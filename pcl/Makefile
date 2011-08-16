@@ -1,21 +1,15 @@
 all: installed
 
-TARBALL = build/pcl-1.1.0.tar.gz
-TARBALL_URL = https://code.ros.org/svn/release/download/thirdparty/pcl/pcl-1.1.0.tar.gz
-SOURCE_DIR = build/pcl
-UNPACK_CMD = tar xzf
-include $(shell rospack find mk)/download_unpack_build.mk
+SVN_DIR = build/pcl_trunk
+SVN_URL = http://svn.pointclouds.org/pcl/branches/pcl-1.x
+#SVN_URL = http://svn.pointclouds.org/pcl/trunk/
+#SVN_PATCH = 
+#SVN_REVISION=
+include $(shell rospack find mk)/svn_checkout.mk
 
-#SVN_DIR = build/pcl_trunk
-## Developers, please use this URL:
-#SVN_URL = http://svn.pointclouds.org/pcl/branches/pcl-1.x
-##SVN_PATCH = 
-#SVN_REVISION=-r1806
-#include $(shell rospack find mk)/svn_checkout.mk
-
-installed: $(SOURCE_DIR)/unpacked
+installed: $(SVN_DIR) cleaned
 	mkdir -p msg/build && cd msg/build && cmake ../.. && make && cd -
-	cd $(SOURCE_DIR) && mkdir -p build && cd build && \
+	cd $(SVN_DIR) && mkdir -p build && cd build && \
 	rm -rf ../common/include/sensor_msgs ../common/include/std_msgs \
 	../common/include/pcl/ModelCoefficients.h ../common/include/pcl/PointIndices.h ../common/include/pcl/PolygonMesh.h ../common/include/pcl/Vertices.h && \
 	export CPATH=`rospack find std_msgs`/msg_gen/cpp/include:`rospack find sensor_msgs`/msg_gen/cpp/include:`rospack find roscpp_serialization`/include:`rospack find cpp_common`/include:`rospack find rostime`/include:`rospack find roscpp_traits`/include:`rospack find roscpp`/include:`rospack find rosconsole`/include:`rospack find std_msgs`/include:`rospack find sensor_msgs`/include && \
@@ -23,6 +17,7 @@ installed: $(SOURCE_DIR)/unpacked
 	cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../../.. \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DUSE_ROS=ON \
+          -DEIGEN_INCLUDE_DIR=`rospack find eigen`/include \
           -DFLANN_INCLUDE_DIR=`rospack find flann`/include \
           -DFLANN_LIBRARY=`rospack find flann`/lib/libflann.so \
           -DCMINPACK_INCLUDE_DIR=`rospack find cminpack`/include \
@@ -54,7 +49,7 @@ cleaned: Makefile
 	touch cleaned
 
 clean:
-	-rm -rf $(SOURCE_DIR)/build rospack_nosubdirs patched installed include bin lib64 msg_gen src *~
+	-rm -rf $(SVN_DIR)/build rospack_nosubdirs patched installed include bin lib64 msg_gen src *~
 
 wiped: Makefile
 	make wipe
