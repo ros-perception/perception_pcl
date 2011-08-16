@@ -1,0 +1,17 @@
+<stack>
+  <description brief="Point Cloud Library">
+    This contains the Point Cloud Library (PCL), its
+    3rd party dependencies, and a ROS interface for PCL nodelets.
+  </description>
+  <author>Maintained by Radu Bogdan Rusu</author>
+  <license>BSD,LGPL</license>  
+  <review status="Doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/perception_pcl_unstable</url>
+  <depend stack="common" /> <!-- nodelet_topic_tools, nodelet -->
+  <depend stack="common_msgs" /> <!-- sensor_msgs, geometry_msgs -->
+  <depend stack="driver_common" /> <!-- dynamic_reconfigure -->
+  <depend stack="geometry" /> <!-- tf, eigen -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- std_msgs, rosbag, roscpp, message_filters -->
+
+</stack>

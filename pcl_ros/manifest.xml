@@ -1,0 +1,42 @@
+<package>
+  <description brief="PCL - ROS (Unstable)">
+
+<p>
+  PCL (Point Cloud Library) ROS interface package. PCL-ROS is the preferred
+  bridge for 3D applications involving n-D Point Clouds and 3D geometry
+  processing in ROS. The package contains powerful nodelet interfaces for PCL
+  algorithms, accepts dynamic reconfiguration of parameters, and supports
+  multiple threading natively for large scale PPG (Perception Processing
+  Graphs) construction and usage.
+</p>
+
+  </description>
+
+  <author>Maintained by Radu Bogdan Rusu</author>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/pcl_ros</url>
+  <review status="doc reviewed" notes=""/>
+
+  <depend package="eigen" />
+
+  <!-- ROS dependencies -->
+  <depend package="roscpp" />
+  <depend package="rosbag" />
+  <depend package="geometry_msgs" />
+  <depend package="nodelet" />
+  <depend package="nodelet_topic_tools" />
+  <depend package="message_filters" />
+  <depend package="dynamic_reconfigure" />
+  <depend package="tf" />
+
+  <!-- PCL -->
+  <depend package="pcl" />
+
+  <export>
+    <!--cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_io -lpcl_ros_features -lpcl_ros_filters -lpcl_ros_segmentation -lpcl_ros_surface -lpcl_ros_tf" /-->
+    <cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" />
+    <nodelet plugin="${prefix}/pcl_nodelets.xml" />
+  </export>
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+</package>

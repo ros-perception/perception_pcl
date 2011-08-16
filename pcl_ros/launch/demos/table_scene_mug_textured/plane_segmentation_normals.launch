@@ -1,0 +1,42 @@
+<launch>
+
+  <include file="$(find pcl_ros)/launch/demos/table_scene_mug_textured/voxelgrid.launch"/>
+  
+  <!-- Estimate point normals -->
+  <node pkg="nodelet" type="nodelet" name="normal_estimation" args="load pcl/NormalEstimation pcl_manager" output="screen">
+    <remap from="~input" to="/voxel_grid/output" />
+    <rosparam>
+      # -[ Mandatory parameters
+      k_search: 0
+      radius_search: 0.015
+      # Set the spatial locator. Possible values are: 0 (ANN), 1 (FLANN), 2 (organized)
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <!-- Segment the table plane -->
+  <node pkg="nodelet" type="nodelet" name="planar_segmentation" args="load pcl/SACSegmentationFromNormals pcl_manager" output="screen">
+    <remap from="~input"   to="/voxel_grid/output" />
+    <remap from="~normals" to="/normal_estimation/output" />
+    <rosparam>
+      # -[ Mandatory parameters
+      model_type: 11
+      distance_threshold: 0.1
+      max_iterations: 1000
+      method_type: 0
+      optimize_coefficients: true
+      normal_distance_weight: 0.1
+      eps_angle: 0.09
+   </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract_plane_indices" args="load pcl/ExtractIndices pcl_manager" output="screen">
+    <remap from="~input"   to="/voxel_grid/output" />
+    <remap from="~indices" to="/planar_segmentation/inliers" />
+    <rosparam>
+      negative: true
+    </rosparam>
+  </node>
+
+</launch>
+

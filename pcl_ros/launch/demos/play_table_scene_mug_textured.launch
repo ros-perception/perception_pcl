@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pcd_to_pointcloud" args="$(find pcl_tutorials)/data/table_scene_mug_stereo_textured.pcd 1" output="screen">
+    <remap from="/cloud_pcd" to="/scene_pointcloud2" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+  
+</launch>
+

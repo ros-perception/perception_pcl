@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find pcl_ros)/launch/demos/table_scene_mug_textured/plane_segmentation_normals.launch"/>
+
+  <!-- Project the planar inliers -->
+  <node pkg="nodelet" type="nodelet" name="project_plane_inliers" args="load pcl/ProjectInliers pcl_manager" output="screen">
+   <remap from="~input"   to="/voxel_grid/output" />
+   <remap from="~indices" to="/planar_segmentation/inliers" />
+   <remap from="~model"   to="/planar_segmentation/model" />
+   <rosparam>
+     model_type: 11
+     copy_all_data: false
+     copy_all_fields: true
+   </rosparam>
+  </node>
+
+  <!-- Compute the convex hull -->
+  <node pkg="nodelet" type="nodelet" name="convex_hull" args="load pcl/ConvexHull2D pcl_manager" output="screen">
+    <remap from="~input"   to="/project_plane_inliers/output" />
+  </node>
+
+</launch>
+
