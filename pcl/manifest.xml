@@ -31,7 +31,7 @@
   <rosdep name="cmake"/>
   
   <export>
-    <cpp cflags="-I${prefix}/include/pcl-1.1/ -I`cmake -P ${prefix}/vtk_include.cmake`" lflags="-L`cmake -P ${prefix}/vtk_library.cmake` -Wl,-rpath,${prefix}/lib64 -L${prefix}/lib64 -Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_common -lpcl_filters -lpcl_features -lpcl_io -lpcl_surface -lpcl_registration -lpcl_sample_consensus -lpcl_kdtree -lpcl_segmentation -lpcl_keypoints -lpcl_range_image -lpcl_range_image_border_extractor -lpcl_visualization -lpcl_octree" />
+    <cpp cflags="-I${prefix}/include/pcl-1.2/ -I`cmake -P ${prefix}/vtk_include.cmake`" lflags="-L`cmake -P ${prefix}/vtk_library.cmake` -Wl,-rpath,${prefix}/lib64 -L${prefix}/lib64 -Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_common -lpcl_filters -lpcl_features -lpcl_io -lpcl_surface -lpcl_registration -lpcl_sample_consensus -lpcl_kdtree -lpcl_segmentation -lpcl_keypoints -lpcl_range_image -lpcl_range_image_border_extractor -lpcl_visualization -lpcl_octree" />
     <rosdoc external="http://docs.pointclouds.org/1.1.0/"/>
   </export>
   <platform os="ubuntu" version="9.04"/>
