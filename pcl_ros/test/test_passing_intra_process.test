@@ -1,0 +1,19 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="pcl_test_manager" args="manager" output="screen" /> 
+
+  <node pkg="nodelet" type="nodelet" name="test_pp1" args="load pcl/TestPingPong pcl_test_manager" output="screen">
+    <remap from="/test_pp1/input" to="/test_pp2/output" />
+    <rosparam>
+      total_msgs: 1000
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="test_pp2" args="load pcl/TestPingPong pcl_test_manager" output="screen">
+    <remap from="/test_pp2/input" to="/test_pp1/output" />
+    <rosparam>
+      total_msgs: 1000
+    </rosparam>
+  </node>
+
+</launch>
+

@@ -1,0 +1,76 @@
+<package>
+  <description brief="CMinpack">
+
+<p>
+    <em>This is the official description of Minpack, from the original ReadMe file:</em>
+    Minpack includes software for solving nonlinear equations and nonlinear
+    least squares problems. Five algorithmic paths each include a core
+    subroutine and an easy-to-use driver. The algorithms proceed either from an
+    analytic specification of the Jacobian matrix or directly from the problem
+    functions. The paths include facilities for systems of equations with a
+    banded Jacobian matrix, for least squares problems with a large amount of
+    data, and for checking the consistency of the Jacobian matrix with the
+    functions.
+</p>
+<p>
+    Minpack is probably the best open-source implementation of the
+    Levenberg-Marquardt algorithm (in fact, it is even better, since it adds to
+    L-M automatic variables scaling). There is another open-source L-M
+    implementation in C/C++, levmar by Manolis Lourakis, but unfortunately is is
+    released under the GPL, which restricts its inclusion in commercial
+    software. Minpack is licensed under a BSD-like license (available in the
+    distribution).
+</p>
+<p>
+    I took a dozen of hours to rework all these problems, and came out with a
+    pure C version of Minpack, with has standard (ISO C99) parameters passing,
+    is fully reentrant, multithread-safe, and has a full set of examples and
+    tests:
+</p>
+<p>
+      1. Input variables are now passed by value, output variables are passed by
+      reference. The keyword "const" is used as much as possible for constant
+      arrays. The return value of each function is now used to get the function
+      status (it was obtained via the IFLAG or INFO parameter in Minpack).
+</p>
+<p>
+      2. All non-const static variables were removed, and the code was tested
+      after that. Luckily, Minpack didn't use the nastiest feature in FORTRAN: all
+      local variables are static, so that a function can behave differently when
+      you call it several times.
+</p>
+<p>
+      3. The function to be minimized and all the Minpack functions now take
+      an extra "void*" argument, which can be used to pass any
+      pointer-to-struct or pointer-to-class, and you can put all you extra
+      parameters and datd in that struct. Just cast this pointer to the
+      appropriate pointer type in your function, and there they are! There
+      is no need for global variables anymore. Be careful if you access the
+      same object from different threads, though.
+</p>
+<p>
+      4. The Debian project did a C include file for Minpack. It still needed some
+      work (add consts and C++ compatibility), so I did this work, and used the
+      include file for the FORTRAN version as the base for my C/C++ version.
+</p>
+<p>
+      5. The Debian project also translated all the FORTRAN examples to C. I
+      worked from these to produce examples which also call my C/C++ version of
+      Minpack instead of the FORTRAN version. Also included in the distribution
+      are reference output files produced by the test runs (for comparison).
+</p>
+  </description>
+
+  <author>Frédéric Devernay</author>
+  <license>BSD</license>
+  <review status="3rdparty" notes=""/>
+  <url>http://devernay.free.fr/hacks/cminpack.html</url>
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcminpack" />
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+</package>

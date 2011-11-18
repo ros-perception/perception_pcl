@@ -1,0 +1,42 @@
+<launch>
+
+  <include file="$(find pcl_ros)/launch/demos/table_scene_mug_textured/extract_object_clusters.launch"/>
+  
+  <!-- Extract the Convex Hull -->
+  <node pkg="nodelet" type="nodelet" name="normal_estimation_object" args="load pcl/NormalEstimation pcl_manager" output="screen">
+    <remap from="~input" to="/extract_objects_indices/output" />
+    <rosparam>
+      # -[ Mandatory parameters
+      k_search: 0
+      radius_search: 0.02
+      # Set the spatial locator. Possible values are: 0 (ANN), 1 (FLANN), 2 (organized)
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <!-- Segment the mug using a cylinder model -->
+  <node pkg="nodelet" type="nodelet" name="cylinder_segmentation" args="load pcl/SACSegmentationFromNormals pcl_manager" output="screen">
+    <remap from="~input"   to="/extract_objects_indices/output" />
+    <remap from="~normals" to="/normal_estimation_object/output" />
+    <rosparam>
+      # -[ Mandatory parameters
+      model_type: 5
+      max_iterations: 1000
+      distance_threshold: 0.02
+
+      method_type: 1
+      optimize_coefficients: true
+      normal_distance_weight: 0.01
+   </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract_mug_indices" args="load pcl/ExtractIndices pcl_manager" output="screen">
+    <remap from="~input"   to="/extract_objects_indices/output" />
+    <remap from="~indices" to="/cylinder_segmentation/inliers" />
+    <rosparam>
+      negative: false
+    </rosparam>
+  </node>
+  
+</launch>
+

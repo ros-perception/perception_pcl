@@ -1,0 +1,4 @@
+<launch>
+  <node name="test_bagread_publish"        pkg="pcl_ros" type="test_bagread_publish" args="$(find pcl_ros)/test_io_bag.bag 1.0" />
+  <test test-name="test_bagread_subscribe" pkg="pcl_ros" type="test_bagread_subscribe" />
+</launch>
