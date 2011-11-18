@@ -1,7 +1,7 @@
 all: installed
 
-TARBALL = build/pcl-1.1.1.tar.gz
-TARBALL_URL = https://code.ros.org/svn/release/download/thirdparty/pcl/pcl-1.1.1.tar.gz
+TARBALL = build/pcl-1.1.2.tar.gz
+TARBALL_URL = https://code.ros.org/svn/release/download/thirdparty/pcl/pcl-1.1.2.tar.gz
 SOURCE_DIR = build/pcl
 UNPACK_CMD = tar xzf
 include $(shell rospack find mk)/download_unpack_build.mk
