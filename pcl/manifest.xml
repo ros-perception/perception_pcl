@@ -25,7 +25,6 @@
   <depend package="cminpack" />
   <depend package="flann" />
 
-  <rosdep name="boost" />
   <rosdep name="libqhull" />
   <rosdep name="libvtk" />
   <rosdep name="cmake"/>
