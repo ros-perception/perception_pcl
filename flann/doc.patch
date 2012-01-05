@@ -1,0 +1,11 @@
+--- CMakeLists.txt.orig	2011-06-20 08:06:34.773096364 -0700
++++ CMakeLists.txt	2011-06-20 08:06:44.683096368 -0700
+@@ -107,7 +107,7 @@
+ add_subdirectory( src )
+ add_subdirectory( examples )
+ add_subdirectory( test )
+-add_subdirectory( doc )
++#add_subdirectory( doc )
+ 
+ 
+ # CPACK options

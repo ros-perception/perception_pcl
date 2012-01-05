@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find pcl_ros)/launch/demos/table_scene_mug_textured/planar_convex_hull.launch"/>
+
+  <!-- Extract the object clusters using a polygonal prism -->
+  <node pkg="nodelet" type="nodelet" name="extract_objects_table" args="load pcl/ExtractPolygonalPrismData pcl_manager" output="screen">
+   <remap from="~input"         to="/extract_plane_indices/output" />
+   <remap from="~planar_hull"   to="/convex_hull/output" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract_objects_indices" args="load pcl/ExtractIndices pcl_manager" output="screen">
+     <!-- Extract_plane_indices needs to be negated for this work -->
+    <remap from="~input"   to="/extract_plane_indices/output" />
+    <remap from="~indices" to="/extract_objects_table/output" />
+    <rosparam>
+      negative: false
+    </rosparam>
+  </node>
+   
+</launch>
+

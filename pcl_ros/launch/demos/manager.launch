@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+  
+</launch>
+

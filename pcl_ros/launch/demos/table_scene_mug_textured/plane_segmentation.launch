@@ -1,0 +1,27 @@
+<launch>
+
+  <!-- Segment the table plane -->
+  <node pkg="nodelet" type="nodelet" name="planar_segmentation" args="load pcl/SACSegmentation pcl_manager" output="screen">
+    <remap from="~input" to="/scene_pointcloud2" />
+    <rosparam>
+      use_indices: true
+      latched_indices: true
+      # -[ Mandatory parameters
+      model_type: 0
+      distance_threshold: 0.05
+
+      method_type: 0
+      optimize_coefficients : true
+   </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract_plane_indices" args="load pcl/ExtractIndices pcl_manager" output="screen">
+    <remap from="~input"   to="/scene_pointcloud2" />
+    <remap from="~indices" to="/planar_segmentation/inliers" />
+    <rosparam>
+      negative: false
+    </rosparam>
+  </node>
+ 
+</launch>
+
