@@ -28,7 +28,7 @@
   <rosdep name="boost"/>
   
   <export>
-     <cpp cflags="-I${prefix}/include/pcl-1.6.0/" lflags="-Wl,-rpath,${prefix}/lib64 -L${prefix}/lib64 -Wl,-rpath,${prefix}/lib -L${prefix}/lib ${prefix}/lib/libpcl_common.so.1.6.0 ${prefix}/lib/libpcl_filters.so.1.6.0 ${prefix}/lib/libpcl_features.so.1.6.0 ${prefix}/lib/libpcl_io.so.1.6.0 ${prefix}/lib/libpcl_surface.so.1.6.0 ${prefix}/lib/libpcl_registration.so.1.6.0 ${prefix}/lib/libpcl_sample_consensus.so.1.6.0 ${prefix}/lib/libpcl_kdtree.so.1.6.0 ${prefix}/lib/libpcl_segmentation.so.1.6.0 ${prefix}/lib/libpcl_keypoints.so.1.6.0 ${prefix}/lib/libpcl_visualization.so.1.6.0 ${prefix}/lib/libpcl_octree.so.1.6.0 ${prefix}/lib/libpcl_search.so.1.6.0" />
+     <cpp cflags="-I${prefix}/include/pcl-1.6/" lflags="-Wl,-rpath,${prefix}/lib64 -L${prefix}/lib64 -Wl,-rpath,${prefix}/lib -L${prefix}/lib ${prefix}/lib/libpcl_common.so.1.6.0 ${prefix}/lib/libpcl_filters.so.1.6.0 ${prefix}/lib/libpcl_features.so.1.6.0 ${prefix}/lib/libpcl_io.so.1.6.0 ${prefix}/lib/libpcl_surface.so.1.6.0 ${prefix}/lib/libpcl_registration.so.1.6.0 ${prefix}/lib/libpcl_sample_consensus.so.1.6.0 ${prefix}/lib/libpcl_kdtree.so.1.6.0 ${prefix}/lib/libpcl_segmentation.so.1.6.0 ${prefix}/lib/libpcl_keypoints.so.1.6.0 ${prefix}/lib/libpcl_visualization.so.1.6.0 ${prefix}/lib/libpcl_octree.so.1.6.0 ${prefix}/lib/libpcl_search.so.1.6.0" />
     <rosdoc external="http://docs.pointclouds.org/"/>
   </export>
 </package>
