@@ -1,0 +1,32 @@
+libtbb:
+  ubuntu: libtbb-dev
+  debian: libtbb-dev
+  fedora: tbb
+  macports: tbb
+libvtk:
+  ubuntu: libvtk5-dev
+  debian: libvtk5-dev
+  fedora: vtk-devel
+  macports: vtk-devel
+unzip:
+  ubuntu: unzip
+  debian: unzip
+  fedora: unzip
+  macports: unzip
+hdf5:
+  ubuntu: libhdf5-serial-dev
+  debian: libhdf5-serial-dev
+  fedora: hdf5-devel
+  macports: hdf5-18
+libqhull:
+  ubuntu: libqhull-dev
+  debian: libqhull-dev
+  fedora: qhull-devel
+  macports: qhull
+cmake:
+  ubuntu: cmake
+  debian: cmake
+  fedora: cmake
+  macports: cmake
+libvtk-qt:
+  ubuntu: libvtk5-qt4-dev
