@@ -1,0 +1,173 @@
+--- src/cpp/flann/algorithms/dist.h
++++ src/cpp/flann/algorithms/dist.h
+@@ -620,7 +620,78 @@ struct HistIntersectionDistance
+     }
+ };
+ 
++template<class T>
++struct HistIntersectionUnionDistance
++{
++    typedef T ElementType;
++    typedef typename Accumulator<T>::Type ResultType;
++
++    /**
++     *  Compute a distance between two vectors using (1 - (1 + sum(min(a_i,b_i))) / (1 + sum(max(a_i, b_i))) )
++     *
++     *  This distance is not a valid kdtree distance, it's not dimensionwise additive
++     *  and ignores worst_dist parameter.
++     */
++
++    template <typename Iterator1, typename Iterator2>
++    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
++    {
++        ResultType result = ResultType();
++        ResultType min0, min1, min2, min3;
++        ResultType max0, max1, max2, max3;
++        Iterator1 last = a + size;
++        Iterator1 lastgroup = last - 3;
+ 
++        ResultType sum_min, sum_max;
++        sum_min = 0;
++        sum_max = 0;
++
++        while (a < lastgroup) {
++          min0 = (a[0] < b[0] ? a[0] : b[0]);
++          max0 = (a[0] > b[0] ? a[0] : b[0]);
++          min1 = (a[1] < b[1] ? a[1] : b[1]);
++          max1 = (a[1] > b[1] ? a[1] : b[1]);
++          min2 = (a[2] < b[2] ? a[2] : b[2]);
++          max2 = (a[2] > b[2] ? a[2] : b[2]);
++          min3 = (a[3] < b[3] ? a[3] : b[3]);
++          max3 = (a[3] > b[3] ? a[3] : b[3]);
++          sum_min += min0 + min1 + min2 + min3;
++          sum_max += max0 + max1 + max2 + max3;
++          a += 4;
++          b += 4;
++          /*if (worst_dist>0 && result>worst_dist) {
++            return result;
++          }*/
++        }
++
++        while (a < last) {
++          min0 = *a < *b ? *a : *b;
++          max0 = *a > *b ? *a : *b;
++          sum_min += min0;
++          sum_max += max0;
++        }
++
++        result = 1.0 - ((1 + sum_min) / (1 + sum_max));
++        return result;
++    }
++
++    /* This distance functor is not dimension-wise additive, which
++     * makes it an invalid kd-tree distance, not implementing the accum_dist method */
++    /**
++     * Partial distance, used by the kd-tree.
++     */
++    template <typename U, typename V>
++    inline ResultType accum_dist(const U& a, const V& b, int dim) const
++    {
++      //printf("New code being used, accum_dist\n");
++      ResultType min0;
++      ResultType max0;
++      min0 = (a < b ? a : b) + 1.0;
++      max0 = (a > b ? a : b) + 1.0;
++      return (1 - (min0 / max0));
++        //return (a+b-2*(a<b?a:b));
++    }
++};
+ 
+ template<class T>
+ struct HellingerDistance
+--- src/cpp/flann/flann.cpp
++++ src/cpp/flann/flann.cpp
+@@ -176,6 +176,9 @@ flann_index_t _flann_build_index(T* dataset, int rows, int cols, float* speedup,
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_build_index<HistIntersectionDistance<T> >(dataset, rows, cols, speedup, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_build_index<HistIntersectionUnionDistance<T> >(dataset, rows, cols, speedup, flann_params);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_build_index<HellingerDistance<T> >(dataset, rows, cols, speedup, flann_params);
+     }
+@@ -250,6 +253,9 @@ int _flann_save_index(flann_index_t index_ptr, char* filename)
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_save_index<HistIntersectionDistance<T> >(index_ptr, filename);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_save_index<HistIntersectionUnionDistance<T> >(index_ptr, filename);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_save_index<HellingerDistance<T> >(index_ptr, filename);
+     }
+@@ -320,6 +326,9 @@ flann_index_t _flann_load_index(char* filename, T* dataset, int rows, int cols)
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_load_index<HistIntersectionDistance<T> >(filename, dataset, rows, cols);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_load_index<HistIntersectionUnionDistance<T> >(filename, dataset, rows, cols);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_load_index<HellingerDistance<T> >(filename, dataset, rows, cols);
+     }
+@@ -407,6 +416,9 @@ int _flann_find_nearest_neighbors(T* dataset,  int rows, int cols, T* testset, i
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_find_nearest_neighbors<HistIntersectionDistance<T> >(dataset, rows, cols, testset, tcount, result, dists, nn, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_find_nearest_neighbors<HistIntersectionUnionDistance<T> >(dataset, rows, cols, testset, tcount, result, dists, nn, flann_params);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_find_nearest_neighbors<HellingerDistance<T> >(dataset, rows, cols, testset, tcount, result, dists, nn, flann_params);
+     }
+@@ -495,6 +507,9 @@ int _flann_find_nearest_neighbors_index(flann_index_t index_ptr, T* testset, int
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_find_nearest_neighbors_index<HistIntersectionDistance<T> >(index_ptr, testset, tcount, result, dists, nn, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_find_nearest_neighbors_index<HistIntersectionUnionDistance<T> >(index_ptr, testset, tcount, result, dists, nn, flann_params);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_find_nearest_neighbors_index<HellingerDistance<T> >(index_ptr, testset, tcount, result, dists, nn, flann_params);
+     }
+@@ -592,6 +607,9 @@ int _flann_radius_search(flann_index_t index_ptr,
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_radius_search<HistIntersectionDistance<T> >(index_ptr, query, indices, dists, max_nn, radius, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++      return __flann_radius_search<HistIntersectionUnionDistance<T> >(index_ptr, query, indices, dists, max_nn, radius, flann_params);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_radius_search<HellingerDistance<T> >(index_ptr, query, indices, dists, max_nn, radius, flann_params);
+     }
+@@ -697,6 +715,9 @@ int _flann_free_index(flann_index_t index_ptr, FLANNParameters* flann_params)
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_free_index<HistIntersectionDistance<T> >(index_ptr, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++        return __flann_free_index<HistIntersectionUnionDistance<T> >(index_ptr, flann_params);
++    }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_free_index<HellingerDistance<T> >(index_ptr, flann_params);
+     }
+@@ -777,6 +798,9 @@ int _flann_compute_cluster_centers(T* dataset, int rows, int cols, int clusters,
+     else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT) {
+         return __flann_compute_cluster_centers<HistIntersectionDistance<T> >(dataset, rows, cols, clusters, result, flann_params);
+     }
++    else if (flann_distance_type==FLANN_DIST_HIST_INTERSECT_UNION) {
++           return __flann_compute_cluster_centers<HistIntersectionUnionDistance<T> >(dataset, rows, cols, clusters, result, flann_params);
++       }
+     else if (flann_distance_type==FLANN_DIST_HELLINGER) {
+         return __flann_compute_cluster_centers<HellingerDistance<T> >(dataset, rows, cols, clusters, result, flann_params);
+     }
+--- src/cpp/flann/defines.h
++++ src/cpp/flann/defines.h
+@@ -140,6 +140,7 @@ enum flann_distance_t
+     FLANN_DIST_HAMMING         	= 9,
+     FLANN_DIST_HAMMING_LUT		= 10,
+     FLANN_DIST_HAMMING_POPCNT   = 11,
++    FLANN_DIST_HIST_INTERSECT_UNION   = 12,
+ 
+     // deprecated constants, should use the FLANN_DIST_* ones instead
+     EUCLIDEAN = 1,

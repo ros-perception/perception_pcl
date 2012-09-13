@@ -1,0 +1,11 @@
+--- CMakeLists.txt.orig	2012-03-08 17:17:08.000000000 +0100
++++ CMakeLists.txt	2012-03-08 17:17:16.000000000 +0100
+@@ -145,7 +145,7 @@
+ add_subdirectory( src )
+ add_subdirectory( examples )
+ add_subdirectory( test )
+-add_subdirectory( doc )
++#add_subdirectory( doc )
+ 
+ 
+ # CPACK options
