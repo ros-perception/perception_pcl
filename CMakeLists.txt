@@ -1,19 +1,27 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8)
 
-set(ROSPACK_MAKEDIST true)
+project(perception_pcl)
 
-# Append to CPACK_SOURCE_IGNORE_FILES a semicolon-separated list of
-# directories (or patterns, but directories should suffice) that should
-# be excluded from the distro.  This is not the place to put things that
-# should be ignored everywhere, like "build" directories; that happens in
-# rosbuild/rosbuild.cmake.  Here should be listed packages that aren't
-# ready for inclusion in a distro.
-#
-# This list is combined with the list in rosbuild/rosbuild.cmake.  Note
-# that CMake 2.6 may be required to ensure that the two lists are combined
-# properly.  CMake 2.4 seems to have unpredictable scoping rules for such
-# variables.
-#list(APPEND CPACK_SOURCE_IGNORE_FILES /core/experimental)
+# Deal with catkin
+find_package(catkin REQUIRED)
+catkin_stack()
 
-rosbuild_make_distribution(1.6.0)
+# deal with ROS
+include_directories(${catkin_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+
+find_package(PCL)
+find_package(eigen)
+
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${eigen_INCLUDE_DIRS})
+include_directories(include)
+
+catkin_project(${PROJECT_NAME}
+  INCLUDE_DIRS include 
+  LIBRARIES pcl_ros_tf
+  DEPENDS  PCL eigen 
+)
+
+# ---[ Point Cloud Library - Transforms
+add_library (pcl_ros_tf src/transforms.cpp)
+
