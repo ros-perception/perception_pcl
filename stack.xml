@@ -24,7 +24,7 @@
   <build_depends>roscpp_core</build_depends>
 
   <depends>PCL</depends>
-  <depends>Eigen</depends>
+  <depends>eigen</depends>
   <depends>geometry</depends>
   <depends>common_msgs</depends>
   <depends>roscpp_core</depends>
