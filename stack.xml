@@ -23,7 +23,7 @@
   <build_depends>common_msgs</build_depends>
   <build_depends>roscpp_core</build_depends>
 
-  <depends>PCL</depends>
+  <depends>pcl</depends>
   <depends>eigen</depends>
   <depends>geometry</depends>
   <depends>common_msgs</depends>
