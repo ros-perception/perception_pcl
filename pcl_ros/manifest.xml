@@ -1,0 +1,33 @@
+<package>
+  <description brief="PCL - ROS interface">
+<p>
+  PCL (Point Cloud Library) ROS interface package. PCL-ROS is the preferred
+  bridge for 3D applications involving n-D Point Clouds and 3D geometry
+  processing in ROS.
+</p>
+  </description>
+  <author>Open Perception</author>
+  <maintainer email="jkammerl@willowgarage.com">Julius Kammerl</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/pcl_ros</url>
+  <review status="doc reviewed" notes=""/>
+
+  <!-- ROS dependencies -->
+  <depend package="roscpp" />
+  <depend package="geometry_msgs" />
+  <depend package="message_filters" />
+  <depend package="tf" />
+
+  <!-- Eigen -->
+  <depend package="common_rosdeps" />
+  <rosdep name="eigen" />
+
+  <!-- PCL -->
+  <depend package="pcl" />
+
+  <export>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" cflags="-I${prefix}/include"/>
+  </export>
+  <platform os="ubuntu" version="10.04"/>
+  <platform os="ubuntu" version="10.10"/>
+</package>

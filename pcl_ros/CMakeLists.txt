@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(perception_pcl)
+project(pcl_ros)
 
 # Deal with catkin
 find_package(catkin REQUIRED roscpp sensor_msgs tf)
@@ -14,12 +14,10 @@ include_directories(include)
 
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
 
-catkin_stack()
-
 catkin_project(${PROJECT_NAME}
   INCLUDE_DIRS include 
   LIBRARIES pcl_ros_tf
-  DEPENDS  roscpp common_msgs sensor_msgs tf 
+  DEPENDS  roscpp sensor_msgs tf 
 )
 
 # ---[ Point Cloud Library - Transforms
