@@ -17,9 +17,16 @@
 
   <build_depends>cmake</build_depends>
   <build_depends>catkin</build_depends>
-  <build_depends>eigen</build_depends>
-  <build_depends>pcl</build_depends>
+  <build_depends>Eigen</build_depends>
+  <build_depends>PCL</build_depends>
+  <build_depends>tf</build_depends>
+  <build_depends>sensor_msgs</build_depends>
+  <build_depends>roscpp_core</build_depends>
 
-  <depends>pcl</depends>
-  <depends>eigen</depends>
+  <depends>PCL</depends>
+  <depends>Eigen</depends>
+  <depends>tf</depends>
+  <depends>sensor_msgs</depends>
+  <depends>roscpp_core</depends>
+
 </stack>
