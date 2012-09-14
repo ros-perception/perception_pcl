@@ -19,13 +19,13 @@
   <build_depends>catkin</build_depends>
   <build_depends>Eigen</build_depends>
   <build_depends>PCL</build_depends>
-  <build_depends>tf</build_depends>
+  <build_depends>geometry</build_depends>
   <build_depends>sensor_msgs</build_depends>
   <build_depends>roscpp_core</build_depends>
 
   <depends>PCL</depends>
   <depends>Eigen</depends>
-  <depends>tf</depends>
+  <depends>geometry</depends>
   <depends>sensor_msgs</depends>
   <depends>roscpp_core</depends>
 
