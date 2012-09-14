@@ -1,0 +1,18 @@
+<stack>
+  <description brief="Point Cloud Library trunk">
+    This contains the Point Cloud Library (PCL) trunk as a unary stack
+  </description>
+  <author>Maintained by Open Perception</author>
+  <license>BSD</license>  
+  <review status="Doc reviewed" notes=""/>
+  <url>http://pointclouds.org</url>
+  <version>0.1.1</version>
+  <depend stack="nodelet_core" /> <!-- nodelet_topic_tools, nodelet -->
+  <depend stack="common_msgs" /> <!-- sensor_msgs, geometry_msgs -->
+  <depend stack="driver_common" /> <!-- dynamic_reconfigure -->
+  <depend stack="geometry" /> <!-- tf -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- std_msgs, rosbag, roscpp, message_filters -->
+  <depend stack="common_rosdeps" /> <!-- eigen -->
+  <depend stack="perception_pcl" /> <!-- needed for flann -->
+</stack>

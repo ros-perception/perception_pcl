@@ -1,0 +1,62 @@
+Re-releasing pcl16
+------------------
+
+When new changes have been made to PCL's trunk, you'll need to re-release pcl16 to get them into the ROS electric distribution and automatically create new debs.  These are the steps you'll need to take to do this:
+
+- Check out pcl16
+  $ svn co svn+ssh://svn@svn.pointclouds.org/ros/trunk/pcl-trunk pcl16
+  - Make sure to explicitly name the directory pcl16 (it will default to pcl-trunk if you don't specify)
+  - If you've already done this, you can obviously just "svn up" instead
+- cd to the pcl16 directory
+  $ cd pcl16
+- Update revision number in Makefile to the latest working revision
+  > SVN_REVISION=-r????
+- Update the version number in stack.xml
+  > <version>0.?.?</version>
+  - Make sure to leave the major revision number as zero.
+- Commit your changes
+  $ svn commit
+- Do whatever local testing you feel is appropriate
+- Run a pre-release test of pcl16 in electric
+  - http://packages.ros.org/prerelease/
+  - ROS distribution: electric
+  - Stacks(s) to test (simultaneously): pcl16
+- If the test passes, you can release 
+  $ rosrun release create.py pcl16 0.?.? electric
+  - (where 0.?.? should be replaced with the new version number)
+
+Creating pcl17
+--------------
+
+Once PCL 1.6 is released, the internal version number of PCL trunk will be incremented to 1.7, and this will require changes to the manifest.  At this point, one may wish to create a new package named pcl17, which can be installed alongside pcl and pcl16.  These are the steps you'll need to take to do this:
+
+- Check out the svn.pointclouds.org/ros/trunk/pcl-trunk as pcl17
+  $ svn co svn+ssh://svn@svn.pointclouds.org/ros/trunk/pcl-trunk pcl17
+- Update revision number in Makefile to the latest working revision
+  > SVN_REVISION=-r????
+- Update the Makefile by changing PCL_VERSION to 17
+  > PCL_VERSION = 17
+- Reset the version number in stack.xml to 0.1.0
+  > <version>0.1.0</version>
+- In the manifest.xml, replace all the so.1.6 with so.1.7
+  - ex: -I${prefix}/include/pcl-1.6/ becomes -I${prefix}/include/pcl-1.7
+        libpcl_common.so.1.6 becomes libpcl_common.so.1.7, etc.
+- Commit your changes to Makefile, stack.xml, and manifest.xml
+- Do whatever local testing you feel is appropriate (e.g., create a package that depends on both pcl and pcl17)
+
+- Checkout/update the ROS distro files from https://code.ros.org/svn/release/trunk
+- Copy the pcl16 entry from the electric rosdistro file (distros/electric.rosdistro)
+- Change the name of the entry from pcl16 to pcl17
+- Remove the version number field (it will be created automatically when you release)
+- It should look like this when you're done:
+    pcl17:
+    _rules:
+      repo: pcl
+      svn: {anon-dev: 'http://svn.pointclouds.org/ros/trunk/pcl-trunk', anon-distro-tag: 'http://svn.pointclouds.org/ros/tags/$RELEASE_NAME/$STACK_NAME',
+        anon-release-tag: 'http://svn.pointclouds.org/ros/tags/$STACK_NAME-$STACK_VERSION',
+        dev: 'svn+ssh://svn@svn.pointclouds.org/ros/trunk/pcl-trunk', distro-tag: 'svn+ssh://svn@svn.pointclouds.org/ros/tags/$RELEASE_NAME/$STACK_NAME',
+        release-tag: 'svn+ssh://svn@svn.pointclouds.org/ros/tags/$STACK_NAME-$STACK_VERSION'}
+- Commit your changes to the electric.rosdistro file
+- Run a pre-release test of pcl17
+- If everything worked, then release
+  $ rosrun release create.py pcl17 0.1.0 electric
