@@ -17,8 +17,8 @@
 
   <build_depends>cmake</build_depends>
   <build_depends>catkin</build_depends>
-  <build_depends>Eigen</build_depends>
-  <build_depends>PCL</build_depends>
+  <build_depends>eigen</build_depends>
+  <build_depends>pcl</build_depends>
   <build_depends>geometry</build_depends>
   <build_depends>common_msgs</build_depends>
   <build_depends>roscpp_core</build_depends>
