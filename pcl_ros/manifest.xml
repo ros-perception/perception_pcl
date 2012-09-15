@@ -22,7 +22,7 @@
   <rosdep name="eigen" />
 
   <!-- PCL -->
-  <depend package="pcl" />
+  <rosdeb package="pcl" />
 
   <export>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" cflags="-I${prefix}/include"/>
