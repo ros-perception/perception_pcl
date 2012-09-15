@@ -19,7 +19,6 @@
   <depend package="tf" />
 
   <!-- Eigen -->
-  <depend package="common_rosdeps" />
   <rosdep name="eigen" />
 
   <!-- PCL -->
