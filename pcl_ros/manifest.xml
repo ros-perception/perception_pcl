@@ -25,7 +25,10 @@
   <rosdeb package="pcl" />
 
   <export>
-    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" cflags="-I${prefix}/include"/>
+    <cpp lflags="`pkg-config pcl_common-1.6 --libs-only-L` 
+                  -lpcl_common -lpcl_geometry -lpcl_sample_consensus -lpcl_features -lpcl_filters -lpcl_io -lpcl_io_ply -lpcl_keypoints -lpcl_registration -lpcl_segmentation -lpcl_surface -lpcl_tracking -lpcl_visualization -lpcl_search -lpcl_kdtree -lpcl_octree -lflann_cpp -lflann_cpp-gd 
+                 `pkg-config eigen3 --libs` -Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" 
+         cflags="`pkg-config pcl_common-1.6 --cflags` `pkg-config eigen3 --cflags` -I${prefix}/include"/>
   </export>
   <platform os="ubuntu" version="10.04"/>
   <platform os="ubuntu" version="10.10"/>
