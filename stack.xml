@@ -1,6 +1,6 @@
 <stack>
   <name>perception_pcl</name>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <description brief="Point Cloud Library interface package">
 <p>
   PCL (Point Cloud Library) ROS interface stack. PCL-ROS is the preferred
