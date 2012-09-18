@@ -22,7 +22,7 @@
   <rosdep name="eigen" />
 
   <!-- PCL -->
-  <rosdeb package="pcl" />
+  <rosdeb name="pcl" />
 
   <export>
     <cpp lflags="`pkg-config pcl_common-1.6 --libs-only-L` 
