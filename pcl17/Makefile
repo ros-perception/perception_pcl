@@ -62,7 +62,6 @@ installed: $(SVN_DIR) cleaned
 	cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../../.. \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DUSE_ROS=ON \
-	-DBUILD_2D=OFF \
 	-DBUILD_CUDA=OFF \
 	-DBUILD_GPU=OFF \
 	-DBUILD_OPENNI=ON \
