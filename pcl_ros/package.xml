@@ -1,5 +1,5 @@
-<stack>
-  <name>perception_pcl</name>
+<package>
+  <name>pcl_ros</name>
   <version>1.0.10</version>
   <description brief="Point Cloud Library interface package">
 <p>
@@ -15,18 +15,17 @@
   <url>http://ros.org/wiki/perception_pcl</url>
   <copyright>Open Perception</copyright>
 
-  <build_depends>cmake</build_depends>
-  <build_depends>catkin</build_depends>
-  <build_depends>eigen</build_depends>
-  <build_depends>pcl</build_depends>
-  <build_depends>geometry</build_depends>
-  <build_depends>common_msgs</build_depends>
-  <build_depends>roscpp_core</build_depends>
+  <build_depend>catkin</build_depend>
+  <build_depend>cmake</build_depend>
+  <build_depend>common_msgs</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>geometry</build_depend>
+  <build_depend>pcl</build_depend>
+  <build_depend>roscpp_core</build_depend>
 
-  <depends>pcl</depends>
-  <depends>eigen</depends>
-  <depends>geometry</depends>
-  <depends>common_msgs</depends>
-  <depends>roscpp_core</depends>
-
-</stack>
+  <run_depend>common_msgs</run_depend>
+  <run_depend>eigen</run_depend>
+  <run_depend>geometry</run_depend>
+  <run_depend>pcl</run_depend>
+  <run_depend>roscpp_core</run_depend>
+</package>
