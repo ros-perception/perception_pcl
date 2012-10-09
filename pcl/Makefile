@@ -13,7 +13,7 @@ installed: $(SVN_DIR) cleaned
 	cd $(SVN_DIR) && mkdir -p build && cd build && \
 	rm -rf ../common/include/sensor_msgs ../common/include/std_msgs \
 	../common/include/pcl/ModelCoefficients.h ../common/include/pcl/PointIndices.h ../common/include/pcl/PolygonMesh.h ../common/include/pcl/Vertices.h && \
-	export CPATH=`rospack find std_msgs`/msg_gen/cpp/include:`rospack find sensor_msgs`/msg_gen/cpp/include:`rospack find roscpp_serialization`/include:`rospack find cpp_common`/include:`rospack find rostime`/include:`rospack find roscpp_traits`/include:`rospack find roscpp`/include:`rospack find rosconsole`/include:`rospack find std_msgs`/include:`rospack find sensor_msgs`/include && \
+	export CPATH=`rospack find std_msgs`/msg_gen/cpp/include:`rospack find sensor_msgs`/msg_gen/cpp/include:`rospack find roscpp_serialization`/include:`rospack find cpp_common`/include:`rospack find rostime`/include:`rospack find roscpp_traits`/include:`rospack find roscpp`/include:`rospack find rosconsole`/include:`rospack find std_msgs`/include:`rospack find sensor_msgs`/include:`rospack find pcl`/msg_gen/cpp/include:$$CPATH && \
 	export LD_LIBRARY_PATH=`rospack find std_msgs`/lib:`rospack find sensor_msgs`/lib:`rospack find roscpp_serialization`/lib:`rospack find cpp_common`/lib:`rospack find rostime`/lib:`rospack find roscpp_traits`/lib:`rospack find roscpp`/lib:`rospack find rosconsole`/lib:`rospack find std_msgs`/lib:`rospack find sensor_msgs`/lib:$$LD_LIBRARY_PATH && \
 	cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../../.. \
 				-DCMAKE_BUILD_TYPE=Release \
