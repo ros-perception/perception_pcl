@@ -69,6 +69,13 @@ installed: $(SVN_DIR) cleaned
 	-DCMAKE_VERBOSE_MAKEFILE=OFF \
 	.. && \
 	make ${ROS_PARALLEL_JOBS} install
+	#rename the lib files and refresh manifest.xml
+	cd `pwd` && \
+	libs=`find ./lib -type f -name "libpcl*"` && \
+	for d in $$libs; do ln -fs `echo $$d | sed 's/\.\/lib\/\(.*\)/\1/'` `echo $$d | sed 's/\(.*libpcl\)\(.*\.so\).*/\1$(PCL_VERSION)\2/'`; done && \
+	lib_names= && \
+	for d in $$libs; do lib_names="$$lib_names`echo $$d | sed 's/.*lib\(pcl\)\(.*\)\.so.*/ -l\1$(PCL_VERSION)\2/'`"; done && \
+	sed -i "s/\(<cpp.*lflags=\)\"[^\"]*\"\(.*\/>\)/\1\"-L$$\{prefix\}\/lib $${lib_names}\"\2/" manifest.xml
 	touch installed
 
 cleaned: Makefile
