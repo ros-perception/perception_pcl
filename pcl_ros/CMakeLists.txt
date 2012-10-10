@@ -13,7 +13,7 @@ include_directories(include)
 
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
 
-catkin_package(DEPENDS Eigen pcl roscpp sensor_msgs tf
+catkin_package(DEPENDS Eigen PCL roscpp sensor_msgs tf
                INCLUDE_DIRS include 
                LIBRARIES pcl_ros_tf
 )
