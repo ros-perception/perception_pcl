@@ -23,16 +23,17 @@ catkin_package(DEPENDS Eigen PCL roscpp sensor_msgs tf
 )
 
 # create messages
-project(pcl)
-add_message_files(DIRECTORY msg
-                  FILES ModelCoefficients.msg
-                        PointIndices.msg
-                        PolygonMesh.msg
-                        Vertices.msg
-)
-generate_messages(DEPENDENCIES sensor_msgs std_msgs)
+### what's below is just to generate the messages that are manually patched into PCL
+###project(pcl)
+###add_message_files(DIRECTORY msg
+###                  FILES ModelCoefficients.msg
+###                        PointIndices.msg
+###                        PolygonMesh.msg
+###                        Vertices.msg
+###)
+###generate_messages(DEPENDENCIES sensor_msgs std_msgs)
+###project(pcl_ros)
 
-project(pcl_ros)
 # ---[ Point Cloud Library - Transforms
 add_library (pcl_ros_tf SHARED src/transforms.cpp)
 target_link_libraries(pcl_ros_tf ${PCL_LIBS} ${Boost_LIBS} ${catkin_LIBS})
