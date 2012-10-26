@@ -1,6 +1,6 @@
 <package>
   <name>pcl_ros</name>
-  <version>1.0.16</version>
+  <version>1.0.17</version>
   <description>
 <p>
   PCL (Point Cloud Library) ROS interface stack. PCL-ROS is the preferred
@@ -15,7 +15,6 @@
 
   <build_depend>catkin</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>geometry</build_depend>
   <build_depend>pcl</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -23,7 +22,6 @@
   <build_depend>tf</build_depend>
 
   <run_depend>eigen</run_depend>
-  <run_depend>geometry</run_depend>
   <run_depend>pcl</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
