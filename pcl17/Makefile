@@ -4,7 +4,7 @@ SVN_DIR = build/pcl_trunk
 # Developers, please use this URL:
 SVN_URL = http://svn.pointclouds.org/pcl/trunk # For the very latest version
 #SVN_PATCH = 
-SVN_REVISION=-r7367 # Update this when doing a new release!
+SVN_REVISION=-r8006 # Update this when doing a new release!
 
 PCL_VERSION = 17
 
