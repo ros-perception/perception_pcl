@@ -6,7 +6,7 @@ find_package(catkin REQUIRED genmsg sensor_msgs std_msgs)
 
 # create messages
 ### what's below is just to generate the messages that are manually patched into PCL
-###project(pcl)
+project(pcl)
 add_message_files(DIRECTORY msg
                   FILES ModelCoefficients.msg
                         PointIndices.msg
@@ -14,6 +14,7 @@ add_message_files(DIRECTORY msg
                         Vertices.msg
 )
 generate_messages(DEPENDENCIES sensor_msgs std_msgs)
+project(pcl_msgs)
 
 catkin_package(DEPENDS sensor_msgs std_msgs)
 
