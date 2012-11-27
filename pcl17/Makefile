@@ -14,13 +14,19 @@ ifeq ($(strip $(SVN_CMDLINE)),)
 SVN_CMDLINE = svn
 endif
 
+revert:
+	cd $(SVN_DIR) && \
+	dirs=`find ./ -type d -name pcl17` && \
+	for d in $$dirs; do mv $$d `echo $$d | sed 's/\(.*\)pcl17/\1pcl/'`; done && \
+	svn revert -R . && svn up ${SVN_REVISION}
+
 $(SVN_DIR):
 	$(SVN_CMDLINE) co $(SVN_REVISION) $(SVN_URL) $(SVN_DIR)
 ifneq ($(strip $(SVN_PATCH)),)
 	cd $(SVN_DIR) && patch -p0 < ../$(SVN_PATCH)
 endif
 	cd $(SVN_DIR) && \
-  sed -Ei 's/-Wold-style-cast/-Wno-old-style-cast -Wno-unused-parameter -Wno-conversion/g' ./CMakeLists.txt && \
+        sed -Ei 's/-Wold-style-cast/-Wno-old-style-cast -Wno-unused-parameter -Wno-conversion/g' ./CMakeLists.txt && \
 	replace_in_files () { \
 	files=`echo $$1 | xargs grep "$$2" | awk {'print $$1'} | awk -F ":" {'print $$1'} | sort -n | uniq` && \
 	query=$$(echo $$2 | sed -e 's/\//\\\//g') && replace=$$(echo $$3 | sed -e 's/\//\\\//g') && \
