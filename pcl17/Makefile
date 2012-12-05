@@ -4,35 +4,11 @@ SVN_DIR = build/pcl_trunk
 # Developers, please use this URL:
 SVN_URL = http://svn.pointclouds.org/pcl/trunk # For the very latest version
 #SVN_PATCH = 
-SVN_REVISION=-r8006 # Update this when doing a new release!
+SVN_REVISION=-r8173 # Update this when doing a new release!
 
 PCL_VERSION = 17
 
-#include $(shell rospack find mk)/svn_checkout.mk
-
-ifeq ($(strip $(SVN_CMDLINE)),)
-SVN_CMDLINE = svn
-endif
-
-revert:
-	cd $(SVN_DIR) && \
-	dirs=`find ./ -type d -name pcl17` && \
-	for d in $$dirs; do mv $$d `echo $$d | sed 's/\(.*\)pcl17/\1pcl/'`; done && \
-	svn revert -R . && svn up ${SVN_REVISION}
-
-$(SVN_DIR):
-	$(SVN_CMDLINE) co $(SVN_REVISION) $(SVN_URL) $(SVN_DIR)
-ifneq ($(strip $(SVN_PATCH)),)
-	cd $(SVN_DIR) && patch -p0 < ../$(SVN_PATCH)
-endif
-	cd $(SVN_DIR) && \
-        sed -Ei 's/-Wold-style-cast/-Wno-old-style-cast -Wno-unused-parameter -Wno-conversion/g' ./CMakeLists.txt && \
-	replace_in_files () { \
-	files=`echo $$1 | xargs grep "$$2" | awk {'print $$1'} | awk -F ":" {'print $$1'} | sort -n | uniq` && \
-	query=$$(echo $$2 | sed -e 's/\//\\\//g') && replace=$$(echo $$3 | sed -e 's/\//\\\//g') && \
-	for i in $$files; do sed -i -e s/"$$query"/"$$replace"/g $$i; done } && \
-	source_files=`find ./ -iname "*.[c|h]pp" -o -name "*.h" -o -name "*.c" -o -name "*.cu" -o -name "*.cxx"` && \
-	replace_in_files "$$source_files" PCL_ PCL$(PCL_VERSION)_ && \
+REPLACEMENTS = replace_in_files "./CMakeLists.txt" '\-Wold-style-cast' '\-Wno-old-style-cast -Wno-unused-parameter -Wno-conversion' && \
 	replace_in_files "$$source_files" 'namespace pcl' 'namespace pcl$(PCL_VERSION)' && \
 	replace_in_files "$$source_files" 'pcl::' 'pcl$(PCL_VERSION)::' && \
 	replace_in_files "$$source_files" 'pcl_gpu::' 'pcl$(PCL_VERSION)_gpu::' && \
@@ -46,19 +22,90 @@ endif
 	replace_in_files "$$source_files" 'aligned_malloc' 'pcl$(PCL_VERSION)_aligned_malloc' && \
 	replace_in_files "$$source_files" 'aligned_free' 'pcl$(PCL_VERSION)_aligned_free' && \
 	replace_in_files "$$source_files" 'POINT_CLOUD_' 'PCL$(PCL_VERSION)_POINT_CLOUD_' && \
-	replace_in_files "`find ./common/include/pcl/console/ -name *.h`" 'TERMINAL_TOOLS' 'PCL$(PCL_VERSION)_TERMINAL_TOOLS' && \
 	replace_in_files "`find ./ -name CMakeLists.txt`" 'include/pcl' 'include/pcl$(PCL_VERSION)' && \
+	replace_in_files "`find ./common/include/pcl/console/ -name *.h`" 'TERMINAL_TOOLS' 'PCL$(PCL_VERSION)_TERMINAL_TOOLS' && \
+	replace_in_files "./cmake/pcl_utils.cmake" '$${INCLUDE_INSTALL_ROOT}/pcl' '$${INCLUDE_INSTALL_ROOT}/pcl$(PCL_VERSION)' && \
+	replace_in_files "$$source_files" 'PCL_' 'PCL$(PCL_VERSION)_'
+
+#include $(shell rospack find mk)/svn_checkout.mk
+
+ifneq ($(r),)
+  ifeq ($(r),head) 
+    SVN_REVISION=
+  else
+    SVN_REVISION=-r$(r)
+  endif
+endif
+
+ifeq ($(strip $(SVN_CMDLINE)),)
+SVN_CMDLINE = svn
+endif
+
+REPLACE_IN_FILES = replace_in_files_f () { \
+	files=`echo $$1 | xargs grep -H "$$2" | awk {'print $$1'} | awk -F ":" {'print $$1'} | sort -n | uniq` && \
+	query=$$(echo $$2 | sed -e 's/\//\\\//g') && replace=$$(echo $$3 | sed -e 's/\//\\\//g') && \
+	for i in $$files; do filetime=`stat -c %y $$i` && sed -i -e s/"$$query"/"$$replace"/g $$i && touch -md "$$filetime" $$i ; done } && \
+	source_files=`find ./ -iname "*.[c|h]pp" -o -name "*.h" -o -name "*.c" -o -name "*.cu" -o -name "*.cxx"`
+
+patched: $(SVN_DIR)
+ifeq ($(wildcard patched), )
+	cd $(SVN_DIR) && \
+	mkdir -p build && \
+	mv build ./../build_temp && \
+	$(REPLACE_IN_FILES) && \
+	replace_in_files () { replace_in_files_f "$$1" "$$2" "$$3" ; } && \
+	$(REPLACEMENTS) && \
 	dirs=`find ./ -name pcl` && \
 	for d in $$dirs; do mv $$d `echo $$d | sed 's/\(.*\)pcl/\1pcl$(PCL_VERSION)/'`; done && \
-	sed -Ei 's/${INCLUDE_INSTALL_ROOT}\/pcl/${INCLUDE_INSTALL_ROOT}\/pcl$(PCL_VERSION)/g' ./cmake/pcl_utils.cmake
+	mv ./../build_temp ./build
+	touch patched
+else
+	@echo "$(SVN_DIR) is patched"
+endif
 
-SVN_UP: $(SVN_DIR)
+undo_patch: $(SVN_DIR)
+ifneq ($(wildcard patched), )
+	cd $(SVN_DIR) && \
+	mkdir -p build && \
+	mv build ./../build_temp && \
+	dirs=`find ./ -name pcl$(PCL_VERSION)` && \
+	for d in $$dirs; do mv $$d `echo $$d | sed 's/\(.*\)pcl$(PCL_VERSION)/\1pcl/'`; done && \
+	$(REPLACE_IN_FILES) && \
+	replace_in_files () { replace_in_files_f "$$1" "$$3" "$$2" ; } && \
+	$(REPLACEMENTS) && \
+	mv ./../build_temp ./build
+	rm patched
+else
+	@echo "$(SVN_DIR) is not patched"
+endif
+
+test_patching:
+	make wipe
+	make installed
+	make undo_patch
+	make clean
+	cd $(SVN_DIR) && svn status
+
+revert: 
+	make undo_patch
+	cd $(SVN_DIR) && svn revert -R .
+
+$(SVN_DIR):
+	$(SVN_CMDLINE) co $(SVN_REVISION) $(SVN_URL) $(SVN_DIR)
+ifneq ($(strip $(SVN_PATCH)),)
+	cd $(SVN_DIR) && patch -p0 < ../$(SVN_PATCH)
+endif
+
+SVN_UP: 
+	make undo_patch
 	cd $(SVN_DIR) && $(SVN_CMDLINE) up $(SVN_REVISION)
+	make installed
 
 download: $(SVN_UP)
 
-installed: $(SVN_DIR) cleaned
+installed: patched
 	mkdir -p msg/build && cd msg/build && cmake ../.. && make && cd -
+	#rm -rf include bin lib64
 	cd $(SVN_DIR) && mkdir -p build && cd build && \
 	rm -rf ../common/include/sensor_msgs ../common/include/std_msgs \
 	../common/include/pcl$(PCL_VERSION)/ModelCoefficients.h ../common/include/pcl$(PCL_VERSION)/PointIndices.h ../common/include/pcl$(PCL_VERSION)/PolygonMesh.h ../common/include/pcl$(PCL_VERSION)/Vertices.h && \
@@ -85,8 +132,10 @@ installed: $(SVN_DIR) cleaned
 	for d in $$libs; do ln -fs `echo $$d | sed 's/\.\/lib\/\(.*\)/\1/'` `echo $$d | sed 's/\(.*libpcl\)\(.*\.so\).*/\1$(PCL_VERSION)\2/'`; done && \
 	lib_names= && \
 	for d in $$libs; do lib_names="$$lib_names`echo $$d | sed 's/.*lib\(pcl\)\(.*\)\.so.*/ -l\1$(PCL_VERSION)\2/'`"; done && \
-	sed -i "s/\(<cpp.*lflags=\)\"[^\"]*\"\(.*\/>\)/\1\"-L$$\{prefix\}\/lib $${lib_names}\"\2/" manifest.xml
-	ln -s lib lib64
+	if ! `grep -qi "\"-L\\$${prefix}/lib $${lib_names}\"" manifest.xml`; then \
+	sed -i "s/\(<cpp.*lflags=\)\"[^\"]*\"\(.*\/>\)/\1\"-L$$\{prefix\}\/lib $${lib_names}\"\2/" manifest.xml ; \
+        fi
+	ln -fs lib lib64
 	touch installed
 
 cleaned: Makefile
@@ -101,4 +150,4 @@ wiped: Makefile
 	touch wiped
 
 wipe: clean
-	rm -rf build cleaned msg/build
+	rm -rf build cleaned patched msg/build
