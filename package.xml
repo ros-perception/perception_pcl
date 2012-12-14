@@ -11,7 +11,8 @@
   <license>BSD</license>  
   <url>http://ros.org/wiki/pcl-msgs</url>
 
-  <build_depend>catkin</build_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>eigen</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
