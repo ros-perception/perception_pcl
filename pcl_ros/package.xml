@@ -13,7 +13,8 @@
   <license>BSD</license>  
   <url>http://ros.org/wiki/perception_pcl</url>
 
-  <build_depend>catkin</build_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  
   <build_depend>eigen</build_depend>
   <build_depend>pcl</build_depend>
   <build_depend>roscpp</build_depend>
