@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.3)
 project(pcl_msgs)
 
 # Deal with catkin
-find_package(catkin REQUIRED genmsg sensor_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation sensor_msgs std_msgs)
 
 # create messages
 ### what's below is just to generate the messages that are manually patched into PCL
@@ -16,5 +16,4 @@ add_message_files(DIRECTORY msg
 generate_messages(DEPENDENCIES sensor_msgs std_msgs)
 project(pcl_msgs)
 
-catkin_package(DEPENDS sensor_msgs std_msgs)
-
+catkin_package(CATKIN_DEPENDS message_runtime sensor_msgs std_msgs)
