@@ -17,25 +17,27 @@
 
   <build_depend>dynamic_reconfigure</build_depend>  
   <build_depend>eigen</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>nodelet_topic_tools</build_depend>
   <build_depend>pcl</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>rosbag</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>rosbag</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>nodelet</build_depend>
-  <build_depend>pluginlib</build_depend>
 
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>eigen</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>nodelet_topic_tools</run_depend>
   <run_depend>pcl</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
-  <run_depend>rosbag</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>pluginlib</run_depend>
   
   <export>
      <rviz plugin="${prefix}/pcl_nodelets.xml"/>
