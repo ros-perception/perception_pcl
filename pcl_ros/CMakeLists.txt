@@ -3,7 +3,7 @@ project(pcl_ros)
 
 # Deal with catkin
 find_package(Boost COMPONENTS system filesystem thread REQUIRED)
-find_package(catkin REQUIRED dynamic_reconfigure genmsg roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib)
+find_package(catkin REQUIRED dynamic_reconfigure genmsg roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib pluginlib)
 find_package(Eigen)
 find_package(PCL)
 
@@ -46,6 +46,8 @@ add_library (pcl_ros_io
 #rosbuild_add_compile_flags (pcl_ros_io ${SSE_FLAGS})
 target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
+class_loader_hide_library_symbols(pcl_ros_io)
+
 # ---[ PCL ROS - Filters
 add_library (pcl_ros_filters
 	      src/pcl_ros/filters/filter.cpp
@@ -58,6 +60,8 @@ add_library (pcl_ros_filters
 	     )
 #add_compile_flags (pcl_ros_filters ${SSE_FLAGS})
 target_link_libraries (pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+class_loader_hide_library_symbols(pcl_ros_filters)
 
 ############ TOOLS
 
