@@ -67,7 +67,7 @@ target_link_libraries (pcd_to_pointcloud pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARI
 add_executable (pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 target_link_libraries (pointcloud_to_pcd pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable (bag_to_pcd tools/bag_to_pcd.cpp)
+add_executable ( bag_to_pcd tools/bag_to_pcd.cpp)
 target_link_libraries (bag_to_pcd pcl_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable (convert_pcd_to_image tools/convert_pcd_to_image.cpp)
@@ -81,8 +81,15 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(TARGETS pcl_ros_tf
+install(TARGETS pcl_ros_tf pcl_ros_io pcl_ros_filters
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
+
+install(TARGETS pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
+  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(FILES pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+
