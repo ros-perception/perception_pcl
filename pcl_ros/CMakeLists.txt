@@ -26,7 +26,7 @@ generate_dynamic_reconfigure_options(cfg/Filter.cfg
 )
 include_directories(include cfg/cpp)
 
-catkin_package()
+catkin_package(DEPENDS Eigen PCL roscpp sensor_msgs tf)
 
 # ---[ Point Cloud Library - Transforms
 add_library (pcl_ros_tf SHARED src/transforms.cpp)
