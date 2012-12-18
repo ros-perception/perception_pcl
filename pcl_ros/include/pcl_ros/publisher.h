@@ -42,8 +42,8 @@
 
 **/
 
-#ifndef pcl_ros_PUBLISHER_H_
-#define pcl_ros_PUBLISHER_H_
+#ifndef PCL_ROS_PUBLISHER_H_
+#define PCL_ROS_PUBLISHER_H_
 
 #include <ros/ros.h>
 #include "pcl/ros/conversions.h"

@@ -3,7 +3,7 @@ project(pcl_ros)
 
 # Deal with catkin
 find_package(Boost COMPONENTS system filesystem thread REQUIRED)
-find_package(catkin REQUIRED genmsg roscpp sensor_msgs std_msgs tf)
+find_package(catkin REQUIRED dynamic_reconfigure genmsg roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib)
 find_package(Eigen)
 find_package(PCL)
 
@@ -17,27 +17,65 @@ include_directories(include)
 
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
 
-catkin_package(DEPENDS Eigen PCL roscpp sensor_msgs tf
-               INCLUDE_DIRS include 
-               LIBRARIES pcl_ros_tf
-)
+# generate the dynamic_reconfigure config file
+generate_dynamic_reconfigure_options(cfg/Filter.cfg
+                                     cfg/ExtractIndices.cfg 
+                                     cfg/StatisticalOutlierRemoval.cfg
+                                     cfg/VoxelGrid.cfg
 
-# create messages
-### what's below is just to generate the messages that are manually patched into PCL
-###project(pcl)
-###add_message_files(DIRECTORY msg
-###                  FILES ModelCoefficients.msg
-###                        PointIndices.msg
-###                        PolygonMesh.msg
-###                        Vertices.msg
-###)
-###generate_messages(DEPENDENCIES sensor_msgs std_msgs)
-###project(pcl_ros)
+)
+include_directories(include cfg/cpp)
+
+catkin_package()
 
 # ---[ Point Cloud Library - Transforms
 add_library (pcl_ros_tf SHARED src/transforms.cpp)
-target_link_libraries(pcl_ros_tf ${PCL_LIBS} ${Boost_LIBS} ${catkin_LIBS})
+target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(pcl_ros_tf ros_gencpp pcl_ros_copy)
+
+############ NODELETS
+
+# ---[ Point Cloud Library - IO
+add_library (pcl_ros_io
+              src/pcl_ros/io/io.cpp
+              src/pcl_ros/io/concatenate_fields.cpp
+              src/pcl_ros/io/concatenate_data.cpp
+              src/pcl_ros/io/pcd_io.cpp
+              src/pcl_ros/io/bag_io.cpp
+             )
+#rosbuild_add_compile_flags (pcl_ros_io ${SSE_FLAGS})
+target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+# ---[ PCL ROS - Filters
+add_library (pcl_ros_filters
+	      src/pcl_ros/filters/filter.cpp
+	      src/pcl_ros/filters/passthrough.cpp
+	      src/pcl_ros/filters/project_inliers.cpp
+	      src/pcl_ros/filters/extract_indices.cpp
+	      src/pcl_ros/filters/radius_outlier_removal.cpp
+	      src/pcl_ros/filters/statistical_outlier_removal.cpp
+	      src/pcl_ros/filters/voxel_grid.cpp
+	     )
+#add_compile_flags (pcl_ros_filters ${SSE_FLAGS})
+target_link_libraries (pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+############ TOOLS
+
+add_executable (pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
+target_link_libraries (pcd_to_pointcloud pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable (pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
+target_link_libraries (pointcloud_to_pcd pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable (bag_to_pcd tools/bag_to_pcd.cpp)
+target_link_libraries (bag_to_pcd pcl_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable (convert_pcd_to_image tools/convert_pcd_to_image.cpp)
+target_link_libraries (convert_pcd_to_image pcl_io pcl_common ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable (convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
+target_link_libraries (convert_pointcloud_to_image pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
