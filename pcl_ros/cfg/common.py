@@ -3,8 +3,6 @@
 # set up parameters that we care about
 PACKAGE = 'pcl_ros'
 
-import roslib;
-roslib.load_manifest (PACKAGE);
 from dynamic_reconfigure.parameter_generator_catkin import *;
 
 def add_common_parameters (gen):
