@@ -3,7 +3,7 @@ project(pcl_ros)
 
 # Deal with catkin
 find_package(Boost COMPONENTS system filesystem thread REQUIRED)
-find_package(catkin REQUIRED dynamic_reconfigure genmsg roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib pluginlib)
+find_package(catkin REQUIRED dynamic_reconfigure genmsg nodelet nodelet_topic_tools roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib pluginlib)
 find_package(Eigen)
 find_package(PCL)
 
