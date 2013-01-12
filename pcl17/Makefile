@@ -115,8 +115,8 @@ installed: patched
 	cmake -DCMAKE_INSTALL_PREFIX=`rospack find pcl17` \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DUSE_ROS=ON \
-	-DBUILD_CUDA=OFF \
-	-DBUILD_GPU=OFF \
+	-DBUILD_CUDA=ON \
+	-DBUILD_GPU=ON \
 	-DBUILD_OPENNI=ON \
 	-DBUILD_TESTS=OFF \
 	-DBUILD_apps=OFF \
@@ -143,7 +143,7 @@ cleaned: Makefile
 	touch cleaned
 
 clean:
-	-rm -rf $(SVN_DIR)/build rospack_nosubdirs patched installed include bin lib64 msg_gen src *~
+	-rm -rf $(SVN_DIR)/build rospack_nosubdirs installed include bin lib64 msg_gen src *~
 
 wiped: Makefile
 	make wipe
