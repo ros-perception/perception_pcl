@@ -29,7 +29,8 @@ include_directories(include cfg/cpp)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES pcl_ros_tf pcl_ros_io pcl_ros_filters
-  DEPENDS Eigen PCL roscpp sensor_msgs tf sensor_msgs std_msgs 
+  CATKIN_DEPENDS roscpp sensor_msgs tf sensor_msgs std_msgs
+  DEPENDS Eigen PCL 
 )
 
 # ---[ Point Cloud Library - Transforms
