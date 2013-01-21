@@ -109,5 +109,5 @@ pcl_ros::BAGReader::onInit ()
 }
 
 typedef pcl_ros::BAGReader BAGReader;
-PLUGINLIB_DECLARE_CLASS (pcl, BAGReader, BAGReader, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet);
 

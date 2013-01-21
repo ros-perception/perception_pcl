@@ -55,8 +55,8 @@
 //#include "statistical_outlier_removal.cpp"
 //#include "voxel_grid.cpp"
 
-/*//PLUGINLIB_DECLARE_CLASS (pcl, PixelGrid, PixelGrid, nodelet::Nodelet);
-//PLUGINLIB_DECLARE_CLASS (pcl, FilterDimension, FilterDimension, nodelet::Nodelet);
+/*//PLUGINLIB_EXPORT_CLASS(PixelGrid,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(FilterDimension,nodelet::Nodelet);
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

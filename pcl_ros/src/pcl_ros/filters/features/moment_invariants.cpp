@@ -73,5 +73,5 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
 }
 
 typedef pcl_ros::MomentInvariantsEstimation MomentInvariantsEstimation;
-PLUGINLIB_DECLARE_CLASS (pcl, MomentInvariantsEstimation, MomentInvariantsEstimation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(MomentInvariantsEstimation,nodelet::Nodelet);
 

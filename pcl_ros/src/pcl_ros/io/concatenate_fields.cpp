@@ -148,5 +148,5 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;
-PLUGINLIB_DECLARE_CLASS (pcl, PointCloudConcatenateFieldsSynchronizer, PointCloudConcatenateFieldsSynchronizer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet);
 

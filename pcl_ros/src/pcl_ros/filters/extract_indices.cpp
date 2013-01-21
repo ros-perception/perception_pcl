@@ -66,5 +66,5 @@ pcl_ros::ExtractIndices::config_callback (pcl_ros::ExtractIndicesConfig &config,
 }
 
 typedef pcl_ros::ExtractIndices ExtractIndices;
-PLUGINLIB_DECLARE_CLASS (pcl, ExtractIndices, ExtractIndices, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ExtractIndices,nodelet::Nodelet);
 
