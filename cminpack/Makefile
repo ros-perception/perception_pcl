@@ -20,9 +20,10 @@ endif
 installed: $(SOURCE_DIR)/unpacked Makefile
 	echo "Building CMinpack..."
 	cd $(SOURCE_DIR) && mkdir -p build && cd build && cmake -DUSE_FPIC=ON -DSHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DCMINPACK_LIB_INSTALL_DIR="." .. && make && cd ../../../../
-	mkdir -p include lib
+	mkdir -p include lib lib/pkgconfig
 	cp $(SOURCE_DIR)/*.h include
 	cp -P $(SOURCE_DIR)/build/libcminpack.* lib
+	cp $(SOURCE_DIR)/build/cmake/cminpack.pc lib/pkgconfig
 	touch installed
 clean: wipe
 wipe:
