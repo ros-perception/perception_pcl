@@ -140,5 +140,5 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstP
 }
 
 typedef pcl_ros::ProjectInliers ProjectInliers;
-PLUGINLIB_DECLARE_CLASS (pcl, ProjectInliers, ProjectInliers, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ProjectInliers,nodelet::Nodelet);
 

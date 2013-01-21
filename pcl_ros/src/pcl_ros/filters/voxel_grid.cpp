@@ -120,5 +120,5 @@ pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t 
 }
 
 typedef pcl_ros::VoxelGrid VoxelGrid;
-PLUGINLIB_DECLARE_CLASS (pcl, VoxelGrid, VoxelGrid, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(VoxelGrid,nodelet::Nodelet);
 

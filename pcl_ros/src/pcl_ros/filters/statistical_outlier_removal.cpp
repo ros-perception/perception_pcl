@@ -77,5 +77,5 @@ pcl_ros::StatisticalOutlierRemoval::config_callback (pcl_ros::StatisticalOutlier
 }
 
 typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
-PLUGINLIB_DECLARE_CLASS (pcl, StatisticalOutlierRemoval, StatisticalOutlierRemoval, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval,nodelet::Nodelet);
 
