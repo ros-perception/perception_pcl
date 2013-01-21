@@ -253,5 +253,5 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
-PLUGINLIB_DECLARE_CLASS (pcl, PointCloudConcatenateDataSynchronizer, PointCloudConcatenateDataSynchronizer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
 

@@ -170,6 +170,6 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
 
 typedef pcl_ros::PCDReader PCDReader;
 typedef pcl_ros::PCDWriter PCDWriter;
-PLUGINLIB_DECLARE_CLASS (pcl, PCDReader, PCDReader, nodelet::Nodelet);
-PLUGINLIB_DECLARE_CLASS (pcl, PCDWriter, PCDWriter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PCDReader,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PCDWriter,nodelet::Nodelet);
 
