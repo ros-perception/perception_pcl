@@ -116,5 +116,5 @@ pcl_ros::PassThrough::config_callback (pcl_ros::FilterConfig &config, uint32_t l
 }
 
 typedef pcl_ros::PassThrough PassThrough;
-PLUGINLIB_DECLARE_CLASS (pcl, PassThrough, PassThrough, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PassThrough,nodelet::Nodelet);
 

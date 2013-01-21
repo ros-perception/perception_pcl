@@ -39,5 +39,5 @@
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
 typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-PLUGINLIB_DECLARE_CLASS (pcl, RadiusOutlierRemoval, RadiusOutlierRemoval, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet);
 
