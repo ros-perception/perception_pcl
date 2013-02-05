@@ -90,14 +90,14 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(TARGETS pcl_ros_tf pcl_ros_io pcl_ros_filters
+install(TARGETS pcl_ros_tf pcl_ros_io pcl_ros_filters pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
-  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+#install(TARGETS pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
+#  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(FILES pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
