@@ -65,7 +65,7 @@ class PCDGenerator
     sensor_msgs::PointCloud2 cloud_;
 
     string file_name_, cloud_topic_;
-    double rate_;
+    double wait_;
 
     pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
 
@@ -97,7 +97,7 @@ class PCDGenerator
     {
       int nr_points      = cloud_.width * cloud_.height;
       string fields_list = pcl::getFieldsList (cloud_);
-      double interval = rate_ * 1e+6;
+      double interval = wait_ * 1e+6;
       while (nh_.ok ())
       {
         ROS_DEBUG_ONCE ("Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
@@ -110,17 +110,20 @@ class PCDGenerator
         }
         else
         {
-          ros::Duration (0.001).sleep ();
+					// check once a second if there is any subscriber
+          ros::Duration (1).sleep ();
           continue;
         }
 
         usleep (interval);
 
-        if (interval == 0)                      // We only publish once if a 0 seconds interval is given
+        if (interval == 0)	// We only publish once if a 0 seconds interval is given
+				{
+					// Give subscribers 3 seconds until point cloud decays... a little ugly!
+		      ros::Duration (3.0).sleep ();
           break;
+				}
       }
-
-      ros::Duration (3.0).sleep ();
       return (true);
     }
 
@@ -131,7 +134,7 @@ class PCDGenerator
 int
   main (int argc, char** argv)
 {
-  if (argc < 3)
+  if (argc < 2)
   {
     std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" << std::endl;
     return (-1);
@@ -141,7 +144,15 @@ int
 
   PCDGenerator c;
   c.file_name_ = string (argv[1]);
-  c.rate_      = atof (argv[2]);
+  // check if publishing interval is given
+  if (argc == 2)
+	{
+  	c.wait_ = 0;
+	}
+	else
+	{
+		c.wait_ = atof (argv[2]);
+	}
 
   if (c.start () == -1)
   {
