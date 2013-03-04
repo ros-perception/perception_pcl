@@ -40,7 +40,7 @@
   <run_depend>tf</run_depend>
   
   <export>
-     <rviz plugin="${prefix}/pcl_nodelets.xml"/>
+     <nodelet plugin="${prefix}/pcl_nodelets.xml"/>
   </export>
           
 </package>
