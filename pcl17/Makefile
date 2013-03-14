@@ -1,10 +1,10 @@
 all: installed
 
-SVN_DIR = build/pcl_trunk
+GIT_DIR = build/pcl_trunk
 # Developers, please use this URL:
-SVN_URL = http://svn.pointclouds.org/pcl/trunk # For the very latest version
-#SVN_PATCH = 
-SVN_REVISION=-r8173 # Update this when doing a new release!
+GIT_URL = https://github.com/PointCloudLibrary/pcl.git # For the very latest version
+#GIT_PATCH = 
+GIT_REVISION= 33308c1e14f0eaed9d204d00aff9c0193608dde6 # Update this when doing a new release!
 
 PCL_VERSION = 17
 
@@ -31,14 +31,14 @@ REPLACEMENTS = replace_in_files "./CMakeLists.txt" '\-Wold-style-cast' '\-Wno-ol
 
 ifneq ($(r),)
   ifeq ($(r),head) 
-    SVN_REVISION=
+    GIT_REVISION=
   else
-    SVN_REVISION=-r$(r)
+    GIT_REVISION=-r$(r)
   endif
 endif
 
-ifeq ($(strip $(SVN_CMDLINE)),)
-SVN_CMDLINE = svn
+ifeq ($(strip $(GIT_CMDLINE)),)
+GIT_CMDLINE = git
 endif
 
 REPLACE_IN_FILES = replace_in_files_f () { \
@@ -47,9 +47,9 @@ REPLACE_IN_FILES = replace_in_files_f () { \
 	for i in $$files; do filetime=`stat -c %y $$i` && sed -i -e s/"$$query"/"$$replace"/g $$i && touch -md "$$filetime" $$i ; done } && \
 	source_files=`find ./ -iname "*.[c|h]pp" -o -name "*.h" -o -name "*.c" -o -name "*.cu" -o -name "*.cxx"`
 
-patched: $(SVN_DIR)
+patched: $(GIT_DIR)
 ifeq ($(wildcard patched), )
-	cd $(SVN_DIR) && \
+	cd $(GIT_DIR) && \
 	mkdir -p build && \
 	mv build ./../build_temp && \
 	$(REPLACE_IN_FILES) && \
@@ -60,12 +60,12 @@ ifeq ($(wildcard patched), )
 	mv ./../build_temp ./build
 	touch patched
 else
-	@echo "$(SVN_DIR) is patched"
+	@echo "$(GIT_DIR) is patched"
 endif
 
-undo_patch: $(SVN_DIR)
+undo_patch: $(GIT_DIR)
 ifneq ($(wildcard patched), )
-	cd $(SVN_DIR) && \
+	cd $(GIT_DIR) && \
 	mkdir -p build && \
 	mv build ./../build_temp && \
 	dirs=`find ./ -name pcl$(PCL_VERSION)` && \
@@ -76,7 +76,7 @@ ifneq ($(wildcard patched), )
 	mv ./../build_temp ./build
 	rm patched
 else
-	@echo "$(SVN_DIR) is not patched"
+	@echo "$(GIT_DIR) is not patched"
 endif
 
 test_patching:
@@ -84,29 +84,36 @@ test_patching:
 	make installed
 	make undo_patch
 	make clean
-	cd $(SVN_DIR) && svn status
+	cd $(GIT_DIR) && git status
 
 revert: 
 	make undo_patch
-	cd $(SVN_DIR) && svn revert -R .
+	cd $(GIT_DIR) && git clean -f -r && git reset $(GIT_REVISION) --hard
 
-$(SVN_DIR):
-	$(SVN_CMDLINE) co $(SVN_REVISION) $(SVN_URL) $(SVN_DIR)
-ifneq ($(strip $(SVN_PATCH)),)
-	cd $(SVN_DIR) && patch -p0 < ../$(SVN_PATCH)
+$(GIT_DIR):
+	if [ ! -d build ]; then \
+	mkdir build;\
+	fi
+	if [ ! -d $(GIT_DIR) ]; then \
+ 	mkdir $(GIT_DIR); \
+	fi
+	$(GIT_CMDLINE) clone  $(GIT_URL) $(GIT_DIR)
+	cd $(GIT_DIR) && $(GIT_CMDLINE) reset $(GIT_REVISION) --hard
+ifneq ($(strip $(GIT_PATCH)),)
+	cd $(GIT_DIR) && patch -p0 < ../$(GIT_PATCH)
 endif
 
-SVN_UP: 
+GIT_UP: 
 	make undo_patch
-	cd $(SVN_DIR) && $(SVN_CMDLINE) up $(SVN_REVISION)
+	cd $(GIT_DIR) && $(GIT_CMDLINE) pull $(GIT_REVISION)
 	make installed
 
-download: $(SVN_UP)
+download: $(GIT_UP)
 
 installed: patched
 	mkdir -p msg/build && cd msg/build && cmake ../.. && make && cd -
 	#rm -rf include bin lib64
-	cd $(SVN_DIR) && mkdir -p build && cd build && \
+	cd $(GIT_DIR) && mkdir -p build && cd build && \
 	rm -rf ../common/include/sensor_msgs ../common/include/std_msgs \
 	../common/include/pcl$(PCL_VERSION)/ModelCoefficients.h ../common/include/pcl$(PCL_VERSION)/PointIndices.h ../common/include/pcl$(PCL_VERSION)/PolygonMesh.h ../common/include/pcl$(PCL_VERSION)/Vertices.h && \
 	export CPATH="`rospack cflags-only-I sensor_msgs`:`rospack cflags-only-I roscpp_serialization`:`rospack cflags-only-I cpp_common`:`rospack cflags-only-I rostime`:`rospack cflags-only-I roscpp_traits`:`rospack cflags-only-I roscpp`:`rospack cflags-only-I rosconsole`:`rospack cflags-only-I std_msgs`:`rospack cflags-only-I sensor_msgs`:`rospack find pcl$(PCL_VERSION)`/msg_gen/cpp/include:$$CPATH" && \
@@ -143,7 +150,7 @@ cleaned: Makefile
 	touch cleaned
 
 clean:
-	-rm -rf $(SVN_DIR)/build rospack_nosubdirs installed include bin lib64 msg_gen src *~
+	-rm -rf $(GIT_DIR)/build rospack_nosubdirs installed include bin lib64 msg_gen src *~
 
 wiped: Makefile
 	make wipe
