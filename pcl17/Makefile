@@ -4,7 +4,7 @@ GIT_DIR = build/pcl_trunk
 # Developers, please use this URL:
 GIT_URL = https://github.com/PointCloudLibrary/pcl.git # For the very latest version
 #GIT_PATCH = 
-GIT_REVISION= 33308c1e14f0eaed9d204d00aff9c0193608dde6 # Update this when doing a new release!
+GIT_REVISION= 6eb5ea26d0ba64e7308ef2b725aaefbdfaa734f0 # Update this when doing a new release!
 
 PCL_VERSION = 17
 
@@ -33,7 +33,7 @@ ifneq ($(r),)
   ifeq ($(r),head) 
     GIT_REVISION=
   else
-    GIT_REVISION=-r$(r)
+    GIT_REVISION=$(r)
   endif
 endif
 
@@ -105,7 +105,8 @@ endif
 
 GIT_UP: 
 	make undo_patch
-	cd $(GIT_DIR) && $(GIT_CMDLINE) pull $(GIT_REVISION)
+	cd $(GIT_DIR) && $(GIT_CMDLINE) pull && $(GIT_CMDLINE) reset $(GIT_REVISION) --hard
+	#TODO: this is a revert, not a update. Maybe use and TEST "checkout".
 	make installed
 
 download: $(GIT_UP)
