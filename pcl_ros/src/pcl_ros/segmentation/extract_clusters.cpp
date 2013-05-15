@@ -100,14 +100,12 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - max_queue_size    : %d\n"
                  " - use_indices       : %s\n"
-                 " - cluster_tolerance : %f\n"
-                 " - spatial_locator   : %d",
+                 " - cluster_tolerance : %f\n",
                  getName ().c_str (),
                  max_queue_size_,
-                 (use_indices_) ? "true" : "false", cluster_tolerance, spatial_locator);
+                 (use_indices_) ? "true" : "false", cluster_tolerance);
 
   // Set given parameters here
-  impl_.setSpatialLocator (spatial_locator);
   impl_.setClusterTolerance (cluster_tolerance);
 }
 

@@ -149,7 +149,6 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
 
   // Reset the indices and surface pointers
   impl_.setInputCloud (cloud);
-  impl_.setOutputNormals (normals);
 
   IndicesPtr indices_ptr;
   if (indices)
@@ -158,11 +157,9 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   impl_.setIndices (indices_ptr);
 
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, 0); //k_);
-  impl_.setSearchMethod (tree_);
   
   // Do the reconstructon
-  impl_.reconstruct (output);
+  //impl_.process (output);
 
   // Publish a Boost shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
