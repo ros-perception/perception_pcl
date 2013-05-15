@@ -64,15 +64,15 @@ class_loader_hide_library_symbols(pcl_ros_io)
 add_library (pcl_ros_features
               src/pcl_ros/features/feature.cpp
               # Compilation is much faster if we include all the following CPP files in feature.cpp
-#              src/pcl_ros/features/boundary.cpp
-#              src/pcl_ros/features/fpfh.cpp
-#              src/pcl_ros/features/fpfh_omp.cpp
-#              src/pcl_ros/features/moment_invariants.cpp
-#              src/pcl_ros/features/normal_3d.cpp
-#              src/pcl_ros/features/normal_3d_omp.cpp
-#              src/pcl_ros/features/pfh.cpp
-#             src/pcl_ros/features/principal_curvatures.cpp
-#              src/pcl_ros/features/vfh.cpp
+              src/pcl_ros/features/boundary.cpp
+              src/pcl_ros/features/fpfh.cpp
+              src/pcl_ros/features/fpfh_omp.cpp
+              src/pcl_ros/features/moment_invariants.cpp
+              src/pcl_ros/features/normal_3d.cpp
+              src/pcl_ros/features/normal_3d_omp.cpp
+              src/pcl_ros/features/pfh.cpp
+              src/pcl_ros/features/principal_curvatures.cpp
+              src/pcl_ros/features/vfh.cpp
               )
 #rosbuild_add_compile_flags (pcl_ros_features ${SSE_FLAGS})
 target_link_libraries (pcl_ros_features ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
@@ -99,7 +99,7 @@ class_loader_hide_library_symbols(pcl_ros_filters)
 add_library (pcl_ros_segmentation
               src/pcl_ros/segmentation/segmentation.cpp
               src/pcl_ros/segmentation/segment_differences.cpp
-#              src/pcl_ros/segmentation/extract_clusters.cpp
+              src/pcl_ros/segmentation/extract_clusters.cpp
               src/pcl_ros/segmentation/extract_polygonal_prism_data.cpp
               src/pcl_ros/segmentation/sac_segmentation.cpp
               )
@@ -113,7 +113,7 @@ add_library (pcl_ros_surface
               src/pcl_ros/surface/surface.cpp
               # Compilation is much faster if we include all the following CPP files in surface.cpp
               src/pcl_ros/surface/convex_hull.cpp
-              #src/pcl_ros/surface/moving_least_squares.cpp
+              src/pcl_ros/surface/moving_least_squares.cpp
               )
 #rosbuild_add_compile_flags (pcl_ros_surface ${SSE_FLAGS})
 target_link_libraries (pcl_ros_surface ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})

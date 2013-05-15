@@ -54,9 +54,6 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
   // Set the parameters
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
-  // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
-  impl_.setSearchMethod (tree_);
 
   // Set the inputs
   impl_.setInputCloud (cloud);
