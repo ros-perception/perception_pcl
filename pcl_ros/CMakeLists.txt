@@ -128,7 +128,7 @@ target_link_libraries (pcd_to_pointcloud pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARI
 add_executable (pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 target_link_libraries (pointcloud_to_pcd pcl_io ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable ( bag_to_pcd tools/bag_to_pcd.cpp)
+add_executable (bag_to_pcd tools/bag_to_pcd.cpp)
 target_link_libraries (bag_to_pcd pcl_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable (convert_pcd_to_image tools/convert_pcd_to_image.cpp)
