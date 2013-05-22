@@ -46,7 +46,7 @@
 #define PCL_ROS_PUBLISHER_H_
 
 #include <ros/ros.h>
-#include "pcl/ros/conversions.h"
+#include <pcl/ros/conversions.h>
 
 namespace pcl_ros 
 {
