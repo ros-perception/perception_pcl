@@ -5,7 +5,7 @@ rosbuild_init ()
 rosbuild_add_boost_directories ()
 #add_definitions (-Wall -O3 -funroll-loops)
 add_definitions (-DEIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET)
-rosbuild_check_for_sse ()
+#rosbuild_check_for_sse ()
 
 set (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
