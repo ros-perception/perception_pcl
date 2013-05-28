@@ -6,12 +6,13 @@
   <author>Maintained by Radu Bogdan Rusu</author>
   <license>BSD,LGPL</license>  
   <review status="Doc reviewed" notes=""/>
-  <url>http://ros.org/wiki/perception_pcl_unstable</url>
-  <depend stack="nodelet_core" /> <!-- nodelet_topic_tools, nodelet -->
+  <url>http://ros.org/wiki/perception_pcl</url>
   <depend stack="common_msgs" /> <!-- sensor_msgs, geometry_msgs -->
-  <depend stack="driver_common" /> <!-- dynamic_reconfigure -->
+  <depend stack="common_rosdeps" /> <!-- common_rosdeps -->
+  <depend stack="dynamic_reconfigure" /> <!-- dynamic_reconfigure -->
   <depend stack="geometry" /> <!-- tf -->
+  <depend stack="nodelet_core" /> <!-- nodelet_topic_tools, nodelet -->
   <depend stack="ros" />
   <depend stack="ros_comm" /> <!-- std_msgs, rosbag, roscpp, message_filters -->
-  <depend stack="common_rosdeps" /> <!-- eigen -->
+
 </stack>

@@ -3,8 +3,8 @@
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
-#include <pcl/ros/point_traits.h>
-#include <pcl/ros/for_each_type.h>
+#include <pcl/point_traits.h>
+#include <pcl/for_each_type.h>
 #include <pcl/ros/conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/mpl/size.hpp>

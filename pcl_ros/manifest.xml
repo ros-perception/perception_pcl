@@ -32,13 +32,15 @@
   <rosdep name="eigen" />
 
   <!-- PCL -->
-  <depend package="pcl" />
-
+  <rosdep name="pcl" />
+  
+  <!-- depend package="pcl" / -->
   <export>
-    <!--cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_io -lpcl_ros_features -lpcl_ros_filters -lpcl_ros_segmentation -lpcl_ros_surface -lpcl_ros_tf" /-->
-    <cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf" />
+    <!-- We go ahead and export pcl's flags here, to avoid having to depend
+         on the pcl package, because that dependency can't be resolved
+         properly by the rosrelease-legacy script. -->
+    <cpp cflags="`pkg-config --cflags pcl_common-1.5 pcl_features-1.5 pcl_filters-1.5 pcl_io-1.5 pcl_kdtree-1.5 pcl_keypoints-1.5 pcl_octree-1.5 pcl_registration-1.5 pcl_sample_consensus-1.5 pcl_search-1.5 pcl_segmentation-1.5 pcl_surface-1.5 pcl_tracking-1.5 pcl_visualization-1.5` -I${prefix}/include -I${prefix}/cfg/cpp" 
+         lflags="`pkg-config --libs pcl_common-1.5 pcl_features-1.5 pcl_filters-1.5 pcl_io-1.5 pcl_kdtree-1.5 pcl_keypoints-1.5 pcl_octree-1.5 pcl_registration-1.5 pcl_sample_consensus-1.5 pcl_search-1.5 pcl_segmentation-1.5 pcl_surface-1.5 pcl_tracking-1.5 pcl_visualization-1.5` -lmysqlclient -Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpcl_ros_tf -lpcl_ros_filters -lpcl_ros_io -lpcl_ros_tests -lpcl_ros_tf"/>
     <nodelet plugin="${prefix}/pcl_nodelets.xml" />
   </export>
-  <platform os="ubuntu" version="10.04"/>
-  <platform os="ubuntu" version="10.10"/>
 </package>

@@ -94,11 +94,6 @@ class PointCloudToPCD
         {
           ROS_INFO_STREAM ("PCD file prefix is: " << prefix_);
         }
-      else if (nh_.getParam ("prefix", prefix_))
-        {
-          ROS_WARN_STREAM ("Non-private PCD prefix parameter is DEPRECATED: "
-                           << prefix_);
-        }
 
       cloud_topic_ = "input";
 

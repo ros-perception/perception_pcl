@@ -17,6 +17,11 @@ find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 include_directories(${EIGEN_INCLUDE_DIRS})
 
+# Uses PCL
+find_package(PCL REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+
 # Enable dynamic_reconfigure
 rosbuild_find_ros_package (dynamic_reconfigure)
 include (${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
@@ -25,6 +30,7 @@ gencfg ()
 # ---[ Point Cloud Library - Transforms
 rosbuild_add_library (pcl_ros_tf src/pcl_ros/transforms.cpp)
 rosbuild_add_compile_flags (pcl_ros_tf ${SSE_FLAGS})
+target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
 
 # ---[ Point Cloud Library - IO
 rosbuild_add_library (pcl_ros_io
@@ -36,7 +42,8 @@ rosbuild_add_library (pcl_ros_io
                      )
 rosbuild_add_compile_flags (pcl_ros_io ${SSE_FLAGS})
 rosbuild_link_boost (pcl_ros_io system)
-target_link_libraries (pcl_ros_io pcl_ros_tf)
+target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES})
+rosbuild_link_boost (pcl_ros_io signals)
 
 ## ---[ PCL ROS - Features
 #rosbuild_add_library (pcl_ros_features
@@ -75,7 +82,8 @@ rosbuild_add_library (pcl_ros_filters
                       src/pcl_ros/filters/voxel_grid.cpp
                      )
 rosbuild_add_compile_flags (pcl_ros_filters ${SSE_FLAGS})
-target_link_libraries (pcl_ros_filters pcl_ros_tf)
+target_link_libraries (pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES})
+rosbuild_link_boost (pcl_ros_filters signals)
 
 ## ---[ Point Cloud Library - Segmentation
 #rosbuild_add_library (pcl_ros_segmentation
