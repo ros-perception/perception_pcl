@@ -5,7 +5,7 @@ project(pcl_ros)
 find_package(Boost COMPONENTS system filesystem thread REQUIRED)
 find_package(catkin REQUIRED dynamic_reconfigure genmsg nodelet nodelet_topic_tools roscpp sensor_msgs std_msgs tf rosbag rosconsole roslib pluginlib)
 find_package(Eigen)
-find_package(PCL)
+find_package(PCL 1.7.0)
 
 # deal with ROS
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS}
