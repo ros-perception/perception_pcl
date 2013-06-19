@@ -129,8 +129,13 @@ int
         ++view_it;
         continue;
       }
+
       // Transform it
-      pcl_ros::transformPointCloud ("/base_link", *cloud, cloud_t, tf_listener);
+      if (!pcl_ros::transformPointCloud ("/base_link", *cloud, cloud_t, tf_listener))
+      {
+        ++view_it;
+        continue;
+      }
 
       std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
 
