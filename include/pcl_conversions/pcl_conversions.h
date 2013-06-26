@@ -35,8 +35,6 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <pcl_std_msgs/PCLHeader.h>
 #include <std_msgs/Header.h>
 
