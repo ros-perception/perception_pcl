@@ -55,14 +55,14 @@ namespace pcl_conversions {
 
 void fromPCLHeaderToHeader(const pcl_std_msgs::PCLHeader &pcl_header, std_msgs::Header &header)
 {
-    header.stamp.fromNSec(pcl_header.stamp);
+    header.stamp.fromNSec(pcl_header.stamp * 1e3);  // Convert from us to ns
     header.seq = pcl_header.seq;
     header.frame_id = pcl_header.frame_id;
 }
 
 void fromHeaderToPCLHeader(const std_msgs::Header &header, pcl_std_msgs::PCLHeader &pcl_header)
 {
-    pcl_header.stamp = header.stamp.toNSec();
+    pcl_header.stamp = header.stamp.toNSec() / 1e3;  // Convert from ns to us
     pcl_header.seq = header.seq;
     pcl_header.frame_id = header.frame_id;
 }
@@ -79,25 +79,6 @@ void fromPCLImageToImage(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs
     image.step = pcl_image.step;
     image.data = pcl_image.data;
 }
-
-class ConvertedImage
-{
-public:
-  ConvertedImage(boost::shared_ptr<pcl_sensor_msgs::PCLImage> pcl_image_ptr)
-  : image(), _pcl_image_ptr(pcl_image_ptr)
-  {
-    fromPCLHeaderToHeader(pcl_image_ptr->header, image.header);
-    image.height = pcl_image_ptr->height;
-    image.width = pcl_image_ptr->width;
-    image.encoding = pcl_image_ptr->encoding;
-    image.is_bigendian = pcl_image_ptr->is_bigendian;
-    image.step = pcl_image_ptr->step;
-  }
-
-  sensor_msgs::Image image;
-private:
-  boost::shared_ptr<pcl_sensor_msgs::PCLImage> _pcl_image_ptr;
-};
 
 void fromImageToPCLImage(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLImage &pcl_image)
 {
