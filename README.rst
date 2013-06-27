@@ -17,6 +17,6 @@ Build status: |Build Status|
 +-----------------+------------------------------------------------------------+
 | Issues          | http://github.com/ros-perception/pcl_conversions/issues    |
 +-----------------+------------------------------------------------------------+
-..| Documentation   | http://ros-perception.github.com/pcl_conversions/doc       |
-..+-----------------+------------------------------------------------------------+
+.. | Documentation   | http://ros-perception.github.com/pcl_conversions/doc       |
+.. +-----------------+------------------------------------------------------------+
 
