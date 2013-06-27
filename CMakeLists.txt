@@ -21,7 +21,5 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 # Add gtest based cpp test target
-find_package(GTEST QUIET)
-if(GTEST_FOUND)
-  catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
-endif()
+catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
+target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
