@@ -7,9 +7,9 @@ This package provides conversions from PCL data types and ROS message types.
 Code & tickets
 --------------
 
-Build status: |Build Status|
+.. Build status: |Build Status|
 
-.. |Build Status| image:: https://secure.travis-ci.org/ros-perception/pcl_conversions.png
+.. .. |Build Status| image:: https://secure.travis-ci.org/ros-perception/pcl_conversions.png
    :target: http://travis-ci.org/ros-perception/pcl_conversions
 
 +-----------------+------------------------------------------------------------+
