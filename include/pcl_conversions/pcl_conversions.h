@@ -51,14 +51,14 @@ namespace pcl_conversions {
 
 /** PCLHeader <=> Header **/
 
-void fromPCLHeaderToHeader(const pcl_std_msgs::PCLHeader &pcl_header, std_msgs::Header &header)
+void fromPCL(const pcl_std_msgs::PCLHeader &pcl_header, std_msgs::Header &header)
 {
     header.stamp.fromNSec(pcl_header.stamp * 1e3);  // Convert from us to ns
     header.seq = pcl_header.seq;
     header.frame_id = pcl_header.frame_id;
 }
 
-void fromHeaderToPCLHeader(const std_msgs::Header &header, pcl_std_msgs::PCLHeader &pcl_header)
+void toPCL(const std_msgs::Header &header, pcl_std_msgs::PCLHeader &pcl_header)
 {
     pcl_header.stamp = header.stamp.toNSec() / 1e3;  // Convert from ns to us
     pcl_header.seq = header.seq;
@@ -67,9 +67,9 @@ void fromHeaderToPCLHeader(const std_msgs::Header &header, pcl_std_msgs::PCLHead
 
 /** PCLImage <=> Image **/
 
-void fromPCLImageToImage(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs::Image &image)
+void fromPCL(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs::Image &image)
 {
-    fromPCLHeaderToHeader(pcl_image.header, image.header);
+    fromPCL(pcl_image.header, image.header);
     image.height = pcl_image.height;
     image.width = pcl_image.width;
     image.encoding = pcl_image.encoding;
@@ -78,9 +78,9 @@ void fromPCLImageToImage(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs
     image.data = pcl_image.data;
 }
 
-void fromImageToPCLImage(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLImage &pcl_image)
+void toPCL(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLImage &pcl_image)
 {
-    fromHeaderToPCLHeader(image.header, pcl_image.header);
+    toPCL(image.header, pcl_image.header);
     pcl_image.height = image.height;
     pcl_image.width = image.width;
     pcl_image.encoding = image.encoding;
@@ -91,7 +91,7 @@ void fromImageToPCLImage(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLIm
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
-void fromPCLPointFieldToPointField(const pcl_sensor_msgs::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
+void fromPCL(const pcl_sensor_msgs::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
 {
     pf.name = pcl_pf.name;
     pf.offset = pcl_pf.offset;
@@ -99,7 +99,7 @@ void fromPCLPointFieldToPointField(const pcl_sensor_msgs::PCLPointField &pcl_pf,
     pf.count = pcl_pf.count;
 }
 
-void fromPointFieldToPCLPointField(const sensor_msgs::PointField &pf, pcl_sensor_msgs::PCLPointField &pcl_pf)
+void toPCL(const sensor_msgs::PointField &pf, pcl_sensor_msgs::PCLPointField &pcl_pf)
 {
     pcl_pf.name = pf.name;
     pcl_pf.offset = pf.offset;
@@ -109,16 +109,16 @@ void fromPointFieldToPCLPointField(const sensor_msgs::PointField &pf, pcl_sensor
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
-void fromPCLPointCloud2ToPointCloud2(const pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
+void fromPCL(const pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
 {
-    fromPCLHeaderToHeader(pcl_pc2.header, pc2.header);
+    fromPCL(pcl_pc2.header, pc2.header);
     pc2.height = pcl_pc2.height;
     pc2.width = pcl_pc2.width;
     pc2.fields.resize(pcl_pc2.fields.size());
     std::vector<pcl_sensor_msgs::PCLPointField>::const_iterator it = pcl_pc2.fields.begin();
     int i = 0;
     for(; it != pcl_pc2.fields.end(); ++it, ++i) {
-        fromPCLPointFieldToPointField(*(it), pc2.fields[i]);
+        fromPCL(*(it), pc2.fields[i]);
     }
     pc2.is_bigendian = pcl_pc2.is_bigendian;
     pc2.point_step = pcl_pc2.point_step;
@@ -127,16 +127,16 @@ void fromPCLPointCloud2ToPointCloud2(const pcl_sensor_msgs::PCLPointCloud2 &pcl_
     pc2.is_dense = pcl_pc2.is_dense;
 }
 
-void fromPointCloud2ToPCLPointCloud2(const sensor_msgs::PointCloud2 &pc2, pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2)
+void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2)
 {
-    fromHeaderToPCLHeader(pc2.header, pcl_pc2.header);
+    toPCL(pc2.header, pcl_pc2.header);
     pcl_pc2.height = pc2.height;
     pcl_pc2.width = pc2.width;
     pcl_pc2.fields.resize(pc2.fields.size());
     std::vector<sensor_msgs::PointField>::const_iterator it = pc2.fields.begin();
     int i = 0;
     for(; it != pc2.fields.end(); ++it, ++i) {
-        fromPointFieldToPCLPointField(*(it), pcl_pc2.fields[i]);
+        toPCL(*(it), pcl_pc2.fields[i]);
     }
     pcl_pc2.is_bigendian = pc2.is_bigendian;
     pcl_pc2.point_step = pc2.point_step;

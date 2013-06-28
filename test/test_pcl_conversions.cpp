@@ -61,10 +61,10 @@ void test_image(T &image) {
 }
 
 TEST_F(PCLConversionTests, imageConversion) {
-  pcl_conversions::fromPCLImageToImage(pcl_image, image);
+  pcl_conversions::fromPCL(pcl_image, image);
   test_image(image);
   pcl_sensor_msgs::PCLImage pcl_image2;
-  pcl_conversions::fromImageToPCLImage(image, pcl_image2);
+  pcl_conversions::toPCL(image, pcl_image2);
   test_image(pcl_image2);
 }
 
@@ -91,10 +91,10 @@ void test_pc(T &pc) {
 }
 
 TEST_F(PCLConversionTests, pointcloud2Conversion) {
-  pcl_conversions::fromPCLPointCloud2ToPointCloud2(pcl_pc2, pc2);
+  pcl_conversions::fromPCL(pcl_pc2, pc2);
   test_pc(pc2);
   pcl_sensor_msgs::PCLPointCloud2 pcl_pc2_2;
-  pcl_conversions::fromPointCloud2ToPCLPointCloud2(pc2, pcl_pc2_2);
+  pcl_conversions::toPCL(pc2, pcl_pc2_2);
   test_pc(pcl_pc2_2);
 }
 
