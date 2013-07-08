@@ -54,6 +54,11 @@
 #include <pcl/PCLPointCloud2.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <pcl/io/pcd_io.h>
+
+#include <Eigen/StdVector>
+#include <Eigen/Geometry>
+
 namespace pcl_conversions {
 
 /** PCLHeader <=> Header **/
@@ -177,5 +182,231 @@ void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
 }
 
 } // namespace pcl_conversions
+
+namespace pcl {
+
+/** Overload pcl::getFieldIndex **/
+inline int getFieldIndex(const sensor_msgs::PointCloud2 &cloud, const std::string &field_name)
+{
+    // Get the index we need
+    for (size_t d = 0; d < cloud.fields.size(); ++d) {
+        if (cloud.fields[d].name == field_name) {
+            return (static_cast<int>(d));
+        }
+    }
+    return (-1);
+
+}
+
+/** Overload pcl::getFieldsList **/
+inline std::string getFieldsList(const sensor_msgs::PointCloud2 &cloud)
+{
+    std::string result;
+    for (size_t i = 0; i < cloud.fields.size () - 1; ++i) {
+        result += cloud.fields[i].name + " ";
+    }
+    result += cloud.fields[cloud.fields.size () - 1].name;
+    return (result);
+}
+
+/** Provide pcl::toROSMsg **/
+void toROSMsg(const sensor_msgs::PointCloud2 &cloud, sensor_msgs::Image &image)
+{
+    pcl::PCLPointCloud2 pcl_cloud;
+    pcl_conversions::toPCL(cloud, pcl_cloud);
+    pcl::PCLImage pcl_image;
+    pcl::toPCLPointCloud2(pcl_cloud, pcl_image);
+    pcl_conversions::fromPCL(pcl_image, image);
+}
+
+/** Overload pcl::createMapping **/
+template<typename PointT>
+void createMapping(const std::vector<sensor_msgs::PointField>& msg_fields, MsgFieldMap& field_map)
+{
+    std::vector<pcl::PCLPointField> pcl_msg_fields;
+    pcl_conversions::toPCL(msg_fields, pcl_msg_fields);
+    return createMapping<PointT>(pcl_msg_fields, field_map);
+}
+
+namespace io {
+
+/** Overload pcl::io::savePCDFile **/
+inline int 
+savePCDFile(const std::string &file_name, const sensor_msgs::PointCloud2 &cloud,
+            const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (), 
+            const Eigen::Quaternionf &orientation = Eigen::Quaternionf::Identity (),
+            const bool binary_mode = false)
+{
+    pcl::PCLPointCloud2 pcl_cloud;
+    pcl_conversions::toPCL(cloud, pcl_cloud);
+    return pcl::io::savePCDFile(file_name, pcl_cloud, origin, orientation, binary_mode);
+}
+
+/** Overload pcl::io::loadPCDFile **/
+inline int loadPCDFile(const std::string &file_name, sensor_msgs::PointCloud2 &cloud)
+{
+    pcl::PCLPointCloud2 pcl_cloud;
+    int ret = pcl::io::loadPCDFile(file_name, pcl_cloud);
+    pcl_conversions::fromPCL(pcl_cloud, cloud);
+    return ret;
+}
+
+} // namespace io
+
+} // namespace pcl
+
+/*
+ * Provide a custom serialization for pcl::PCLPointCloud2
+ */
+
+namespace ros 
+{
+  // In ROS 1.3.1+, we can specialize the functor used to create PointCloud<T> objects
+  // on the subscriber side. This allows us to generate the mapping between message
+  // data and object fields only once and reuse it.
+#if ROS_VERSION_MINIMUM(1, 3, 1)
+  template<>
+  struct DefaultMessageCreator<pcl::PCLPointCloud2>
+  { 
+    boost::shared_ptr<pcl::PCLPointCloud2> operator() ()
+    {
+      boost::shared_ptr<pcl::PCLPointCloud2> msg(new pcl::PCLPointCloud2());
+      return msg;
+    }
+  };
+#endif
+
+  namespace message_traits 
+  {
+    template<>
+    struct MD5Sum<pcl::PCLPointCloud2>
+    {
+      static const char* value() { return MD5Sum<sensor_msgs::PointCloud2>::value(); }
+      static const char* value(const pcl::PCLPointCloud2&) { return value(); }
+
+      static const uint64_t static_value1 = MD5Sum<sensor_msgs::PointCloud2>::static_value1;
+      static const uint64_t static_value2 = MD5Sum<sensor_msgs::PointCloud2>::static_value2;
+      
+      // If the definition of sensor_msgs/PointCloud2 changes, we'll get a compile error here.
+      ROS_STATIC_ASSERT(static_value1 == 0x1158d486dd51d683ULL);
+      ROS_STATIC_ASSERT(static_value2 == 0xce2f1be655c3c181ULL);
+    };
+
+    template<>
+    struct DataType<pcl::PCLPointCloud2>
+    {
+      static const char* value() { return DataType<sensor_msgs::PointCloud2>::value(); }
+      static const char* value(const pcl::PCLPointCloud2&) { return value(); }
+    };
+
+    template<>
+    struct Definition<pcl::PCLPointCloud2>
+    {
+      static const char* value() { return Definition<sensor_msgs::PointCloud2>::value(); }
+      static const char* value(const pcl::PCLPointCloud2&) { return value(); }
+    };
+
+    template<> struct HasHeader<pcl::PCLPointCloud2> : TrueType {};
+  } // namespace ros::message_traits
+
+  namespace serialization 
+  {
+    template<>
+    struct Serializer<pcl::PCLPointCloud2>
+    {
+      template<typename Stream>
+      inline static void write(Stream& stream, const pcl::PCLPointCloud2& m)
+      {
+        std_msgs::Header header;
+        pcl_conversions::fromPCL(m.header, header);
+        stream.next(header);
+        stream.next(m.height);
+        stream.next(m.width);
+        std::vector<sensor_msgs::PointField> pfs;
+        pcl_conversions::fromPCL(m.fields, pfs);
+        stream.next(pfs);
+        stream.next(m.is_bigendian);
+        stream.next(m.point_step);
+        stream.next(m.row_step);
+        stream.next(m.data);
+        stream.next(m.is_dense);
+      }
+
+      template<typename Stream>
+      inline static void read(Stream& stream, pcl::PCLPointCloud2& m)
+      {
+        std_msgs::Header header;
+        stream.next(header);
+        pcl_conversions::toPCL(header, m.header);
+        stream.next(m.height);
+        stream.next(m.width);
+        std::vector<sensor_msgs::PointField> pfs;
+        stream.next(pfs);
+        pcl_conversions::toPCL(pfs, m.fields);
+        stream.next(m.fields);
+        stream.next(m.is_bigendian);
+        stream.next(m.point_step);
+        stream.next(m.row_step);
+        stream.next(m.data);
+        stream.next(m.is_dense);
+      }
+
+      inline static uint32_t serializedLength(const pcl::PCLPointCloud2& m)
+      {
+        uint32_t length = 0;
+
+        std_msgs::Header header;
+        pcl_conversions::fromPCL(m.header, header);
+        length += serializationLength(header);
+        length += 4; // height
+        length += 4; // width
+        std::vector<sensor_msgs::PointField> pfs;
+        pcl_conversions::fromPCL(m.fields, pfs);
+        length += serializationLength(pfs); // fields
+        length += 1; // is_bigendian
+        length += 4; // point_step
+        length += 4; // row_step
+        length += 4; // data's size
+        length += m.data.size() * sizeof(pcl::uint8_t);
+        length += 1; // is_dense
+
+        return length;
+      }
+    };
+
+    template<>
+    struct Serializer<pcl::PCLHeader>
+    {
+      template<typename Stream>
+      inline static void write(Stream& stream, const pcl::PCLHeader& m)
+      {
+        std_msgs::Header header;
+        pcl_conversions::fromPCL(m, header);
+        stream.next(header);
+      }
+
+      template<typename Stream>
+      inline static void read(Stream& stream, pcl::PCLHeader& m)
+      {
+        std_msgs::Header header;
+        stream.next(header);
+        pcl_conversions::toPCL(header, m);
+      }
+
+      inline static uint32_t serializedLength(const pcl::PCLHeader& m)
+      {
+        uint32_t length = 0;
+
+        std_msgs::Header header;
+        pcl_conversions::fromPCL(m, header);
+        length += serializationLength(header);
+
+        return length;
+      }
+    };
+  } // namespace ros::serialization
+
+} // namespace ros
+
 
 #endif
