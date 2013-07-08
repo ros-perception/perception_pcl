@@ -204,25 +204,25 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                 cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                 cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), fromPCL(cloud_surface->header).stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
                  indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
     else
       NODELET_DEBUG ("[input_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str ());
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), fromPCL(cloud_surface->header).stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str ());
 
   else
     if (indices)
       NODELET_DEBUG ("[input_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
                      indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
     else
-      NODELET_DEBUG ("[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", cloud->width * cloud->height, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+      NODELET_DEBUG ("[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
   ///
 
 
@@ -394,9 +394,9 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                      getName ().c_str (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), fromPCL(cloud_surface->header).stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
                      indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
     else
       NODELET_DEBUG ("[%s::input_normals_surface_indices_callback]\n"
@@ -404,9 +404,9 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                      getName ().c_str (), 
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), fromPCL(cloud_surface->header).stamp.toSec (), cloud_surface->header.frame_id.c_str (), pnh_->resolveName ("surface").c_str (),
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
   else
     if (indices)
       NODELET_DEBUG ("[%s::input_normals_surface_indices_callback]\n"
@@ -414,16 +414,16 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                      getName ().c_str (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
                      indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
     else
       NODELET_DEBUG ("[%s::input_normals_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                      getName ().c_str (), 
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
   ///
 
   if ((int)(cloud->width * cloud->height) < k_)
