@@ -33,6 +33,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef PCL_CONVERSIONS_H__
+#define PCL_CONVERSIONS_H__
+
 #include <vector>
 
 #include <pcl_std_msgs/PCLHeader.h>
@@ -146,3 +149,5 @@ void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl_sensor_msgs::PCLPointCloud2 
 }
 
 } // namespace pcl_conversions
+
+#endif
