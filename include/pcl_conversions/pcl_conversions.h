@@ -38,30 +38,34 @@
 
 #include <vector>
 
-#include <pcl_std_msgs/PCLHeader.h>
+#include <ros/ros.h>
+
+#include <pcl/conversions.h>
+
+#include <pcl/PCLHeader.h>
 #include <std_msgs/Header.h>
 
-#include <pcl_sensor_msgs/PCLImage.h>
+#include <pcl/PCLImage.h>
 #include <sensor_msgs/Image.h>
 
-#include <pcl_sensor_msgs/PCLPointField.h>
+#include <pcl/PCLPointField.h>
 #include <sensor_msgs/PointField.h>
 
-#include <pcl_sensor_msgs/PCLPointCloud2.h>
+#include <pcl/PCLPointCloud2.h>
 #include <sensor_msgs/PointCloud2.h>
 
 namespace pcl_conversions {
 
 /** PCLHeader <=> Header **/
 
-void fromPCL(const pcl_std_msgs::PCLHeader &pcl_header, std_msgs::Header &header)
+void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::Header &header)
 {
     header.stamp.fromNSec(pcl_header.stamp * 1e3);  // Convert from us to ns
     header.seq = pcl_header.seq;
     header.frame_id = pcl_header.frame_id;
 }
 
-void toPCL(const std_msgs::Header &header, pcl_std_msgs::PCLHeader &pcl_header)
+void toPCL(const std_msgs::Header &header, pcl::PCLHeader &pcl_header)
 {
     pcl_header.stamp = header.stamp.toNSec() / 1e3;  // Convert from ns to us
     pcl_header.seq = header.seq;
@@ -70,7 +74,7 @@ void toPCL(const std_msgs::Header &header, pcl_std_msgs::PCLHeader &pcl_header)
 
 /** PCLImage <=> Image **/
 
-void fromPCL(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs::Image &image)
+void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
 {
     fromPCL(pcl_image.header, image.header);
     image.height = pcl_image.height;
@@ -81,7 +85,7 @@ void fromPCL(const pcl_sensor_msgs::PCLImage &pcl_image, sensor_msgs::Image &ima
     image.data = pcl_image.data;
 }
 
-void toPCL(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLImage &pcl_image)
+void toPCL(const sensor_msgs::Image &image, pcl::PCLImage &pcl_image)
 {
     toPCL(image.header, pcl_image.header);
     pcl_image.height = image.height;
@@ -94,7 +98,7 @@ void toPCL(const sensor_msgs::Image &image, pcl_sensor_msgs::PCLImage &pcl_image
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
-void fromPCL(const pcl_sensor_msgs::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
+void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
 {
     pf.name = pcl_pf.name;
     pf.offset = pcl_pf.offset;
@@ -102,7 +106,7 @@ void fromPCL(const pcl_sensor_msgs::PCLPointField &pcl_pf, sensor_msgs::PointFie
     pf.count = pcl_pf.count;
 }
 
-void toPCL(const sensor_msgs::PointField &pf, pcl_sensor_msgs::PCLPointField &pcl_pf)
+void toPCL(const sensor_msgs::PointField &pf, pcl::PCLPointField &pcl_pf)
 {
     pcl_pf.name = pf.name;
     pcl_pf.offset = pf.offset;
@@ -112,7 +116,7 @@ void toPCL(const sensor_msgs::PointField &pf, pcl_sensor_msgs::PCLPointField &pc
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
-void fromPCL(const pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
+void fromPCL(const pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
 {
     fromPCL(pcl_pc2.header, pc2.header);
     pc2.height = pcl_pc2.height;
@@ -130,7 +134,7 @@ void fromPCL(const pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointC
     pc2.is_dense = pcl_pc2.is_dense;
 }
 
-void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl_sensor_msgs::PCLPointCloud2 &pcl_pc2)
+void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
 {
     toPCL(pc2.header, pcl_pc2.header);
     pcl_pc2.height = pc2.height;
