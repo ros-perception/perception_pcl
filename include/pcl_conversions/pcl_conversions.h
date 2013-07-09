@@ -54,6 +54,9 @@
 #include <pcl/PCLPointCloud2.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <pcl/PointIndices.h>
+#include <pcl_msgs/PointIndices.h>
+
 #include <pcl/io/pcd_io.h>
 
 #include <Eigen/StdVector>
@@ -179,6 +182,19 @@ void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
     pcl_pc2.row_step = pc2.row_step;
     pcl_pc2.data = pc2.data;
     pcl_pc2.is_dense = pc2.is_dense;
+}
+
+/** pcl::PointIndices <=> pcl_msgs::PointIndices **/
+void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::PointIndices &pi)
+{
+  fromPCL(pcl_pi.header, pi.header);
+  pi.indices = pcl_pi.indices;
+}
+
+void toPCL(const pcl_msgs::PointIndices &pi, pcl::PointIndices &pcl_pi)
+{
+  toPCL(pi.header, pcl_pi.header);
+  pcl_pi.indices = pi.indices;
 }
 
 } // namespace pcl_conversions
