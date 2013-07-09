@@ -93,7 +93,7 @@ namespace pcl_ros
       input_callback (const PointCloudConstPtr &input)
       {
         PointIndices cloud;
-        cloud.header.stamp = input->header.stamp;
+        cloud.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
         nf_.add (boost::make_shared<PointIndices> (cloud));
       }
 

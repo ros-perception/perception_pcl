@@ -40,6 +40,11 @@
 #include "pcl_ros/segmentation/extract_polygonal_prism_data.h"
 #include <pcl/io/io.h>
 
+#include <pcl_conversions/pcl_conversions.h>
+
+using pcl_conversions::fromPCL;
+using pcl_conversions::toPCL;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::ExtractPolygonalPrismData::onInit ()
@@ -120,14 +125,14 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
     return;
 
   // Copy the header (stamp + frame_id)
-  pcl::PointIndices inliers;
-  inliers.header = cloud->header;
+  pcl_msgs::PointIndices inliers;
+  inliers.header = fromPCL(cloud->header);
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud) || !isValid (hull, "planar_hull"))
   {
     NODELET_ERROR ("[%s::input_hull_indices_callback] Invalid input!", getName ().c_str ());
-    pub_output_.publish (boost::make_shared<const pcl::PointIndices> (inliers));
+    pub_output_.publish (boost::make_shared<const pcl_msgs::PointIndices> (inliers));
     return;
   }
   // If indices are given, check if they are valid
@@ -145,16 +150,16 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), hull->header.stamp.toSec (), hull->header.frame_id.c_str (), pnh_->resolveName ("planar_hull").c_str (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.toSec (), hull->header.frame_id.c_str (), pnh_->resolveName ("planar_hull").c_str (),
                    indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
   else
     NODELET_DEBUG ("[%s::input_indices_hull_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), hull->header.stamp.toSec (), hull->header.frame_id.c_str (), pnh_->resolveName ("planar_hull").c_str ());
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.toSec (), hull->header.frame_id.c_str (), pnh_->resolveName ("planar_hull").c_str ());
   ///
 
   if (cloud->header.frame_id != hull->header.frame_id)
@@ -180,10 +185,14 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   impl_.setIndices (indices_ptr);
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
-  if (!cloud->points.empty ())
-    impl_.segment (inliers);
+  if (!cloud->points.empty ()) {
+    pcl::PointIndices pcl_inliers;
+    toPCL(inliers, pcl_inliers);
+    impl_.segment (pcl_inliers);
+    fromPCL(pcl_inliers, inliers);
+  }
   // Enforce that the TF frame and the timestamp are copied
-  inliers.header = cloud->header;
+  inliers.header = fromPCL(cloud->header);
   pub_output_.publish (boost::make_shared<const PointIndices> (inliers));
   NODELET_DEBUG ("[%s::input_hull_callback] Publishing %zu indices.", getName ().c_str (), inliers.indices.size ());
 }
