@@ -66,6 +66,7 @@ namespace pcl_conversions {
 
 /** PCLHeader <=> Header **/
 
+inline
 void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::Header &header)
 {
     header.stamp.fromNSec(pcl_header.stamp * 1e3);  // Convert from us to ns
@@ -73,6 +74,7 @@ void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::Header &header)
     header.frame_id = pcl_header.frame_id;
 }
 
+inline
 void toPCL(const std_msgs::Header &header, pcl::PCLHeader &pcl_header)
 {
     pcl_header.stamp = header.stamp.toNSec() / 1e3;  // Convert from ns to us
@@ -80,6 +82,7 @@ void toPCL(const std_msgs::Header &header, pcl::PCLHeader &pcl_header)
     pcl_header.frame_id = header.frame_id;
 }
 
+inline
 std_msgs::Header fromPCL(const pcl::PCLHeader &pcl_header)
 {
     std_msgs::Header header;
@@ -87,6 +90,7 @@ std_msgs::Header fromPCL(const pcl::PCLHeader &pcl_header)
     return header;
 }
 
+inline
 pcl::PCLHeader toPCL(const std_msgs::Header &header)
 {
     pcl::PCLHeader pcl_header;
@@ -96,6 +100,7 @@ pcl::PCLHeader toPCL(const std_msgs::Header &header)
 
 /** PCLImage <=> Image **/
 
+inline
 void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
 {
     fromPCL(pcl_image.header, image.header);
@@ -107,6 +112,7 @@ void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
     image.data = pcl_image.data;
 }
 
+inline
 void toPCL(const sensor_msgs::Image &image, pcl::PCLImage &pcl_image)
 {
     toPCL(image.header, pcl_image.header);
@@ -120,6 +126,7 @@ void toPCL(const sensor_msgs::Image &image, pcl::PCLImage &pcl_image)
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
+inline
 void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
 {
     pf.name = pcl_pf.name;
@@ -128,6 +135,7 @@ void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
     pf.count = pcl_pf.count;
 }
 
+inline
 void fromPCL(const std::vector<pcl::PCLPointField> &pcl_pfs, std::vector<sensor_msgs::PointField> &pfs)
 {
     pfs.resize(pcl_pfs.size());
@@ -138,6 +146,7 @@ void fromPCL(const std::vector<pcl::PCLPointField> &pcl_pfs, std::vector<sensor_
     }
 }
 
+inline
 void toPCL(const sensor_msgs::PointField &pf, pcl::PCLPointField &pcl_pf)
 {
     pcl_pf.name = pf.name;
@@ -146,6 +155,7 @@ void toPCL(const sensor_msgs::PointField &pf, pcl::PCLPointField &pcl_pf)
     pcl_pf.count = pf.count;
 }
 
+inline
 void toPCL(const std::vector<sensor_msgs::PointField> &pfs, std::vector<pcl::PCLPointField> &pcl_pfs)
 {
     pcl_pfs.resize(pfs.size());
@@ -158,6 +168,7 @@ void toPCL(const std::vector<sensor_msgs::PointField> &pfs, std::vector<pcl::PCL
 
 /** PCLPointCloud2 <=> PointCloud2 **/
 
+inline
 void fromPCL(const pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
 {
     fromPCL(pcl_pc2.header, pc2.header);
@@ -171,6 +182,7 @@ void fromPCL(const pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::PointCloud2 &pc2)
     pc2.is_dense = pcl_pc2.is_dense;
 }
 
+inline
 void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
 {
     toPCL(pc2.header, pcl_pc2.header);
@@ -185,12 +197,15 @@ void toPCL(const sensor_msgs::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
 }
 
 /** pcl::PointIndices <=> pcl_msgs::PointIndices **/
+
+inline
 void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::PointIndices &pi)
 {
   fromPCL(pcl_pi.header, pi.header);
   pi.indices = pcl_pi.indices;
 }
 
+inline
 void toPCL(const pcl_msgs::PointIndices &pi, pcl::PointIndices &pcl_pi)
 {
   toPCL(pi.header, pcl_pi.header);
@@ -226,6 +241,8 @@ inline std::string getFieldsList(const sensor_msgs::PointCloud2 &cloud)
 }
 
 /** Provide pcl::toROSMsg **/
+
+inline
 void toROSMsg(const sensor_msgs::PointCloud2 &cloud, sensor_msgs::Image &image)
 {
     pcl::PCLPointCloud2 pcl_cloud;
@@ -425,4 +442,4 @@ namespace ros
 } // namespace ros
 
 
-#endif
+#endif /* PCL_CONVERSIONS_H__ */
