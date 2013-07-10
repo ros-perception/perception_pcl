@@ -472,7 +472,34 @@ namespace pcl {
     pcl_conversions::moveFromPCL(pcl_image, image);
   }
 
+  /** Provide to/fromROSMsg for sensor_msgs::PointCloud2 <=> pcl::PointCloud<T> **/
+
+  template<typename T>
+  void toROSMsg(const pcl::PointCloud<T> &pcl_cloud, sensor_msgs::PointCloud2 &cloud)
+  {
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+    pcl_conversions::moveFromPCL(pcl_pc2, cloud);
+  }
+
+  template<typename T>
+  void fromROSMsg(const sensor_msgs::PointCloud2 &cloud, pcl::PointCloud<T> &pcl_cloud)
+  {
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(cloud, pcl_pc2);
+    pcl::toPCLPointCloud2(pcl_cloud, cloud);
+  }
+
+  template<typename T>
+  void moveFromROSMsg(sensor_msgs::PointCloud2 &cloud, pcl::PointCloud<T> &pcl_cloud)
+  {
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::moveToPCL(cloud, pcl_pc2);
+    pcl::toPCLPointCloud2(pcl_cloud, cloud);
+  }
+
   /** Overload pcl::createMapping **/
+
   template<typename PointT>
   void createMapping(const std::vector<sensor_msgs::PointField>& msg_fields, MsgFieldMap& field_map)
   {
@@ -484,6 +511,7 @@ namespace pcl {
   namespace io {
 
     /** Overload pcl::io::savePCDFile **/
+
     inline int 
     savePCDFile(const std::string &file_name, const sensor_msgs::PointCloud2 &cloud,
                 const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (), 
@@ -507,6 +535,7 @@ namespace pcl {
     }
 
     /** Overload pcl::io::loadPCDFile **/
+
     inline int loadPCDFile(const std::string &file_name, sensor_msgs::PointCloud2 &cloud)
     {
       pcl::PCLPointCloud2 pcl_cloud;
