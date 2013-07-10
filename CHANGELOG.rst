@@ -2,8 +2,8 @@
 Changelog for package pcl_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2013-07-09)
+------------------
 * Generate messages into the pcl_msgs namespace rather than the pcl namespace
 
 0.0.3 (2012-12-15)
