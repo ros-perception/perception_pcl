@@ -2,6 +2,10 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2013-07-10)
+------------------
+* Add missing EIGEN define which caused failures on the farm
+
 1.1.0 (2013-07-09)
 ------------------
 * Add missing include in one of the installed headers

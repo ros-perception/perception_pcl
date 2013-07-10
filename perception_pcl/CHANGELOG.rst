@@ -2,9 +2,13 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2013-07-10)
+------------------
+* No changes
+
 1.1.0 (2013-07-09)
 ------------------
-* Fixes from converting from pcl-1.7, incomplete
+* No changes
 
 1.0.34 (2013-05-21)
 -------------------
