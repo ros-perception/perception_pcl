@@ -37,7 +37,14 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
+#include <pcl/PointIndices.h>
 #include "pcl_ros/segmentation/extract_clusters.h"
+
+#include <pcl_conversions/pcl_conversions.h>
+
+using pcl_conversions::fromPCL;
+using pcl_conversions::moveFromPCL;
+using pcl_conversions::toPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -158,15 +165,18 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
   }
 
   /// DEBUG
-  if (indices)
+  if (indices) {
+    std_msgs::Header cloud_header = fromPCL(cloud->header);
+    std_msgs::Header indices_header = indices->header;
     NODELET_DEBUG ("[%s::input_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
-  else
-    NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud_header.stamp.toSec (), cloud_header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   indices->indices.size (), indices_header.stamp.toSec (), indices_header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
+  } else {
+    NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+  }
   ///
 
   IndicesPtr indices_ptr;
@@ -176,7 +186,7 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
   impl_.setInputCloud (cloud);
   impl_.setIndices (indices_ptr);
 
-  std::vector<PointIndices> clusters;
+  std::vector<pcl::PointIndices> clusters;
   impl_.extract (clusters);
 
   if (publish_indices_)
@@ -186,8 +196,10 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       if ((int)i >= max_clusters_)
         break;
       // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
-      clusters[i].header.stamp += ros::Duration (i * 0.001);
-      pub_output_.publish (boost::make_shared<const PointIndices> (clusters[i]));
+      pcl_msgs::PointIndices ros_pi;
+      moveFromPCL(clusters[i], ros_pi);
+      ros_pi.header.stamp += ros::Duration (i * 0.001);
+      pub_output_.publish (ros_pi);
     }
 
     NODELET_DEBUG ("[segmentAndPublish] Published %zu clusters (PointIndices) on topic %s", clusters.size (), pnh_->resolveName ("output").c_str ());
@@ -204,11 +216,13 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       //PointCloud output_blob;     // Convert from the templated output to the PointCloud blob
       //pcl::toROSMsg (output, output_blob);
       // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
-      output.header.stamp += ros::Duration (i * 0.001);
+      std_msgs::Header header = fromPCL(output.header);
+      header.stamp += ros::Duration (i * 0.001);
+      toPCL(header, output.header);
       // Publish a Boost shared ptr const data
       pub_output_.publish (output.makeShared ());
       NODELET_DEBUG ("[segmentAndPublish] Published cluster %zu (with %zu values and stamp %f) on topic %s",
-                     i, clusters[i].indices.size (), output.header.stamp.toSec (), pnh_->resolveName ("output").c_str ());
+                     i, clusters[i].indices.size (), header.stamp.toSec (), pnh_->resolveName ("output").c_str ());
     }
   }
 }

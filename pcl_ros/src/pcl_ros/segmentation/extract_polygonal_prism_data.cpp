@@ -42,8 +42,8 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
-using pcl_conversions::fromPCL;
-using pcl_conversions::toPCL;
+using pcl_conversions::moveFromPCL;
+using pcl_conversions::moveToPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -132,14 +132,14 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   if (!isValid (cloud) || !isValid (hull, "planar_hull"))
   {
     NODELET_ERROR ("[%s::input_hull_indices_callback] Invalid input!", getName ().c_str ());
-    pub_output_.publish (boost::make_shared<const pcl_msgs::PointIndices> (inliers));
+    pub_output_.publish (inliers);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
     NODELET_ERROR ("[%s::input_hull_indices_callback] Invalid indices!", getName ().c_str ());
-    pub_output_.publish (boost::make_shared<const pcl::PointIndices> (inliers));
+    pub_output_.publish (inliers);
     return;
   }
 
@@ -169,7 +169,7 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
     if (!pcl_ros::transformPointCloud (cloud->header.frame_id, *hull, planar_hull, tf_listener_))
     {
       // Publish empty before return
-      pub_output_.publish (boost::make_shared<const pcl::PointIndices> (inliers));
+      pub_output_.publish (inliers);
       return;
     }
     impl_.setInputPlanarHull (planar_hull.makeShared ());
@@ -187,13 +187,13 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty ()) {
     pcl::PointIndices pcl_inliers;
-    toPCL(inliers, pcl_inliers);
+    moveToPCL(inliers, pcl_inliers);
     impl_.segment (pcl_inliers);
-    fromPCL(pcl_inliers, inliers);
+    moveFromPCL(pcl_inliers, inliers);
   }
   // Enforce that the TF frame and the timestamp are copied
   inliers.header = fromPCL(cloud->header);
-  pub_output_.publish (boost::make_shared<const PointIndices> (inliers));
+  pub_output_.publish (inliers);
   NODELET_DEBUG ("[%s::input_hull_callback] Publishing %zu indices.", getName ().c_str (), inliers.indices.size ());
 }
 

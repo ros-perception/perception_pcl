@@ -112,7 +112,7 @@ namespace pcl_ros
 
       /** \brief Null passthrough filter, used for pushing empty elements in the
         * synchronizer */
-      message_filters::PassThrough<PointIndices> nf_pi_;
+      message_filters::PassThrough<pcl_msgs::PointIndices> nf_pi_;
 
       /** \brief Nodelet initialization routine. */
       virtual void onInit ();
@@ -149,7 +149,7 @@ namespace pcl_ros
       inline void
       input_callback (const PointCloudConstPtr &input)
       {
-        indices_.header = input->header;
+        indices_.header = fromPCL(input->header);
         PointIndicesConstPtr indices;
         indices.reset (new PointIndices (indices_));
         nf_pi_.add (indices);
@@ -220,7 +220,7 @@ namespace pcl_ros
       input_callback (const PointCloudConstPtr &cloud)
       {
         PointIndices indices;
-        indices.header.stamp = cloud->header.stamp;
+        indices.header.stamp = fromPCL(cloud->header).stamp;
         nf_.add (boost::make_shared<PointIndices> (indices));
       }
 
@@ -241,7 +241,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl::ModelCoefficientsConstPtr &model);
+      void axis_callback (const pcl_msgs::ModelCoefficientsConstPtr &model);
 
       /** \brief Dynamic reconfigure callback
         * \param config the config object

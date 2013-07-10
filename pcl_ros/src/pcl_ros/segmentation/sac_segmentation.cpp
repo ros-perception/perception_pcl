@@ -39,6 +39,10 @@
 #include "pcl_ros/segmentation/sac_segmentation.h"
 #include <pcl/io/io.h>
 
+#include <pcl_conversions/pcl_conversions.h>
+
+using pcl_conversions::fromPCL;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SACSegmentation::onInit ()
@@ -249,25 +253,25 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   if (pub_indices_.getNumSubscribers () <= 0 && pub_model_.getNumSubscribers () <= 0)
     return;
 
-  PointIndices inliers;
-  ModelCoefficients model;
+  pcl_msgs::PointIndices inliers;
+  pcl_msgs::ModelCoefficients model;
   // Enforce that the TF frame and the timestamp are copied
-  inliers.header = model.header = cloud->header;
+  inliers.header = model.header = fromPCL(cloud->header);
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud)) 
   {
     NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
-    pub_indices_.publish (boost::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (boost::make_shared<const ModelCoefficients> (model));
+    pub_indices_.publish (inliers);
+    pub_model_.publish (model);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
     NODELET_ERROR ("[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
-    pub_indices_.publish (boost::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (boost::make_shared<const ModelCoefficients> (model));
+    pub_indices_.publish (inliers);
+    pub_model_.publish (model);
     return;
   }
 
@@ -277,11 +281,11 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
                    indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
   else
     NODELET_DEBUG ("[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", 
-                   getName ().c_str (), cloud->width * cloud->height, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+                   getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
   ///
 
   // Check whether the user has given a different input TF frame
@@ -308,8 +312,15 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   impl_.setIndices (indices_ptr);
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
-  if (!cloud->points.empty ())
-    impl_.segment (inliers, model);
+  if (!cloud->points.empty ()) {
+    pcl::PointIndices pcl_inliers;
+    pcl::ModelCoefficients pcl_model;
+    pcl_conversions::moveToPCL(inliers, pcl_inliers);
+    pcl_conversions::moveToPCL(model, pcl_model);
+    impl_.segment (pcl_inliers, pcl_model);
+    pcl_conversions::moveFromPCL(pcl_inliers, inliers);
+    pcl_conversions::moveFromPCL(pcl_model, model);
+  }
 
   // Probably need to transform the model of the plane here
 
@@ -453,7 +464,7 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl::ModelCoefficientsConstPtr &model)
+pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::ModelCoefficientsConstPtr &model)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -551,7 +562,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   PointIndices inliers;
   ModelCoefficients model;
   // Enforce that the TF frame and the timestamp are copied
-  inliers.header = model.header = cloud->header;
+  inliers.header = model.header = fromPCL(cloud->header);
 
   if (impl_.getModelType () < 0)
   {
@@ -584,16 +595,16 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str (),
                    indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
   else
     NODELET_DEBUG ("[%s::input_normals_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.toSec (), cloud_normals->header.frame_id.c_str (), pnh_->resolveName ("normals").c_str ());
   ///
 
 
@@ -618,8 +629,15 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   impl_.setIndices (indices_ptr);
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
-  if (!cloud->points.empty ())
-    impl_.segment (inliers, model);
+  if (!cloud->points.empty ()) {
+    pcl::PointIndices pcl_inliers;
+    pcl::ModelCoefficients pcl_model;
+    pcl_conversions::moveToPCL(inliers, pcl_inliers);
+    pcl_conversions::moveToPCL(model, pcl_model);
+    impl_.segment (pcl_inliers, pcl_model);
+    pcl_conversions::moveFromPCL(pcl_inliers, inliers);
+    pcl_conversions::moveFromPCL(pcl_model, model);
+  }
 
   // Check if we have enough inliers, clear inliers + model if not
   if ((int)inliers.indices.size () <= min_inliers_)

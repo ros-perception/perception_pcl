@@ -45,6 +45,8 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <sensor_msgs/PointCloud2.h>
+
 namespace pcl_ros
 {
   /** \brief @b PointCloudConcatenateFieldsSynchronizer is a special form of data synchronizer: it listens for a set of 

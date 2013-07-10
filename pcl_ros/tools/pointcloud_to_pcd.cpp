@@ -37,10 +37,15 @@
 
 // ROS core
 #include <ros/ros.h>
+
+#include <sensor_msgs/PointCloud2.h>
+
 // PCL includes
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+
+#include <pcl_conversions/pcl_conversions.h>
 
 using namespace std;
 
@@ -67,7 +72,7 @@ class PointCloudToPCD
     ////////////////////////////////////////////////////////////////////////////////
     // Callback
     void
-      cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud)
+      cloud_cb (const pcl::PCLPointCloud2::ConstPtr& cloud)
     {
       if ((cloud->width * cloud->height) == 0)
         return;

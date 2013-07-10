@@ -120,10 +120,10 @@ void
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
                    indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("indices").c_str ());
   else
-    NODELET_DEBUG ("[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
+    NODELET_DEBUG ("[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
 
   // Reset the indices and surface pointers
   IndicesPtr indices_ptr;
@@ -140,7 +140,7 @@ void
   if (output.points.size () >= 3)
   {
     geometry_msgs::PolygonStamped poly;
-    poly.header = output.header;
+    poly.header = fromPCL(output.header);
     poly.polygon.points.resize (output.points.size ());
     // Get three consecutive points (without copying)
     pcl::Vector4fMap O = output.points[1].getVector4fMap ();
