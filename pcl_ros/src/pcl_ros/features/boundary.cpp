@@ -38,7 +38,7 @@
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/boundary.h"
 
-void 
+void
 pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
@@ -46,7 +46,7 @@ pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
   pub_output_.publish (output.makeShared ());
 }
 
-void 
+void
 pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud, 
                                              const PointCloudNConstPtr &normals,
                                              const PointCloudInConstPtr &surface,
