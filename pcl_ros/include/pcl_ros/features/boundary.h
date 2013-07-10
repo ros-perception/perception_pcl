@@ -38,6 +38,8 @@
 #ifndef PCL_ROS_BOUNDARY_H_
 #define PCL_ROS_BOUNDARY_H_
 
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
+
 #include <pcl/features/boundary.h>
 #include "pcl_ros/features/feature.h"
 
@@ -55,11 +57,11 @@ namespace pcl_ros
   {
     private:
       pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> impl_;
-      
+
       typedef pcl::PointCloud<pcl::Boundary> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
-      inline bool 
+      inline bool
       childInit (ros::NodeHandle &nh)
       {
         // Create the output publisher
@@ -71,7 +73,7 @@ namespace pcl_ros
       void emptyPublish (const PointCloudInConstPtr &cloud);
 
       /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud, 
+      void computePublish (const PointCloudInConstPtr &cloud,
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);

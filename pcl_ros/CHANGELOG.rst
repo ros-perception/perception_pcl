@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2013-07-09)
+------------------
 * Add missing include in one of the installed headers
 * Refactors to use pcl-1.7
 * Use the PointIndices from pcl_msgs
