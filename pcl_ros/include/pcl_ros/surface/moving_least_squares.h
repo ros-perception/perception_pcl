@@ -59,7 +59,7 @@ namespace pcl_ros
   class MovingLeastSquares : public PCLNodelet
   {
     typedef pcl::PointXYZ PointIn;
-    typedef pcl::Normal NormalOut;
+    typedef pcl::PointNormal NormalOut;
 
     typedef pcl::PointCloud<PointIn> PointCloudIn;
     typedef PointCloudIn::Ptr PointCloudInPtr;

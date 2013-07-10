@@ -47,7 +47,7 @@
 #include <sensor_msgs/PointCloud2.h>
 // PCL includes
 #include <pcl_msgs/PointIndices.h>
-#include <pcl/ModelCoefficients.h>
+#include <pcl_msgs/ModelCoefficients.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
@@ -82,7 +82,7 @@ namespace pcl_ros
       typedef PointIndices::Ptr PointIndicesPtr;
       typedef PointIndices::ConstPtr PointIndicesConstPtr;
 
-      typedef pcl::ModelCoefficients ModelCoefficients;
+      typedef pcl_msgs::ModelCoefficients ModelCoefficients;
       typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
       typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
 

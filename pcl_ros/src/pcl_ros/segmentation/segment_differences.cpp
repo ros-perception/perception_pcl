@@ -109,8 +109,8 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  getName ().c_str (),
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), cloud_target->header.stamp.toSec (), cloud_target->header.frame_id.c_str (), pnh_->resolveName ("target").c_str ());
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
+                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.toSec (), cloud_target->header.frame_id.c_str (), pnh_->resolveName ("target").c_str ());
 
   impl_.setInputCloud (cloud);
   impl_.setTargetCloud (cloud_target);
@@ -120,7 +120,7 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
 
   pub_output_.publish (output.makeShared ());
   NODELET_DEBUG ("[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", getName ().c_str (),
-                     output.points.size (), output.header.stamp.toSec (), pnh_->resolveName ("output").c_str ());
+                     output.points.size (), fromPCL(output.header).stamp.toSec (), pnh_->resolveName ("output").c_str ());
 }
 
 typedef pcl_ros::SegmentDifferences SegmentDifferences;
