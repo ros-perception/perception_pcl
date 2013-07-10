@@ -49,6 +49,8 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/conversions.h>
 
+#include <pcl_conversions/pcl_conversions.h>
+
 namespace pcl_ros 
 {
   class BasePublisher
