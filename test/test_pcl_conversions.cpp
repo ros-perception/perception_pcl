@@ -28,11 +28,11 @@ protected:
     pcl_pc2.is_dense = true;
     pcl_pc2.fields.resize(2);
     pcl_pc2.fields[0].name = "XYZ";
-    pcl_pc2.fields[0].datatype = pcl_sensor_msgs::PCLPointField::INT8;
+    pcl_pc2.fields[0].datatype = pcl::PCLPointField::INT8;
     pcl_pc2.fields[0].count = 3;
     pcl_pc2.fields[0].offset = 0;
     pcl_pc2.fields[1].name = "RGB";
-    pcl_pc2.fields[1].datatype = pcl_sensor_msgs::PCLPointField::INT8;
+    pcl_pc2.fields[1].datatype = pcl::PCLPointField::INT8;
     pcl_pc2.fields[1].count = 3;
     pcl_pc2.fields[1].offset = 8 * 3;
     pcl_pc2.data.resize(2);
@@ -40,10 +40,10 @@ protected:
     pcl_pc2.data[1] = 0x43;
   }
 
-  pcl_sensor_msgs::PCLImage pcl_image;
+  pcl::PCLImage pcl_image;
   sensor_msgs::Image image;
 
-  pcl_sensor_msgs::PCLPointCloud2 pcl_pc2;
+  pcl::PCLPointCloud2 pcl_pc2;
   sensor_msgs::PointCloud2 pc2;
 };
 
@@ -63,7 +63,7 @@ void test_image(T &image) {
 TEST_F(PCLConversionTests, imageConversion) {
   pcl_conversions::fromPCL(pcl_image, image);
   test_image(image);
-  pcl_sensor_msgs::PCLImage pcl_image2;
+  pcl::PCLImage pcl_image2;
   pcl_conversions::toPCL(image, pcl_image2);
   test_image(pcl_image2);
 }
@@ -78,11 +78,11 @@ void test_pc(T &pc) {
   EXPECT_TRUE(pc.is_bigendian);
   EXPECT_TRUE(pc.is_dense);
   EXPECT_EQ("XYZ", pc.fields[0].name);
-  EXPECT_EQ(pcl_sensor_msgs::PCLPointField::INT8, pc.fields[0].datatype);
+  EXPECT_EQ(pcl::PCLPointField::INT8, pc.fields[0].datatype);
   EXPECT_EQ(3, pc.fields[0].count);
   EXPECT_EQ(0, pc.fields[0].offset);
   EXPECT_EQ("RGB", pc.fields[1].name);
-  EXPECT_EQ(pcl_sensor_msgs::PCLPointField::INT8, pc.fields[1].datatype);
+  EXPECT_EQ(pcl::PCLPointField::INT8, pc.fields[1].datatype);
   EXPECT_EQ(3, pc.fields[1].count);
   EXPECT_EQ(8 * 3, pc.fields[1].offset);
   EXPECT_EQ(2, pc.data.size());
@@ -93,7 +93,7 @@ void test_pc(T &pc) {
 TEST_F(PCLConversionTests, pointcloud2Conversion) {
   pcl_conversions::fromPCL(pcl_pc2, pc2);
   test_pc(pc2);
-  pcl_sensor_msgs::PCLPointCloud2 pcl_pc2_2;
+  pcl::PCLPointCloud2 pcl_pc2_2;
   pcl_conversions::toPCL(pc2, pcl_pc2_2);
   test_pc(pcl_pc2_2);
 }

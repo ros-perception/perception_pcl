@@ -3,17 +3,13 @@ project(pcl_conversions)
 
 find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs)
 
-# This line can be removed once this is addressed:
-# https://github.com/PointCloudLibrary/pcl/issues/184
-find_package(PCL REQUIRED)
-find_package(PCL REQUIRED COMPONENTS COMMON)
+find_package(PCL REQUIRED QUIET COMPONENTS common)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_COMMON_INCLUDE_DIRS})
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${PCL_COMMON_INCLUDE_DIRS}
   CATKIN_DEPENDS sensor_msgs std_msgs
-  DEPENDS pcl
 )
 
 # Mark cpp header files for installation
