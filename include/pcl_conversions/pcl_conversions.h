@@ -512,9 +512,9 @@ namespace pcl {
 
     /** Overload pcl::io::savePCDFile **/
 
-    inline int 
+    inline int
     savePCDFile(const std::string &file_name, const sensor_msgs::PointCloud2 &cloud,
-                const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (), 
+                const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (),
                 const Eigen::Quaternionf &orientation = Eigen::Quaternionf::Identity (),
                 const bool binary_mode = false)
     {
@@ -523,9 +523,9 @@ namespace pcl {
       return pcl::io::savePCDFile(file_name, pcl_cloud, origin, orientation, binary_mode);
     }
 
-    inline int 
+    inline int
     destructiveSavePCDFile(const std::string &file_name, sensor_msgs::PointCloud2 &cloud,
-                           const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (), 
+                           const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (),
                            const Eigen::Quaternionf &orientation = Eigen::Quaternionf::Identity (),
                            const bool binary_mode = false)
     {
@@ -579,7 +579,7 @@ namespace pcl {
       PCL_ERROR ("[pcl::concatenatePointCloud] Number of fields in cloud1 (%u) != Number of fields in cloud2 (%u)\n", cloud1.fields.size (), cloud2.fields.size ());
       return (false);
     }
-    
+
     // Copy cloud1 into cloud_out
     cloud_out = cloud1;
     size_t nrpts = cloud_out.data.size ();
@@ -602,7 +602,7 @@ namespace pcl {
         if (cloud2.fields[j].name == "_")
           continue;
 
-        fields2_sizes.push_back (cloud2.fields[j].count * 
+        fields2_sizes.push_back (cloud2.fields[j].count *
                                  pcl::getFieldSize (cloud2.fields[j].datatype));
         fields2.push_back (cloud2.fields[j]);
       }
@@ -626,8 +626,8 @@ namespace pcl {
               (cloud1.fields[i].name == "rgba" && fields2[j].name == "rgb") ||
               (cloud1.fields[i].name == fields2[j].name))
           {
-            memcpy (reinterpret_cast<char*> (&cloud_out.data[nrpts + cp * cloud1.point_step + cloud1.fields[i].offset]), 
-                    reinterpret_cast<const char*> (&cloud2.data[cp * cloud2.point_step + cloud2.fields[j].offset]), 
+            memcpy (reinterpret_cast<char*> (&cloud_out.data[nrpts + cp * cloud1.point_step + cloud1.fields[i].offset]),
+                    reinterpret_cast<const char*> (&cloud2.data[cp * cloud2.point_step + cloud2.fields[j].offset]),
                     fields2_sizes[j]);
             ++i;  // increment the field size i
           }
@@ -645,11 +645,10 @@ namespace pcl {
         // Otherwise we need to make sure the names are the same
         if (cloud1.fields[i].name != cloud2.fields[i].name)
         {
-          PCL_ERROR ("[pcl::concatenatePointCloud] Name of field %d in cloud1, %s, does not match name in cloud2, %s\n", i, cloud1.fields[i].name.c_str (), cloud2.fields[i].name.c_str ());      
+          PCL_ERROR ("[pcl::concatenatePointCloud] Name of field %d in cloud1, %s, does not match name in cloud2, %s\n", i, cloud1.fields[i].name.c_str (), cloud2.fields[i].name.c_str ());
           return (false);
         }
       }
-      
       cloud_out.data.resize (nrpts + cloud2.data.size ());
       memcpy (&cloud_out.data[nrpts], &cloud2.data[0], cloud2.data.size ());
     }
@@ -658,11 +657,11 @@ namespace pcl {
 
 } // namespace pcl
 
-namespace ros 
+namespace ros
 {
   template<>
   struct DefaultMessageCreator<pcl::PCLPointCloud2>
-  { 
+  {
     boost::shared_ptr<pcl::PCLPointCloud2> operator() ()
     {
       boost::shared_ptr<pcl::PCLPointCloud2> msg(new pcl::PCLPointCloud2());
@@ -670,7 +669,7 @@ namespace ros
     }
   };
 
-  namespace message_traits 
+  namespace message_traits
   {
     template<>
     struct MD5Sum<pcl::PCLPointCloud2>
@@ -680,7 +679,7 @@ namespace ros
 
       static const uint64_t static_value1 = MD5Sum<sensor_msgs::PointCloud2>::static_value1;
       static const uint64_t static_value2 = MD5Sum<sensor_msgs::PointCloud2>::static_value2;
-      
+
       // If the definition of sensor_msgs/PointCloud2 changes, we'll get a compile error here.
       ROS_STATIC_ASSERT(static_value1 == 0x1158d486dd51d683ULL);
       ROS_STATIC_ASSERT(static_value2 == 0xce2f1be655c3c181ULL);
@@ -703,7 +702,7 @@ namespace ros
     template<> struct HasHeader<pcl::PCLPointCloud2> : TrueType {};
   } // namespace ros::message_traits
 
-  namespace serialization 
+  namespace serialization
   {
     /*
      * Provide a custom serialization for pcl::PCLPointCloud2

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pcl_conversions)
 
-find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs)
 
 find_package(PCL REQUIRED QUIET COMPONENTS common)
 
