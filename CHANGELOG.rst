@@ -2,6 +2,10 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2013-07-12)
+------------------
+* small fix for conversion functions
+
 0.1.1 (2013-07-10)
 ------------------
 * Fix find_package bug with pcl
