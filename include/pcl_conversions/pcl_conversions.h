@@ -487,7 +487,7 @@ namespace pcl {
   {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(cloud, pcl_pc2);
-    pcl::toPCLPointCloud2(pcl_cloud, cloud);
+    pcl::fromPCLPointCloud2(pcl_pc2, pcl_cloud);
   }
 
   template<typename T>
@@ -495,7 +495,7 @@ namespace pcl {
   {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::moveToPCL(cloud, pcl_pc2);
-    pcl::toPCLPointCloud2(pcl_cloud, cloud);
+    pcl::fromPCLPointCloud2(pcl_pc2, pcl_cloud);
   }
 
   /** Overload pcl::createMapping **/
