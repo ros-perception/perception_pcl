@@ -2,6 +2,11 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.3 (2013-07-13)
+------------------
+* Add missing dependency on roscpp
+* Fixup tests and pcl usage in CMakeList.txt
+
 0.1.2 (2013-07-12)
 ------------------
 * small fix for conversion functions
