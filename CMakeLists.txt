@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pcl_conversions)
 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS pcl_msgs roscpp sensor_msgs std_msgs)
 
 find_package(PCL REQUIRED QUIET COMPONENTS common)
 
@@ -9,7 +9,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_COMMON_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include ${PCL_COMMON_INCLUDE_DIRS}
-  CATKIN_DEPENDS sensor_msgs std_msgs
+  CATKIN_DEPENDS pcl_msgs roscpp sensor_msgs std_msgs
 )
 
 # Mark cpp header files for installation
@@ -20,5 +20,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 # Add gtest based cpp test target
-catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
-target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
+  target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
+endif()
