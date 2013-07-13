@@ -2,6 +2,14 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.4 (2013-07-13)
+------------------
+* Fixup dependencies and CMakeLists.txt:
+
+  * Added a versioned dependency on pcl, fixes `#1 <https://github.com/ros-perception/pcl_conversions/issues/1>`_
+  * Added a dependency on pcl_msgs, fixes `#2 <https://github.com/ros-perception/pcl_conversions/issues/2>`_
+  * Wrapped the test target in a CATKIN_ENABLE_TESTING check
+
 0.1.3 (2013-07-13)
 ------------------
 * Add missing dependency on roscpp
