@@ -31,6 +31,7 @@
 
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>eigen</run_depend>
+  <run_depend>message_filters</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>nodelet_topic_tools</run_depend>
   <run_depend>pcl</run_depend>
