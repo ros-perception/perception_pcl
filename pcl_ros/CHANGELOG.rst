@@ -2,6 +2,11 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2013-07-19)
+------------------
+* Fixed missing package exports on pcl_conversions and others
+* Make find_package on Eigen and PCL REQUIRED
+
 1.1.1 (2013-07-10)
 ------------------
 * Add missing EIGEN define which caused failures on the farm
