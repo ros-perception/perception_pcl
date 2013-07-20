@@ -66,7 +66,7 @@ catkin_package(
     message_filters
     nodelet
     pcl_conversions
-    pcl_ros
+    pcl_msgs
     rosbag
     roscpp
     sensor_msgs
