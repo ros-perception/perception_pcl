@@ -18,6 +18,6 @@ install:
 
 script:
   - source /opt/ros/hydro/setup.bash
-  - catkin_make tests
-  - catkin_make run_tests
-  - catkin_make install
+  - catkin_make tests --source .
+  - catkin_make run_tests --source .
+  - catkin_make install -- source .
