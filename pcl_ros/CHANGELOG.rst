@@ -2,6 +2,13 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.4 (2013-07-23)
+------------------
+* Fix a serialization error with point_cloud headers
+* Initialize shared pointers before use in part of the pcl_conversions
+  Should address runtime errors reported in `#29 <https://github.com/ros-perception/perception_pcl/issues/29>`_
+* Changed the default bounds on filters to -1000, 1000 from -5, 5 in common.py
+
 1.1.2 (2013-07-19)
 ------------------
 * Fixed missing package exports on pcl_conversions and others
