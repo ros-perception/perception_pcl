@@ -213,8 +213,8 @@ namespace ros
       inline static void read(Stream& stream, pcl::PointCloud<T>& m)
       {
         std_msgs::Header header;
-        pcl_conversions::fromPCL(m.header, header);
         stream.next(header);
+        pcl_conversions::toPCL(header, m.header);
         stream.next(m.height);
         stream.next(m.width);
 
