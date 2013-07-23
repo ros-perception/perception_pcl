@@ -68,11 +68,11 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        pcl::PCLPointCloud2::Ptr pcl_input;
+        pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
-        pcl::ModelCoefficients::Ptr pcl_model;
+        pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
         pcl_conversions::toPCL(*(model_), *(pcl_model));
         impl_.setModelCoefficients (pcl_model);
         pcl::PCLPointCloud2 pcl_output;
