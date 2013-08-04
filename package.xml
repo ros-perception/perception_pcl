@@ -8,7 +8,7 @@
   </description>
   <author>Open Perception</author>
   <maintainer email="jkammerl@willowgarage.com">Julius Kammerl</maintainer>
-  <license>BSD</license>  
+  <license>BSD</license>
   <url>http://ros.org/wiki/pcl-msgs</url>
 
   <buildtool_depend>catkin</buildtool_depend>
