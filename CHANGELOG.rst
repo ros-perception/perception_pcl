@@ -2,6 +2,10 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.5 (2013-08-27)
+------------------
+* Use new pcl rosdep keys (libpcl-all and libpcl-all-dev)
+
 0.1.4 (2013-07-13)
 ------------------
 * Fixup dependencies and CMakeLists.txt:
