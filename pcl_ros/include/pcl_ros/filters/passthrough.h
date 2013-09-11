@@ -64,9 +64,13 @@ namespace pcl_ros
               PointCloud2 &output)
       {
         boost::mutex::scoped_lock lock (mutex_);
-        impl_.setInputCloud (input);
+        pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+        pcl_conversions::toPCL (*(input), *(pcl_input));
+        impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
-        impl_.filter (output);
+        pcl::PCLPointCloud2 pcl_output;
+        impl_.filter (pcl_output);
+        pcl_conversions::moveFromPCL(pcl_output, output);
       }
 
       /** \brief Child initialization routine.
@@ -85,7 +89,7 @@ namespace pcl_ros
 
     private:
       /** \brief The PCL filter implementation used. */
-      pcl::PassThrough<sensor_msgs::PointCloud2> impl_;
+      pcl::PassThrough<pcl::PCLPointCloud2> impl_;
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

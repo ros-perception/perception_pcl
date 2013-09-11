@@ -48,8 +48,9 @@ Cloud Data) format.
 #include <boost/filesystem.hpp>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include "pcl/io/io.h"
-#include "pcl/io/pcd_io.h"
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/transforms.h"
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
@@ -129,8 +130,13 @@ int
         ++view_it;
         continue;
       }
+
       // Transform it
-      pcl_ros::transformPointCloud ("/base_link", *cloud, cloud_t, tf_listener);
+      if (!pcl_ros::transformPointCloud ("/base_link", *cloud, cloud_t, tf_listener))
+      {
+        ++view_it;
+        continue;
+      }
 
       std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
 

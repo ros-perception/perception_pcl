@@ -86,13 +86,13 @@ pcl_ros::PCDReader::onInit ()
     {
       NODELET_INFO ("[%s::onInit] New file given: %s", getName ().c_str (), file_name_.c_str ());
       file_name = file_name_;
-      PointCloud2 cloud;
+      pcl::PCLPointCloud2 cloud;
       if (impl_.read (file_name_, cloud) < 0)
       {
         NODELET_ERROR ("[%s::onInit] Error reading %s !", getName ().c_str (), file_name_.c_str ());
         return;
       }
-      output_ = boost::make_shared<PointCloud2> (cloud);
+      pcl_conversions::moveFromPCL(cloud, *(output_));
       output_->header.stamp    = ros::Time::now ();
       output_->header.frame_id = tf_frame_;
     }
@@ -163,7 +163,10 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
     fname = boost::lexical_cast<std::string> (cloud->header.stamp.toSec ()) + ".pcd";
   else
     fname = file_name_;
-  impl_.write (fname, cloud, Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), binary_mode_);
+  pcl::PCLPointCloud2 pcl_cloud;
+  // It is safe to remove the const here because we are the only subscriber callback.
+  pcl_conversions::moveToPCL(*(const_cast<PointCloud2*>(cloud.get())), pcl_cloud);
+  impl_.write (fname, pcl_cloud, Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), binary_mode_);
 
   NODELET_DEBUG ("[%s::input_callback] Data saved to %s", getName ().c_str (), fname.c_str ());
 }

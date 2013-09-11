@@ -46,9 +46,10 @@
 
 #include <sensor_msgs/PointCloud2.h>
 // PCL includes
-#include <pcl/PointIndices.h>
-#include <pcl/ModelCoefficients.h>
+#include <pcl_msgs/PointIndices.h>
+#include <pcl_msgs/ModelCoefficients.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
 // ROS Nodelet includes
 #include <nodelet/nodelet.h>
@@ -59,6 +60,8 @@
 
 // Include TF
 #include <tf/transform_listener.h>
+
+using pcl_conversions::fromPCL;
 
 namespace pcl_ros
 {
@@ -75,11 +78,11 @@ namespace pcl_ros
       typedef PointCloud::Ptr PointCloudPtr;
       typedef PointCloud::ConstPtr PointCloudConstPtr;
 
-      typedef pcl::PointIndices PointIndices;
+      typedef pcl_msgs::PointIndices PointIndices;
       typedef PointIndices::Ptr PointIndicesPtr;
       typedef PointIndices::ConstPtr PointIndicesConstPtr;
 
-      typedef pcl::ModelCoefficients ModelCoefficients;
+      typedef pcl_msgs::ModelCoefficients ModelCoefficients;
       typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
       typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
 
@@ -157,7 +160,7 @@ namespace pcl_ros
       {
         if (cloud->width * cloud->height != cloud->points.size ())
         {
-          NODELET_WARN ("[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->points.size (), cloud->width, cloud->height, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
+          NODELET_WARN ("[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
 
           return (false);
         }
