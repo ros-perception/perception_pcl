@@ -21,4 +21,6 @@ before_script:
 
 script:
   - source /opt/ros/groovy/setup.bash
+  - cd /home/travis/build/ros-perception && dir -al
+  - cd /home/travis/build/ros-perception/perception_pcl && dir -al
   - catkin_make_isolated
