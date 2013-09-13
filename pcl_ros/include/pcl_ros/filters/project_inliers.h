@@ -68,10 +68,16 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        impl_.setInputCloud (input);
+        pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+        pcl_conversions::toPCL (*(input), *(pcl_input));
+        impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
-        impl_.setModelCoefficients (model_);
-        impl_.filter (output);
+        pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
+        pcl_conversions::toPCL(*(model_), *(pcl_model));
+        impl_.setModelCoefficients (pcl_model);
+        pcl::PCLPointCloud2 pcl_output;
+        impl_.filter (pcl_output);
+        pcl_conversions::moveFromPCL(pcl_output, output);
       }
 
     private:
@@ -85,7 +91,7 @@ namespace pcl_ros
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_e_;
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
       /** \brief The PCL filter implementation used. */
-      pcl::ProjectInliers<PointCloud2> impl_;
+      pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
 
       /** \brief Nodelet initialization routine. */
       virtual void 

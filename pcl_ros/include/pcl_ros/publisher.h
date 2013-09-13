@@ -46,7 +46,10 @@
 #define PCL_ROS_PUBLISHER_H_
 
 #include <ros/ros.h>
-#include "pcl/ros/conversions.h"
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/conversions.h>
+
+#include <pcl_conversions/pcl_conversions.h>
 
 namespace pcl_ros 
 {
