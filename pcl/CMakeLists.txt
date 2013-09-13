@@ -8,7 +8,7 @@ INSTALL(CODE "MESSAGE(\"make install\")")
 ExternalProject_Add( pcl_trunk
   PREFIX pcl_trunk
   GIT_REPOSITORY https://github.com/PointCloudLibrary/pcl.git
-  GIT_TAG cd902a41c84921d6056ee0eacf9ada4591b9d1e3
+  GIT_TAG 098ed53943b47d481174db5d2e2da7abbbd71229
   DOWNLOAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/pcl_trunk"
   SOURCE_DIR "${SOURCE_DIR}"
   BUILD_COMMAND .
