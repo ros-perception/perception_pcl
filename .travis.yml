@@ -15,12 +15,13 @@ install:
   - rosdep update
   - rosdep install --from-paths . --ignore-src --rosdistro groovy -y
 
-before_script:
-  - cd /home/travis/build/ros-perception/perception_pcl && git clone https://github.com/ros-perception/pcl_msgs.git
-  - cd /home/travis/build/ros-perception/perception_pcl && git clone https://github.com/ros-perception/pcl_conversions.git
-
 script:
+  - cd pcl_ros
+  - mkdir build
+  - cd build
   - source /opt/ros/groovy/setup.bash
-  - cd /home/travis/build/ros-perception && dir -al
-  - cd /home/travis/build/ros-perception/perception_pcl && dir -al
-  - catkin_make_isolated
+  - cmake .. -DCATKIN_ENABLE_TESTING=1
+  - make
+  - make tests
+  - make run_tests
+  - catkin_test_results ./test_results
