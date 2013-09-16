@@ -48,9 +48,11 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 /* ---[ */
 int
@@ -74,7 +76,7 @@ main (int argc, char **argv)
   {
     pcl::toROSMsg (cloud, image); //convert the cloud
   }
-  catch (std::runtime_error e)
+  catch (std::runtime_error &e)
   {
     ROS_ERROR_STREAM("Error in converting cloud to image message: "
                             << e.what());

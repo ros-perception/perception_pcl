@@ -57,7 +57,7 @@ namespace pcl_ros
       boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > srv_;
 
       /** \brief The PCL filter implementation used. */
-      pcl::VoxelGrid<sensor_msgs::PointCloud2> impl_;
+      pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
 
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset

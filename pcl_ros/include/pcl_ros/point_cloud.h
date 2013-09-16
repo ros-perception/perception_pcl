@@ -5,7 +5,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_traits.h>
 #include <pcl/for_each_type.h>
-#include <pcl/ros/conversions.h>
+#include <pcl/conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
@@ -109,6 +110,61 @@ namespace ros
     };
 
     template<typename T> struct HasHeader<pcl::PointCloud<T> > : TrueType {};
+
+    // This is bad because it will only work for pcl::PointXYZ, but I can't
+    // find another way around ambiguous partial template specialization...
+    template<>
+    struct TimeStamp<pcl::PointCloud<pcl::PointXYZ> >
+    {
+      // This specialization could be dangerous, but it's the best I can do.
+      // If this TimeStamp struct is destroyed before they are done with the
+      // pointer returned by the first functions may go out of scope, but there
+      // isn't a lot I can do about that. This is a good reason to refuse to
+      // returning pointers like this...
+      static ros::Time* pointer(pcl::PointCloud<pcl::PointXYZ> &m) {
+        header_.reset(new std_msgs::Header());
+        pcl_conversions::fromPCL(m.header, *(header_));
+        return &(header_->stamp);
+      }
+      static ros::Time const* pointer(const pcl::PointCloud<pcl::PointXYZ>& m) {
+        header_const_.reset(new std_msgs::Header());
+        pcl_conversions::fromPCL(m.header, *(header_const_));
+        return &(header_const_->stamp);
+      }
+      static ros::Time value(const pcl::PointCloud<pcl::PointXYZ>& m) {
+        return pcl_conversions::fromPCL(m.header).stamp;
+      }
+    private:
+      static boost::shared_ptr<std_msgs::Header> header_;
+      static boost::shared_ptr<std_msgs::Header> header_const_;
+    };
+
+    template<>
+    struct TimeStamp<pcl::PointCloud<pcl::Normal> >
+    {
+      // This specialization could be dangerous, but it's the best I can do.
+      // If this TimeStamp struct is destroyed before they are done with the
+      // pointer returned by the first functions may go out of scope, but there
+      // isn't a lot I can do about that. This is a good reason to refuse to
+      // returning pointers like this...
+      static ros::Time* pointer(pcl::PointCloud<pcl::Normal> &m) {
+        header_.reset(new std_msgs::Header());
+        pcl_conversions::fromPCL(m.header, *(header_));
+        return &(header_->stamp);
+      }
+      static ros::Time const* pointer(const pcl::PointCloud<pcl::Normal>& m) {
+        header_const_.reset(new std_msgs::Header());
+        pcl_conversions::fromPCL(m.header, *(header_const_));
+        return &(header_const_->stamp);
+      }
+      static ros::Time value(const pcl::PointCloud<pcl::Normal>& m) {
+        return pcl_conversions::fromPCL(m.header).stamp;
+      }
+    private:
+      static boost::shared_ptr<std_msgs::Header> header_;
+      static boost::shared_ptr<std_msgs::Header> header_const_;
+    };
+
   } // namespace ros::message_traits
 
   namespace serialization 
@@ -156,7 +212,9 @@ namespace ros
       template<typename Stream>
       inline static void read(Stream& stream, pcl::PointCloud<T>& m)
       {
-        stream.next(m.header);
+        std_msgs::Header header;
+        stream.next(header);
+        pcl_conversions::toPCL(header, m.header);
         stream.next(m.height);
         stream.next(m.width);
 
