@@ -125,6 +125,7 @@ add_library(pcl_ros_filters
   src/pcl_ros/filters/voxel_grid.cpp
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
 
 ## Declare the pcl_ros_segmentation library
