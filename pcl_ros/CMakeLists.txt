@@ -65,7 +65,7 @@ add_library (pcl_ros_filters
 	     )
 #add_compile_flags (pcl_ros_filters ${SSE_FLAGS})
 target_link_libraries (pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-
+add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
 
 ############ TOOLS
