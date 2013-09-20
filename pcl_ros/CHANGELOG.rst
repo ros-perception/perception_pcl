@@ -2,6 +2,11 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* adding more uncaught config dependencies
+* adding FeatureConfig dependency too
+
 1.1.6 (2013-09-20)
 ------------------
 * add excplicit dependency on gencfg target
