@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.7 (2013-09-20)
+------------------
 * adding more uncaught config dependencies
 * adding FeatureConfig dependency too
 
