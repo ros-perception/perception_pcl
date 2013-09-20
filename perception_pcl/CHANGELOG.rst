@@ -2,6 +2,9 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.5 (2013-08-27)
 ------------------
 * Updated package.xml's to use new libpcl-all rosdep rules
