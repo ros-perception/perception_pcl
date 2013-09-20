@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.6 (2013-09-20)
+------------------
 * add excplicit dependency on gencfg target
 
 1.1.5 (2013-08-27)
