@@ -111,6 +111,7 @@ add_library(pcl_ros_features
   src/pcl_ros/features/vfh.cpp
 )
 target_link_libraries (pcl_ros_features ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_dependencies(pcl_ros_features ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_features)
 
 
