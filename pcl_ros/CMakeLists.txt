@@ -18,8 +18,15 @@ include_directories(include)
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
 
 # generate the dynamic_reconfigure config file
-generate_dynamic_reconfigure_options(cfg/Filter.cfg
+generate_dynamic_reconfigure_options(cfg/Feature.cfg
+                                     cfg/Filter.cfg
+                                     cfg/EuclideanClusterExtraction.cfg
                                      cfg/ExtractIndices.cfg 
+                                     cfg/ExtractPolygonalPrismData.cfg
+                                     cfg/MLS.cfg
+                                     cfg/SACSegmentation.cfg
+                                     cfg/SACSegmentationFromNormals.cfg
+                                     cfg/SegmentDifferences.cfg 
                                      cfg/StatisticalOutlierRemoval.cfg
                                      cfg/VoxelGrid.cfg
 
@@ -53,6 +60,26 @@ target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES}
 
 class_loader_hide_library_symbols(pcl_ros_io)
 
+# ---[ PCL ROS - Features
+add_library (pcl_ros_features
+              src/pcl_ros/features/feature.cpp
+              # Compilation is much faster if we include all the following CPP files in feature.cpp
+              src/pcl_ros/features/boundary.cpp
+              src/pcl_ros/features/fpfh.cpp
+              src/pcl_ros/features/fpfh_omp.cpp
+              src/pcl_ros/features/moment_invariants.cpp
+              src/pcl_ros/features/normal_3d.cpp
+              src/pcl_ros/features/normal_3d_omp.cpp
+              src/pcl_ros/features/pfh.cpp
+              src/pcl_ros/features/principal_curvatures.cpp
+              src/pcl_ros/features/vfh.cpp
+              )
+#rosbuild_add_compile_flags (pcl_ros_features ${SSE_FLAGS})
+target_link_libraries (pcl_ros_features ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+class_loader_hide_library_symbols(pcl_ros_features)
+
+
 # ---[ PCL ROS - Filters
 add_library (pcl_ros_filters
 	      src/pcl_ros/filters/filter.cpp
@@ -67,6 +94,31 @@ add_library (pcl_ros_filters
 target_link_libraries (pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
+
+# ---[ Point Cloud Library - Segmentation
+add_library (pcl_ros_segmentation
+              src/pcl_ros/segmentation/segmentation.cpp
+              src/pcl_ros/segmentation/segment_differences.cpp
+              src/pcl_ros/segmentation/extract_clusters.cpp
+              src/pcl_ros/segmentation/extract_polygonal_prism_data.cpp
+              src/pcl_ros/segmentation/sac_segmentation.cpp
+              )
+#rosbuild_add_compile_flags (pcl_ros_segmentation ${SSE_FLAGS})
+target_link_libraries (pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+class_loader_hide_library_symbols(pcl_ros_segmentation)
+
+# ---[ Point Cloud Library - Surface
+add_library (pcl_ros_surface
+              src/pcl_ros/surface/surface.cpp
+              # Compilation is much faster if we include all the following CPP files in surface.cpp
+              src/pcl_ros/surface/convex_hull.cpp
+              src/pcl_ros/surface/moving_least_squares.cpp
+              )
+#rosbuild_add_compile_flags (pcl_ros_surface ${SSE_FLAGS})
+target_link_libraries (pcl_ros_surface ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+
+class_loader_hide_library_symbols(pcl_ros_surface)
 
 ############ TOOLS
 
@@ -90,7 +142,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(TARGETS pcl_ros_tf pcl_ros_io pcl_ros_filters pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
+install(TARGETS pcl_ros_tf pcl_ros_io pcl_ros_features pcl_ros_filters pcl_ros_surface pcl_ros_segmentation pcd_to_pointcloud pointcloud_to_pcd bag_to_pcd convert_pcd_to_image convert_pointcloud_to_image
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
