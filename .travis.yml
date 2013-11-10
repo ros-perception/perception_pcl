@@ -13,7 +13,7 @@ install:
   - sudo apt-get install python-catkin-pkg python-rosdep
   - sudo rosdep init
   - rosdep update
-  - rosdep install --from-paths . --ignore-src --rosdistro hydro -y
+  - rosdep install --from-paths . --ignore-src --rosdistro groovy -y
 
 script:
   - source /opt/ros/hydro/setup.bash
