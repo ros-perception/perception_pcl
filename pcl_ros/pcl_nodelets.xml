@@ -1,4 +1,74 @@
+<!-- PCL Features library component -->
+<library path="lib/libpcl_ros_features">
+  <class name="pcl/BoundaryEstimation" type="BoundaryEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      BoundaryEstimation estimates whether a set of points is lying on surface boundaries using an angle criterion. The
+      code makes use of the estimated surface normals at each point in the input data set.
+    </description>
+  </class>
 
+  <class name="pcl/FPFHEstimation" type="FPFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      FPFHEstimation estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud dataset
+      containing points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/FPFHEstimationOMP" type="FPFHEstimationOMP" base_class_type="nodelet::Nodelet">
+    <description>
+      FPFHEstimationOMP estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud dataset
+      containing points and normals, in parallel, using the OpenMP standard.
+    </description>
+  </class>
+  
+  <class name="pcl/MomentInvariantsEstimation" type="MomentInvariantsEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      MomentInvariantsEstimation estimates the 3 moment invariants (j1, j2, j3) at each 3D point.
+    </description>
+  </class>
+
+  <class name="pcl/NormalEstimationOMP" type="NormalEstimationOMP" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimationOMP estimates local surface properties at each 3D point, such as surface normals and curvatures,
+      in parallel, using the OpenMP standard.
+    </description>
+  </class>
+
+  <class name="pcl/NormalEstimationTBB" type="NormalEstimationTBB" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and curvatures, in
+      parallel, using Intel's Threading Building Blocks library.
+    </description>
+  </class>
+
+  <class name="pcl/NormalEstimation" type="NormalEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimation estimates local surface properties at each 3D point, such as surface normals and curvatures.
+    </description>
+  </class>
+
+  <class name="pcl/PFHEstimation" type="PFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      PFHEstimation estimates the Point Feature Histogram (PFH) descriptor for a given point cloud dataset containing
+      points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/PrincipalCurvaturesEstimation" type="PrincipalCurvaturesEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of principal surface 
+      curvatures for a given point cloud dataset containing points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/VFHEstimation" type="VFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      VFHEstimation estimates the Viewpoint Feature Histogram (VFH) global descriptor for a given point cloud cluster dataset
+      containing points and normals.
+    </description>
+  </class>
+
+</library>
 
 <!-- PCL IO library component -->
 <library path="lib/libpcl_ros_io">
@@ -83,4 +153,74 @@
   </class>
 </library>
 
+<!-- PCL Segmentation library component -->
+<library path="lib/libpcl_ros_segmentation">
+  <class name="pcl/ExtractPolygonalPrismData" type="ExtractPolygonalPrismData" base_class_type="nodelet::Nodelet">
+    <description>
+      ExtractPolygonalPrismData uses a set of point indices that represent a planar model, and together with a given
+      height, generates a 3D polygonal prism. The polygonal prism is then used to segment all points lying inside it.
+    </description>
+  </class>
+
+   <class name="pcl/EuclideanClusterExtraction" type="EuclideanClusterExtraction" base_class_type="nodelet::Nodelet">
+     <description>
+       EuclideanClusterExtraction represents a segmentation class for cluster extraction in an Euclidean sense.
+    </description>
+  </class>
+
+  <class name="pcl/SACSegmentationFromNormals" type="SACSegmentationFromNormals" base_class_type="nodelet::Nodelet">
+    <description>
+      SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in the sense that
+      it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation. 
+    </description>
+  </class>
+
+  <class name="pcl/SACSegmentation" type="SACSegmentation" base_class_type="nodelet::Nodelet">
+    <description>
+      SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in the sense that
+      it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation. 
+    </description>
+  </class>
+
+  <class name="pcl/SegmentDifferences" type="SegmentDifferences" base_class_type="nodelet::Nodelet">
+     <description>
+       SegmentDifferences obtains the difference between two spatially aligned point clouds and returns the
+       difference between them for a maximum given distance threshold.
+    </description>
+  </class>
+
+</library>
+
+<!-- PCL Surface reconstruction library component -->
+<library path="lib/libpcl_ros_surface">
+  <class name="pcl/MovingLeastSquares" type="MovingLeastSquares" base_class_type="nodelet::Nodelet">
+    <description>
+      MovingLeastSquares is an implementation of the MLS algorithm for data reconstruction through bivariate polynomial fitting.
+    </description>
+  </class>
+  <class name="pcl/ConvexHull2D" type="ConvexHull2D" base_class_type="nodelet::Nodelet">
+    <description>
+      ConvexHull2D represents a 2D ConvexHull implementation.
+    </description>
+  </class>
+</library>
+
+<!-- PCL Tests (used for testing only) -->
+<library path="lib/libpcl_ros_tests">
+  <class name="pcl/TestTalker" type="TestTalker" base_class_type="nodelet::Nodelet">
+    <description>
+      PCL Talker test.
+    </description>
+  </class>
+  <class name="pcl/TestListener" type="TestListener" base_class_type="nodelet::Nodelet">
+    <description>
+      PCL Listener test.
+    </description>
+  </class>
+  <class name="pcl/TestPingPong" type="TestPingPong" base_class_type="nodelet::Nodelet">
+    <description>
+      PCL PingPong test.
+    </description>
+  </class>
+</library>
 
