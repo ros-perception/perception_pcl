@@ -57,7 +57,7 @@ add_library (pcl_ros_io
              )
 #rosbuild_add_compile_flags (pcl_ros_io ${SSE_FLAGS})
 target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-
+add_dependencies(pcl_ros_io ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_io)
 
 # ---[ PCL ROS - Features
@@ -76,7 +76,7 @@ add_library (pcl_ros_features
               )
 #rosbuild_add_compile_flags (pcl_ros_features ${SSE_FLAGS})
 target_link_libraries (pcl_ros_features ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-
+add_dependencies(pcl_ros_features ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_features)
 
 
@@ -105,7 +105,7 @@ add_library (pcl_ros_segmentation
               )
 #rosbuild_add_compile_flags (pcl_ros_segmentation ${SSE_FLAGS})
 target_link_libraries (pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-
+add_dependencies(pcl_ros_segmentation ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_segmentation)
 
 # ---[ Point Cloud Library - Surface
@@ -117,7 +117,7 @@ add_library (pcl_ros_surface
               )
 #rosbuild_add_compile_flags (pcl_ros_surface ${SSE_FLAGS})
 target_link_libraries (pcl_ros_surface ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-
+add_dependencies(pcl_ros_surface ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_surface)
 
 ############ TOOLS
