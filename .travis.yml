@@ -1,0 +1,22 @@
+language:
+  - cpp
+  - python
+python:
+  - "2.7"
+compiler:
+  - gcc
+
+install:
+  - sudo sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
+  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  - sudo apt-get update
+  - sudo apt-get install python-catkin-pkg python-rosdep
+  - sudo rosdep init
+  - rosdep update
+  - rosdep install --from-paths . --ignore-src --rosdistro hydro -y
+
+script:
+  - source /opt/ros/hydro/setup.bash
+  - catkin_make tests --source . -j1 -DCATKIN_ENABLE_TESTING=ON
+  - catkin_make run_tests --source . -j1 -DCATKIN_ENABLE_TESTING=ON
+  - catkin_make install --source . -j1 -DCATKIN_ENABLE_TESTING=ON
