@@ -36,7 +36,7 @@ include_directories(include cfg/cpp)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES pcl_ros_tf pcl_ros_io pcl_ros_filters
-  CATKIN_DEPENDS roscpp sensor_msgs tf sensor_msgs std_msgs
+  CATKIN_DEPENDS roscpp sensor_msgs tf sensor_msgs std_msgs dynamic_reconfigure
   DEPENDS Eigen PCL 
 )
 
@@ -57,7 +57,7 @@ add_library (pcl_ros_io
              )
 #rosbuild_add_compile_flags (pcl_ros_io ${SSE_FLAGS})
 target_link_libraries (pcl_ros_io pcl_ros_tf ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(pcl_ros_io ${PROJECT_NAME}_gencfg)
+
 class_loader_hide_library_symbols(pcl_ros_io)
 
 # ---[ PCL ROS - Features
