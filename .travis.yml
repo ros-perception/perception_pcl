@@ -16,7 +16,7 @@ install:
   - rosdep install --from-paths . --ignore-src --rosdistro groovy -y
 
 script:
-  - source /opt/ros/hydro/setup.bash
+  - source /opt/ros/groovy/setup.bash
   - catkin_make tests --source . -j1 -DCATKIN_ENABLE_TESTING=ON
   - catkin_make run_tests --source . -j1 -DCATKIN_ENABLE_TESTING=ON
   - catkin_make install --source . -j1 -DCATKIN_ENABLE_TESTING=ON
