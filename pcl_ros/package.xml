@@ -35,7 +35,7 @@
   <run_depend>message_filters</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>nodelet_topic_tools</run_depend>
-  <run_depend>libpcl-all</run_depend>
+  <run_depend>libpcl-all-dev</run_depend>
   <run_depend>pcl_conversions</run_depend>
   <run_depend>pcl_msgs</run_depend>
   <run_depend>pluginlib</run_depend>
