@@ -76,9 +76,39 @@ namespace pcl_conversions {
   /** PCLHeader <=> Header **/
 
   inline
+  void fromPCL(const pcl::uint64_t &pcl_stamp, ros::Time &stamp)
+  {
+    stamp.fromNSec(pcl_stamp * 1e3);  // Convert from us to ns
+  }
+
+  inline
+  void toPCL(const ros::Time &stamp, pcl::uint64_t &pcl_stamp)
+  {
+    pcl_stamp = stamp.toNSec() / 1e3;  // Convert from ns to us
+  }
+
+  inline
+  ros::Time fromPCL(const pcl::uint64_t &pcl_stamp)
+  {
+    ros::Time stamp;
+    fromPCL(pcl_stamp, stamp);
+    return stamp;
+  }
+
+  inline
+  pcl::uint64_t toPCL(const ros::Time &stamp)
+  {
+    pcl::uint64_t pcl_stamp;
+    toPCL(stamp, pcl_stamp);
+    return pcl_stamp;
+  }
+
+  /** PCLHeader <=> Header **/
+
+  inline
   void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::Header &header)
   {
-    header.stamp.fromNSec(pcl_header.stamp * 1e3);  // Convert from us to ns
+    fromPCL(pcl_header.stamp, header.stamp);
     header.seq = pcl_header.seq;
     header.frame_id = pcl_header.frame_id;
   }
@@ -86,7 +116,7 @@ namespace pcl_conversions {
   inline
   void toPCL(const std_msgs::Header &header, pcl::PCLHeader &pcl_header)
   {
-    pcl_header.stamp = header.stamp.toNSec() / 1e3;  // Convert from ns to us
+    toPCL(header.stamp, pcl_header.stamp);
     pcl_header.seq = header.seq;
     pcl_header.frame_id = header.frame_id;
   }
