@@ -3,17 +3,19 @@
   <name>pcl_conversions</name>
   <version>0.1.5</version>
   <description>Provides conversions from PCL data types and ROS message types</description>
-  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
+
+  <author email="william@osrfoundation.org">William Woodall</author>
+  <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
 
   <license>BSD</license>
 
+  <url>http://wiki.ros.org/pcl_conversions</url>
   <url type="repository">https://github.com/ros-perception/pcl_conversions</url>
   <url type="bugtracker">https://github.com/ros-perception/pcl_conversions/issues</url>
 
-  <author email="william@osrfoundation.org">William Woodall</author>
-
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>roscpp</build_depend>
