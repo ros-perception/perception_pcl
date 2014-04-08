@@ -7,7 +7,9 @@
 </p>
   </description>
   <author>Open Perception</author>
-  <maintainer email="jkammerl@willowgarage.com">Julius Kammerl</maintainer>
+  <author email="jkammerl@willowgarage.com">Julius Kammerl</author>
+  <author email="william@osrfoundation.org">William Woodall</author>
+  <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/pcl-msgs</url>
 
