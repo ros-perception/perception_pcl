@@ -8,11 +8,16 @@
   processing in ROS.
 
   </description>
+
   <author>Open Perception</author>
-  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
-  <maintainer email="julius@kammerl.de">Julius Kammerl</maintainer>
+  <author email="jkammerl@willowgarage.com">Julius Kammerl</author>
+  <author email="william@osrfoundation.org">William Woodall</author>
+  <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
+
   <license>BSD</license>
   <url>http://ros.org/wiki/perception_pcl</url>
+  <url type="repository">https://github.com/ros-perception/perception_pcl</url>
+  <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
