@@ -91,6 +91,7 @@ int
 
   view.addQuery (bag, rosbag::TypeQuery ("sensor_msgs/PointCloud2"));
   view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
+  view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
   view_it = view.begin ();
 
   std::string output_dir = std::string (argv[3]);
