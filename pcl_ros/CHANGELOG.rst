@@ -2,7 +2,7 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.1.8 (2014-04-09)
+1.2.0 (2014-04-09)
 ------------------
 * Updated maintainership
 * Fix TF2 support for bag_to_pcd `#46 <https://github.com/ros-perception/perception_pcl/issues/46>`_
