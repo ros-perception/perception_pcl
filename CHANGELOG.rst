@@ -2,6 +2,14 @@
 Changelog for package pcl_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* clean up package.xml
+* update maintainer info
+* remove eigen dependency
+* Merge pull request `#1 <https://github.com/ros-perception/pcl_msgs/issues/1>`_ from bulwahn/patch-1
+* Contributors: Lukas Bulwahn, Paul Bovbel
+
 0.1.0 (2013-07-09)
 ------------------
 * Generate messages into the pcl_msgs namespace rather than the pcl namespace
