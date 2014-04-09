@@ -2,8 +2,8 @@
 Changelog for package pcl_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2014-04-09)
+------------------
 * clean up package.xml
 * update maintainer info
 * remove eigen dependency
