@@ -1,6 +1,6 @@
 <package>
   <name>perception_pcl</name>
-  <version>1.1.7</version>
+  <version>1.1.8</version>
   <description>
 
   PCL (Point Cloud Library) ROS interface stack. PCL-ROS is the preferred
@@ -9,10 +9,14 @@
 
   </description>
   <author>Open Perception</author>
-  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
-  <maintainer email="julius@kammerl.de">Julius Kammerl</maintainer>
+  <author email="william@osrfoundation.org">William Woodall</author>
+  <author email="julius@kammerl.de">Julius Kammerl</author>
+  <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
+  <maintainer email="bill@neautomation.com">Bill Morris</maintainer>
   <license>BSD</license>
-  <url>http://ros.org/wiki/perception_pcl</url>
+  <url type="website">http://ros.org/wiki/perception_pcl</url>
+  <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
+  <url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

@@ -2,6 +2,10 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.8 (2014-04-09)
+------------------
+* Updated maintainership and added bugtracker/repository info to package.xml
+
 1.1.7 (2013-09-20)
 ------------------
 
