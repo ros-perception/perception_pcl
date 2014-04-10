@@ -2,8 +2,8 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2014-04-10)
+------------------
 * Added conversions for stamp types
 * update maintainer info, add eigen dependency
 * fix Eigen dependency
