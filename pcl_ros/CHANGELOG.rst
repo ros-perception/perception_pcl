@@ -2,6 +2,15 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update to support TF2
+  Fixes `#46 <https://github.com/ros-perception/perception_pcl/issues/46>`_
+* pcl_ros: also run_depend on libpcl-all
+* Make pcl_ros run_depend on libpcl-all-dev
+  When downstream projects build against pcl_ros, they need the pcl headers provided by libpcl-all-dev.
+* Contributors: Lucid One, Scott K Logan, William Woodall
+
 1.1.7 (2013-09-20)
 ------------------
 * adding more uncaught config dependencies
