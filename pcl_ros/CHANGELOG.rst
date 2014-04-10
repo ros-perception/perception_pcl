@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.8 (2014-04-10)
+------------------
 * Update to support TF2
   Fixes `#46 <https://github.com/ros-perception/perception_pcl/issues/46>`_
 * pcl_ros: also run_depend on libpcl-all
