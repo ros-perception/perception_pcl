@@ -57,6 +57,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 
   // ---[ Optional parameters
   private_nh_.getParam ("max_queue_size", maximum_queue_size_);
+  private_nh_.getParam ("same_fields", concatenate_same_fields_);
 
   // Output
   pub_output_ = private_nh_.advertise<PointCloud2> ("output", maximum_queue_size_);
@@ -212,7 +213,10 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
     in2_t = boost::make_shared<PointCloud2> (in2);
 
   // Concatenate the results
-  pcl::concatenatePointCloud (*in1_t, *in2_t, out);
+  if(concatenate_same_fields_)
+    pcl::concatenatePointCloud (*in1_t, *in2_t, out);
+  else
+    pcl::concatenateFields (*in1_t, *in2_t, out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,21 +230,21 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
   PointCloud2::Ptr out1 (new PointCloud2 ());
   PointCloud2::Ptr out2 (new PointCloud2 ());
   pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1);
-  if (in3)
+  if (filters_.size() >= 3)
   {
     pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in3, *out2);
     out1 = out2;
-    if (in4)
+    if (filters_.size() >= 4)
     {
       pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in4, *out1);
-      if (in5)
+      if (filters_.size() >= 5)
       {
         pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in5, *out2);
         out1 = out2;
-        if (in6)
+        if (filters_.size() >= 6)
         {
           pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in6, *out1);
-          if (in7)
+          if (filters_.size() >= 7)
           {
             pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in7, *out2);
             out1 = out2;

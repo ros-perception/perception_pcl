@@ -90,6 +90,10 @@ namespace pcl_ros
       /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
       bool approximate_sync_;
 
+      /** \brief False if we would like to concatenate different fields from different topics (true by default). */
+      bool concatenate_same_fields_;
+
+
       /** \brief A vector of message filters. */
       std::vector<boost::shared_ptr<message_filters::Subscriber<PointCloud2> > > filters_;
 
