@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  * Copyright (c) 2013, Open Source Robotics Foundation, Inc.
+ * Copyright (c) 2010-2012, Willow Garage, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -500,6 +501,36 @@ namespace pcl {
     pcl::PCLImage pcl_image;
     pcl::toPCLPointCloud2(pcl_cloud, pcl_image);
     pcl_conversions::moveFromPCL(pcl_image, image);
+  }
+
+  template<typename T> void
+  toROSMsg (const pcl::PointCloud<T> &cloud, sensor_msgs::Image& msg)
+  {
+    // Ease the user's burden on specifying width/height for unorganized datasets
+    if (cloud.width == 0 && cloud.height == 0)
+    {
+      throw std::runtime_error("Needs to be a dense like cloud!!");
+    }
+    else
+    {
+      if (cloud.points.size () != cloud.width * cloud.height)
+        throw std::runtime_error("The width and height do not match the cloud size!");
+      msg.height = cloud.height;
+      msg.width = cloud.width;
+    }
+
+    // sensor_msgs::image_encodings::BGR8;
+    msg.encoding = "bgr8";
+    msg.step = msg.width * sizeof (uint8_t) * 3;
+    msg.data.resize (msg.step * msg.height);
+    for (size_t y = 0; y < cloud.height; y++)
+    {
+      for (size_t x = 0; x < cloud.width; x++)
+      {
+        uint8_t * pixel = &(msg.data[y * msg.step + x * 3]);
+        memcpy (pixel, &cloud (x, y).rgb, 3 * sizeof(uint8_t));
+      }
+    }
   }
 
   /** Provide to/fromROSMsg for sensor_msgs::PointCloud2 <=> pcl::PointCloud<T> **/
