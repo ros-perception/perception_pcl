@@ -205,21 +205,3 @@
   </class>
 </library>
 
-<!-- PCL Tests (used for testing only) -->
-<library path="lib/libpcl_ros_tests">
-  <class name="pcl/TestTalker" type="TestTalker" base_class_type="nodelet::Nodelet">
-    <description>
-      PCL Talker test.
-    </description>
-  </class>
-  <class name="pcl/TestListener" type="TestListener" base_class_type="nodelet::Nodelet">
-    <description>
-      PCL Listener test.
-    </description>
-  </class>
-  <class name="pcl/TestPingPong" type="TestPingPong" base_class_type="nodelet::Nodelet">
-    <description>
-      PCL PingPong test.
-    </description>
-  </class>
-</library>
