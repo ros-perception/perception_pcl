@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(pcl_ros)
 
 ## Find system dependencies
+find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen REQUIRED)
 find_package(PCL REQUIRED)
@@ -52,6 +53,7 @@ generate_dynamic_reconfigure_options(
   cfg/SegmentDifferences.cfg
   cfg/StatisticalOutlierRemoval.cfg
   cfg/VoxelGrid.cfg
+  cfg/CropBox.cfg
 )
 
 ## Declare the catkin package
@@ -124,6 +126,7 @@ add_library(pcl_ros_filters
   src/pcl_ros/filters/radius_outlier_removal.cpp
   src/pcl_ros/filters/statistical_outlier_removal.cpp
   src/pcl_ros/filters/voxel_grid.cpp
+  src/pcl_ros/filters/crop_box.cpp
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
