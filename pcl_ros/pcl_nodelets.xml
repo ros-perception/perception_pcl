@@ -1,3 +1,4 @@
+
 <!-- PCL Features library component -->
 <library path="lib/libpcl_ros_features">
   <class name="pcl/BoundaryEstimation" type="BoundaryEstimation" base_class_type="nodelet::Nodelet">
@@ -151,6 +152,12 @@
       StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data.
     </description>
   </class>
+
+  <class name="pcl/CropBox" type="CropBox" base_class_type="nodelet::Nodelet">
+    <description>
+      CropBox is a filter that allows the user to filter all the data inside of a given box.
+    </description>
+  </class>
 </library>
 
 <!-- PCL Segmentation library component -->
@@ -204,4 +211,5 @@
     </description>
   </class>
 </library>
+
 
