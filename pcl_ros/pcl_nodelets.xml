@@ -1,3 +1,42 @@
+<<<<<<< HEAD
+=======
+
+<!-- PCL Features library component -->
+<library path="lib/libpcl_ros_features">
+  <class name="pcl/BoundaryEstimation" type="BoundaryEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      BoundaryEstimation estimates whether a set of points is lying on surface boundaries using an angle criterion. The
+      code makes use of the estimated surface normals at each point in the input data set.
+    </description>
+  </class>
+
+  <class name="pcl/FPFHEstimation" type="FPFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      FPFHEstimation estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud dataset
+      containing points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/FPFHEstimationOMP" type="FPFHEstimationOMP" base_class_type="nodelet::Nodelet">
+    <description>
+      FPFHEstimationOMP estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud dataset
+      containing points and normals, in parallel, using the OpenMP standard.
+    </description>
+  </class>
+  
+  <class name="pcl/MomentInvariantsEstimation" type="MomentInvariantsEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      MomentInvariantsEstimation estimates the 3 moment invariants (j1, j2, j3) at each 3D point.
+    </description>
+  </class>
+
+  <class name="pcl/NormalEstimationOMP" type="NormalEstimationOMP" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimationOMP estimates local surface properties at each 3D point, such as surface normals and curvatures,
+      in parallel, using the OpenMP standard.
+    </description>
+  </class>
+>>>>>>> c3c0d30... Merge pull request #60 from martimorta/hydro-devel
 
 
 <!-- PCL IO library component -->
@@ -81,6 +120,13 @@
       StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data.
     </description>
   </class>
+
+  <class name="pcl/CropBox" type="CropBox" base_class_type="nodelet::Nodelet">
+    <description>
+      CropBox is a filter that allows the user to filter all the data inside of a given box.
+    </description>
+  </class>
 </library>
+
 
 
