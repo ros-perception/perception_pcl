@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-=======
-
 <!-- PCL Features library component -->
 <library path="lib/libpcl_ros_features">
   <class name="pcl/BoundaryEstimation" type="BoundaryEstimation" base_class_type="nodelet::Nodelet">
@@ -36,8 +33,6 @@
       in parallel, using the OpenMP standard.
     </description>
   </class>
->>>>>>> c3c0d30... Merge pull request #60 from martimorta/hydro-devel
-
 
 <!-- PCL IO library component -->
 <library path="lib/libpcl_ros_io">
