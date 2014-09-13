@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.9 (2014-09-13)
+------------------
 * Created a nodelet for the CropBox filter
 * Tests no longer exist
 * add nodelet definitions to xml
