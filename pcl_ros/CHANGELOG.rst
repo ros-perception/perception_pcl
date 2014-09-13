@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2014-09-13)
+------------------
 * clean up merge
 * merge pull request `#60 <https://github.com/ros-perception/perception_pcl/issues/60>`_
 * Contributors: Paul Bovbel
