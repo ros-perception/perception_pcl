@@ -107,7 +107,7 @@ namespace pointcloud_to_laserscan
         //pointer to pointcloud data to transform to laserscan
         PointCloud::ConstPtr cloud_scan;
 
-        std_msgs::Header cloud_in_header = pcl_conversions::fromPCL(cloud_scan->header);
+        std_msgs::Header cloud_in_header = pcl_conversions::fromPCL(cloud_msg->header);
 
         //decide if pointcloud needs to be transformed to a target frame
         if(!target_frame_.empty() && cloud_in_header.frame_id != target_frame_){
