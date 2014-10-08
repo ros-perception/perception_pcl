@@ -129,7 +129,7 @@ namespace pointcloud_to_laserscan
                 pcl_ros::transformPointCloud(target_frame_, *cloud_msg, *cloud_tf, tf_);
                 cloud_scan = cloud_tf;
             }else{
-                ROS_WARN_STREAM_THROTTLE(1.0, "Can't transform cloud with frame " << cloud_in_header.frame_id << " into lasercan with frame " << target_frame_);
+                ROS_WARN_STREAM_THROTTLE(1.0, "Can't transform cloud with frame " << cloud_header.frame_id << " into lasercan with frame " << target_frame_);
                 return;
             }
         }else{
