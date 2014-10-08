@@ -107,12 +107,24 @@ namespace pointcloud_to_laserscan
         //pointer to pointcloud data to transform to laserscan
         PointCloud::ConstPtr cloud_scan;
 
-        std_msgs::Header cloud_in_header = pcl_conversions::fromPCL(cloud_msg->header);
+        std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_msg->header);
+
+        //build laserscan output
+        sensor_msgs::LaserScan output;
+        output.header = cloud_header;
+        output.angle_min = angle_min_;
+        output.angle_max = angle_max_;
+        output.angle_increment = angle_increment_;
+        output.time_increment = 0.0;
+        output.scan_time = scan_time_;
+        output.range_min = range_min_;
+        output.range_max = range_max_;
 
         //decide if pointcloud needs to be transformed to a target frame
-        if(!target_frame_.empty() && cloud_in_header.frame_id != target_frame_){
-            bool found_transform = tf_.waitForTransform(cloud_in_header.frame_id, target_frame_, cloud_in_header.stamp, ros::Duration(10.0));
-            if(found_transform){
+        if(!target_frame_.empty() && cloud_header.frame_id != target_frame_){
+            output.header.frame_id = target_frame_;
+            
+            if(tf_.waitForTransform(cloud_header.frame_id, target_frame_, cloud_header.stamp, ros::Duration(10.0))){
                 PointCloud::Ptr cloud_tf(new PointCloud);
                 pcl_ros::transformPointCloud(target_frame_, *cloud_msg, *cloud_tf, tf_);
                 cloud_scan = cloud_tf;
@@ -124,21 +136,10 @@ namespace pointcloud_to_laserscan
             cloud_scan = cloud_msg;
         }
 
-        //build laserscan output
-        sensor_msgs::LaserScan output;
-        output.header = cloud_in_header;
-        output.header.frame_id = target_frame_;
-        output.angle_min = angle_min_;
-        output.angle_max = angle_max_;
-        output.angle_increment = angle_increment_;
-        output.time_increment = 0.0;
-        output.scan_time = scan_time_;
-        output.range_min = range_min_;
-        output.range_max = range_max_;
-
+        //determine amount of rays to create
         uint32_t ranges_size = std::ceil((output.angle_max - output.angle_min) / output.angle_increment);
 
-        //determine if laserscan rays with no obstacle data will evaluate to infinity
+        //determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
         if(use_inf_){
             output.ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
         }else{
@@ -151,24 +152,24 @@ namespace pointcloud_to_laserscan
             const float &z = it->z;
 
             if ( std::isnan(x) || std::isnan(y) || std::isnan(z) ){
-                //NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
+                //ROS_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
                 continue;
             }
 
             if (z > max_height_ || z < min_height_){
-                //NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", z, min_height_, max_height_);
+                //ROS_DEBUG("rejected for height %f not in range (%f, %f)\n", z, min_height_, max_height_);
                 continue;
             }
 
             double range = hypot(x,y);
             if (range < range_min_){
-                //NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, x, y, z);
+                //ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, x, y, z);
                 continue;
             }
 
             double angle = atan2(y, x);
             if (angle < output.angle_min || angle > output.angle_max){
-                //NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output.angle_min, output.angle_max);
+                //ROS_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output.angle_min, output.angle_max);
                 continue;
             }
 
