@@ -33,6 +33,7 @@
       in parallel, using the OpenMP standard.
     </description>
   </class>
+</library>
 
 <!-- PCL IO library component -->
 <library path="lib/libpcl_ros_io">
