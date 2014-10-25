@@ -2,6 +2,14 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding target_frame
+  [Ability to specify frame in bag_to_pcd ](https://github.com/ros-perception/perception_pcl/issues/55)
+* Update pcl_nodelets.xml
+  Included missing closing library tag.  This was causing the pcl/Filter nodelets below the missing nodelet tag to not be exported correctly.
+* Contributors: Matt Derry, Paul Bovbel, Ruffin
+
 1.2.1 (2014-09-13)
 ------------------
 * clean up merge
