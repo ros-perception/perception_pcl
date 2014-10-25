@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.10 (2014-10-25)
+-------------------
 
 * update changelogs
 * clean up package.xml
