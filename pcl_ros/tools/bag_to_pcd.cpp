@@ -66,8 +66,8 @@ int
   ros::init (argc, argv, "bag_to_pcd");
   if (argc < 4)
   {
-    std::cerr << "Syntax is: " << argv[0] << " <file_in.bag> <topic> <output_directory>" << std::endl;
-    std::cerr << "Example: " << argv[0] << " data.bag /laser_tilt_cloud ./pointclouds" << std::endl;
+    std::cerr << "Syntax is: " << argv[0] << " <file_in.bag> <topic> <output_directory> [<target_frame>]" << std::endl;
+    std::cerr << "Example: " << argv[0] << " data.bag /laser_tilt_cloud ./pointclouds /base_link" << std::endl;
     return (-1);
   }
 
@@ -132,11 +132,20 @@ int
         continue;
       }
 
-      // Transform it
-      if (!pcl_ros::transformPointCloud ("/base_link", *cloud, cloud_t, tf_listener))
+      // If a target_frame was specified
+      if(argc > 4)
       {
-        ++view_it;
-        continue;
+        // Transform it
+        if (!pcl_ros::transformPointCloud (argv[4], *cloud, cloud_t, tf_listener))
+        {
+         ++view_it;
+         continue;
+        }
+      }
+      else
+      {
+        // Else, don't transform it
+        cloud_t = *cloud;
       }
 
       std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
