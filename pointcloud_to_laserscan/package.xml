@@ -8,6 +8,10 @@
     <author>Tully Foote</author>
 
     <license>BSD</license>
+    
+    <url type="website">http://ros.org/wiki/perception_pcl</url>
+    <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
+    <url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
     <buildtool_depend>catkin</buildtool_depend>
     <build_depend>dynamic_reconfigure</build_depend>
