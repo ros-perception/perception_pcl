@@ -25,7 +25,7 @@
   <run_depend>pcl_conversions</run_depend>
   <run_depend>pcl_msgs</run_depend>
   <run_depend>pcl_ros</run_depend>
-
+  <run_depend>pointcloud_to_laserscan</run_depend>
   <export>
     <metapackage/>
   </export>
