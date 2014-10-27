@@ -50,7 +50,7 @@ namespace pointcloud_to_laserscan
             nh_(nh), private_nh_(private_nh)
     {
 
-        private_nh.param<std::string>("target_frame", target_frame_, "base_link");
+        private_nh.param<std::string>("target_frame", target_frame_, "");
         private_nh_.param<double>("min_height", min_height_, 0.0);
         private_nh_.param<double>("max_height", max_height_, 1.0);
 
