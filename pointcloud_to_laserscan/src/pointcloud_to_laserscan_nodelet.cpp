@@ -38,7 +38,7 @@
  * Author: Paul Bovbel
  */
 
-#include <pointcloud_to_laserscan/PointCloudToLaserScanBase.h>
+#include <pointcloud_to_laserscan/pointcloud_to_laserscan_base.h>
 #include <nodelet/nodelet.h>
 
 

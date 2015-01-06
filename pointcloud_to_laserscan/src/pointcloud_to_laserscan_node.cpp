@@ -39,7 +39,7 @@
  */
 
 #include <ros/ros.h>
-#include <pointcloud_to_laserscan/PointCloudToLaserScanBase.h>
+#include <pointcloud_to_laserscan/pointcloud_to_laserscan_base.h>
 
 int main(int argc, char **argv){
     ros::init(argc, argv, "pointcloud_to_laserscan");

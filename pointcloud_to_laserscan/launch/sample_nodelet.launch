@@ -10,7 +10,7 @@
     </include>
 
     <!-- push pointcloud_to_laserscan nodelet into sensor's nodelet manager-->
-    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet $(arg camera)_nodelet_manager">
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet $(arg camera)_nodelet_manager">
 
         <param name="use_inf" value="true"/>
         <param name="use_concurrency" value="true"/>
