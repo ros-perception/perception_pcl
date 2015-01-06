@@ -30,5 +30,6 @@
     <run_depend>sensor_msgs</run_depend>
 
     <export>
+        <nodelet plugin="${prefix}/nodelets.xml"/>
     </export>
 </package>
