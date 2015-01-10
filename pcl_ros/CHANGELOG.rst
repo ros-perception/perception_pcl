@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2015-01-10)
+------------------
 * Update common.py
   Extended filter limits up to ±100000.0 in order to support intensity channel filtering.
 * Contributors: Dani Carbonell
