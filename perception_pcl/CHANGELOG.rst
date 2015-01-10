@@ -2,6 +2,11 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* clean up package.xml
+* Contributors: Paul Bovbel
+
 1.2.2 (2014-10-25)
 ------------------
 
