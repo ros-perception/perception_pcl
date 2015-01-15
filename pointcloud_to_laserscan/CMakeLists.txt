@@ -23,7 +23,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(pointcloud_to_laserscan src/pointcloud_to_laserscan_base.cpp src/pointcloud_to_laserscan_nodelet.cpp)
+add_library(pointcloud_to_laserscan src/pointcloud_to_laserscan_nodelet.cpp)
 target_link_libraries(pointcloud_to_laserscan ${catkin_LIBRARIES})
 
 add_executable(pointcloud_to_laserscan_node src/pointcloud_to_laserscan_node.cpp)
