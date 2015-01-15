@@ -2,6 +2,9 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.3 (2015-01-10)
 ------------------
 * Update common.py
