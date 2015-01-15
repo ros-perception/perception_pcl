@@ -50,7 +50,7 @@ namespace pointcloud_to_laserscan
 
   void PointCloudToLaserScanNodelet::onInit()
   {
-      nh_ = getMTPrivateNodeHandle();
+      nh_ = getMTNodeHandle();
       private_nh_ = getMTPrivateNodeHandle();
 
       private_nh_.param<std::string>("target_frame", target_frame_, "");
@@ -81,6 +81,24 @@ namespace pointcloud_to_laserscan
       pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 10,
           boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
           boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+  }
+
+  void PointCloudToLaserScanNodelet::connectCb()
+  {
+      boost::mutex::scoped_lock lock(connect_mutex_);
+      if (!sub_ && pub_.getNumSubscribers() > 0) {
+          NODELET_DEBUG("Connecting to depth topic.");
+          sub_ = nh_.subscribe("cloud_in", input_queue_size_, &PointCloudToLaserScanNodelet::cloudCb, this);
+      }
+  }
+
+  void PointCloudToLaserScanNodelet::disconnectCb()
+  {
+      boost::mutex::scoped_lock lock(connect_mutex_);
+      if (pub_.getNumSubscribers() == 0) {
+          NODELET_DEBUG("Unsubscribing from depth topic.");
+          sub_.shutdown();
+      }
   }
 
   void PointCloudToLaserScanNodelet::cloudCb(const PointCloud::ConstPtr &cloud_msg)
@@ -164,23 +182,6 @@ namespace pointcloud_to_laserscan
       pub_.publish(output);
   }
 
-  void PointCloudToLaserScanNodelet::connectCb()
-  {
-      boost::mutex::scoped_lock lock(connect_mutex_);
-      if (!sub_ && pub_.getNumSubscribers() > 0) {
-          NODELET_DEBUG("Connecting to depth topic.");
-          sub_ = nh_.subscribe("cloud_in", input_queue_size_, &PointCloudToLaserScanNodelet::cloudCb, this);
-      }
-  }
-
-  void PointCloudToLaserScanNodelet::disconnectCb()
-  {
-      boost::mutex::scoped_lock lock(connect_mutex_);
-      if (pub_.getNumSubscribers() == 0) {
-          NODELET_DEBUG("Unsubscribing from depth topic.");
-          sub_.shutdown();
-      }
-  }
 }
 
 PLUGINLIB_DECLARE_CLASS(pointcloud_to_laserscan, PointCloudToLaserScanNodelet, pointcloud_to_laserscan::PointCloudToLaserScanNodelet, nodelet::Nodelet);
