@@ -14,6 +14,7 @@
   	<url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
     <buildtool_depend>catkin</buildtool_depend>
+
     <build_depend>dynamic_reconfigure</build_depend>
     <build_depend>libpcl-all-dev</build_depend>
     <build_depend>message_filters</build_depend>
@@ -22,6 +23,7 @@
     <build_depend>roscpp</build_depend>
     <build_depend>roslaunch</build_depend>
     <build_depend>sensor_msgs</build_depend>
+
     <run_depend>dynamic_reconfigure</run_depend>
     <run_depend>libpcl-all-dev</run_depend>
     <run_depend>message_filters</run_depend>
