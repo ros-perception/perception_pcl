@@ -2,21 +2,19 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointcloud_to_laserscan)
 
 find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
   message_filters
   nodelet
-  pcl_ros
   roscpp
   sensor_msgs
-  roslaunch
   tf2
+  tf2_ros
+  geometry_msgs
 )
-find_package(PCL REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES pointcloud_to_laserscan
-  CATKIN_DEPENDS dynamic_reconfigure libpcl-all-dev message_filters nodelet pcl_ros roscpp sensor_msgs
+  CATKIN_DEPENDS roscpp message_filters nodelet sensor_msgs tf2 tf2_ros
 )
 
 include_directories(
