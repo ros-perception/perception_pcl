@@ -2,6 +2,15 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove stray dependencies
+* Refactor with tf2 and message filters
+* Remove roslaunch check
+* Fix regressions
+* Refactor to allow debug messages from node and nodelet
+* Contributors: Paul Bovbel
+
 1.2.3 (2015-01-10)
 ------------------
 * add launch tests
