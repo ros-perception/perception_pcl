@@ -41,22 +41,21 @@
 #ifndef POINTCLOUD_TO_LASERSCAN_POINTCLOUD_TO_LASERSCAN_NODELET
 #define POINTCLOUD_TO_LASERSCAN_POINTCLOUD_TO_LASERSCAN_NODELET
 
-#include <ros/ros.h>
-#include <boost/thread/mutex.hpp>
+#include "ros/ros.h"
+#include "boost/thread/mutex.hpp"
 
-#include <pcl/point_cloud.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/ros/conversions.h>
+#include "nodelet/nodelet.h"
+#include "tf2/buffer_core.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/message_filter.h"
+#include "message_filters/subscriber.h"
+#include "sensor_msgs/PointCloud2.h"
 
-#include <tf/transform_listener.h>
-#include <nodelet/nodelet.h>
 
 namespace pointcloud_to_laserscan
 {
-  typedef pcl::PointXYZ Point;
-  typedef pcl::PointCloud<Point> PointCloud;
-
+  typedef message_filters::Subscriber<sensor_msgs::PointCloud2> FilteredSub;
+  typedef tf2_ros::MessageFilter<sensor_msgs::PointCloud2> MessageFilter;
 /**
 * Class to process incoming pointclouds into laserscans. Some initial code was pulled from the defunct turtlebot
 * pointcloud_to_laserscan implementation.
@@ -65,12 +64,12 @@ namespace pointcloud_to_laserscan
   {
 
   public:
-    PointCloudToLaserScanNodelet() { };
+    PointCloudToLaserScanNodelet();
 
   private:
     virtual void onInit();
 
-    void cloudCb(const PointCloud::ConstPtr &cloud_msg);
+    void cloudCb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg);
 
     void connectCb();
 
@@ -78,9 +77,12 @@ namespace pointcloud_to_laserscan
 
     ros::NodeHandle nh_, private_nh_;
     ros::Publisher pub_;
-    ros::Subscriber sub_;
-    tf::TransformListener tf_;
     boost::mutex connect_mutex_;
+
+    tf2_ros::Buffer tf2_;
+    tf2_ros::TransformListener tf2_listener_;
+    boost::shared_ptr<FilteredSub> sub_;
+    boost::shared_ptr<MessageFilter> message_filter_;
 
     // ROS Parameters
     unsigned int input_queue_size_;
