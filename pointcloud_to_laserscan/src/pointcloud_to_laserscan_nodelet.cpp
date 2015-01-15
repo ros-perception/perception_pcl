@@ -38,39 +38,150 @@
  * Author: Paul Bovbel
  */
 
-#include <pointcloud_to_laserscan/pointcloud_to_laserscan_base.h>
+#include <pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet.h>
 #include <nodelet/nodelet.h>
-
+#include <sensor_msgs/LaserScan.h>
+#include <pcl_ros/transforms.h>
+#include <math.h>
+#include <pluginlib/class_list_macros.h>
 
 namespace pointcloud_to_laserscan
 {
 
-    class PointCloudToLaserScanNodelet : public nodelet::Nodelet
-    {
-    public:
-        PointCloudToLaserScanNodelet()  {};
+  void PointCloudToLaserScanNodelet::onInit()
+  {
+      nh_ = getMTPrivateNodeHandle();
+      private_nh_ = getMTPrivateNodeHandle();
 
-        ~PointCloudToLaserScanNodelet() {}
+      private_nh_.param<std::string>("target_frame", target_frame_, "");
+      private_nh_.param<double>("min_height", min_height_, 0.0);
+      private_nh_.param<double>("max_height", max_height_, 1.0);
 
-    private:
-        virtual void onInit()
-        {
-            bool use_concurrency;
-            getPrivateNodeHandle().param<bool>("use_concurrency", use_concurrency, false);
+      private_nh_.param<double>("angle_min", angle_min_, -M_PI/2.0);
+      private_nh_.param<double>("angle_max", angle_max_, M_PI/2.0);
+      private_nh_.param<double>("angle_increment", angle_increment_, M_PI/360.0);
+      private_nh_.param<double>("scan_time", scan_time_, 1.0/30.0);
+      private_nh_.param<double>("range_min", range_min_, 0.45);
+      private_nh_.param<double>("range_max", range_max_, 4.0);
 
-            if(use_concurrency){
-                cloud_to_scan.reset(new PointCloudToLaserScanBase(getMTNodeHandle(), getPrivateNodeHandle()));
-            }else{
-                cloud_to_scan.reset(new PointCloudToLaserScanBase(getNodeHandle(), getPrivateNodeHandle()));
-            }
+      int concurrency_level;
+      private_nh_.param<int>("concurrency_level", concurrency_level, true);
+      private_nh_.param<bool>("use_inf", use_inf_, true);
 
-        };
+      boost::mutex::scoped_lock lock(connect_mutex_);
 
-        boost::shared_ptr<PointCloudToLaserScanBase> cloud_to_scan;
-    };
+      // Only queue one pointcloud per running thread
+      if(concurrency_level > 0)
+      {
+          input_queue_size_ = concurrency_level;
+      }else{
+          input_queue_size_ = boost::thread::hardware_concurrency();
+      }
 
+      pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 10,
+          boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
+          boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+  }
+
+  void PointCloudToLaserScanNodelet::cloudCb(const PointCloud::ConstPtr &cloud_msg)
+  {
+      //pointer to pointcloud data to transform to laserscan
+      PointCloud::ConstPtr cloud_scan;
+
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_msg->header);
+
+      //build laserscan output
+      sensor_msgs::LaserScan output;
+      output.header = cloud_header;
+      output.angle_min = angle_min_;
+      output.angle_max = angle_max_;
+      output.angle_increment = angle_increment_;
+      output.time_increment = 0.0;
+      output.scan_time = scan_time_;
+      output.range_min = range_min_;
+      output.range_max = range_max_;
+
+      //decide if pointcloud needs to be transformed to a target frame
+      if(!target_frame_.empty() && cloud_header.frame_id != target_frame_){
+          output.header.frame_id = target_frame_;
+
+          if(tf_.waitForTransform(cloud_header.frame_id, target_frame_, cloud_header.stamp, ros::Duration(10.0))){
+              PointCloud::Ptr cloud_tf(new PointCloud);
+              pcl_ros::transformPointCloud(target_frame_, *cloud_msg, *cloud_tf, tf_);
+              cloud_scan = cloud_tf;
+          }else{
+              NODELET_WARN_STREAM_THROTTLE(1.0, "Can't transform cloud with frame " << cloud_header.frame_id << " into "
+                  "lasercan with frame " << target_frame_);
+              return;
+          }
+      }else{
+          cloud_scan = cloud_msg;
+      }
+
+      //determine amount of rays to create
+      uint32_t ranges_size = std::ceil((output.angle_max - output.angle_min) / output.angle_increment);
+
+      //determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
+      if(use_inf_){
+          output.ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+      }else{
+          output.ranges.assign(ranges_size, output.range_max + 1.0);
+      }
+
+      for (PointCloud::const_iterator it = cloud_scan->begin(); it != cloud_scan->end(); ++it){
+          const float &x = it->x;
+          const float &y = it->y;
+          const float &z = it->z;
+
+          if ( std::isnan(x) || std::isnan(y) || std::isnan(z) ){
+              NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
+              continue;
+          }
+
+          if (z > max_height_ || z < min_height_){
+              NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", z, min_height_, max_height_);
+              continue;
+          }
+
+          double range = hypot(x,y);
+          if (range < range_min_){
+              NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, x, y, z);
+              continue;
+          }
+
+          double angle = atan2(y, x);
+          if (angle < output.angle_min || angle > output.angle_max){
+              NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output.angle_min, output.angle_max);
+              continue;
+          }
+
+          //overwrite range at laserscan ray if new range is smaller
+          int index = (angle - output.angle_min) / output.angle_increment;
+          if (range < output.ranges[index]){
+              output.ranges[index] = range;
+          }
+      }
+      pub_.publish(output);
+  }
+
+  void PointCloudToLaserScanNodelet::connectCb()
+  {
+      boost::mutex::scoped_lock lock(connect_mutex_);
+      if (!sub_ && pub_.getNumSubscribers() > 0) {
+          NODELET_DEBUG("Connecting to depth topic.");
+          sub_ = nh_.subscribe("cloud_in", input_queue_size_, &PointCloudToLaserScanNodelet::cloudCb, this);
+      }
+  }
+
+  void PointCloudToLaserScanNodelet::disconnectCb()
+  {
+      boost::mutex::scoped_lock lock(connect_mutex_);
+      if (pub_.getNumSubscribers() == 0) {
+          NODELET_DEBUG("Unsubscribing from depth topic.");
+          sub_.shutdown();
+      }
+  }
 }
 
-#include <pluginlib/class_list_macros.h>
 PLUGINLIB_DECLARE_CLASS(pointcloud_to_laserscan, PointCloudToLaserScanNodelet, pointcloud_to_laserscan::PointCloudToLaserScanNodelet, nodelet::Nodelet);
 
