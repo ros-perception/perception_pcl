@@ -15,7 +15,7 @@
         <remap from="cloud_in" to="$(arg camera)/depth_registered/points_processed"/>
         <remap from="scan" to="$(arg camera)/scan"/>
         <rosparam>
-            target_frame: base_link
+            target_frame: base_link # Leave empty for no transform
             min_height: 0.0
             max_height: 1.0
 
