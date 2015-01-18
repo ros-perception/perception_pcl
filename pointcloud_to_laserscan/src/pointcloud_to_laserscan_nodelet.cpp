@@ -42,7 +42,6 @@
 #include <sensor_msgs/LaserScan.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include <geometry_msgs/PointStamped.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 namespace pointcloud_to_laserscan
