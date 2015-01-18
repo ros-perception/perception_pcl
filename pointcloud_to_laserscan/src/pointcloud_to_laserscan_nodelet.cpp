@@ -43,6 +43,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <geometry_msgs/PointStamped.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 namespace pointcloud_to_laserscan
 {
@@ -153,61 +154,52 @@ namespace pointcloud_to_laserscan
       output.ranges.assign(ranges_size, output.range_max + 1.0);
     }
 
-    // Pre-allocate for transformation
-    geometry_msgs::TransformStamped transform;
-    geometry_msgs::PointStamped in, out;
-    in.header = cloud_msg->header;
+    sensor_msgs::PointCloud2ConstPtr cloud_out;
+    sensor_msgs::PointCloud2Ptr cloud;
 
-    bool need_transform = !(output.header.frame_id == cloud_msg->header.frame_id);
-
-    // Fetch transform if necessary
-    if(need_transform)
+    // Transform cloud if necessary
+    if(!(output.header.frame_id == cloud_msg->header.frame_id))
     {
       try
       {
-        transform = tf2_.lookupTransform(target_frame_, cloud_msg->header.frame_id, cloud_msg->header.stamp);
+        cloud.reset(new sensor_msgs::PointCloud2);
+        tf2_.transform(*cloud_msg, *cloud, target_frame_, ros::Duration(tolerance_));
+        cloud_out = cloud;
       }
       catch (tf2::TransformException ex)
       {
         NODELET_ERROR_STREAM("Transform failure: " << ex.what());
         return;
       }
+    }else{
+      cloud_out = cloud_msg;
     }
 
     // Iterate through pointcloud
-    sensor_msgs::PointCloud2ConstIterator<double> iter_x(*cloud_msg, "x");
-    sensor_msgs::PointCloud2ConstIterator<double> iter_y(*cloud_msg, "y");
-    sensor_msgs::PointCloud2ConstIterator<double> iter_z(*cloud_msg, "z");
+    sensor_msgs::PointCloud2ConstIterator<double> iter_x(*cloud_out, "x");
+    sensor_msgs::PointCloud2ConstIterator<double> iter_y(*cloud_out, "y");
+    sensor_msgs::PointCloud2ConstIterator<double> iter_z(*cloud_out, "z");
 
     for(; iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z){
 
-      const double *x = &(*iter_x), *y = &(*iter_y), *z = &(*iter_z);
-
-      // Do transform if necessary
-      if(need_transform){
-        in.point.x = *x;  in.point.y = *y;  in.point.z = *z;
-        tf2::doTransform(in, out, transform);
-        x = &out.point.x; y = &out.point.y; z = &out.point.z;
-      }
-
-      if ( std::isnan(*x) || std::isnan(*y) || std::isnan(*z) ){
-        NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", *x, *y, *z);
+      if ( std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z) ){
+        NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", *iter_x, *iter_y, *iter_z);
         continue;
       }
 
-      if (*z > max_height_ || *z < min_height_){
-        NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", *z, min_height_, max_height_);
+      if (*iter_z > max_height_ || *iter_z < min_height_){
+        NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", *iter_z, min_height_, max_height_);
         continue;
       }
 
-      double range = hypot(*x,*y);
+      double range = hypot(*iter_x,*iter_y);
       if (range < range_min_){
-        NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, *x, *y,
-            *z);
+        NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, *iter_x, *iter_y,
+            *iter_z);
         continue;
       }
 
-      double angle = atan2(*y, *x);
+      double angle = atan2(*iter_y, *iter_x);
       if (angle < output.angle_min || angle > output.angle_max){
         NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output.angle_min, output.angle_max);
         continue;
