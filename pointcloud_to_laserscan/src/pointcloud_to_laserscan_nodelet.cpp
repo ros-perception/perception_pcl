@@ -58,6 +58,7 @@ namespace pointcloud_to_laserscan
     private_nh_ = getMTPrivateNodeHandle();
 
     private_nh_.param<std::string>("target_frame", target_frame_, "");
+    private_nh_.param<double>("tolerance", tolerance_, 0.0);
     private_nh_.param<double>("min_height", min_height_, 0.0);
     private_nh_.param<double>("max_height", max_height_, 1.0);
 
@@ -91,23 +92,31 @@ namespace pointcloud_to_laserscan
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
     if (!sub_ && pub_.getNumSubscribers() > 0) {
-      NODELET_DEBUG("Got a subscriber to laserscan, starting subscriber to point cloud");
+      NODELET_INFO("Got a subscriber to scan, starting subscriber to pointcloud");
       sub_.reset(new FilteredSub(nh_, "cloud_in", input_queue_size_));
       if(!target_frame_.empty())
       {
         message_filter_.reset(new MessageFilter(*sub_, tf2_, target_frame_, input_queue_size_, nh_));
+        message_filter_->setTolerance(ros::Duration(tolerance_));
         message_filter_->registerCallback(boost::bind(&PointCloudToLaserScanNodelet::cloudCb, this, _1));
+        message_filter_->registerFailureCallback(boost::bind(&PointCloudToLaserScanNodelet::failureCb, this, _1, _2));
       }else{
         sub_->registerCallback(boost::bind(&PointCloudToLaserScanNodelet::cloudCb, this, _1));
       }
     }
   }
 
+  void PointCloudToLaserScanNodelet::failureCb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg,
+      tf2_ros::filter_failure_reasons::FilterFailureReason reason){
+    NODELET_WARN_STREAM_THROTTLE(3.0, "Can't transform pointcloud from frame " << cloud_msg->header.frame_id << " to "
+        << message_filter_->getTargetFramesString() << " with tolerance " << tolerance_);
+  }
+
   void PointCloudToLaserScanNodelet::disconnectCb()
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
     if (pub_.getNumSubscribers() == 0) {
-      NODELET_DEBUG("No subscibers to laserscan, shutting down subscriber to point cloud");
+      NODELET_INFO("No subscibers to scan, shutting down subscriber to pointcloud");
       if(!target_frame_.empty())
       {
         message_filter_.reset();
