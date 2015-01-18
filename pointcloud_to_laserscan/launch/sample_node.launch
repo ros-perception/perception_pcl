@@ -16,6 +16,7 @@
         <remap from="scan" to="$(arg camera)/scan"/>
         <rosparam>
             target_frame: base_link # Leave empty for no transform
+            transform_tolerance: 1.0
             min_height: 0.0
             max_height: 1.0
 
