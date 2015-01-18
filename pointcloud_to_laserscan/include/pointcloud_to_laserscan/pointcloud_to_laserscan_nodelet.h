@@ -45,7 +45,7 @@
 #include "boost/thread/mutex.hpp"
 
 #include "nodelet/nodelet.h"
-#include "tf2/buffer_core.h"
+#include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/message_filter.h"
 #include "message_filters/subscriber.h"
