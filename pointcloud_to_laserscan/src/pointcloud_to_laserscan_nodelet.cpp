@@ -127,14 +127,14 @@ namespace pointcloud_to_laserscan
 
   void PointCloudToLaserScanNodelet::cloudCb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   {
-    if(target_frame_.empty()){
-      target_frame_ = cloud_msg->header.frame_id;
-    }
 
     //build laserscan output
     sensor_msgs::LaserScan output;
     output.header = cloud_msg->header;
-    output.header.frame_id = target_frame_;
+    if(!target_frame_.empty()){
+      output.header.frame_id = target_frame_;
+    }
+
     output.angle_min = angle_min_;
     output.angle_max = angle_max_;
     output.angle_increment = angle_increment_;
@@ -175,9 +175,9 @@ namespace pointcloud_to_laserscan
     }
 
     // Iterate through pointcloud
-    sensor_msgs::PointCloud2ConstIterator<double> iter_x(*cloud_out, "x");
-    sensor_msgs::PointCloud2ConstIterator<double> iter_y(*cloud_out, "y");
-    sensor_msgs::PointCloud2ConstIterator<double> iter_z(*cloud_out, "z");
+    sensor_msgs::PointCloud2ConstIterator<float> iter_x(*cloud_out, "x");
+    sensor_msgs::PointCloud2ConstIterator<float> iter_y(*cloud_out, "y");
+    sensor_msgs::PointCloud2ConstIterator<float> iter_z(*cloud_out, "z");
 
     for(; iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z){
 
@@ -217,4 +217,3 @@ namespace pointcloud_to_laserscan
 }
 
 PLUGINLIB_DECLARE_CLASS(pointcloud_to_laserscan, PointCloudToLaserScanNodelet, pointcloud_to_laserscan::PointCloudToLaserScanNodelet, nodelet::Nodelet);
-
