@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.5 (2015-01-20)
+------------------
 * Switch to tf_sensor_msgs for transform
 * Set parameters in sample launch files to default
 * Add tolerance parameter
