@@ -65,7 +65,7 @@ namespace pointcloud_to_laserscan
       private_nh_.param<double>("range_max", range_max_, 4.0);
 
       int concurrency_level;
-      private_nh_.param<int>("concurrency_level", concurrency_level, true);
+      private_nh_.param<int>("concurrency_level", concurrency_level, 1);
       private_nh_.param<bool>("use_inf", use_inf_, true);
 
       boost::mutex::scoped_lock lock(connect_mutex_);
