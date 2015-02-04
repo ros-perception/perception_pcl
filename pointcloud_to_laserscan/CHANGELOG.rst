@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2015-02-04)
+------------------
 * Fix default value for concurrency
 * Fix multithreaded lazy pub sub
 * Contributors: Paul Bovbel
