@@ -79,13 +79,13 @@ namespace pcl_conversions {
   inline
   void fromPCL(const pcl::uint64_t &pcl_stamp, ros::Time &stamp)
   {
-    stamp.fromNSec(pcl_stamp * 1e3);  // Convert from us to ns
+    stamp.fromNSec(pcl_stamp * 1000ull);  // Convert from us to ns
   }
 
   inline
   void toPCL(const ros::Time &stamp, pcl::uint64_t &pcl_stamp)
   {
-    pcl_stamp = stamp.toNSec() / 1e3;  // Convert from ns to us
+    pcl_stamp = stamp.toNSec() / 1000ull;  // Convert from ns to us
   }
 
   inline
