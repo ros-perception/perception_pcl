@@ -168,6 +168,20 @@ target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} 
 add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
 target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 
+#############
+## Testing ##
+#############
+
+if(CATKIN_ENABLE_TESTING)
+  # we don't have to find_package GTEST; catkin does it for us
+  include_directories(${GTEST_INCLUDE_DIRS})
+  add_executable(test_tf_message_filter_pcl EXCLUDE_FROM_ALL src/test/test_tf_message_filter_pcl.cpp)
+  target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
+  add_dependencies(tests test_tf_message_filter_pcl)
+  find_package(rostest)
+  add_rostest(tests/test_tf_message_filter_pcl.xml)
+endif(CATKIN_ENABLE_TESTING)
+
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
