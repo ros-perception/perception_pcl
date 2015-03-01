@@ -21,6 +21,21 @@
       containing points and normals, in parallel, using the OpenMP standard.
     </description>
   </class>
+
+  <class name="pcl/SHOTEstimation" type="SHOTEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      SHOTEstimation estimates SHOT descriptor for a given point cloud dataset
+      containing points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/SHOTEstimationOMP" type="SHOTEstimationOMP" base_class_type="nodelet::Nodelet">
+    <description>
+      SHOTEstimationOMP estimates SHOT descriptor for a given point cloud dataset
+      containing points and normals, in parallel, using the OpenMP standard.
+    </description>
+  </class>
+
   
   <class name="pcl/MomentInvariantsEstimation" type="MomentInvariantsEstimation" base_class_type="nodelet::Nodelet">
     <description>
