@@ -27,7 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \author Josh Faust */
+/** \author Brice Rebsamen
+ * Copied and adapted from geometry/test_message_filter.cpp
+ */
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -365,8 +367,8 @@ TEST(MessageFilter, removeCallback)
     // Have callback fire at high rate to increase chances of race condition
     tf_filter.reset(
       new tf::MessageFilter<PCDType>(*tf_listener,
-                                                         "map", 5, threaded_nh,
-                                                         ros::Duration(0.000001)));
+                                     "map", 5, threaded_nh,
+                                     ros::Duration(0.000001)));
 
     // Sleep and reset; sleeping increases chances of race condition
     ros::Duration(0.001).sleep();
