@@ -175,11 +175,11 @@ target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${ca
 if(CATKIN_ENABLE_TESTING)
   # we don't have to find_package GTEST; catkin does it for us
   include_directories(${GTEST_INCLUDE_DIRS})
-  add_executable(test_tf_message_filter_pcl EXCLUDE_FROM_ALL src/test/test_tf_message_filter_pcl.cpp)
-  target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
-  add_dependencies(tests test_tf_message_filter_pcl)
+  #add_executable(test_tf_message_filter_pcl EXCLUDE_FROM_ALL src/test/test_tf_message_filter_pcl.cpp)
+  #target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
+  #add_dependencies(tests test_tf_message_filter_pcl)
   find_package(rostest)
-  add_rostest(tests/test_tf_message_filter_pcl.xml)
+  #add_rostest(tests/test_tf_message_filter_pcl.xml)
 endif(CATKIN_ENABLE_TESTING)
 
 
