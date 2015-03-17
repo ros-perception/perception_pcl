@@ -95,6 +95,9 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const Indic
     cloud_tf.reset (new PointCloud2 (cloud_transformed));
   }
 
+  // Copy timestamp to keep it
+  cloud_tf->header.stamp = input->header.stamp;
+  
   // Publish a boost shared ptr
   pub_output_.publish (cloud_tf);
 }
