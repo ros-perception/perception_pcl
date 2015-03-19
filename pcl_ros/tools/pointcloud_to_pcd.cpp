@@ -63,6 +63,8 @@ class PointCloudToPCD
 
   private:
     std::string prefix_;
+    bool binary_;
+    bool compressed_;
 
   public:
     string cloud_topic_;
@@ -86,12 +88,30 @@ class PointCloudToPCD
       ss << prefix_ << cloud->header.stamp << ".pcd";
       ROS_INFO ("Data saved to %s", ss.str ().c_str ());
 
-      pcl::io::savePCDFile (ss.str (), *cloud, Eigen::Vector4f::Zero (),
-                            Eigen::Quaternionf::Identity (), false);
+      pcl::PCDWriter writer;
+      if(binary_)
+	{
+	  if(compressed_)
+	    {
+	      writer.writeBinaryCompressed (ss.str (), *cloud, Eigen::Vector4f::Zero (),
+					    Eigen::Quaternionf::Identity ());
+	    }
+	  else
+	    {
+	      writer.writeBinary (ss.str (), *cloud, Eigen::Vector4f::Zero (),
+				  Eigen::Quaternionf::Identity ());
+	    }
+	}
+      else
+	{
+	  writer.writeASCII (ss.str (), *cloud, Eigen::Vector4f::Zero (),
+			     Eigen::Quaternionf::Identity (), 8);
+	}
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    PointCloudToPCD ()
+    PointCloudToPCD () : binary_(false), compressed_(false)
     {
       // Check if a prefix parameter is defined for output file names.
       ros::NodeHandle priv_nh("~");
@@ -104,6 +124,24 @@ class PointCloudToPCD
           ROS_WARN_STREAM ("Non-private PCD prefix parameter is DEPRECATED: "
                            << prefix_);
         }
+
+      priv_nh.getParam ("binary", binary_);
+      priv_nh.getParam ("compressed", compressed_);
+      if(binary_)
+	{
+	  if(compressed_)
+	    {
+	      ROS_INFO_STREAM ("Saving as binary compressed PCD");
+	    }
+	  else
+	    {
+	      ROS_INFO_STREAM ("Saving as binary PCD");
+	    }
+	}
+      else
+	{
+	  ROS_INFO_STREAM ("Saving as binary PCD");
+	}
 
       cloud_topic_ = "input";
 
