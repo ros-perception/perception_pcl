@@ -100,6 +100,49 @@ TEST_F(PCLConversionTests, pointcloud2Conversion) {
 
 } // namespace
 
+
+struct StampTestData
+{
+  const ros::Time stamp_;
+  ros::Time stamp2_;
+
+  explicit StampTestData(const ros::Time &stamp)
+    : stamp_(stamp)
+  {
+    pcl::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(stamp_, pcl_stamp);
+    pcl_conversions::fromPCL(pcl_stamp, stamp2_);
+  }
+};
+
+TEST(PCLConversionStamp, Stamps)
+{
+  {
+    const StampTestData d(ros::Time(1.000001));
+    EXPECT_TRUE(d.stamp_==d.stamp2_);
+  }
+
+  {
+    const StampTestData d(ros::Time(1.999999));
+    EXPECT_TRUE(d.stamp_==d.stamp2_);
+  }
+
+  {
+    const StampTestData d(ros::Time(1.999));
+    EXPECT_TRUE(d.stamp_==d.stamp2_);
+  }
+
+  {
+    const StampTestData d(ros::Time(1423680574, 746000000));
+    EXPECT_TRUE(d.stamp_==d.stamp2_);
+  }
+
+  {
+    const StampTestData d(ros::Time(1423680629, 901000000));
+    EXPECT_TRUE(d.stamp_==d.stamp2_);
+  }
+}
+
 int main(int argc, char **argv) {
   try {
     ::testing::InitGoogleTest(&argc, argv);
