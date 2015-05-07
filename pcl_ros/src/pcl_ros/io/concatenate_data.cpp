@@ -201,7 +201,6 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
   //ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
   PointCloud2::Ptr in1_t (new PointCloud2 ());
   PointCloud2::Ptr in2_t (new PointCloud2 ());
-
   // Transform the point clouds into the specified output frame
   if (output_frame_ != in1.header.frame_id)
     pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
@@ -215,6 +214,8 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
 
   // Concatenate the results
   pcl::concatenatePointCloud (*in1_t, *in2_t, out);
+  // Copy header
+  out.header.stamp = in1.header.stamp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,21 +229,21 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
   PointCloud2::Ptr out1 (new PointCloud2 ());
   PointCloud2::Ptr out2 (new PointCloud2 ());
   pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1);
-  if (in3)
+  if (in3 && in3->width * in3->height > 0)
   {
     pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in3, *out2);
     out1 = out2;
-    if (in4)
+    if (in4 && in4->width * in4->height > 0)
     {
       pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in4, *out1);
-      if (in5)
+      if (in5 && in5->width * in5->height > 0)
       {
         pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in5, *out2);
         out1 = out2;
-        if (in6)
+        if (in6 && in6->width * in6->height > 0)
         {
           pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in6, *out1);
-          if (in7)
+          if (in7 && in7->width * in7->height > 0)
           {
             pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in7, *out2);
             out1 = out2;
