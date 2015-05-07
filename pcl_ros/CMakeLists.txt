@@ -104,6 +104,8 @@ add_library(pcl_ros_features
   src/pcl_ros/features/boundary.cpp
   src/pcl_ros/features/fpfh.cpp
   src/pcl_ros/features/fpfh_omp.cpp
+  src/pcl_ros/features/shot.cpp
+  src/pcl_ros/features/shot_omp.cpp
   src/pcl_ros/features/moment_invariants.cpp
   src/pcl_ros/features/normal_3d.cpp
   src/pcl_ros/features/normal_3d_omp.cpp
