@@ -167,6 +167,11 @@
       StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data.
     </description>
   </class>
+  <class name="pcl/RadiusOutlierRemoval" type="RadiusOutlierRemoval" base_class_type="nodelet::Nodelet">
+    <description>
+      RadiusOutlierRemoval uses point neighborhood statistics to filter outlier data.
+    </description>
+  </class>
 
   <class name="pcl/CropBox" type="CropBox" base_class_type="nodelet::Nodelet">
     <description>
