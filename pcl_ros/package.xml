@@ -20,8 +20,11 @@
   <url type="repository">https://github.com/ros-perception/perception_pcl</url>
   
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>cmake_modules</build_depend>
+  <build_depend>rosconsole</build_depend>
+  <build_depend>genmsg</build_depend>
+  <build_depend>roslib</build_depend>
+
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>nodelet</build_depend>

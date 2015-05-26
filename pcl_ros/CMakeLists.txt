@@ -33,13 +33,6 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
 )
 
-## Add link directories
-link_directories(
-  ${Boost_LIBRARY_DIRS}
-  ${Eigen_LIBRARY_DIRS}
-  ${PCL_LIBRARY_DIRS}
-)
-
 ## Generate dynamic_reconfigure
 generate_dynamic_reconfigure_options(
   cfg/EuclideanClusterExtraction.cfg
@@ -83,7 +76,7 @@ catkin_package(
 
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
-target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_tf pcl_ros_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ## Nodelets
@@ -96,7 +89,7 @@ add_library(pcl_ros_io
   src/pcl_ros/io/io.cpp
   src/pcl_ros/io/pcd_io.cpp
 )
-target_link_libraries(pcl_ros_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 class_loader_hide_library_symbols(pcl_ros_io)
 
 ## Declare the pcl_ros_features library
@@ -115,7 +108,7 @@ add_library(pcl_ros_features
   src/pcl_ros/features/principal_curvatures.cpp
   src/pcl_ros/features/vfh.cpp
 )
-target_link_libraries (pcl_ros_features ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries (pcl_ros_features ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_features ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_features)
 
@@ -131,7 +124,7 @@ add_library(pcl_ros_filters
   src/pcl_ros/filters/voxel_grid.cpp
   src/pcl_ros/filters/crop_box.cpp
 )
-target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
 
@@ -143,7 +136,7 @@ add_library (pcl_ros_segmentation
   src/pcl_ros/segmentation/segment_differences.cpp
   src/pcl_ros/segmentation/segmentation.cpp
 )
-target_link_libraries(pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_segmentation ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_segmentation)
 
@@ -154,26 +147,26 @@ add_library (pcl_ros_surface
   src/pcl_ros/surface/convex_hull.cpp
   src/pcl_ros/surface/moving_least_squares.cpp
 )
-target_link_libraries(pcl_ros_surface ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_surface ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_surface ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_surface)
 
 ## Tools
 
 add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
-target_link_libraries(pcd_to_pointcloud pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcd_to_pointcloud pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-target_link_libraries(pointcloud_to_pcd pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pointcloud_to_pcd pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
-target_link_libraries(bag_to_pcd pcl_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(bag_to_pcd pcl_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
-target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
-target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
 
 
 install(DIRECTORY include/${PROJECT_NAME}/
