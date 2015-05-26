@@ -42,6 +42,9 @@
 #include <pcl/filters/radius_outlier_removal.h>
 #include "pcl_ros/filters/filter.h"
 
+// Dynamic reconfigure
+#include "pcl_ros/RadiusOutlierRemovalConfig.h"
+
 namespace pcl_ros
 {
   /** \brief @b RadiusOutlierRemoval is a simple filter that removes outliers if the number of neighbors in a certain
@@ -52,6 +55,9 @@ namespace pcl_ros
   class RadiusOutlierRemoval : public Filter
   {
     protected:
+      /** \brief Pointer to a dynamic reconfigure service. */
+      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > srv_;
+
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
@@ -72,9 +78,17 @@ namespace pcl_ros
 
       /** \brief Child initialization routine.
         * \param nh ROS node handle
+        * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
-      virtual inline bool child_init (ros::NodeHandle &nh) { return (true); }
+    virtual inline bool child_init (ros::NodeHandle &nh, bool &has_service);
 
+      /** \brief Dynamic reconfigure callback
+        * \param config the config object
+        * \param level the dynamic reconfigure level
+        */
+      void config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level);
+
+    
     private:
       /** \brief The PCL filter implementation used. */
       pcl::RadiusOutlierRemoval<pcl::PCLPointCloud2> impl_;
