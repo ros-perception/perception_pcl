@@ -38,6 +38,40 @@
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl_ros::RadiusOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_service)
+{
+  // Enable the dynamic reconfigure service
+  has_service = true;
+  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
+  dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
+  srv_->setCallback (f);
+
+  return (true);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::RadiusOutlierRemoval::config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level)
+{
+  boost::mutex::scoped_lock lock (mutex_);
+
+  if (impl_.getMinNeighborsInRadius () != config.min_neighbors)
+  {
+    impl_.setMinNeighborsInRadius (config.min_neighbors);
+    NODELET_DEBUG ("[%s::config_callback] Setting the number of neighbors in radius: %d.", getName ().c_str (), config.min_neighbors);
+  }
+
+  if (impl_.getRadiusSearch () != config.radius_search)
+  {
+    impl_.setRadiusSearch (config.radius_search);
+    NODELET_DEBUG ("[%s::config_callback] Setting the radius to search neighbors: %f.", getName ().c_str (), config.radius_search);
+  }
+  
+}
+
+
 typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
 PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet);
 
