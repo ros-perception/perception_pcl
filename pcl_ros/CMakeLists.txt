@@ -52,6 +52,7 @@ generate_dynamic_reconfigure_options(
   cfg/SACSegmentationFromNormals.cfg
   cfg/SegmentDifferences.cfg
   cfg/StatisticalOutlierRemoval.cfg
+  cfg/RadiusOutlierRemoval.cfg
   cfg/VoxelGrid.cfg
   cfg/CropBox.cfg
 )
