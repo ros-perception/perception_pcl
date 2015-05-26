@@ -47,6 +47,41 @@
       in parallel, using the OpenMP standard.
     </description>
   </class>
+
+  <class name="pcl/NormalEstimationTBB" type="NormalEstimationTBB" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and curvatures, in
+      parallel, using Intel's Threading Building Blocks library.
+    </description>
+  </class>
+
+  <class name="pcl/NormalEstimation" type="NormalEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      NormalEstimation estimates local surface properties at each 3D point, such as surface normals and curvatures.
+    </description>
+  </class>
+
+  <class name="pcl/PFHEstimation" type="PFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      PFHEstimation estimates the Point Feature Histogram (PFH) descriptor for a given point cloud dataset containing
+      points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/PrincipalCurvaturesEstimation" type="PrincipalCurvaturesEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of principal surface 
+      curvatures for a given point cloud dataset containing points and normals.
+    </description>
+  </class>
+
+  <class name="pcl/VFHEstimation" type="VFHEstimation" base_class_type="nodelet::Nodelet">
+    <description>
+      VFHEstimation estimates the Viewpoint Feature Histogram (VFH) global descriptor for a given point cloud cluster dataset
+      containing points and normals.
+    </description>
+  </class>
+
 </library>
 
 <!-- PCL IO library component -->
@@ -143,5 +178,55 @@
   </class>
 </library>
 
+<!-- PCL Segmentation library component -->
+<library path="lib/libpcl_ros_segmentation">
+  <class name="pcl/ExtractPolygonalPrismData" type="ExtractPolygonalPrismData" base_class_type="nodelet::Nodelet">
+    <description>
+      ExtractPolygonalPrismData uses a set of point indices that represent a planar model, and together with a given
+      height, generates a 3D polygonal prism. The polygonal prism is then used to segment all points lying inside it.
+    </description>
+  </class>
 
+   <class name="pcl/EuclideanClusterExtraction" type="EuclideanClusterExtraction" base_class_type="nodelet::Nodelet">
+     <description>
+       EuclideanClusterExtraction represents a segmentation class for cluster extraction in an Euclidean sense.
+    </description>
+  </class>
+
+  <class name="pcl/SACSegmentationFromNormals" type="SACSegmentationFromNormals" base_class_type="nodelet::Nodelet">
+    <description>
+      SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in the sense that
+      it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation.
+    </description>
+  </class>
+
+  <class name="pcl/SACSegmentation" type="SACSegmentation" base_class_type="nodelet::Nodelet">
+    <description>
+      SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in the sense that
+      it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation.
+    </description>
+  </class>
+
+  <class name="pcl/SegmentDifferences" type="SegmentDifferences" base_class_type="nodelet::Nodelet">
+     <description>
+       SegmentDifferences obtains the difference between two spatially aligned point clouds and returns the
+       difference between them for a maximum given distance threshold.
+    </description>
+  </class>
+
+</library>
+
+<!-- PCL Surface reconstruction library component -->
+<library path="lib/libpcl_ros_surface">
+  <class name="pcl/MovingLeastSquares" type="MovingLeastSquares" base_class_type="nodelet::Nodelet">
+    <description>
+      MovingLeastSquares is an implementation of the MLS algorithm for data reconstruction through bivariate polynomial fitting.
+    </description>
+  </class>
+  <class name="pcl/ConvexHull2D" type="ConvexHull2D" base_class_type="nodelet::Nodelet">
+    <description>
+      ConvexHull2D represents a 2D ConvexHull implementation.
+    </description>
+  </class>
+</library>
 
