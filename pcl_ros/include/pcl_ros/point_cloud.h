@@ -109,29 +109,30 @@ namespace ros
       static const char* value(const pcl::PointCloud<T>&) { return value(); }
     };
 
-    template<typename T> struct HasHeader<pcl::PointCloud<T> > : TrueType {};
+    // pcl point clouds message don't have a ROS compatible header
+    // the specialized meta functions below (TimeStamp and FrameId)
+    // can be used to get the header data.
+    template<typename T> struct HasHeader<pcl::PointCloud<T> > : FalseType {};
 
-    // This is bad because it will only work for pcl::PointXYZ, but I can't
-    // find another way around ambiguous partial template specialization...
-    template<>
-    struct TimeStamp<pcl::PointCloud<pcl::PointXYZ> >
+    template<typename T>
+    struct TimeStamp<pcl::PointCloud<T> >
     {
       // This specialization could be dangerous, but it's the best I can do.
       // If this TimeStamp struct is destroyed before they are done with the
       // pointer returned by the first functions may go out of scope, but there
       // isn't a lot I can do about that. This is a good reason to refuse to
       // returning pointers like this...
-      static ros::Time* pointer(pcl::PointCloud<pcl::PointXYZ> &m) {
+      static ros::Time* pointer(typename pcl::PointCloud<T> &m) {
         header_.reset(new std_msgs::Header());
         pcl_conversions::fromPCL(m.header, *(header_));
         return &(header_->stamp);
       }
-      static ros::Time const* pointer(const pcl::PointCloud<pcl::PointXYZ>& m) {
+      static ros::Time const* pointer(const typename pcl::PointCloud<T>& m) {
         header_const_.reset(new std_msgs::Header());
         pcl_conversions::fromPCL(m.header, *(header_const_));
         return &(header_const_->stamp);
       }
-      static ros::Time value(const pcl::PointCloud<pcl::PointXYZ>& m) {
+      static ros::Time value(const typename pcl::PointCloud<T>& m) {
         return pcl_conversions::fromPCL(m.header).stamp;
       }
     private:
@@ -139,30 +140,12 @@ namespace ros
       static boost::shared_ptr<std_msgs::Header> header_const_;
     };
 
-    template<>
-    struct TimeStamp<pcl::PointCloud<pcl::Normal> >
+    template<typename T>
+    struct FrameId<pcl::PointCloud<T> >
     {
-      // This specialization could be dangerous, but it's the best I can do.
-      // If this TimeStamp struct is destroyed before they are done with the
-      // pointer returned by the first functions may go out of scope, but there
-      // isn't a lot I can do about that. This is a good reason to refuse to
-      // returning pointers like this...
-      static ros::Time* pointer(pcl::PointCloud<pcl::Normal> &m) {
-        header_.reset(new std_msgs::Header());
-        pcl_conversions::fromPCL(m.header, *(header_));
-        return &(header_->stamp);
-      }
-      static ros::Time const* pointer(const pcl::PointCloud<pcl::Normal>& m) {
-        header_const_.reset(new std_msgs::Header());
-        pcl_conversions::fromPCL(m.header, *(header_const_));
-        return &(header_const_->stamp);
-      }
-      static ros::Time value(const pcl::PointCloud<pcl::Normal>& m) {
-        return pcl_conversions::fromPCL(m.header).stamp;
-      }
-    private:
-      static boost::shared_ptr<std_msgs::Header> header_;
-      static boost::shared_ptr<std_msgs::Header> header_const_;
+      static std::string* pointer(pcl::PointCloud<T>& m) { return &m.header.frame_id; }
+      static std::string const* pointer(const pcl::PointCloud<T>& m) { return &m.header.frame_id; }
+      static std::string value(const pcl::PointCloud<T>& m) { return m.header.frame_id; }
     };
 
   } // namespace ros::message_traits

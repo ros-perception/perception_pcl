@@ -58,6 +58,8 @@
   <run_depend>tf</run_depend>
   <run_depend>python-vtk</run_depend>
   <run_depend>libvtk-java</run_depend>
+  
+  <test_depend>rostest</test_depend>
 
   <export>
      <nodelet plugin="${prefix}/pcl_nodelets.xml"/>
