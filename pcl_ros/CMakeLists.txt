@@ -4,7 +4,7 @@ project(pcl_ros)
 ## Find system dependencies
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
 
 ## Find catkin packages
@@ -29,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 include_directories(include
   ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
 )
 
@@ -70,13 +70,13 @@ catkin_package(
     tf
   DEPENDS
     Boost
-    Eigen
+    Eigen3
     PCL
 )
 
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
-target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_tf pcl_ros_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ## Nodelets
@@ -89,7 +89,7 @@ add_library(pcl_ros_io
   src/pcl_ros/io/io.cpp
   src/pcl_ros/io/pcd_io.cpp
 )
-target_link_libraries(pcl_ros_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 class_loader_hide_library_symbols(pcl_ros_io)
 
 ## Declare the pcl_ros_features library
@@ -108,7 +108,7 @@ add_library(pcl_ros_features
   src/pcl_ros/features/principal_curvatures.cpp
   src/pcl_ros/features/vfh.cpp
 )
-target_link_libraries (pcl_ros_features ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries (pcl_ros_features ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_features ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_features)
 
@@ -124,7 +124,7 @@ add_library(pcl_ros_filters
   src/pcl_ros/filters/voxel_grid.cpp
   src/pcl_ros/filters/crop_box.cpp
 )
-target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
 
@@ -136,7 +136,7 @@ add_library (pcl_ros_segmentation
   src/pcl_ros/segmentation/segment_differences.cpp
   src/pcl_ros/segmentation/segmentation.cpp
 )
-target_link_libraries(pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_segmentation ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_segmentation)
 
@@ -147,39 +147,35 @@ add_library (pcl_ros_surface
   src/pcl_ros/surface/convex_hull.cpp
   src/pcl_ros/surface/moving_least_squares.cpp
 )
-target_link_libraries(pcl_ros_surface ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_surface ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_surface ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_surface)
 
 ## Tools
 
 add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
-target_link_libraries(pcd_to_pointcloud pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcd_to_pointcloud pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-target_link_libraries(pointcloud_to_pcd pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARIES})
+target_link_libraries(pointcloud_to_pcd pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
-target_link_libraries(bag_to_pcd pcl_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARY_DIRS} ${PCL_LIBRARIES})
+target_link_libraries(bag_to_pcd pcl_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
-target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
-target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 #############
 ## Testing ##
 #############
 
 if(CATKIN_ENABLE_TESTING)
-  # we don't have to find_package GTEST; catkin does it for us
-  include_directories(${GTEST_INCLUDE_DIRS})
-  #add_executable(test_tf_message_filter_pcl EXCLUDE_FROM_ALL src/test/test_tf_message_filter_pcl.cpp)
-  #target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
-  #add_dependencies(tests test_tf_message_filter_pcl)
-  find_package(rostest)
-  #add_rostest(tests/test_tf_message_filter_pcl.xml)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(test_tf_message_filter_pcl tests/test_tf_message_filter_pcl.launch src/test/test_tf_message_filter_pcl.cpp)
+  target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
 endif(CATKIN_ENABLE_TESTING)
 
 
