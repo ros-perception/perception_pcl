@@ -2,6 +2,13 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added a test for rounding errors in stamp conversion
+  for some values the test fails.
+* add pcl::PointCloud to Image msg converter for extracting the rgb component of a cloud
+* Contributors: Brice Rebsamen, Lucid One, Michael Ferguson, Paul Bovbel
+
 0.2.0 (2014-04-10)
 ------------------
 * Added conversions for stamp types
