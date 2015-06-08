@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2015-06-08)
+------------------
 
 * Cleanup pointcloud_to_laserscan launch files
 * Contributors: Paul Bovbel

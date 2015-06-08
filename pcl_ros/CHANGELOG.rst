@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2015-06-08)
+------------------
 * Sync pcl_nodelets.xml from hydro to indigo
   Fixes to pass catkin lint -W1
 * Fixes `#87 <https://github.com/ros-perception/perception_pcl/issues/87>`_ for Indigo
