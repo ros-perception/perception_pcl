@@ -2,6 +2,16 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Sync pcl_nodelets.xml from hydro to indigo
+  Fixes to pass catkin lint -W1
+* Fixes `#87 <https://github.com/ros-perception/perception_pcl/issues/87>`_ for Indigo
+* Fixes `#85 <https://github.com/ros-perception/perception_pcl/issues/85>`_ for Indigo
+* Fixes `#77 <https://github.com/ros-perception/perception_pcl/issues/77>`_ and `#80 <https://github.com/ros-perception/perception_pcl/issues/80>`_ for indigo
+* Added option to save pointclouds in binary and binary compressed format
+* Contributors: Lucid One, Mitchell Wills
+
 1.2.6 (2015-02-04)
 ------------------
 
