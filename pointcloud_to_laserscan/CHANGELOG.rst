@@ -5,6 +5,9 @@ Changelog for package pointcloud_to_laserscan
 Forthcoming
 -----------
 
+* Cleanup pointcloud_to_laserscan launch files
+* Contributors: Paul Bovbel
+
 1.2.6 (2015-02-04)
 ------------------
 * Fix default value for concurrency
