@@ -59,6 +59,24 @@ typedef sensor_msgs::PointCloud2 PointCloud;
 typedef PointCloud::Ptr PointCloudPtr;
 typedef PointCloud::ConstPtr PointCloudConstPtr;
 
+
+bool transform(std::string &target_frame, const PointCloud &cloud, PointCloud &transformed)
+{
+  static tf::TransformListener tf_listener;
+
+  return pcl_ros::transformPointCloud (target_frame, cloud, transformed, tf_listener);
+}
+
+void sendTransform(tf::tfMessage::ConstPtr tf)
+{
+  static tf::TransformBroadcaster tf_broadcaster;
+  ros::Duration r (0.001);
+
+  tf_broadcaster.sendTransform (tf->transforms);
+  ros::spinOnce ();
+  r.sleep ();
+}
+
 /* ---[ */
 int
   main (int argc, char** argv)
@@ -71,9 +89,11 @@ int
     return (-1);
   }
 
-  // TF
-  tf::TransformListener tf_listener;
-  tf::TransformBroadcaster tf_broadcaster;
+  std::string target_frame;
+  if (argv[4] != NULL)
+  {
+    target_frame = std::string (argv[4]);
+  }
 
   rosbag::Bag bag;
   rosbag::View view;
@@ -82,16 +102,19 @@ int
   try
   {
     bag.open (argv[1], rosbag::bagmode::Read);
-  } 
-  catch (rosbag::BagException) 
+  }
+  catch (rosbag::BagException)
   {
     std::cerr << "Error opening file " << argv[1] << std::endl;
     return (-1);
   }
 
   view.addQuery (bag, rosbag::TypeQuery ("sensor_msgs/PointCloud2"));
-  view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
-  view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
+  if (!target_frame.empty ())
+  {
+    view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
+    view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
+  }
   view_it = view.begin ();
 
   std::string output_dir = std::string (argv[3]);
@@ -109,8 +132,6 @@ int
   // Add the PointCloud2 handler
   std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << argv[2] << " to " << output_dir << std::endl;
 
-  PointCloud cloud_t;
-  ros::Duration r (0.001);
   // Loop over the whole bag file
   while (view_it != view.end ())
   {
@@ -118,45 +139,41 @@ int
     tf::tfMessage::ConstPtr tf = view_it->instantiate<tf::tfMessage> ();
     if (tf != NULL)
     {
-      tf_broadcaster.sendTransform (tf->transforms);
-      ros::spinOnce ();
-      r.sleep ();
+      sendTransform (tf);
+      ++view_it;
+      continue;
     }
-    else
+
+    PointCloudConstPtr cloud = view_it->instantiate<PointCloud> ();
+    if (cloud == NULL)
     {
-      // Get the PointCloud2 message
-      PointCloudConstPtr cloud = view_it->instantiate<PointCloud> ();
-      if (cloud == NULL)
+      ++view_it;
+      continue;
+    }
+
+    PointCloud transformed;
+    // Transform if a target frame was specified.
+    if (!target_frame.empty ())
+    {
+      if (!transform (target_frame, *cloud, transformed))
       {
         ++view_it;
         continue;
       }
-
-      // If a target_frame was specified
-      if(argc > 4)
-      {
-        // Transform it
-        if (!pcl_ros::transformPointCloud (argv[4], *cloud, cloud_t, tf_listener))
-        {
-         ++view_it;
-         continue;
-        }
-      }
-      else
-      {
-        // Else, don't transform it
-        cloud_t = *cloud;
-      }
-
-      std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
-
-      std::stringstream ss;
-      ss << output_dir << "/" << cloud_t.header.stamp << ".pcd";
-      std::cerr << "Data saved to " << ss.str () << std::endl;
-      pcl::io::savePCDFile (ss.str (), cloud_t, Eigen::Vector4f::Zero (),
-                            Eigen::Quaternionf::Identity (), true);
     }
-    // Increment the iterator
+    else
+    {
+      transformed = *cloud;
+    }
+
+    std::cerr << "Got " << transformed.width * transformed.height << " data points in frame " << transformed.header.frame_id << " with the following fields: " << pcl::getFieldsList (transformed) << std::endl;
+
+    std::stringstream ss;
+    ss << output_dir << "/" << transformed.header.stamp << ".pcd";
+    std::cerr << "Data saved to " << ss.str () << std::endl;
+    pcl::io::savePCDFile (ss.str (), transformed, Eigen::Vector4f::Zero (),
+                          Eigen::Quaternionf::Identity (), true);
+
     ++view_it;
   }
 
