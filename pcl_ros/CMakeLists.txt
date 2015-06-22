@@ -136,7 +136,7 @@ add_library (pcl_ros_segmentation
   src/pcl_ros/segmentation/segment_differences.cpp
   src/pcl_ros/segmentation/segmentation.cpp
 )
-target_link_libraries(pcl_ros_segmentation pcl_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_segmentation pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_segmentation ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_segmentation)
 
@@ -154,19 +154,19 @@ class_loader_hide_library_symbols(pcl_ros_surface)
 ## Tools
 
 add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
-target_link_libraries(pcd_to_pointcloud pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcd_to_pointcloud ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-target_link_libraries(pointcloud_to_pcd pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
+target_link_libraries(pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
-target_link_libraries(bag_to_pcd pcl_io pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
+target_link_libraries(bag_to_pcd pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARY_DIRS} ${PCL_LIBRARIES})
 
 add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
-target_link_libraries(convert_pcd_to_image pcl_io pcl_common ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pcd_to_image ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
-target_link_libraries(convert_pointcloud_to_image pcl_io ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(convert_pointcloud_to_image ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
 
 #############
 ## Testing ##
