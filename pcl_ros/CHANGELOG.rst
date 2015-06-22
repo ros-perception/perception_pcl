@@ -2,6 +2,31 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* cleanup broken library links
+  All removed library names are included in ${PCL_LIBRARIES}.
+  However, the plain library names broke catkin's overlay mechanism:
+  Where ${PCL_LIBRARIES} could point to a local installation of the PCL,
+  e.g. pcd_ros_segmentation might still link to the system-wide installed version
+  of pcl_segmentation.
+* Fixed test for jade-devel. Progress on `#92 <https://github.com/ros-perception/perception_pcl/issues/92>`_
+* commented out test_tf_message_filter_pcl
+  Until `ros/geometry#80 <https://github.com/ros/geometry/issues/80>`_ has been merged the test will fail.
+* fixed indentation and author
+* Adds a test for tf message filters with pcl pointclouds
+* specialized HasHeader, TimeStamp, FrameId
+  - HasHeader now returns false
+  - TimeStamp and FrameId specialed for pcl::PointCloud<T> for any point type T
+  These changes allow to use pcl::PointCloud with tf::MessageFilter
+* Sync pcl_nodelets.xml from hydro to indigo
+  Fixes to pass catkin lint -W1
+* Fixes `#87 <https://github.com/ros-perception/perception_pcl/issues/87>`_ for Indigo
+* Fixes `#85 <https://github.com/ros-perception/perception_pcl/issues/85>`_ for Indigo
+* Fixes `#77 <https://github.com/ros-perception/perception_pcl/issues/77>`_ and `#80 <https://github.com/ros-perception/perception_pcl/issues/80>`_ for indigo
+* Added option to save pointclouds in binary and binary compressed format
+* Contributors: Brice Rebsamen, Lucid One, Mitchell Wills, v4hn
+
 1.2.6 (2015-02-04)
 ------------------
 
