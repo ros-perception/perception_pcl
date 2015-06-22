@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2015-06-22)
+------------------
 * cleanup broken library links
   All removed library names are included in ${PCL_LIBRARIES}.
   However, the plain library names broke catkin's overlay mechanism:
