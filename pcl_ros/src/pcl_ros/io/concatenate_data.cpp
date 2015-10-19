@@ -59,6 +59,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 
   // ---[ Optional parameters
   private_nh_.getParam ("max_queue_size", maximum_queue_size_);
+  private_nh_.getParam ("use_latest_tf", use_latest_tf_);
 
   // Output
   pub_output_ = private_nh_.advertise<PointCloud2> ("output", maximum_queue_size_);
@@ -195,7 +196,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void 
+bool
 pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out)
 {
   //ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
@@ -203,20 +204,45 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
   PointCloud2::Ptr in2_t (new PointCloud2 ());
 
   // Transform the point clouds into the specified output frame
-  if (output_frame_ != in1.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
-  else
+  if (output_frame_ != in1.header.frame_id) {
+    if (use_latest_tf_) {
+      sensor_msgs::PointCloud2 latest_pointcloud(in1);
+      latest_pointcloud.header.stamp = ros::Time(0);
+      pcl_ros::transformPointCloud (output_frame_, latest_pointcloud, *in1_t, tf_);
+    } else {
+      if (tf_.waitForTransform(output_frame_, in1.header.frame_id, in1.header.stamp, ros::Duration(1.0))) {
+        pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
+      } else {
+        ROS_ERROR("failed to resolve tf from %s to %s", output_frame_.c_str(), in1.header.frame_id.c_str());
+        return false;
+      }
+    }
+  } else {
     in1_t = boost::make_shared<PointCloud2> (in1);
+  }
 
-  if (output_frame_ != in2.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
-  else
+  if (output_frame_ != in2.header.frame_id) {
+    if (use_latest_tf_) {
+      sensor_msgs::PointCloud2 latest_pointcloud(in2);
+      latest_pointcloud.header.stamp = ros::Time(0);
+      pcl_ros::transformPointCloud (output_frame_, latest_pointcloud, *in2_t, tf_);
+    } else {
+      if (tf_.waitForTransform(output_frame_, in2.header.frame_id, in2.header.stamp, ros::Duration(1.0))) {
+        pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
+      } else {
+        ROS_ERROR("failed to resolve tf from %s to %s", output_frame_.c_str(), in1.header.frame_id.c_str());
+        return false;
+      }
+    }
+  } else {
     in2_t = boost::make_shared<PointCloud2> (in2);
+  }
 
   // Concatenate the results
   pcl::concatenatePointCloud (*in1_t, *in2_t, out);
   // Copy header
   out.header.stamp = in1.header.stamp;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -229,24 +255,24 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
 {
   PointCloud2::Ptr out1 (new PointCloud2 ());
   PointCloud2::Ptr out2 (new PointCloud2 ());
-  pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1);
+  if (!pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1)) return;
   if (in3 && in3->width * in3->height > 0)
   {
-    pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in3, *out2);
+    if (pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in3, *out2)) return;
     out1 = out2;
     if (in4 && in4->width * in4->height > 0)
     {
-      pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in4, *out1);
+      if ( pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in4, *out1)) return;
       if (in5 && in5->width * in5->height > 0)
       {
-        pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in5, *out2);
+        if (pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in5, *out2)) return;
         out1 = out2;
         if (in6 && in6->width * in6->height > 0)
         {
-          pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in6, *out1);
+          if (pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in6, *out1)) return;
           if (in7 && in7->width * in7->height > 0)
           {
-            pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in7, *out2);
+            if (pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in7, *out2)) return;
             out1 = out2;
           } 
         }

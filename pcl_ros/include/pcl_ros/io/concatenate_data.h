@@ -87,6 +87,9 @@ namespace pcl_ros
       /** \brief The maximum number of messages that we can store in the queue. */
       int maximum_queue_size_;
 
+      /** \brief True if we use latest tf to resolve transformation of frames. */
+      bool use_latest_tf_;
+
       /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
       bool approximate_sync_;
 
@@ -127,7 +130,7 @@ namespace pcl_ros
                   const PointCloud2::ConstPtr &in5, const PointCloud2::ConstPtr &in6, 
                   const PointCloud2::ConstPtr &in7, const PointCloud2::ConstPtr &in8);
       
-      void combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out);
+      bool combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out);
   };
 }
 
