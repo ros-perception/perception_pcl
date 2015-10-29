@@ -4,7 +4,14 @@ project(pcl_ros)
 ## Find system dependencies
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 QUIET)
+if(NOT Eigen3_FOUND)
+  # Fallback on cmake_modules FindEigen if FindEigen3 not installed on system
+  find_package(Eigen REQUIRED)
+  set(Eigen3_FOUND ${Eigen_FOUND})
+  set(Eigen3_INCLUDE_DIRS ${Eigen_INCLUDE_DIRS})
+  set(Eigen3_LIBRARY_DIRS ${Eigen_LIBRARY_DIRS})
+endif()
 find_package(PCL REQUIRED)
 
 ## Find catkin packages
