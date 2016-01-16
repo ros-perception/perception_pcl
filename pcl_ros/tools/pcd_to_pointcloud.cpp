@@ -51,6 +51,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 #include "pcl_ros/publisher.h"
+#include "pcl_msgs/UpdateFilename.h"
 
 using namespace std;
 
@@ -62,8 +63,6 @@ class PCDGenerator
     ros::NodeHandle private_nh_;
   public:
 
-    boost::mutex mutex_;
-
     // ROS messages
     sensor_msgs::PointCloud2 cloud_;
 
@@ -71,7 +70,8 @@ class PCDGenerator
     double wait_;
 
     pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
-    ros::WallTimer timer_;
+    ros::Timer timer_;
+    ros::ServiceServer service_;
 
     ////////////////////////////////////////////////////////////////////////////////
     PCDGenerator () : tf_frame_ ("/base_link"), private_nh_("~")
@@ -93,19 +93,36 @@ class PCDGenerator
         return (-1);
       cloud_.header.frame_id = tf_frame_;
       // set timer to publish cloud periodically
-      timer_ = nh_.createWallTimer(
-        ros::WallDuration(wait_),
+      timer_ = nh_.createTimer(
+        ros::Duration(wait_),
         &PCDGenerator::publishCloudCb,
         this,
         /*oneshot=*/false);
+      // service to update filename
+      service_ = private_nh_.advertiseService("update_filename", &PCDGenerator::updateFilenameCb, this);
       return (0);
+    }
+
+    bool updateFilenameCb(pcl_msgs::UpdateFilename::Request &req,
+                          pcl_msgs::UpdateFilename::Response &res)
+    {
+      sensor_msgs::PointCloud2 new_cloud;
+      if (pcl::io::loadPCDFile(req.filename, new_cloud) == -1) {
+        res.success = false;
+        return false;
+      }
+      file_name_ = req.filename;
+      cloud_ = new_cloud;
+      cloud_.header.frame_id = tf_frame_;
+      cloud_.header.stamp = ros::Time::now();
+      res.success = true;
+      return true;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
     // publishCloudCb
-    void publishCloudCb(const ros::WallTimerEvent& event)
+    void publishCloudCb(const ros::TimerEvent& event)
     {
-      boost::mutex::scoped_lock lock(mutex_);
       ROS_DEBUG_ONCE("Publishing data with %d points (%s) on topic %s in frame %s.", cloud_.width * cloud_.height, pcl::getFieldsList(cloud_).c_str(), nh_.resolveName(cloud_topic_).c_str(), cloud_.header.frame_id.c_str());
       cloud_.header.stamp = ros::Time::now();
       if (pub_.getNumSubscribers() > 0)
