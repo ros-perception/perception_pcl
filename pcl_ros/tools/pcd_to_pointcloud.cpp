@@ -62,6 +62,8 @@ class PCDGenerator
     ros::NodeHandle private_nh_;
   public:
 
+    boost::mutex mutex_;
+
     // ROS messages
     sensor_msgs::PointCloud2 cloud_;
 
@@ -69,6 +71,7 @@ class PCDGenerator
     double wait_;
 
     pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
+    ros::WallTimer timer_;
 
     ////////////////////////////////////////////////////////////////////////////////
     PCDGenerator () : tf_frame_ ("/base_link"), private_nh_("~")
@@ -89,45 +92,28 @@ class PCDGenerator
       if (file_name_ == "" || pcl::io::loadPCDFile (file_name_, cloud_) == -1)
         return (-1);
       cloud_.header.frame_id = tf_frame_;
+      // set timer to publish cloud periodically
+      timer_ = nh_.createTimer(
+        ros::WallDuration(wait_),
+        &PCDGenerator::publishCloudCb,
+        this,
+        /*oneshot=*/false);
       return (0);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    // Spin (!)
-    bool spin ()
+    // publishCloudCb
+    void publishCloudCb(const ros::TimerEvent& event)
     {
-      int nr_points      = cloud_.width * cloud_.height;
-      string fields_list = pcl::getFieldsList (cloud_);
-      double interval = wait_ * 1e+6;
-      while (nh_.ok ())
+      boost::mutex::scoped_lock lock(mutex_);
+      ROS_DEBUG_ONCE("Publishing data with %d points (%s) on topic %s in frame %s.", cloud_.width * cloud_.height, pcl::getFieldsList(cloud_).c_str(), nh_.resolveName(cloud_topic_).c_str(), cloud_.header.frame_id.c_str());
+      cloud_.header.stamp = ros::Time::now();
+      if (pub_.getNumSubscribers() > 0)
       {
-        ROS_DEBUG_ONCE ("Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
-        cloud_.header.stamp = ros::Time::now ();
-
-        if (pub_.getNumSubscribers () > 0)
-        {
-          ROS_DEBUG ("Publishing data to %d subscribers.", pub_.getNumSubscribers ());
-          pub_.publish (cloud_);
-        }
-        else
-        {
-					// check once a second if there is any subscriber
-          ros::Duration (1).sleep ();
-          continue;
-        }
-
-        usleep (interval);
-
-        if (interval == 0)	// We only publish once if a 0 seconds interval is given
-				{
-					// Give subscribers 3 seconds until point cloud decays... a little ugly!
-		      ros::Duration (3.0).sleep ();
-          break;
-				}
+        ROS_DEBUG ("Publishing data to %d subscribers.", pub_.getNumSubscribers ());
+        pub_.publish(cloud_);
       }
-      return (true);
     }
-
 
 };
 
@@ -161,7 +147,7 @@ int
     return (-1);
   }
   ROS_INFO ("Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
-  c.spin ();
+  ros::spin();
 
   return (0);
 }
