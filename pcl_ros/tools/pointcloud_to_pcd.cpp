@@ -140,7 +140,7 @@ class PointCloudToPCD
 	}
       else
 	{
-	  ROS_INFO_STREAM ("Saving as binary PCD");
+	  ROS_INFO_STREAM ("Saving as ASCII PCD");
 	}
 
       cloud_topic_ = "input";
