@@ -18,7 +18,7 @@
   <url type="website">http://ros.org/wiki/perception_pcl</url>
   <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
   <url type="repository">https://github.com/ros-perception/perception_pcl</url>
-  
+
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>rosconsole</build_depend>
@@ -38,7 +38,6 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>python-vtk</build_depend>
   <build_depend>libvtk-java</build_depend>
 
   <run_depend>dynamic_reconfigure</run_depend>
@@ -56,9 +55,8 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>python-vtk</run_depend>
   <run_depend>libvtk-java</run_depend>
-  
+
   <test_depend>rostest</test_depend>
 
   <export>
