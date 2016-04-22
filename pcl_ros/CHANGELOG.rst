@@ -2,6 +2,14 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixup libproj-dev rosdep
+* Add build depend on libproj, since it's not provided by vtk right now
+* manually remove dependency on vtkproj from PCL_LIBRARIES
+* Remove python-vtk for kinetic-devel, see issue `#44 <https://github.com/ros-perception/perception_pcl/issues/44>`_
+* Contributors: Jackie Kay, Paul Bovbel
+
 1.3.0 (2015-06-22)
 ------------------
 * cleanup broken library links
