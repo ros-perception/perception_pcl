@@ -64,6 +64,7 @@ public:
     try
     {
       pcl::toROSMsg (*cloud, image_); //convert the cloud
+      image_.header = cloud->header;
       image_pub_.publish (image_); //publish our cloud image
     }
     catch (std::runtime_error &e)
