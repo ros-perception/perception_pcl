@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2016-04-22)
+------------------
 * Fixup libproj-dev rosdep
 * Add build depend on libproj, since it's not provided by vtk right now
 * manually remove dependency on vtkproj from PCL_LIBRARIES
