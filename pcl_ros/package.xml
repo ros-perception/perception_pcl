@@ -40,7 +40,7 @@
   <build_depend>tf</build_depend>
   <build_depend>libvtk-java</build_depend>
   <!-- libproj-dev needed due to error in vtk6 -->
-  <build_depend>libproj-dev</build_depend>
+  <build_depend>proj</build_depend>
 
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>eigen</run_depend>
