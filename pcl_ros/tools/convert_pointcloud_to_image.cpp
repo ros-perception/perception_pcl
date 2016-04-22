@@ -56,18 +56,21 @@ public:
   void
   cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud)
   {
-    if ((cloud->width * cloud->height) == 0)
-      return; //return if the cloud is not dense!
+    if (cloud->height <= 1)
+    {
+      ROS_ERROR("Input point cloud is not organized, ignoring!");
+      return;
+    }
     try
     {
       pcl::toROSMsg (*cloud, image_); //convert the cloud
+      image_pub_.publish (image_); //publish our cloud image
     }
     catch (std::runtime_error &e)
     {
       ROS_ERROR_STREAM("Error in converting cloud to image message: "
                         << e.what());
     }
-    image_pub_.publish (image_); //publish our cloud image
   }
   PointCloudToImage () : cloud_topic_("input"),image_topic_("output")
   {
