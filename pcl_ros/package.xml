@@ -58,6 +58,7 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>libvtk-java</run_depend>
+  <run_depend>proj</run_depend>
 
   <test_depend>rostest</test_depend>
 
