@@ -72,6 +72,8 @@ class PointCloudToPCD
     bool binary_;
     bool compressed_;
     std::string fixed_frame_;
+    int num_saved_;
+    int max_num_saved_;
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
 
@@ -87,6 +89,12 @@ class PointCloudToPCD
     {
       if ((cloud->width * cloud->height) == 0)
         return;
+
+      if ((max_num_saved_ > 0) && (max_num_saved_ <= num_saved_))
+      {
+        ROS_INFO_STREAM("Saved max number of clouds (you can quit now)");
+        return;
+      }
 
       ROS_INFO ("Received %d data points in frame %s with the following fields: %s",
                 (int)cloud->width * cloud->height,
@@ -129,6 +137,8 @@ class PointCloudToPCD
 	  writer.writeASCII (ss.str (), *cloud, v, q, 8);
 	}
 
+      num_saved_++;
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +159,8 @@ class PointCloudToPCD
       priv_nh.getParam ("fixed_frame", fixed_frame_);
       priv_nh.getParam ("binary", binary_);
       priv_nh.getParam ("compressed", compressed_);
+
+      priv_nh.param ("max_num_saved", max_num_saved_, -1);
       if(binary_)
 	{
 	  if(compressed_)
