@@ -433,7 +433,6 @@ namespace pcl_conversions {
   {
     fromPCL(pcl_mesh.header, mesh.header);
     moveFromPCL(pcl_mesh.cloud, mesh.cloud);
-    moveFromPCL(pcl_mesh.cloud, mesh.cloud);
   }
 
   inline
