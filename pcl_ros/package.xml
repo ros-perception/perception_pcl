@@ -48,7 +48,11 @@
   <test_depend>rostest</test_depend>
 
   <export>
-     <nodelet plugin="${prefix}/pcl_nodelets.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_features.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_filters.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_io.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_segmentation.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_surface.xml"/>
   </export>
 
 </package>
