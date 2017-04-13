@@ -5,7 +5,7 @@ project(pcl_ros)
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
-find_package(PCL 1.7 REQUIRED)
+find_package(PCL REQUIRED)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
