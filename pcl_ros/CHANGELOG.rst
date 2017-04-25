@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.0 (2017-04-25)
+------------------
 * Fix lib name duplication error in ubunt:zesty
 * Detect automatically the version of PCL in cmake
 * Install xml files declaring nodelets
