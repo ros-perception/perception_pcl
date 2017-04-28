@@ -2,8 +2,13 @@ sudo: required
 dist: trusty
 language: generic
 env:
+  global:
+    - ROS_DISTRO=lunar
   matrix:
-    - ROS_DISTRO=lunar DOCKER_IMAGE=ubuntu:zesty
+    - DOCKER_IMAGE=debian:stretch
+    - DOCKER_IMAGE=ubuntu:xenial
+    - DOCKER_IMAGE=ubuntu:yakkety
+    - DOCKER_IMAGE=ubuntu:zesty
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
