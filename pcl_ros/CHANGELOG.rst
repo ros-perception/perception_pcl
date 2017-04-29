@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.2 (2017-04-29)
+------------------
 * Find Qt5Widgets to fix -lQt5::Widgets error
 * Contributors: Kentaro Wada
 
