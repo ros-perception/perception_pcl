@@ -22,7 +22,8 @@ function travis_time_end {
     set -x
 }
 
-apt-get update -qq && apt-get install -qq -y -q wget sudo lsb-release # for docker
+apt-get update -qq && apt-get install -qq -y -q wget sudo lsb-release gnupg # for docker
+
 
 travis_time_start setup.before_install
 #before_install:
