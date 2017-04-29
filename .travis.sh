@@ -61,7 +61,7 @@ wstool up
 
 # package depdencies: install using rosdep.
 cd ~/catkin_ws
-rosdep install -q -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+rosdep install -q -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO --os $DOCKER_IMAGE
 travis_time_end
 
 travis_time_start setup.script
