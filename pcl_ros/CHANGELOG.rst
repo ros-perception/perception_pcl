@@ -2,6 +2,12 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add dependency on qtbase5-dev for find_package(Qt5Widgets)
+  See https://github.com/ros-perception/perception_pcl/pull/117#issuecomment-298158272 for detail.
+* Contributors: Kentaro Wada
+
 1.5.2 (2017-04-29)
 ------------------
 * Find Qt5Widgets to fix -lQt5::Widgets error
