@@ -41,9 +41,6 @@
   <depend>std_msgs</depend>
   <depend>tf</depend>
   <depend>tf2_eigen</depend>
-  <depend>libvtk-java</depend>
-  <!-- libproj-dev needed due to error in vtk6 -->
-  <depend>proj</depend>
 
   <test_depend>rostest</test_depend>
 
