@@ -6,8 +6,6 @@ find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
-# For debian: https://github.com/ros-perception/perception_pcl/issues/139
-find_package(Qt5Widgets QUIET)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
