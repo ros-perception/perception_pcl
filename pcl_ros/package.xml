@@ -42,9 +42,6 @@
   <depend>std_msgs</depend>
   <depend>tf</depend>
   <depend>tf2_eigen</depend>
-  <depend>libvtk-java</depend>
-  <!-- libproj-dev needed due to error in vtk6 -->
-  <depend>proj</depend>
   <!-- qtbase5-dev needed due to error in qt5 -->
   <depend>qtbase5-dev</depend>
 
