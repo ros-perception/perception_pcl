@@ -5,7 +5,7 @@
   <!-- use voxel_grid for small cpu load in filtering -->
   <include file="$(find pcl_ros)/samples/sample_voxel_grid.launch">
     <arg name="gui" value="false" />
-    <arg name="leaf_size" value="0.01" />
+    <arg name="leaf_size" value="0.02" />
   </include>
 
   <node name="statistical_outlier_removal"
