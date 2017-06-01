@@ -6,9 +6,8 @@ find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
-# For debian: https://github.com/ros-perception/perception_pcl/issues/139
-find_package(Qt5Widgets QUIET)
-
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+set(QT_LIBRARIES Qt5::Widgets)
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
   list(REMOVE_ITEM PCL_LIBRARIES "/usr/lib/libmpi.so")
@@ -84,7 +83,7 @@ catkin_package(
 
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
-target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${Eigen3_LIBRARIES} ${PCL_LIBRARIES} ${QT_LIBRARIES})
 add_dependencies(pcl_ros_tf pcl_ros_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ## Nodelets
