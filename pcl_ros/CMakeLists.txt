@@ -6,13 +6,22 @@ find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED COMPONENTS core io surface)
-# For debian: https://github.com/ros-perception/perception_pcl/issues/139
-find_package(Qt5Widgets QUIET)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
   list(REMOVE_ITEM PCL_LIBRARIES "/usr/lib/libmpi.so")
+
+  # For debian: https://github.com/ros-perception/perception_pcl/issues/139
+  list(REMOVE_DUPLICATES PCL_LIBRARIES)
+  list(REMOVE_ITEM PCL_LIBRARIES
+    "vtkGUISupportQt"
+    "vtkGUISupportQtOpenGL"
+    "vtkGUISupportQtSQL"
+    "vtkGUISupportQtWebkit"
+    "vtkViewsQt"
+    "vtkRenderingQt")
 endif()
+
 
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
