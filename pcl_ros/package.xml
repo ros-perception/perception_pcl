@@ -42,8 +42,6 @@
   <depend>std_msgs</depend>
   <depend>tf</depend>
   <depend>tf2_eigen</depend>
-  <!-- qtbase5-dev needed due to error in qt5 -->
-  <depend>qtbase5-dev</depend>
 
   <test_depend>rostest</test_depend>
 
