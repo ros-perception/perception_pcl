@@ -12,7 +12,6 @@ if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   list(REMOVE_ITEM PCL_LIBRARIES "/usr/lib/libmpi.so")
 
   # For debian: https://github.com/ros-perception/perception_pcl/issues/139
-  list(REMOVE_DUPLICATES PCL_LIBRARIES)
   list(REMOVE_ITEM PCL_LIBRARIES
     "vtkGUISupportQt"
     "vtkGUISupportQtOpenGL"
