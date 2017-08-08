@@ -114,6 +114,14 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output) = 0;
 
+      /** \brief Lazy transport subscribe routine. */
+      virtual void
+      subscribe();
+
+      /** \brief Lazy transport unsubscribe routine. */
+      virtual void
+      unsubscribe();
+
       /** \brief Nodelet initialization routine. */
       virtual void 
       onInit ();
