@@ -104,29 +104,8 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const Indic
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::onInit ()
+pcl_ros::Filter::subscribe()
 {
-  // Call the super onInit ()
-  PCLNodelet::onInit ();
-
-  // Call the child's local init
-  bool has_service = false;
-  if (!child_init (*pnh_, has_service))
-  {
-    NODELET_ERROR ("[%s::onInit] Initialization failed.", getName ().c_str ());
-    return;
-  }
-
-  pub_output_ = pnh_->advertise<PointCloud2> ("output", max_queue_size_);
-
-  // Enable the dynamic reconfigure service
-  if (!has_service)
-  {
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > (*pnh_);
-    dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f =  boost::bind (&Filter::config_callback, this, _1, _2);
-    srv_->setCallback (f);
-  }
-
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_)
   {
@@ -150,6 +129,45 @@ pcl_ros::Filter::onInit ()
   else
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", max_queue_size_,  bind (&Filter::input_indices_callback, this, _1, pcl_msgs::PointIndicesConstPtr ()));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::unsubscribe()
+{
+  if (use_indices_)
+  {
+    sub_input_filter_.unsubscribe();
+    sub_indices_filter_.unsubscribe();
+  }
+  else
+    sub_input_.shutdown();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::onInit ()
+{
+  // Call the super onInit ()
+  PCLNodelet::onInit ();
+
+  // Call the child's local init
+  bool has_service = false;
+  if (!child_init (*pnh_, has_service))
+  {
+    NODELET_ERROR ("[%s::onInit] Initialization failed.", getName ().c_str ());
+    return;
+  }
+
+  pub_output_ = advertise<PointCloud2> (*pnh_, "output", max_queue_size_);
+
+  // Enable the dynamic reconfigure service
+  if (!has_service)
+  {
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > (*pnh_);
+    dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f =  boost::bind (&Filter::config_callback, this, _1, _2);
+    srv_->setCallback (f);
+  }
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created.", getName ().c_str ());
 }
@@ -175,10 +193,6 @@ pcl_ros::Filter::config_callback (pcl_ros::FilterConfig &config, uint32_t level)
 void
 pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, const PointIndicesConstPtr &indices)
 {
-  // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
-    return;
-
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
