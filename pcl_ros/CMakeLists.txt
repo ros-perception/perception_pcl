@@ -76,6 +76,7 @@ catkin_package(
     dynamic_reconfigure
     message_filters
     nodelet
+    nodelet_topic_tools
     pcl_conversions
     pcl_msgs
     rosbag
