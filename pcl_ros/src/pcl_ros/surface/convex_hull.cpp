@@ -44,20 +44,33 @@
 void
 pcl_ros::ConvexHull2D::onInit ()
 {
-  ros::NodeHandle pnh = getMTPrivateNodeHandle ();
-  pub_output_ = pnh.advertise<PointCloud> ("output", max_queue_size_);
-  pub_plane_  = pnh.advertise<geometry_msgs::PolygonStamped>("output_polygon", max_queue_size_);
+  pcl_ros::ConvexHull2D::onInit();
+
+  pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
+  pub_plane_  = advertise<geometry_msgs::PolygonStamped>(*pnh_, "output_polygon", max_queue_size_);
 
   // ---[ Optional parameters
-  pnh.getParam ("use_indices", use_indices_);
+  pnh_->getParam ("use_indices", use_indices_);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - use_indices    : %s",
+                 getName ().c_str (), 
+                 (use_indices_) ? "true" : "false");
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ConvexHull2D::subscribe()
+{
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (pnh, "input", 1);
+    sub_input_filter_.subscribe (*pnh_, "input", 1);
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_.subscribe (pnh, "indices", 1);
+    sub_indices_filter_.subscribe (*pnh_, "indices", 1);
 
     if (approximate_sync_)
     {
@@ -76,12 +89,20 @@ pcl_ros::ConvexHull2D::onInit ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh.subscribe<PointCloud> ("input", 1,  bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = pnh_->subscribe<PointCloud> ("input", 1,  bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+}
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - use_indices    : %s",
-                 getName ().c_str (), 
-                 (use_indices_) ? "true" : "false");
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ConvexHull2D::unsubscribe()
+{
+  if (use_indices_)
+  {
+    sub_input_filter_.unsubscribe();
+    sub_indices_filter_.unsubscribe();
+  }
+  else
+    sub_input_.shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

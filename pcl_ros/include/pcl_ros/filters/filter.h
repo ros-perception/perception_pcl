@@ -133,6 +133,14 @@ namespace pcl_ros
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices> > >       sync_input_indices_e_;
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices> > > sync_input_indices_a_;
 
+      /** \brief Callback on subscription. */
+      virtual void
+      subscribe();
+
+      /** \brief Callback on unsubscription */
+      virtual void
+      unsubscribe();
+
       /** \brief Dynamic reconfigure service callback. */
       virtual void 
       config_callback (pcl_ros::FilterConfig &config, uint32_t level);

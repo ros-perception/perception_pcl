@@ -52,7 +52,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
 // ROS Nodelet includes
-#include <nodelet/nodelet.h>
+#include <nodelet_topic_tools/nodelet_lazy.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -69,7 +69,7 @@ namespace pcl_ros
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
   /** \brief @b PCLNodelet represents the base PCL Nodelet class. All PCL nodelets should inherit from this class. */
-  class PCLNodelet : public nodelet::Nodelet
+  class PCLNodelet : public nodelet_topic_tools::NodeletLazy
   {
     public:
       typedef sensor_msgs::PointCloud2 PointCloud2;
@@ -94,9 +94,6 @@ namespace pcl_ros
                       max_queue_size_ (3), approximate_sync_ (false) {};
 
     protected:
-      /** \brief The ROS NodeHandle used for parameters, publish/subscribe, etc. */
-      boost::shared_ptr<ros::NodeHandle> pnh_;
-
       /** \brief Set to true if point indices are used.
        *
        * When receiving a point cloud, if use_indices_ is false, the entire
@@ -201,7 +198,7 @@ namespace pcl_ros
       virtual void
       onInit ()
       {
-        pnh_.reset (new ros::NodeHandle (getMTPrivateNodeHandle ()));
+        nodelet_topic_tools::NodeletLazy::onInit();
         
         // Parameters that we care about only at startup
         pnh_->getParam ("max_queue_size", max_queue_size_);
@@ -222,6 +219,12 @@ namespace pcl_ros
             (latched_indices_) ? "true" : "false", 
             max_queue_size_);
       }
+
+    /** \brief Callback on subscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void subscribe() {};
+
+    /** \brief Callback on unsubscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void unsubscribe() {};
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

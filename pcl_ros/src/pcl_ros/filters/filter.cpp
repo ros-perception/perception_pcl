@@ -117,7 +117,7 @@ pcl_ros::Filter::onInit ()
     return;
   }
 
-  pub_output_ = pnh_->advertise<PointCloud2> ("output", max_queue_size_);
+  pub_output_ = advertise<PointCloud2> (*pnh_, "output", max_queue_size_);
 
   // Enable the dynamic reconfigure service
   if (!has_service)
@@ -127,6 +127,15 @@ pcl_ros::Filter::onInit ()
     srv_->setCallback (f);
   }
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created.", getName ().c_str ());
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::subscribe()
+{
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_)
   {
@@ -150,8 +159,19 @@ pcl_ros::Filter::onInit ()
   else
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", max_queue_size_,  bind (&Filter::input_indices_callback, this, _1, pcl_msgs::PointIndicesConstPtr ()));
+}
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created.", getName ().c_str ());
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::unsubscribe()
+{
+  if (use_indices_)
+  {
+    sub_input_filter_.unsubscribe();
+    sub_indices_filter_.unsubscribe();
+  }
+  else
+    sub_input_.shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
