@@ -52,13 +52,23 @@ pcl_ros::ExtractPolygonalPrismData::onInit ()
   // Call the super onInit ()
   PCLNodelet::onInit ();
 
-  sub_hull_filter_.subscribe (*pnh_, "planar_hull", max_queue_size_);
-  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
-
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig> > (*pnh_);
   dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig>::CallbackType f = boost::bind (&ExtractPolygonalPrismData::config_callback, this, _1, _2);
   srv_->setCallback (f);
+
+  // Advertise the output topics
+  pub_output_ = advertise<PointIndices> (*pnh_, "output", max_queue_size_);
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ExtractPolygonalPrismData::subscribe ()
+{
+  sub_hull_filter_.subscribe (*pnh_, "planar_hull", max_queue_size_);
+  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
 
   // Create the objects here
   if (approximate_sync_)
@@ -88,9 +98,16 @@ pcl_ros::ExtractPolygonalPrismData::onInit ()
     sync_input_hull_indices_a_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
   else
     sync_input_hull_indices_e_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+}
 
-  // Advertise the output topics
-  pub_output_ = pnh_->advertise<PointIndices> ("output", max_queue_size_);
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ExtractPolygonalPrismData::unsubscribe ()
+{
+  sub_hull_filter_.unsubscribe();
+  sub_input_filter_.unsubscribe();
+
+  if (use_indices_) sub_indices_filter_.unsubscribe();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
