@@ -104,7 +104,7 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const Indic
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::onInit ()
+pcl_ros::Filter::onInit()
 {
   // Call the super onInit ()
   PCLNodelet::onInit ();
@@ -195,10 +195,6 @@ pcl_ros::Filter::config_callback (pcl_ros::FilterConfig &config, uint32_t level)
 void
 pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, const PointIndicesConstPtr &indices)
 {
-  // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
-    return;
-
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {

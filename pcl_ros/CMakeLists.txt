@@ -6,6 +6,7 @@ find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
+find_package(PCL REQUIRED COMPONENTS core features filters io surface)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
@@ -76,6 +77,7 @@ catkin_package(
     dynamic_reconfigure
     message_filters
     nodelet
+    nodelet_topic_tools
     pcl_conversions
     pcl_msgs
     rosbag
