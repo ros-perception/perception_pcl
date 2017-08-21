@@ -40,3 +40,7 @@ script:
 
 notifications:
   email: false
+
+branches:
+  only:
+    - /.*-devel/
