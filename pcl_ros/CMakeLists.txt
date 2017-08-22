@@ -5,7 +5,7 @@ project(pcl_ros)
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED COMPONENTS core features filters io surface)
+find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
@@ -203,6 +203,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(samples/pcl_ros/features/sample_normal_3d.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/filters/sample_statistical_outlier_removal.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/filters/sample_voxel_grid.launch ARGS gui:=false)
+  add_rostest(samples/pcl_ros/segmentation/sample_extract_clusters.launch ARGS gui:=false)
 endif(CATKIN_ENABLE_TESTING)
 
 
