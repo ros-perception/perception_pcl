@@ -21,3 +21,6 @@ script:
 after_failure:
   - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
   - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done
+branches:
+  only:
+    - /.*-devel/
