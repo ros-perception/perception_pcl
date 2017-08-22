@@ -24,6 +24,9 @@ function travis_time_end {
 
 apt-get update -qq && apt-get install -qq -y -q wget sudo lsb-release gnupg # for docker
 
+# Setup ccache
+apt-get install -qq -y -q ccache
+export PATH=/usr/lib/ccache:$PATH
 
 travis_time_start setup.before_install
 #before_install:
