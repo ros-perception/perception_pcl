@@ -12,6 +12,7 @@ services:
 env:
   global:
     - ARCH=amd64
+    - CONFIG_URL=https://raw.githubusercontent.com/ros-infrastructure/ros_buildfarm_config/production/index.yaml
     - JOB_PATH=/tmp/devel_job
     - ROS_DISTRO=lunar
   matrix:
@@ -31,7 +32,7 @@ install:
   - mkdir -p $JOB_PATH/catkin_workspace/src
   - cp -R $TRAVIS_BUILD_DIR $JOB_PATH/catkin_workspace/src/
   # generate the script to run a devel job for that target and repo
-  - generate_devel_script.py https://raw.githubusercontent.com/ros-infrastructure/ros_buildfarm_config/production/index.yaml $ROS_DISTRO default $REPOSITORY_NAME $OS_NAME $OS_CODE_NAME $ARCH > $JOB_PATH/devel_job.sh
+  - generate_devel_script.py $CONFIG_URL $ROS_DISTRO default $REPOSITORY_NAME $OS_NAME $OS_CODE_NAME $ARCH > $JOB_PATH/devel_job.sh
   - cd $JOB_PATH
   - cat devel_job.sh
   # run the actual job which involves Docker
