@@ -371,48 +371,9 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
   dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>::CallbackType f = boost::bind (&SACSegmentationFromNormals::config_callback, this, _1, _2);
   srv_->setCallback (f);
 
-  // Subscribe to the input and normals using filters
-  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
-  sub_normals_filter_.subscribe (*pnh_, "normals", max_queue_size_);
-
-  // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
-  sub_axis_ = pnh_->subscribe ("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
-
-  if (approximate_sync_)
-    sync_input_normals_indices_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
-  else
-    sync_input_normals_indices_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
-
-  // If we're supposed to look for PointIndices (indices)
-  if (use_indices_)
-  {
-    // Subscribe to the input using a filter
-    sub_indices_filter_.subscribe (*pnh_, "indices", max_queue_size_);
-
-    if (approximate_sync_)
-      sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);
-    else
-      sync_input_normals_indices_e_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);
-  }
-  else
-  {
-    // Create a different callback for copying over the timestamp to fake indices
-    sub_input_filter_.registerCallback (bind (&SACSegmentationFromNormals::input_callback, this, _1));
-
-    if (approximate_sync_)
-      sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
-    else
-      sync_input_normals_indices_e_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
-  }
-
-  if (approximate_sync_)
-    sync_input_normals_indices_a_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
-  else
-    sync_input_normals_indices_e_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
-
   // Advertise the output topics
-  pub_indices_ = pnh_->advertise<PointIndices> ("inliers", max_queue_size_);
-  pub_model_   = pnh_->advertise<ModelCoefficients> ("model", max_queue_size_);
+  pub_indices_ = advertise<PointIndices> (*pnh_, "inliers", max_queue_size_);
+  pub_model_   = advertise<ModelCoefficients> (*pnh_, "model", max_queue_size_);
 
   // ---[ Mandatory parameters
   int model_type;
@@ -477,6 +438,65 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
   impl_.setModelType (model_type);
   impl_.setMethodType (method_type);
   impl_.setAxis (axis);
+
+  onInitPostProcess ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::SACSegmentationFromNormals::subscribe ()
+{
+  // Subscribe to the input and normals using filters
+  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
+  sub_normals_filter_.subscribe (*pnh_, "normals", max_queue_size_);
+
+  // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
+  sub_axis_ = pnh_->subscribe ("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
+
+  if (approximate_sync_)
+    sync_input_normals_indices_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
+  else
+    sync_input_normals_indices_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
+
+  // If we're supposed to look for PointIndices (indices)
+  if (use_indices_)
+  {
+    // Subscribe to the input using a filter
+    sub_indices_filter_.subscribe (*pnh_, "indices", max_queue_size_);
+
+    if (approximate_sync_)
+      sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);
+    else
+      sync_input_normals_indices_e_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);
+  }
+  else
+  {
+    // Create a different callback for copying over the timestamp to fake indices
+    sub_input_filter_.registerCallback (bind (&SACSegmentationFromNormals::input_callback, this, _1));
+
+    if (approximate_sync_)
+      sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
+    else
+      sync_input_normals_indices_e_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
+  }
+
+  if (approximate_sync_)
+    sync_input_normals_indices_a_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+  else
+    sync_input_normals_indices_e_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::SACSegmentationFromNormals::unsubscribe ()
+{
+  sub_input_filter_.unsubscribe ();
+  sub_normals_filter_.unsubscribe ();
+
+  sub_axis_.shutdown ();
+
+  if (use_indices_)
+    sub_indices_filter_.unsubscribe ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,10 +591,6 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
       )
 {
   boost::mutex::scoped_lock lock (mutex_);
-
-  // No subscribers, no work
-  if (pub_indices_.getNumSubscribers () <= 0 && pub_model_.getNumSubscribers () <= 0)
-    return;
 
   PointIndices inliers;
   ModelCoefficients model;
