@@ -63,6 +63,10 @@ namespace pcl_ros
       /** \brief Nodelet initialization routine. */
       virtual void onInit ();
 
+      /** \brief LazyNodelet connection routine. */
+      virtual void subscribe ();
+      virtual void unsubscribe ();
+
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
