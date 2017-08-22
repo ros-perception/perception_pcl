@@ -3,8 +3,9 @@
   <arg name="gui" default="true" />
 
   <!-- use voxel_grid for small cpu load in filtering -->
-  <include file="$(find pcl_ros)/samples/sample_voxel_grid.launch">
+  <include file="$(find pcl_ros)/samples/pcl_ros/filters/sample_voxel_grid.launch">
     <arg name="gui" value="false" />
+    <arg name="test" value="false" />
     <arg name="leaf_size" value="0.02" />
   </include>
 
@@ -32,7 +33,7 @@
   <group if="$(arg gui)">
     <node name="rviz"
           pkg="rviz" type="rviz"
-          args="-d $(find pcl_ros)/samples/config/statistical_outlier_removal.rviz">
+          args="-d $(find pcl_ros)/samples/pcl_ros/filters/config/statistical_outlier_removal.rviz">
     </node>
   </group>
 
