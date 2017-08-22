@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="test" default="true" />
 
   <arg name="leaf_size" default="0.05" />
 
@@ -20,16 +21,18 @@
     </rosparam>
   </node>
 
-  <test test-name="test_voxel_grid"
-        name="test_voxel_grid"
-        pkg="rostest" type="hztest">
-    <rosparam>
-      topic: /voxel_grid/output
-      hz: 20
-      hzerror: 15
-      test_duration: 5.0
-    </rosparam>
-  </test>
+  <group if="$(arg test)">
+    <test test-name="test_voxel_grid"
+          name="test_voxel_grid"
+          pkg="rostest" type="hztest">
+      <rosparam>
+        topic: /voxel_grid/output
+        hz: 20
+        hzerror: 15
+        test_duration: 5.0
+      </rosparam>
+    </test>
+  </group>
 
   <group if="$(arg gui)">
     <node name="rviz"
