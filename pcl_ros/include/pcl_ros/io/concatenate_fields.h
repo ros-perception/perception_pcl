@@ -39,7 +39,7 @@
 #define PCL_IO_CONCATENATE_FIELDS_H_
 
 // ROS includes
-#include <nodelet/nodelet.h>
+#include <nodelet_topic_tools/nodelet_lazy.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -54,7 +54,7 @@ namespace pcl_ros
     * a single PointCloud output message.
     * \author Radu Bogdan Rusu
     */
-  class PointCloudConcatenateFieldsSynchronizer: public nodelet::Nodelet
+  class PointCloudConcatenateFieldsSynchronizer: public nodelet_topic_tools::NodeletLazy
   {
     public:
       typedef sensor_msgs::PointCloud2 PointCloud;
@@ -73,12 +73,11 @@ namespace pcl_ros
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
       void onInit ();
+      void subscribe ();
+      void unsubscribe ();
       void input_callback (const PointCloudConstPtr &cloud);
 
     private:
-      /** \brief ROS local node handle. */
-      ros::NodeHandle private_nh_;
-
       /** \brief The input PointCloud subscriber. */
       ros::Subscriber sub_input_;
 
