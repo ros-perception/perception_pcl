@@ -45,8 +45,8 @@ pcl_ros::MovingLeastSquares::onInit ()
   PCLNodelet::onInit ();
   
   //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
-  pub_output_ = pnh_->advertise<PointCloudIn> ("output", max_queue_size_);
-  pub_normals_ = pnh_->advertise<NormalCloudOut> ("normals", max_queue_size_);
+  pub_output_ = advertise<PointCloudIn> (*pnh_, "output", max_queue_size_);
+  pub_normals_ = advertise<NormalCloudOut> (*pnh_, "normals", max_queue_size_);
   
   //if (!pnh_->getParam ("k_search", k_) && !pnh_->getParam ("search_radius", search_radius_))  
   if (!pnh_->getParam ("search_radius", search_radius_))
@@ -69,6 +69,18 @@ pcl_ros::MovingLeastSquares::onInit ()
   // ---[ Optional parameters
   pnh_->getParam ("use_indices", use_indices_);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - use_indices    : %s",
+                 getName ().c_str (),
+                 (use_indices_) ? "true" : "false");
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::MovingLeastSquares::subscribe()
+{
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_)
   {
@@ -95,12 +107,19 @@ pcl_ros::MovingLeastSquares::onInit ()
   else
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = pnh_->subscribe<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+}
 
-
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - use_indices    : %s",
-                 getName ().c_str (), 
-                 (use_indices_) ? "true" : "false");
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::MovingLeastSquares::unsubscribe()
+{
+  if (use_indices_)
+  {
+    sub_input_filter_.unsubscribe();
+    sub_indices_filter_.unsubscribe();
+  }
+  else
+    sub_input_.shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

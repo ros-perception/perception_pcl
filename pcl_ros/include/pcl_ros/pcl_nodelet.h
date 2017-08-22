@@ -224,6 +224,12 @@ namespace pcl_ros
             max_queue_size_);
       }
 
+    /** \brief Callback on subscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void subscribe() {};
+
+    /** \brief Callback on unsubscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void unsubscribe() {};
+
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
