@@ -42,12 +42,12 @@
 void
 pcl_ros::PCDReader::onInit ()
 {
-  ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
+  PCLNodelet::onInit ();
   // Provide a latched topic
-  ros::Publisher pub_output = private_nh.advertise<PointCloud2> ("output", max_queue_size_, true);
+  ros::Publisher pub_output = pnh_->advertise<PointCloud2> ("output", max_queue_size_, true);
 
-  private_nh.getParam ("publish_rate", publish_rate_);
-  private_nh.getParam ("tf_frame", tf_frame_);
+  pnh_->getParam ("publish_rate", publish_rate_);
+  pnh_->getParam ("tf_frame", tf_frame_);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - publish_rate : %f\n"
@@ -66,14 +66,14 @@ pcl_ros::PCDReader::onInit ()
     ros::spinOnce ();
     ros::Duration (0.01).sleep ();
   }
-  while (private_nh.ok () && pub_output.getNumSubscribers () == 0);
+  while (pnh_->ok () && pub_output.getNumSubscribers () == 0);
 
   std::string file_name;
 
-  while (private_nh.ok ())
+  while (pnh_->ok ())
   {
     // Get the current filename parameter. If no filename set, loop
-    if (!private_nh.getParam ("filename", file_name_) && file_name_.empty ())
+    if (!pnh_->getParam ("filename", file_name_) && file_name_.empty ())
     {
       ROS_ERROR_ONCE ("[%s::onInit] Need a 'filename' parameter to be set before continuing!", getName ().c_str ());
       ros::Duration (0.01).sleep ();
@@ -122,9 +122,11 @@ pcl_ros::PCDReader::onInit ()
 
     ros::spinOnce ();
     // Update parameters from server
-    private_nh.getParam ("publish_rate", publish_rate_);
-    private_nh.getParam ("tf_frame", tf_frame_);
+    pnh_->getParam ("publish_rate", publish_rate_);
+    pnh_->getParam ("tf_frame", tf_frame_);
   }
+
+  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,11 +135,12 @@ pcl_ros::PCDReader::onInit ()
 void
 pcl_ros::PCDWriter::onInit ()
 {
-  ros::NodeHandle pnh = getMTPrivateNodeHandle ();
-  sub_input_ = pnh.subscribe ("input", 1,  &PCDWriter::input_callback, this);
+  PCLNodelet::onInit ();
+
+  sub_input_ = pnh_->subscribe ("input", 1,  &PCDWriter::input_callback, this);
   // ---[ Optional parameters
-  pnh.getParam ("filename", file_name_);
-  pnh.getParam ("binary_mode", binary_mode_);
+  pnh_->getParam ("filename", file_name_);
+  pnh_->getParam ("binary_mode", binary_mode_);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - filename     : %s\n"
@@ -145,6 +148,7 @@ pcl_ros::PCDWriter::onInit ()
                  getName ().c_str (),
                  file_name_.c_str (), (binary_mode_) ? "true" : "false");
 
+  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +158,7 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
   if (!isValid (cloud))
     return;
   
-  getMTPrivateNodeHandle ().getParam ("filename", file_name_);
+  pnh_->getParam ("filename", file_name_);
 
   NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
  
