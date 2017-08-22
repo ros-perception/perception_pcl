@@ -110,11 +110,15 @@ namespace pcl_ros
         * \param level the dynamic reconfigure level
         */
       void config_callback (MLSConfig &config, uint32_t level); 
-    
-    private:
+
       /** \brief Nodelet initialization routine. */
       virtual void onInit ();
 
+      /** \brief LazyNodelet connection routine. */
+      virtual void subscribe ();
+      virtual void unsubscribe ();
+
+    private:
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
