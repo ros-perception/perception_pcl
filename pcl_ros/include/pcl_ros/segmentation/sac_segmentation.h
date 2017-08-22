@@ -242,6 +242,10 @@ namespace pcl_ros
       /** \brief Nodelet initialization routine. */
       virtual void onInit ();
 
+      /** \brief LazyNodelet connection routine. */
+      virtual void subscribe ();
+      virtual void unsubscribe ();
+
       /** \brief Model callback
         * \param model the sample consensus model found
         */
