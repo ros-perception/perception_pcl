@@ -200,8 +200,9 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_tf_message_filter_pcl tests/test_tf_message_filter_pcl.launch src/test/test_tf_message_filter_pcl.cpp)
   target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
-  add_rostest(samples/sample_statistical_outlier_removal.launch ARGS gui:=false)
-  add_rostest(samples/sample_voxel_grid.launch ARGS gui:=false)
+  add_rostest(samples/pcl_ros/features/sample_normal_3d.launch ARGS gui:=false)
+  add_rostest(samples/pcl_ros/filters/sample_statistical_outlier_removal.launch ARGS gui:=false)
+  add_rostest(samples/pcl_ros/filters/sample_voxel_grid.launch ARGS gui:=false)
 endif(CATKIN_ENABLE_TESTING)
 
 
