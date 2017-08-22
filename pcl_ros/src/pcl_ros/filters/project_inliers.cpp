@@ -43,8 +43,6 @@
 void
 pcl_ros::ProjectInliers::onInit ()
 {
-  // No need to call the super onInit as we are overwriting everything
-  //Filter<sensor_msgs::PointCloud2>::onInit ();
   PCLNodelet::onInit ();
 
   // ---[ Mandatory parameters
@@ -65,11 +63,30 @@ pcl_ros::ProjectInliers::onInit ()
   pnh_->getParam ("copy_all_data", copy_all_data);
   pnh_->getParam ("copy_all_fields", copy_all_fields);
 
-  pub_output_ = pnh_->advertise<PointCloud2> ("output", max_queue_size_);
+  pub_output_ = advertise<PointCloud2> (*pnh_, "output", max_queue_size_);
 
   // Subscribe to the input using a filter
   sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - model_type      : %d\n"
+                 " - copy_all_data   : %s\n"
+                 " - copy_all_fields : %s",
+                 getName ().c_str (),
+                 model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
+
+  // Set given parameters here
+  impl_.setModelType (model_type);
+  impl_.setCopyAllFields (copy_all_fields);
+  impl_.setCopyAllData (copy_all_data);
+
+  onInitPostProcess ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ProjectInliers::subscribe ()
+{
 /*
   TODO : implement use_indices_
   if (use_indices_)
@@ -91,18 +108,19 @@ pcl_ros::ProjectInliers::onInit ()
     sync_input_indices_model_e_->connectInput (sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_e_->registerCallback (bind (&ProjectInliers::input_indices_model_callback, this, _1, _2, _3));
   }
-  
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - model_type      : %d\n"
-                 " - copy_all_data   : %s\n"
-                 " - copy_all_fields : %s",
-                 getName ().c_str (),
-                 model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
+}
 
-  // Set given parameters here
-  impl_.setModelType (model_type);
-  impl_.setCopyAllFields (copy_all_fields);
-  impl_.setCopyAllData (copy_all_data);
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::ProjectInliers::unsubscribe ()
+{
+/*
+  TODO : implement use_indices_
+  if (use_indices_)
+  {*/
+
+  sub_input_filter_.unsubscribe ();
+  sub_model_.unsubscribe ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
