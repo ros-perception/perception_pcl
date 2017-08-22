@@ -1,6 +1,8 @@
 sudo: false
 dist: trusty
 language: generic
+services:
+  - docker
 cache:
   directories:
     - $HOME/.ccache
