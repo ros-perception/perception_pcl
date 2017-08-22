@@ -114,14 +114,6 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output) = 0;
 
-      /** \brief Lazy transport subscribe routine. */
-      virtual void
-      subscribe();
-
-      /** \brief Lazy transport unsubscribe routine. */
-      virtual void
-      unsubscribe();
-
       /** \brief Nodelet initialization routine. */
       virtual void 
       onInit ();
@@ -140,6 +132,14 @@ namespace pcl_ros
       /** \brief Synchronized input, and indices.*/
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices> > >       sync_input_indices_e_;
       boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices> > > sync_input_indices_a_;
+
+      /** \brief Callback on subscription. */
+      virtual void
+      subscribe();
+
+      /** \brief Callback on unsubscription */
+      virtual void
+      unsubscribe();
 
       /** \brief Dynamic reconfigure service callback. */
       virtual void 

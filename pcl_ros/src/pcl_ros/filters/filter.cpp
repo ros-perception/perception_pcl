@@ -104,6 +104,36 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const Indic
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
+pcl_ros::Filter::onInit()
+{
+  // Call the super onInit ()
+  PCLNodelet::onInit ();
+
+  // Call the child's local init
+  bool has_service = false;
+  if (!child_init (*pnh_, has_service))
+  {
+    NODELET_ERROR ("[%s::onInit] Initialization failed.", getName ().c_str ());
+    return;
+  }
+
+  pub_output_ = advertise<PointCloud2> (*pnh_, "output", max_queue_size_);
+
+  // Enable the dynamic reconfigure service
+  if (!has_service)
+  {
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > (*pnh_);
+    dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f =  boost::bind (&Filter::config_callback, this, _1, _2);
+    srv_->setCallback (f);
+  }
+
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created.", getName ().c_str ());
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
 pcl_ros::Filter::subscribe()
 {
   // If we're supposed to look for PointIndices (indices)
@@ -142,34 +172,6 @@ pcl_ros::Filter::unsubscribe()
   }
   else
     sub_input_.shutdown();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::Filter::onInit ()
-{
-  // Call the super onInit ()
-  PCLNodelet::onInit ();
-
-  // Call the child's local init
-  bool has_service = false;
-  if (!child_init (*pnh_, has_service))
-  {
-    NODELET_ERROR ("[%s::onInit] Initialization failed.", getName ().c_str ());
-    return;
-  }
-
-  pub_output_ = advertise<PointCloud2> (*pnh_, "output", max_queue_size_);
-
-  // Enable the dynamic reconfigure service
-  if (!has_service)
-  {
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > (*pnh_);
-    dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f =  boost::bind (&Filter::config_callback, this, _1, _2);
-    srv_->setCallback (f);
-  }
-
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created.", getName ().c_str ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

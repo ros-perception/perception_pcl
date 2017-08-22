@@ -85,6 +85,21 @@ pcl_ros::Feature::onInit ()
   dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&Feature::config_callback, this, _1, _2);
   srv_->setCallback (f);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - use_surface    : %s\n"
+                 " - k_search       : %d\n"
+                 " - radius_search  : %f\n"
+                 " - spatial_locator: %d",
+                getName ().c_str (),
+                (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
+
+  onInitPostProcess();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Feature::subscribe()
+{
   // If we're supposed to look for PointIndices (indices) or PointCloud (surface) messages
   if (use_indices_ || use_surface_)
   {
@@ -138,14 +153,26 @@ pcl_ros::Feature::onInit ()
   else
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = pnh_->subscribe<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+}
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - use_surface    : %s\n"
-                 " - k_search       : %d\n"
-                 " - radius_search  : %f\n"
-                 " - spatial_locator: %d",
-                getName ().c_str (),
-                (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
+////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Feature::unsubscribe()
+{
+  if (use_indices_ || use_surface_)
+  {
+    sub_input_filter_.unsubscribe();
+    if (use_indices_)
+    {
+      sub_indices_filter_.unsubscribe();
+      if (use_surface_)
+        sub_surface_filter_.unsubscribe();
+    }
+    else
+      sub_surface_filter_.unsubscribe();
+  }
+  else
+    sub_input_.shutdown();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,10 +196,6 @@ void
 pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
     const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
-  // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
-    return;
-
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
@@ -273,13 +296,28 @@ pcl_ros::FeatureFromNormals::onInit ()
   // ---[ Optional parameters
   pnh_->getParam ("use_surface", use_surface_);
 
-  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
-  sub_normals_filter_.subscribe (*pnh_, "normals", max_queue_size_);
-
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared<dynamic_reconfigure::Server<FeatureConfig> > (*pnh_);
   dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&FeatureFromNormals::config_callback, this, _1, _2);
   srv_->setCallback (f);
+
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - use_surface    : %s\n"
+                 " - k_search       : %d\n"
+                 " - radius_search  : %f\n"
+                 " - spatial_locator: %d",
+                getName ().c_str (),
+                 (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
+
+  onInitPostProcess();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::FeatureFromNormals::subscribe()
+{
+  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
+  sub_normals_filter_.subscribe (*pnh_, "normals", max_queue_size_);
 
   // Create the objects here
   if (approximate_sync_)
@@ -342,13 +380,26 @@ pcl_ros::FeatureFromNormals::onInit ()
   else
     sync_input_normals_surface_indices_e_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - use_surface    : %s\n"
-                 " - k_search       : %d\n"
-                 " - radius_search  : %f\n"
-                 " - spatial_locator: %d",
-                getName ().c_str (),
-                 (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::FeatureFromNormals::unsubscribe()
+{
+  sub_input_filter_.unsubscribe();
+  sub_normals_filter_.unsubscribe();
+
+  if (use_indices_ || use_surface_)
+  {
+    if (use_indices_)
+    {
+      sub_indices_filter_.unsubscribe();
+      if (use_surface_)
+        sub_surface_filter_.unsubscribe();
+    }
+    else
+      sub_surface_filter_.unsubscribe();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

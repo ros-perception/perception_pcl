@@ -194,16 +194,12 @@ namespace pcl_ros
         return (true);
       }
 
-      /** \brief Lazy transport subscribe/unsubscribe routine. It is optional for backward compatibility. */
-      virtual void subscribe () {}
-      virtual void unsubscribe () {}
-
       /** \brief Nodelet initialization routine. Reads in global parameters used by all nodelets. */
       virtual void
       onInit ()
       {
         nodelet_topic_tools::NodeletLazy::onInit();
-
+        
         // Parameters that we care about only at startup
         pnh_->getParam ("max_queue_size", max_queue_size_);
         
@@ -223,6 +219,12 @@ namespace pcl_ros
             (latched_indices_) ? "true" : "false", 
             max_queue_size_);
       }
+
+    /** \brief Callback on subscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void subscribe() {};
+
+    /** \brief Callback on unsubscription. Inherited from nodelet_topic_tools::NodeletLazy. */
+    virtual void unsubscribe() {};
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
