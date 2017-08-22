@@ -28,6 +28,15 @@ apt-get update -qq && apt-get install -qq -y -q wget sudo lsb-release gnupg # fo
 travis_time_start setup.before_install
 #before_install:
 # Define some config vars.
+# Setup apt target
+if [ "$OS_NAME" = "debian" ]; then
+  # Using httpredir here to match mirror used in osrf image
+  # (https://github.com/osrf/multiarch-docker-image-generation/blob/d251b9a/build-image.sh#L46)
+  echo deb http://httpredir.debian.org/debian $OS_CODE_NAME contrib non-free | tee -a /etc/apt/sources.list
+  # Hit cloudfront mirror because of corrupted packages on fastly mirrors (https://github.com/ros-infrastructure/ros_buildfarm/issues/455)
+  # You can remove this line to target the default mirror or replace this to use the mirror of your preference
+  sed -i 's/httpredir.debian.org/cloudfront.debian.net/' /etc/apt/sources.list
+fi
 # Install ROS
 sudo sh -c "echo \"deb http://packages.ros.org/ros-shadow-fixed/ubuntu `lsb_release -cs` main\" > /etc/apt/sources.list.d/ros-latest.list"
 wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
@@ -61,7 +70,7 @@ wstool up
 
 # package depdencies: install using rosdep.
 cd ~/catkin_ws
-rosdep install -q -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO --os $DOCKER_IMAGE
+rosdep install -q -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO --os $OS_NAME:$OS_CODE_NAME
 travis_time_end
 
 travis_time_start setup.script
