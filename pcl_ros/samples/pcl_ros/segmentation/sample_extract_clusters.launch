@@ -25,7 +25,7 @@
     <rosparam>
       topic: /extract_clusters/output
       hz: 3000
-      hzerror: 1000
+      hzerror: 2400
       test_duration: 5.0
     </rosparam>
   </test>
