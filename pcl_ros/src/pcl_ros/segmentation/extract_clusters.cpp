@@ -71,15 +71,33 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
   pnh_->getParam ("publish_indices", publish_indices_);
 
   if (publish_indices_)
-    pub_output_ = pnh_->advertise<PointIndices> ("output", max_queue_size_);
+    pub_output_ = advertise<PointIndices> (*pnh_, "output", max_queue_size_);
   else
-    pub_output_ = pnh_->advertise<PointCloud> ("output", max_queue_size_);
+    pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<EuclideanClusterExtractionConfig> > (*pnh_);
   dynamic_reconfigure::Server<EuclideanClusterExtractionConfig>::CallbackType f =  boost::bind (&EuclideanClusterExtraction::config_callback, this, _1, _2);
   srv_->setCallback (f);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - max_queue_size    : %d\n"
+                 " - use_indices       : %s\n"
+                 " - cluster_tolerance : %f\n",
+                 getName ().c_str (),
+                 max_queue_size_,
+                 (use_indices_) ? "true" : "false", cluster_tolerance);
+
+  // Set given parameters here
+  impl_.setClusterTolerance (cluster_tolerance);
+
+  onInitPostProcess ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::EuclideanClusterExtraction::subscribe ()
+{
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_)
   {
@@ -103,17 +121,19 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
   else
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_, bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+}
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - max_queue_size    : %d\n"
-                 " - use_indices       : %s\n"
-                 " - cluster_tolerance : %f\n",
-                 getName ().c_str (),
-                 max_queue_size_,
-                 (use_indices_) ? "true" : "false", cluster_tolerance);
-
-  // Set given parameters here
-  impl_.setClusterTolerance (cluster_tolerance);
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::EuclideanClusterExtraction::unsubscribe ()
+{
+  if (use_indices_)
+  {
+    sub_input_filter_.unsubscribe ();
+    sub_indices_filter_.unsubscribe ();
+  }
+  else
+    sub_input_.shutdown ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
