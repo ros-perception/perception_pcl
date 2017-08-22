@@ -46,8 +46,20 @@ pcl_ros::SegmentDifferences::onInit ()
   // Call the super onInit ()
   PCLNodelet::onInit ();
 
-  pub_output_ = pnh_->advertise<PointCloud> ("output", max_queue_size_);
+  pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
 
+  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+                 " - max_queue_size    : %d",
+                 getName ().c_str (),
+                 max_queue_size_);
+
+  onInitPostProcess ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::SegmentDifferences::subscribe ()
+{
   // Subscribe to the input using a filter
   sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
   sub_target_filter_.subscribe (*pnh_, "target", max_queue_size_);
@@ -69,11 +81,14 @@ pcl_ros::SegmentDifferences::onInit ()
     sync_input_target_e_->connectInput (sub_input_filter_, sub_target_filter_);
     sync_input_target_e_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
   }
+}
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
-                 " - max_queue_size    : %d",
-                 getName ().c_str (),
-                 max_queue_size_);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::SegmentDifferences::unsubscribe ()
+{
+  sub_input_filter_.unsubscribe ();
+  sub_target_filter_.unsubscribe ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
