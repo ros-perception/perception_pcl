@@ -47,9 +47,10 @@
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
 {
-  private_nh_ = getMTPrivateNodeHandle ();
+  nodelet_topic_tools::NodeletLazy::onInit ();
+
   // ---[ Mandatory parameters
-  if (!private_nh_.getParam ("input_messages", input_messages_))
+  if (!pnh_->getParam ("input_messages", input_messages_))
   {
     NODELET_ERROR ("[onInit] Need a 'input_messages' parameter to be set before continuing!");
     return;
@@ -60,10 +61,25 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
     return;
   }
   // ---[ Optional parameters
-  private_nh_.getParam ("max_queue_size", maximum_queue_size_);
-  private_nh_.getParam ("maximum_seconds", maximum_seconds_);
-  sub_input_ = private_nh_.subscribe ("input", maximum_queue_size_,  &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
-  pub_output_ = private_nh_.advertise<sensor_msgs::PointCloud2> ("output", maximum_queue_size_);
+  pnh_->getParam ("max_queue_size", maximum_queue_size_);
+  pnh_->getParam ("maximum_seconds", maximum_seconds_);
+  pub_output_ = advertise<sensor_msgs::PointCloud2> (*pnh_, "output", maximum_queue_size_);
+
+  onInitPostProcess ();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
+{
+  sub_input_ = pnh_->subscribe ("input", maximum_queue_size_,  &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
+{
+  sub_input_.shutdown ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +87,7 @@ void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
 {
   NODELET_DEBUG ("[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), private_nh_.resolveName ("input").c_str ());
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
 
   // Erase old data in the queue
   if (maximum_seconds_ > 0 && queue_.size () > 0)
