@@ -74,6 +74,10 @@ namespace pcl_ros
       /** \brief Nodelet initialization routine. */
       void onInit ();
 
+      /** \brief LazyNodelet connection routine. */
+      void subscribe ();
+      void unsubscribe ();
+
       /** \brief Dynamic reconfigure callback
         * \param config the config object
         * \param level the dynamic reconfigure level
