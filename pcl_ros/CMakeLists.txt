@@ -204,6 +204,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(samples/pcl_ros/filters/sample_statistical_outlier_removal.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/filters/sample_voxel_grid.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/segmentation/sample_extract_clusters.launch ARGS gui:=false)
+  add_rostest(samples/pcl_ros/surface/sample_convex_hull.launch ARGS gui:=false)
 endif(CATKIN_ENABLE_TESTING)
 
 
