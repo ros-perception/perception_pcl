@@ -46,10 +46,11 @@
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 {
-  private_nh_ = getMTPrivateNodeHandle ();
+  nodelet_topic_tools::NodeletLazy::onInit ();
+
   // ---[ Mandatory parameters
-  private_nh_.getParam ("output_frame", output_frame_);
-  private_nh_.getParam ("approximate_sync", approximate_sync_);
+  pnh_->getParam ("output_frame", output_frame_);
+  pnh_->getParam ("approximate_sync", approximate_sync_);
 
   if (output_frame_.empty ())
   {
@@ -57,133 +58,130 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
     return;
   }
 
-  // ---[ Optional parameters
-  private_nh_.getParam ("max_queue_size", maximum_queue_size_);
-
-  // Output
-  pub_output_ = private_nh_.advertise<PointCloud2> ("output", maximum_queue_size_);
-
-  XmlRpc::XmlRpcValue input_topics;
-  if (!private_nh_.getParam ("input_topics", input_topics))
+  if (!pnh_->getParam ("input_topics", input_topics_))
   {
     NODELET_ERROR ("[onInit] Need a 'input_topics' parameter to be set before continuing!");
-    return; 
+    return;
   }
-  // Check the type
-  switch (input_topics.getType ())
+  if (input_topics_.getType () != XmlRpc::XmlRpcValue::TypeArray)
   {
-    case XmlRpc::XmlRpcValue::TypeArray:
+    NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
+    return;
+  }
+  if (input_topics_.size () == 1)
+  {
+    NODELET_ERROR ("[onInit] Only one topic given. Need at least two topics to continue.");
+    return;
+  }
+  if (input_topics_.size () > 8)
+  {
+    NODELET_ERROR ("[onInit] More than 8 topics passed!");
+    return;
+  }
+
+  // ---[ Optional parameters
+  pnh_->getParam ("max_queue_size", maximum_queue_size_);
+
+  // Output
+  pub_output_ = advertise<PointCloud2> (*pnh_, "output", maximum_queue_size_);
+
+  onInitPostProcess ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
+{
+  ROS_INFO_STREAM ("Subscribing to " << input_topics_.size () << " user given topics as inputs:");
+  for (int d = 0; d < input_topics_.size (); ++d)
+    ROS_INFO_STREAM (" - " << (std::string)(input_topics_[d]));
+
+  // Subscribe to the filters
+  filters_.resize (input_topics_.size ());
+
+  // 8 topics
+  if (approximate_sync_)
+    ts_a_.reset (new message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointCloud2, PointCloud2,
+                                                                                  PointCloud2, PointCloud2, PointCloud2,
+                                                                                  PointCloud2, PointCloud2>
+                                                  > (maximum_queue_size_));
+  else
+    ts_e_.reset (new message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointCloud2, PointCloud2,
+                                                                            PointCloud2, PointCloud2, PointCloud2,
+                                                                            PointCloud2, PointCloud2>
+                                                  > (maximum_queue_size_));
+
+  // First input_topics_.size () filters are valid
+  for (int d = 0; d < input_topics_.size (); ++d)
+  {
+    filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
+    filters_[d]->subscribe (*pnh_, (std::string)(input_topics_[d]), maximum_queue_size_);
+  }
+
+  // Bogus null filter
+  filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
+
+  switch (input_topics_.size ())
+  {
+    case 2:
     {
-      if (input_topics.size () == 1)
-      {
-        NODELET_ERROR ("[onInit] Only one topic given. Need at least two topics to continue.");
-        return;
-      }
-
-      if (input_topics.size () > 8)
-      {
-        NODELET_ERROR ("[onInit] More than 8 topics passed!");
-        return;
-       }
-
-      ROS_INFO_STREAM ("[onInit] Subscribing to " << input_topics.size () << " user given topics as inputs:");
-      for (int d = 0; d < input_topics.size (); ++d)
-        ROS_INFO_STREAM (" - " << (std::string)(input_topics[d]));
-
-      // Subscribe to the filters
-      filters_.resize (input_topics.size ());
-
-      // 8 topics
       if (approximate_sync_)
-        ts_a_.reset (new message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointCloud2, PointCloud2,
-                                                                                      PointCloud2, PointCloud2, PointCloud2,
-                                                                                      PointCloud2, PointCloud2> 
-                                                      > (maximum_queue_size_));
+        ts_a_->connectInput (*filters_[0], *filters_[1], nf_, nf_, nf_, nf_, nf_, nf_);
       else
-        ts_e_.reset (new message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointCloud2, PointCloud2,
-                                                                                PointCloud2, PointCloud2, PointCloud2,
-                                                                                PointCloud2, PointCloud2> 
-                                                      > (maximum_queue_size_));
-
-      // First input_topics.size () filters are valid
-      for (int d = 0; d < input_topics.size (); ++d)
-      {
-        filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-        filters_[d]->subscribe (private_nh_, (std::string)(input_topics[d]), maximum_queue_size_);
-      }
-
-      // Bogus null filter
-      filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
-
-      switch (input_topics.size ())
-      {
-        case 2:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], nf_, nf_, nf_, nf_, nf_, nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], nf_, nf_, nf_, nf_, nf_, nf_);
-          break;
-        }
-        case 3:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], nf_, nf_, nf_, nf_, nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], nf_, nf_, nf_, nf_, nf_);
-          break;
-        }
-        case 4:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], nf_, nf_, nf_, nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], nf_, nf_, nf_, nf_);
-          break;
-        }
-        case 5:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], nf_, nf_, nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], nf_, nf_, nf_);
-          break;
-        }
-        case 6:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], nf_, nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], nf_, nf_);
-          break;
-        }
-        case 7:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], nf_);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], nf_);
-          break;
-        }
-        case 8:
-        {
-          if (approximate_sync_)
-            ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], *filters_[7]);
-          else
-            ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], *filters_[7]);
-          break;
-        }
-        default:
-        {
-          NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
-          return;
-        }
-      }
+        ts_e_->connectInput (*filters_[0], *filters_[1], nf_, nf_, nf_, nf_, nf_, nf_);
+      break;
+    }
+    case 3:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], nf_, nf_, nf_, nf_, nf_);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], nf_, nf_, nf_, nf_, nf_);
+      break;
+    }
+    case 4:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], nf_, nf_, nf_, nf_);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], nf_, nf_, nf_, nf_);
+      break;
+    }
+    case 5:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], nf_, nf_, nf_);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], nf_, nf_, nf_);
+      break;
+    }
+    case 6:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], nf_, nf_);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], nf_, nf_);
+      break;
+    }
+    case 7:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], nf_);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], nf_);
+      break;
+    }
+    case 8:
+    {
+      if (approximate_sync_)
+        ts_a_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], *filters_[7]);
+      else
+        ts_e_->connectInput (*filters_[0], *filters_[1], *filters_[2], *filters_[3], *filters_[4], *filters_[5], *filters_[6], *filters_[7]);
       break;
     }
     default:
     {
-      NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
+      NODELET_FATAL ("Invalid 'input_topics' parameter given!");
       return;
     }
   }
@@ -192,6 +190,16 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
     ts_a_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
   else
     ts_e_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::PointCloudConcatenateDataSynchronizer::unsubscribe ()
+{
+  for (int d = 0; d < filters_.size (); ++d)
+  {
+    filters_[d]->unsubscribe ();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
