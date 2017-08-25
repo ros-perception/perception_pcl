@@ -3,9 +3,7 @@ dist: trusty
 language: generic
 services:
   - docker
-cache:
-  directories:
-    - $HOME/.ccache
+cache: ccache
 env:
   global:
     - ROS_DISTRO=lunar
