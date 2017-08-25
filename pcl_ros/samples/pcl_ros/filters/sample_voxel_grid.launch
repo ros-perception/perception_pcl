@@ -37,7 +37,7 @@
   <group if="$(arg gui)">
     <node name="rviz"
           pkg="rviz" type="rviz"
-          args="-d $(find pcl_ros)/samples/config/voxel_grid.rviz">
+          args="-d $(find pcl_ros)/samples/pcl_ros/filters/config/voxel_grid.rviz">
     </node>
   </group>
 
