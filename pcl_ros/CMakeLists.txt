@@ -8,9 +8,6 @@ find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
-  # FIXME: this causes duplicates and not found error in ubuntu:zesty
-  list(REMOVE_ITEM PCL_LIBRARIES "/usr/lib/libmpi.so")
-
   # For debian: https://github.com/ros-perception/perception_pcl/issues/139
   list(REMOVE_ITEM PCL_LIBRARIES
     "vtkGUISupportQt"
