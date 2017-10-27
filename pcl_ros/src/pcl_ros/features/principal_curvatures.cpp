@@ -72,5 +72,5 @@ pcl_ros::PrincipalCurvaturesEstimation::computePublish (const PointCloudInConstP
 }
 
 typedef pcl_ros::PrincipalCurvaturesEstimation PrincipalCurvaturesEstimation;
-PLUGINLIB_DECLARE_CLASS (pcl, PrincipalCurvaturesEstimation, PrincipalCurvaturesEstimation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PrincipalCurvaturesEstimation, nodelet::Nodelet)
 
