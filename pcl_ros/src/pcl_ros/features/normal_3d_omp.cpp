@@ -70,5 +70,5 @@ pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::NormalEstimationOMP NormalEstimationOMP;
-PLUGINLIB_DECLARE_CLASS (pcl, NormalEstimationOMP, NormalEstimationOMP, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(NormalEstimationOMP, nodelet::Nodelet)
 

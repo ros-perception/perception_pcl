@@ -216,5 +216,5 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
 }
 
 typedef pcl_ros::ExtractPolygonalPrismData ExtractPolygonalPrismData;
-PLUGINLIB_DECLARE_CLASS (pcl, ExtractPolygonalPrismData, ExtractPolygonalPrismData, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ExtractPolygonalPrismData, nodelet::Nodelet)
 
