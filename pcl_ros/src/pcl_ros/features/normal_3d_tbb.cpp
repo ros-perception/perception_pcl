@@ -75,7 +75,7 @@ pcl_ros::NormalEstimationTBB::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::NormalEstimationTBB NormalEstimationTBB;
-PLUGINLIB_DECLARE_CLASS (pcl, NormalEstimationTBB, NormalEstimationTBB, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(NormalEstimationTBB, nodelet::Nodelet)
 
 #endif // HAVE_TBB
 

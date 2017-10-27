@@ -71,4 +71,4 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::BoundaryEstimation BoundaryEstimation;
-PLUGINLIB_DECLARE_CLASS (pcl, BoundaryEstimation, BoundaryEstimation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(BoundaryEstimation, nodelet::Nodelet)
