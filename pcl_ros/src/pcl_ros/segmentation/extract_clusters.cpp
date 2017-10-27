@@ -228,5 +228,5 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
 }
 
 typedef pcl_ros::EuclideanClusterExtraction EuclideanClusterExtraction;
-PLUGINLIB_DECLARE_CLASS (pcl, EuclideanClusterExtraction, EuclideanClusterExtraction, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(EuclideanClusterExtraction, nodelet::Nodelet)
 

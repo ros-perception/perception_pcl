@@ -71,5 +71,5 @@ pcl_ros::SHOTEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::SHOTEstimation SHOTEstimation;
-PLUGINLIB_DECLARE_CLASS (pcl, SHOTEstimation, SHOTEstimation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(SHOTEstimation, nodelet::Nodelet)
 
