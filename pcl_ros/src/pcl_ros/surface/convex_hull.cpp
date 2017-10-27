@@ -178,5 +178,5 @@ void
 }
 
 typedef pcl_ros::ConvexHull2D ConvexHull2D;
-PLUGINLIB_DECLARE_CLASS (pcl, ConvexHull2D, ConvexHull2D, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ConvexHull2D, nodelet::Nodelet)
 

@@ -72,5 +72,5 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::FPFHEstimationOMP FPFHEstimationOMP;
-PLUGINLIB_DECLARE_CLASS (pcl, FPFHEstimationOMP, FPFHEstimationOMP, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(FPFHEstimationOMP, nodelet::Nodelet)
 
