@@ -139,5 +139,5 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
 }
 
 typedef pcl_ros::SegmentDifferences SegmentDifferences;
-PLUGINLIB_DECLARE_CLASS (pcl, SegmentDifferences, SegmentDifferences, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(SegmentDifferences, nodelet::Nodelet)
 

@@ -691,6 +691,6 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
 
 typedef pcl_ros::SACSegmentation SACSegmentation;
 typedef pcl_ros::SACSegmentationFromNormals SACSegmentationFromNormals;
-PLUGINLIB_DECLARE_CLASS (pcl, SACSegmentation, SACSegmentation, nodelet::Nodelet);
-PLUGINLIB_DECLARE_CLASS (pcl, SACSegmentationFromNormals, SACSegmentationFromNormals, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(SACSegmentation, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(SACSegmentationFromNormals, nodelet::Nodelet)
 
