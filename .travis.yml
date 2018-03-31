@@ -10,7 +10,6 @@ env:
   matrix:
     - DOCKER_IMAGE=debian:stretch
     - DOCKER_IMAGE=ubuntu:xenial
-    - DOCKER_IMAGE=ubuntu:zesty
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
