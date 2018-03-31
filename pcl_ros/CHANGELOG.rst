@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.4 (2018-03-31)
+------------------
 * update to use non deprecated pluginlib macro
 * Fix config path of sample_voxel_grid.launch
 * remove hack now that upstream pcl has been rebuilt
