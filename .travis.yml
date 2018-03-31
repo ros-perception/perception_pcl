@@ -24,4 +24,4 @@ after_failure:
   - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done
 branches:
   only:
-    - /.*-devel/
+    - /.*-devel$/
