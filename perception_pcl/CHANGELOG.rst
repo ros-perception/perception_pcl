@@ -2,6 +2,11 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add myname as a maintainer
+* Contributors: Kentaro Wada
+
 1.4.0 (2016-04-22)
 ------------------
 

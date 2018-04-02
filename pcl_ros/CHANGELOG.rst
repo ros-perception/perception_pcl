@@ -2,6 +2,70 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update to use non deprecated pluginlib macro
+* Fix config path of sample_voxel_grid.launch
+* remove hack now that upstream pcl has been rebuilt
+* Looser hzerror in test for extract_clusters to make it pass on Travis
+* Add sample & test for surface/convex_hull
+* Add sample & test for segmentation/extract_clusters.cpp
+* Add sample & test for io/concatenate_data.cpp
+* Add sample & test for features/normal_3d.cpp
+* Organize samples of pcl_ros/features
+* Add test arg to avoid duplicated testing
+* LazyNodelet for features/*
+* LazyNodelet for filters/ProjectInliers
+* Refactor io/PCDReader and io/PCDWriter as child of PCLNodelet
+* LazyNodelet for io/PointCloudConcatenateFieldsSynchronizer
+* LazyNodelet for io/PointCloudConcatenateDataSynchronizer
+* LazyNodelet for segmentation/SegmentDifferences
+* LazyNodelet for segmentation/SACSegmentationFromNormals
+* LazyNodelet for segmentation/SACSegmentation
+* LazyNodelet for segmentation/ExtractPolygonalPrismData
+* LazyNodelet for segmentation/EuclideanClusterExtraction
+* LazyNodelet for surface/MovingLeastSquares
+* LazyNodelet for surface/ConvexHull2D
+* Add missing COMPONENTS of PCL
+* Inherit NodeletLazy for pipeline with less cpu load
+* Set leaf_size 0.02
+* Install samples
+* Add sample and test for pcl/StatisticalOutlierRemoval
+  Conflicts:
+  pcl_ros/CMakeLists.txt
+* Add sample and test for pcl/VoxelGrid
+  Conflicts:
+  pcl_ros/CMakeLists.txt
+* no need to remove duplicates
+* spourious line change
+* remove now unnecessary build_depend on qtbase5
+* exclude PCL IO libraries exporting Qt flag
+* find only PCL components used instead of all PCL
+* Remove dependency on vtk/libproj-dev (`#145 <https://github.com/ros-perception/perception_pcl/issues/145>`_)
+  * Remove dependency on vtk/libproj-dev
+  These dependencies were introduced in `#124 <https://github.com/ros-perception/perception_pcl/issues/124>`_ to temporarily fix
+  missing / wrong dependencies in upstream vtk. This hack is no longer
+  necessary, since fixed vtk packages have been uploaded to
+  packages.ros.org (see `#124 <https://github.com/ros-perception/perception_pcl/issues/124>`_ and `ros-infrastructure/reprepro-updater#32 <https://github.com/ros-infrastructure/reprepro-updater/issues/32>`_).
+  * Remove vtk hack from CMakeLists.txt
+* Add dependency on qtbase5-dev for find_package(Qt5Widgets)
+  See https://github.com/ros-perception/perception_pcl/pull/117#issuecomment-298158272 for detail.
+* Find Qt5Widgets to fix -lQt5::Widgets error
+* Add myname as a maintainer
+* Fix lib name duplication error
+* Detect automatically the version of PCL
+* Merge pull request `#134 <https://github.com/ros-perception/perception_pcl/issues/134>`_ from ros-perception/install_plugins_xml
+  Install xml files declaring nodelets
+* Install xml files declaring nodelets
+  https://github.com/ros-perception/perception_pcl/commit/f81cded18b4f6d398b460a36c953fe6620a02bd6#commitcomment-21871201
+  @scottnothing Thanks!
+* Merge pull request `#132 <https://github.com/ros-perception/perception_pcl/issues/132>`_ from wkentaro/fix_syntax_nodelet_manifest
+  Fix syntax of nodelet manifest file
+* Fix syntax of nodelet manifest file
+  By splitting files for each library.
+  Close `#131 <https://github.com/ros-perception/perception_pcl/issues/131>`_
+* Contributors: Kentaro Wada, Mikael Arguedas, Paul Bovbel
+
 1.4.0 (2016-04-22)
 ------------------
 * Fixup libproj-dev rosdep
