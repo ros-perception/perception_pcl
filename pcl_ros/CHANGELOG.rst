@@ -2,6 +2,22 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update to use non deprecated pluginlib macro
+* Install xml files declaring nodelets
+  https://github.com/ros-perception/perception_pcl/commit/f81cded18b4f6d398b460a36c953fe6620a02bd6#commitcomment-21871201
+  @scottnothing Thanks!
+* Fix syntax of nodelet manifest file
+  By splitting files for each library.
+  Close `#131 <https://github.com/ros-perception/perception_pcl/issues/131>`_
+* Merge pull request `#114 <https://github.com/ros-perception/perception_pcl/issues/114>`_ from dpiet/indigo-devel
+  Fixing typo in a ROS_INFO statement
+* Fixing typo in a ROS_INFO statement
+  Statement was incorrectly informing user that PCD would be saved as binary instead of ASCII.
+* Merge cleanup broken library links
+* Contributors: Kentaro Wada, Mikael Arguedas, Paul Bovbel, dpiet, v4hn
+
 1.2.7 (2015-06-08)
 ------------------
 * Sync pcl_nodelets.xml from hydro to indigo
