@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.8 (2018-04-03)
+------------------
 * update to use non deprecated pluginlib macro
 * Install xml files declaring nodelets
   https://github.com/ros-perception/perception_pcl/commit/f81cded18b4f6d398b460a36c953fe6620a02bd6#commitcomment-21871201

@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.8 (2018-04-03)
+------------------
 * Merge pull request `#99 <https://github.com/ros-perception/perception_pcl/issues/99>`_ from ros-perception/fix-tolerance
   Fix pointcloud_to_laserscan transform tolerance issues
 * Fix pointcloud_to_laserscan transform tolerance issues
