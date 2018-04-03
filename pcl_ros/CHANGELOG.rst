@@ -2,6 +2,9 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.8 (2018-04-03)
 ------------------
 * update to use non deprecated pluginlib macro
