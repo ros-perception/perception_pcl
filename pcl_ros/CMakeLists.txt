@@ -4,7 +4,8 @@ project(pcl_ros)
 ## Find system dependencies
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
-find_package(Eigen3 REQUIRED)
+find_package(PkgConfig)
+pkg_search_module(Eigen3 REQUIRED eigen3)
 find_package(PCL 1.7 REQUIRED)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
