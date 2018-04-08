@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.3 (2018-04-08)
+------------------
 * Provide all PCL libraries
   Related to https://github.com/ros-perception/perception_pcl/pull/184
 * Contributors: Kentaro Wada
