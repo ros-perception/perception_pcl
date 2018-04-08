@@ -2,6 +2,12 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Provide all PCL libraries
+  Related to https://github.com/ros-perception/perception_pcl/pull/184
+* Contributors: Kentaro Wada
+
 1.4.2 (2018-04-03)
 ------------------
 * update to use non deprecated pluginlib macro
