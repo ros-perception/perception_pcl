@@ -21,6 +21,7 @@ endif()
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
+  message_filters
   nodelet
   nodelet_topic_tools
   pcl_conversions
