@@ -3,25 +3,26 @@ project(pcl_conversions)
 
 find_package(catkin REQUIRED COMPONENTS pcl_msgs roscpp sensor_msgs std_msgs)
 
-find_package(PCL REQUIRED QUIET COMPONENTS common)
+find_package(PCL REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_COMMON_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS})
-
 catkin_package(
-  INCLUDE_DIRS include ${PCL_COMMON_INCLUDE_DIRS}
+  INCLUDE_DIRS include
   CATKIN_DEPENDS pcl_msgs roscpp sensor_msgs std_msgs
+  DEPENDS Eigen3 PCL
 )
 
-# Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
 )
 
-# Add gtest based cpp test target
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
-  target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
+  include_directories(
+    include
+    ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS})
+
+  catkin_add_gtest(test_pcl_conversions test/test_pcl_conversions.cpp)
+  target_link_libraries(test_pcl_conversions ${catkin_LIBRARIES})
 endif()
