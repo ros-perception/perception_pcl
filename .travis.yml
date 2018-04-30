@@ -8,8 +8,13 @@ env:
   global:
     - ROS_DISTRO=lunar
   matrix:
+    # lunar
     - DOCKER_IMAGE=debian:stretch
     - DOCKER_IMAGE=ubuntu:xenial
+    # melodic
+    - DOCKER_IMAGE=debian:stretch ROS_DISTRO=melodic
+    - DOCKER_IMAGE=ubuntu:artful ROS_DISTRO=melodic
+    - DOCKER_IMAGE=ubuntu:bionic ROS_DISTRO=melodic
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
