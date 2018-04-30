@@ -17,10 +17,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(pcl_msgs)
-  find_package(roscpp)
-  find_package(sensor_msgs )
-  find_package(std_msgs)
+  find_package(catkin REQUIRED COMPONENTS roscpp pcl_msgs sensor_msgs std_msgs)
   include_directories(
     include
     ${catkin_INCLUDE_DIRS}
