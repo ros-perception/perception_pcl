@@ -16,19 +16,18 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>eigen</depend>
+  <build_export_depend>eigen</build_export_depend>
+  <build_export_depend>libpcl-all-dev</build_export_depend>
+  <build_export_depend>pcl_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
 
-  <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>pcl_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-
-  <run_depend>libpcl-all</run_depend>
-  <run_depend>libpcl-all-dev</run_depend>
-  <run_depend>pcl_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
+  <test_depend>eigen</test_depend>
+  <test_depend>libpcl-all-dev</test_depend>
+  <test_depend>pcl_msgs</test_depend>
+  <test_depend>roscpp</test_depend>
+  <test_depend>sensor_msgs</test_depend>
+  <test_depend>std_msgs</test_depend>
 
 </package>
