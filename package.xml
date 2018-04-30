@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>pcl_conversions</name>
   <version>0.2.1</version>
   <description>Provides conversions from PCL data types and ROS message types</description>
@@ -16,7 +16,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>cmake_modules</build_depend>
+  <depend>eigen</depend>
+
   <build_depend>libpcl-all-dev</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>roscpp</build_depend>
