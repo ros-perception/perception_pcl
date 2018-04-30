@@ -15,7 +15,8 @@ notifications:
       - www.kentaro.wada@gmail.com
 env:
   matrix:
-    - ROS_DISTRO="melodic"
+    - ROS_DISTRO="melodic" OS_NAME=ubuntu OS_CODE_NAME=artful
+    - ROS_DISTRO="melodic" OS_NAME=ubuntu OS_CODE_NAME=bionic
     - ROS_DISTRO="melodic" OS_NAME=debian OS_CODE_NAME=stretch
 before_script:
   - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
