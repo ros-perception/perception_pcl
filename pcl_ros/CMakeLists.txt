@@ -83,7 +83,7 @@ catkin_package(
     tf
   DEPENDS
     Boost
-    Eigen3
+    EIGEN3
     PCL
 )
 
