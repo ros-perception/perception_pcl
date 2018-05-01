@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pcl_conversions)
 
-find_package(catkin REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS pcl_msgs roscpp sensor_msgs std_msgs)
 
 find_package(PCL REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
@@ -17,10 +17,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(pcl_msgs)
-  find_package(roscpp)
-  find_package(sensor_msgs )
-  find_package(std_msgs)
   include_directories(
     include
     ${catkin_INCLUDE_DIRS}
