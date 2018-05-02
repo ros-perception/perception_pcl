@@ -5,12 +5,17 @@ services:
   - docker
 cache: ccache
 env:
-  global:
-    - ROS_DISTRO=melodic
   matrix:
-    - DOCKER_IMAGE=debian:stretch
-    - DOCKER_IMAGE=ubuntu:artful
-    - DOCKER_IMAGE=ubuntu:bionic
+    # Test the target distro.
+    - ROS_DISTRO=melodic DOCKER_IMAGE=debian:stretch
+    - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:artful
+    - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:bionic
+    # To test backward compatibility for users who build from source.
+    - ROS_DISTRO=lunar DOCKER_IMAGE=debian:stretch
+    - ROS_DISTRO=lunar DOCKER_IMAGE=ubuntu:xenial
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=debian:jessie
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=ubuntu:xenial
+    - ROS_DISTRO=indigo DOCKER_IMAGE=ubuntu:trusty
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
