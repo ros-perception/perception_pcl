@@ -13,7 +13,12 @@ find_package(Eigen3 REQUIRED)
 # configure properly.  Here we remove those bogus entries so that downstream
 # consumers of this package succeed.
 if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
-  list(FILTER PCL_INCLUDE_DIRS EXCLUDE REGEX "/usr/include/.*-linux-gnu/freetype2")
+  foreach(item ${PCL_INCLUDE_DIRS})
+    string(REGEX MATCH "/usr/include/.*-linux-gnu/freetype2" item ${item})
+    if(item)
+      list(REMOVE_ITEM PCL_INCLUDE_DIRS ${item})
+    endif()
+  endforeach()
 endif()
 
 catkin_package(
