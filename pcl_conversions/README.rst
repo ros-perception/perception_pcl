@@ -15,7 +15,7 @@ Code & tickets
 +-----------------+------------------------------------------------------------+
 | pcl_conversions | http://ros.org/wiki/pcl_conversions                        |
 +-----------------+------------------------------------------------------------+
-| Issues          | http://github.com/ros-perception/pcl_conversions/issues    |
+| Issues          | http://github.com/ros-perception/perception_pcl/issues    |
 +-----------------+------------------------------------------------------------+
 .. | Documentation   | http://ros-perception.github.com/pcl_conversions/doc       |
 .. +-----------------+------------------------------------------------------------+
