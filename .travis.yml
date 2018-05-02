@@ -6,10 +6,11 @@ services:
 cache: ccache
 env:
   global:
-    - ROS_DISTRO=lunar
+    - ROS_DISTRO=melodic
   matrix:
     - DOCKER_IMAGE=debian:stretch
-    - DOCKER_IMAGE=ubuntu:xenial
+    - DOCKER_IMAGE=ubuntu:artful
+    - DOCKER_IMAGE=ubuntu:bionic
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
