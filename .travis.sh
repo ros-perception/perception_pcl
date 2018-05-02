@@ -22,6 +22,9 @@ function travis_time_end {
     set -x
 }
 
+# Default configuration
+test "$NOT_TEST_INSTALL" = "" && export NOT_TEST_INSTALL=false
+
 # Mainly for https://github.com/ros-perception/perception_pcl/pull/197#issuecomment-386056906
 export DEBIAN_FRONTEND=noninteractive
 
@@ -78,7 +81,9 @@ cd ~/catkin_ws
 catkin build -p1 -j1
 catkin run_tests -p1 -j1
 catkin_test_results --all build
-catkin clean -b --yes
-catkin config --install
-catkin build -p1 -j1
+if [ "$NOT_TEST_INSTALL" != "true" ]; then
+  catkin clean -b --yes
+  catkin config --install
+  catkin build -p1 -j1
+fi
 travis_time_end
