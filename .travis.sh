@@ -22,6 +22,8 @@ function travis_time_end {
     set -x
 }
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt-get update -qq && apt-get install -qq -y -q wget sudo lsb-release gnupg # for docker
 
 # Setup ccache
