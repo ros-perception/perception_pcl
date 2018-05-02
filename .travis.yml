@@ -11,11 +11,11 @@ env:
     - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:artful
     - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:bionic
     # To test backward compatibility for users who build from source.
-    - ROS_DISTRO=lunar DOCKER_IMAGE=debian:stretch
-    - ROS_DISTRO=lunar DOCKER_IMAGE=ubuntu:xenial
-    - ROS_DISTRO=kinetic DOCKER_IMAGE=debian:jessie
-    - ROS_DISTRO=kinetic DOCKER_IMAGE=ubuntu:xenial
-    - ROS_DISTRO=indigo DOCKER_IMAGE=ubuntu:trusty
+    - ROS_DISTRO=lunar DOCKER_IMAGE=debian:stretch NOT_TEST_INSTALL=true
+    - ROS_DISTRO=lunar DOCKER_IMAGE=ubuntu:xenial NOT_TEST_INSTALL=true
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=debian:jessie NOT_TEST_INSTALL=true
+    - ROS_DISTRO=kinetic DOCKER_IMAGE=ubuntu:xenial NOT_TEST_INSTALL=true
+    - ROS_DISTRO=indigo DOCKER_IMAGE=ubuntu:trusty NOT_TEST_INSTALL=true
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
