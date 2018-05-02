@@ -1,10 +1,20 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.7)
 project(pcl_conversions)
 
 find_package(catkin REQUIRED COMPONENTS)
 
 find_package(PCL REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
+
+# There is a bug in the Ubuntu Artful (17.10) version of the VTK package,
+# where it includes /usr/include/*-linux-gnu/freetype2 in the include
+# directories (which doesn't exist).  This filters down to the PCL_INCLUDE_DIRS,
+# and causes downstream projects trying to use these libraries to fail to
+# configure properly.  Here we remove those bogus entries so that downstream
+# consumers of this package succeed.
+if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
+  list(FILTER PCL_INCLUDE_DIRS EXCLUDE REGEX "/usr/include/.*-linux-gnu/freetype2")
+endif()
 
 catkin_package(
   INCLUDE_DIRS include
