@@ -12,8 +12,8 @@
   <license>BSD</license>
 
   <url>http://wiki.ros.org/pcl_conversions</url>
-  <url type="repository">https://github.com/ros-perception/pcl_conversions</url>
-  <url type="bugtracker">https://github.com/ros-perception/pcl_conversions/issues</url>
+  <url type="repository">https://github.com/ros-perception/perception_pcl</url>
+  <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
