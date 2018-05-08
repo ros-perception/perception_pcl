@@ -2,8 +2,8 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.1 (2018-05-08)
+------------------
 * Add 1.6.0 section to CHANGELOG.rst
 * Use foreach + string regex to implement list(filter on old cmake
 * Downgrade the required cmake version for backward compatibility
