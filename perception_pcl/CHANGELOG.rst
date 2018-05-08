@@ -2,6 +2,12 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.6.0 (2018-04-30)
+------------------
+
+* Fix build and update maintainers
+* Contributors: Paul Bovbel, Kentaro Wada
+
 1.5.4 (2018-03-31)
 ------------------
 

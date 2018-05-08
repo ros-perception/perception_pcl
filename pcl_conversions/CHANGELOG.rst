@@ -2,6 +2,12 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.6.0 (2018-04-30)
+------------------
+
+* Fix build and update maintainers
+* Contributors: Paul Bovbel, Kentaro Wada
+
 0.2.1 (2015-06-08)
 ------------------
 * Added a test for rounding errors in stamp conversion

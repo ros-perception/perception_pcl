@@ -2,6 +2,14 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.6.0 (2018-04-30)
+------------------
+
+* Fix build and update maintainers
+* Add message_filters to find_package
+* Remove unnecessary dependency on genmsg
+* Contributors: Paul Bovbel, Kentaro Wada
+
 1.5.4 (2018-03-31)
 ------------------
 * update to use non deprecated pluginlib macro
