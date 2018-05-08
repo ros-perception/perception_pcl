@@ -2,6 +2,11 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add 1.6.0 section to CHANGELOG.rst
+* Contributors: Kentaro Wada
+
 1.6.0 (2018-04-30)
 ------------------
 

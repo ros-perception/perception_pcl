@@ -2,6 +2,12 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add 1.6.0 section to CHANGELOG.rst
+* Fix the use of Eigen3 in cmake
+* Contributors: Kentaro Wada
+
 1.6.0 (2018-04-30)
 ------------------
 

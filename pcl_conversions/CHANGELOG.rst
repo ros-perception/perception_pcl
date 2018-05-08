@@ -2,6 +2,17 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add 1.6.0 section to CHANGELOG.rst
+* Use foreach + string regex to implement list(filter on old cmake
+* Downgrade the required cmake version for backward compatibility
+* update package.xml links to point to new repository
+* CMake 3.6.3 is sufficient
+* Fix a bug building on artful.
+* Fixup pcl_conversions test
+* Contributors: Chris Lalancette, Kentaro Wada, Mikael Arguedas, Paul Bovbel
+
 1.6.0 (2018-04-30)
 ------------------
 
