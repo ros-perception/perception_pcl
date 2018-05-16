@@ -18,6 +18,19 @@ if(NOT "${PCL_LIBRARIES}" STREQUAL "")
     "vtkRenderingQt")
 endif()
 
+# Remove include dirs which does not exist in some platforms.
+# https://github.com/ros-perception/perception_pcl/issues/172
+# https://github.com/ros-perception/perception_pcl/issues/206
+if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
+  foreach(item ${PCL_INCLUDE_DIRS})
+    string(REGEX MATCH "/usr/include/.*-linux-gnu/freetype2" match1 ${item})
+    string(REGEX MATCH "/usr/include/hdf5/openmpi" match2 ${item})
+    if(match1 OR match2)
+      list(REMOVE_ITEM PCL_INCLUDE_DIRS ${item})
+    endif()
+  endforeach()
+endif()
+
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
