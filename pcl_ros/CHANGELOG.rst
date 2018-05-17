@@ -2,6 +2,21 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use nested foreach for the filtered patterns
+* Filter include dirs that does not exist
+  Close https://github.com/ros-perception/perception_pcl/issues/172
+  Close https://github.com/ros-perception/perception_pcl/issues/206
+* Remove dependencies on not existing target
+* Fix use of Eigen3
+* Revert "Increase limits on CropBox filter parameters"
+  This reverts commit e007128e41b189092a3311775a28c8ebbd8f13ad.
+* Increase limits on CropBox filter parameters
+  Min and max of CropBox filter was +/- 5m. For a pointcloud from a Velodyne, for example, this is not enough.
+  Increased to +/- 1000m.
+* Contributors: James Ward, Kentaro Wada
+
 1.4.3 (2018-04-08)
 ------------------
 * Provide all PCL libraries
