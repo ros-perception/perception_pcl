@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.4 (2018-05-17)
+------------------
 * Use nested foreach for the filtered patterns
 * Filter include dirs that does not exist
   Close https://github.com/ros-perception/perception_pcl/issues/172
