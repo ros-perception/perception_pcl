@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.2 (2018-05-20)
+------------------
 * Fix exported includes in Ubuntu Artful
 * Increase limits on CropBox filter parameters
 * Contributors: James Ward, Jiri Horner
