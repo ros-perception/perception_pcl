@@ -94,7 +94,7 @@ int main (int argc, char** argv) {
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
     pub = nh.advertise<sensor_msgs::PointCloud2>(cloud_topic, 1, true);
-    // update potentially remapped topic name for logging
+    // update potentially remapped topic name for later logging
     cloud_topic = nh.resolveName(cloud_topic);
     // filename
     std::string file_name;
@@ -143,5 +143,6 @@ int main (int argc, char** argv) {
     if (interval > 0) {
         timer = nh.createTimer(ros::Duration(interval), timer_callback);
     }
+    // process callbacks
     ros::spin();
 }
