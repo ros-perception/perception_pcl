@@ -83,7 +83,7 @@ void publish() {
     pub.publish(cloud);
 }
 
-void timer_callback(ros::TimerEvent const& event) {
+void timer_callback(ros::TimerEvent const&) {
     // just re-publish
     publish();
 }
