@@ -49,6 +49,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <chrono>
+#include <thread>
 
 #include "pcl_ros/publisher.h"
 
@@ -116,7 +118,7 @@ class PCDGenerator
           continue;
         }
 
-        usleep (interval);
+        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
 
         if (interval == 0)	// We only publish once if a 0 seconds interval is given
 				{
