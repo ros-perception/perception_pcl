@@ -89,7 +89,28 @@ int
     return (-1);
   }
 
-  view.addQuery (bag, rosbag::TypeQuery ("sensor_msgs/PointCloud2"));
+  // check that target topic exists in the bag file:
+  rosbag::View topic_list_view(bag);
+  std::string target_topic;
+  std::map<std::string, std::string> topic_list;
+  for(rosbag::ConnectionInfo const *ci: topic_list_view.getConnections() )
+  {
+      topic_list[ci->topic] = ci->datatype;
+      if (ci->topic == argv[2])
+      {
+          target_topic = std::string (argv[2]);
+          view.addQuery (bag, rosbag::TopicQuery (target_topic));
+      }
+  }
+  if (target_topic.empty())
+  {
+      std::cerr << "Could not find topic '" << argv[2] << "' in bag file!" << std::endl;
+      std::cerr << "Topic should be one of the following:" << std::endl;
+      for (std::map<std::string, std::string>::iterator it=topic_list.begin(); it!=topic_list.end(); ++it)
+          std::cout << "    " << it->first << " (" << it->second << ")" << std::endl;
+      return(-1);
+  }
+
   view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
   view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
   view_it = view.begin ();
@@ -107,7 +128,7 @@ int
   }
 
   // Add the PointCloud2 handler
-  std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << argv[2] << " to " << output_dir << std::endl;
+  std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << target_topic << " to " << output_dir << std::endl;
 
   PointCloud cloud_t;
   ros::Duration r (0.001);
@@ -148,7 +169,7 @@ int
         cloud_t = *cloud;
       }
 
-      std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
+      std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " << cloud_t.header.frame_id << " on topic " << view_it->getTopic() << " with the following fields: " << pcl::getFieldsList (cloud_t) << std::endl;
 
       std::stringstream ss;
       ss << output_dir << "/" << cloud_t.header.stamp << ".pcd";
