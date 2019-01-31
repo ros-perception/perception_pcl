@@ -49,9 +49,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+
 #ifdef _WIN32
-#include <chrono>
-#include <thread>
+  #include <chrono>
+  #include <thread>
 #endif
 
 #include "pcl_ros/publisher.h"
