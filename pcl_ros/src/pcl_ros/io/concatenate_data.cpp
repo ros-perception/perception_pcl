@@ -212,14 +212,30 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
 
   // Transform the point clouds into the specified output frame
   if (output_frame_ != in1.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
+  {
+    if (!pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_))
+    {
+      NODELET_ERROR ("[%s::combineClouds] Error converting first input dataset from %s to %s.", getName ().c_str (), in1.header.frame_id.c_str (), output_frame_.c_str ());
+      return;
+    }
+  }
   else
+  {
     in1_t = boost::make_shared<PointCloud2> (in1);
+  }
 
   if (output_frame_ != in2.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
+  {
+    if (!pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_))
+    {
+      NODELET_ERROR ("[%s::combineClouds] Error converting second input dataset from %s to %s.", getName ().c_str (), in2.header.frame_id.c_str (), output_frame_.c_str ());
+      return;
+    }
+  }
   else
+  {
     in2_t = boost::make_shared<PointCloud2> (in2);
+  }
 
   // Concatenate the results
   pcl::concatenatePointCloud (*in1_t, *in2_t, out);
