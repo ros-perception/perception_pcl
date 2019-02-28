@@ -60,12 +60,7 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::PointCl
   {
     tf_listener.lookupTransform (target_frame, in.header.frame_id, in.header.stamp, transform);
   }
-  catch (tf::LookupException &e)
-  {
-    ROS_ERROR ("%s", e.what ());
-    return (false);
-  }
-  catch (tf::ExtrapolationException &e)
+  catch (const tf::TransformException &e)
   {
     ROS_ERROR ("%s", e.what ());
     return (false);

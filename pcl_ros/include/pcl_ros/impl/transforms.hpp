@@ -105,12 +105,7 @@ transformPointCloudWithNormals (const std::string &target_frame,
   {
     tf_listener.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, transform);
   }
-  catch (tf::LookupException &e)
-  {
-    ROS_ERROR ("%s", e.what ());
-    return (false);
-  }
-  catch (tf::ExtrapolationException &e)
+  catch (const tf::TransformException &e)
   {
     ROS_ERROR ("%s", e.what ());
     return (false);
@@ -139,16 +134,12 @@ transformPointCloud (const std::string &target_frame,
   {
     tf_listener.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, transform);
   }
-  catch (tf::LookupException &e)
+  catch (const tf::TransformException &e)
   {
     ROS_ERROR ("%s", e.what ());
     return (false);
   }
-  catch (tf::ExtrapolationException &e)
-  {
-    ROS_ERROR ("%s", e.what ());
-    return (false);
-  }
+
   transformPointCloud (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
   return (true);
@@ -168,12 +159,7 @@ transformPointCloud (const std::string &target_frame,
   {
     tf_listener.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, fixed_frame, transform);
   }
-  catch (tf::LookupException &e)
-  {
-    ROS_ERROR ("%s", e.what ());
-    return (false);
-  }
-  catch (tf::ExtrapolationException &e)
+  catch (const tf::TransformException &e)
   {
     ROS_ERROR ("%s", e.what ());
     return (false);
@@ -201,12 +187,7 @@ transformPointCloudWithNormals (const std::string &target_frame,
   {
     tf_listener.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, fixed_frame, transform);
   }
-  catch (tf::LookupException &e)
-  {
-    ROS_ERROR ("%s", e.what ());
-    return (false);
-  }
-  catch (tf::ExtrapolationException &e)
+  catch (const tf::TransformException &e)
   {
     ROS_ERROR ("%s", e.what ());
     return (false);
