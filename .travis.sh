@@ -78,6 +78,7 @@ travis_time_start setup.script
 # Compile and test.
 #script:
 source /opt/ros/$ROS_DISTRO/setup.bash
+find /opt -name roscppConfig.cmake
 cd ~/catkin_ws
 catkin build -p1 -j1
 catkin run_tests -p1 -j1
