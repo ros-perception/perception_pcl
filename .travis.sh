@@ -53,6 +53,7 @@ travis_time_start setup.install
 # Create a catkin workspace with the package under test.
 #install:
 mkdir -p ~/catkin_ws/src
+mkdir ~/catkin_ws/logs
 
 # Add the package under test to the workspace.
 cd ~/catkin_ws/src
