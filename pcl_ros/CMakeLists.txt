@@ -231,6 +231,13 @@ install(
     pcl_ros_filters
     pcl_ros_surface
     pcl_ros_segmentation
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  TARGETS
     pcd_to_pointcloud
     pointcloud_to_pcd
     bag_to_pcd
