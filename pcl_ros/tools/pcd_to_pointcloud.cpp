@@ -43,6 +43,10 @@
 
  **/
 
+// STL
+#include <chrono>
+#include <thread>
+
 // ROS core
 #include <ros/ros.h>
 #include <pcl/io/io.h>
@@ -116,7 +120,7 @@ class PCDGenerator
           continue;
         }
 
-        usleep (interval);
+        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
 
         if (interval == 0)	// We only publish once if a 0 seconds interval is given
 				{
