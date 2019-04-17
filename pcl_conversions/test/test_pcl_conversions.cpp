@@ -41,10 +41,10 @@ protected:
   }
 
   pcl::PCLImage pcl_image;
-  sensor_msgs::Image image;
+  sensor_msgs::msg::Image image;
 
   pcl::PCLPointCloud2 pcl_pc2;
-  sensor_msgs::PointCloud2 pc2;
+  sensor_msgs::msg::PointCloud2 pc2;
 };
 
 template<class T>
@@ -103,10 +103,10 @@ TEST_F(PCLConversionTests, pointcloud2Conversion) {
 
 struct StampTestData
 {
-  const ros::Time stamp_;
-  ros::Time stamp2_;
+  const rclcpp::Time stamp_;
+  rclcpp::Time stamp2_;
 
-  explicit StampTestData(const ros::Time &stamp)
+  explicit StampTestData(const rclcpp::Time &stamp)
     : stamp_(stamp)
   {
     pcl::uint64_t pcl_stamp;
@@ -118,27 +118,27 @@ struct StampTestData
 TEST(PCLConversionStamp, Stamps)
 {
   {
-    const StampTestData d(ros::Time(1.000001));
+    const StampTestData d(rclcpp::Time(1.000001));
     EXPECT_TRUE(d.stamp_==d.stamp2_);
   }
 
   {
-    const StampTestData d(ros::Time(1.999999));
+    const StampTestData d(rclcpp::Time(1.999999));
     EXPECT_TRUE(d.stamp_==d.stamp2_);
   }
 
   {
-    const StampTestData d(ros::Time(1.999));
+    const StampTestData d(rclcpp::Time(1.999));
     EXPECT_TRUE(d.stamp_==d.stamp2_);
   }
 
   {
-    const StampTestData d(ros::Time(1423680574, 746000000));
+    const StampTestData d(rclcpp::Time(1423680574, 746000000));
     EXPECT_TRUE(d.stamp_==d.stamp2_);
   }
 
   {
-    const StampTestData d(ros::Time(1423680629, 901000000));
+    const StampTestData d(rclcpp::Time(1423680629, 901000000));
     EXPECT_TRUE(d.stamp_==d.stamp2_);
   }
 }
