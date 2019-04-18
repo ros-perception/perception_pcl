@@ -45,9 +45,8 @@ Cloud Data) format.
  **/
 
 #include <sstream>
-#include <boost/filesystem.hpp>
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
+#include <rosbag2/bag.h>
+#include <rosbag2/view.h>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -55,7 +54,7 @@ Cloud Data) format.
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 
-typedef sensor_msgs::PointCloud2 PointCloud;
+typedef sensor_msgs::msg::PointCloud2 PointCloud;
 typedef PointCloud::Ptr PointCloudPtr;
 typedef PointCloud::ConstPtr PointCloudConstPtr;
 
@@ -63,7 +62,8 @@ typedef PointCloud::ConstPtr PointCloudConstPtr;
 int
   main (int argc, char** argv)
 {
-  ros::init (argc, argv, "bag_to_pcd");
+  rclcpp::init (argc, argv);
+  //"bag_to_pcd"
   if (argc < 4)
   {
     std::cerr << "Syntax is: " << argv[0] << " <file_in.bag> <topic> <output_directory> [<target_frame>]" << std::endl;
@@ -72,33 +72,33 @@ int
   }
 
   // TF
-  tf::TransformListener tf_listener;
-  tf::TransformBroadcaster tf_broadcaster;
+  tf2_ros::TransformListener tf_listener;
+  tf2_ros::TransformBroadcaster tf_broadcaster;
 
-  rosbag::Bag bag;
-  rosbag::View view;
-  rosbag::View::iterator view_it;
+  rosbag2::Bag bag;
+  rosbag2::View view;
+  rosbag2::View::iterator view_it;
 
   try
   {
-    bag.open (argv[1], rosbag::bagmode::Read);
+    bag.open (argv[1], rosbag2::bagmode::Read);
   } 
-  catch (rosbag::BagException) 
+  catch (rosbag2::BagException)
   {
     std::cerr << "Error opening file " << argv[1] << std::endl;
     return (-1);
   }
 
-  view.addQuery (bag, rosbag::TypeQuery ("sensor_msgs/PointCloud2"));
-  view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
-  view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
+  view.addQuery (bag, rosbag2::TypeQuery ("sensor_msgs/PointCloud2"));
+  view.addQuery (bag, rosbag2::TypeQuery ("tf/tfMessage"));
+  view.addQuery (bag, rosbag2::TypeQuery ("tf2_msgs/TFMessage"));
   view_it = view.begin ();
 
   std::string output_dir = std::string (argv[3]);
-  boost::filesystem::path outpath (output_dir);
-  if (!boost::filesystem::exists (outpath))
+  std::filesystem::path outpath (output_dir);
+  if (!std::filesystem::exists (outpath))
   {
-    if (!boost::filesystem::create_directories (outpath))
+    if (!std::filesystem::create_directories (outpath))
     {
       std::cerr << "Error creating directory " << output_dir << std::endl;
       return (-1);
@@ -110,12 +110,12 @@ int
   std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << argv[2] << " to " << output_dir << std::endl;
 
   PointCloud cloud_t;
-  ros::Duration r (0.001);
+  rclcpp::Duration r (0.001);
   // Loop over the whole bag file
   while (view_it != view.end ())
   {
     // Handle TF messages first
-    tf::tfMessage::ConstPtr tf = view_it->instantiate<tf::tfMessage> ();
+    tf2::msg::tfMessage::ConstPtr tf = view_it->instantiate<tf2::msg::tfMessage> ();
     if (tf != NULL)
     {
       tf_broadcaster.sendTransform (tf->transforms);

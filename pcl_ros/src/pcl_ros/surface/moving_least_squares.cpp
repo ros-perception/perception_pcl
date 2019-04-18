@@ -35,41 +35,34 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/surface/moving_least_squares.h"
 #include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::MovingLeastSquares::onInit ()
 {
-  PCLNodelet::onInit ();
-  
   //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
-  pub_output_ = advertise<PointCloudIn> (*pnh_, "output", max_queue_size_);
-  pub_normals_ = advertise<NormalCloudOut> (*pnh_, "normals", max_queue_size_);
+  pub_output_ = advertise<PointCloudIn> ("output", max_queue_size_);
+  pub_normals_ = advertise<NormalCloudOut> ("normals", max_queue_size_);
   
-  //if (!pnh_->getParam ("k_search", k_) && !pnh_->getParam ("search_radius", search_radius_))  
-  if (!pnh_->getParam ("search_radius", search_radius_))
+  //if (!this->getParam ("k_search", k_) && !this->getParam ("search_radius", search_radius_))  
+  if (!this->get_parameter ("search_radius", search_radius_))
   {
     //NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
-    NODELET_ERROR ("[%s::onInit] Need a 'search_radius' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'search_radius' parameter to be set before continuing!", getName ().c_str ());
     return;
   }
-  if (!pnh_->getParam ("spatial_locator", spatial_locator_type_))
+  if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   { 
-    NODELET_ERROR ("[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
     return;
   }
-
-  // Enable the dynamic reconfigure service
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<MLSConfig> > (*pnh_);
-  dynamic_reconfigure::Server<MLSConfig>::CallbackType f = boost::bind (&MovingLeastSquares::config_callback, this, _1, _2 );
-  srv_->setCallback (f); 
 
   // ---[ Optional parameters
-  pnh_->getParam ("use_indices", use_indices_);
+  this->get_parameter ("use_indices", use_indices_);
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - use_indices    : %s",
                  getName ().c_str (), 
                  (use_indices_) ? "true" : "false");
@@ -85,20 +78,20 @@ pcl_ros::MovingLeastSquares::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (*pnh_, "input", 1);
+    sub_input_filter_.subscribe ("input", 1);
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_.subscribe (*pnh_, "indices", 1);
+    sub_indices_filter_.subscribe ("indices", 1);
 
     if (approximate_sync_)
     {
-      sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn, PointIndices> > >(max_queue_size_);
+      sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
     }
     else
     {
-      sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn, PointIndices> > >(max_queue_size_);
+      sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
@@ -106,7 +99,7 @@ pcl_ros::MovingLeastSquares::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +133,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // If cloud is given, check if it's valid
   if (!isValid (cloud)) 
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
     output.header = cloud->header;
     pub_output_.publish (output.makeShared ());
     return;
@@ -148,7 +141,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // If indices are given, check if they are valid
   if (indices && !isValid (indices, "indices"))
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
     output.header = cloud->header;
     pub_output_.publish (output.makeShared ());
     return;
@@ -156,14 +149,14 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
 
   /// DEBUG
   if (indices)
-    NODELET_DEBUG ("[%s::input_indices_model_callback]\n"
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_model_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
-                   indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("indices").c_str ());
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
+                   indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("indices").c_str ());
   else
-    NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
   ///
 
   // Reset the indices and surface pointers
@@ -180,7 +173,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // Do the reconstructon
   //impl_.process (output);
 
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
   pub_output_.publish (output.makeShared ());
@@ -188,46 +181,5 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   pub_normals_.publish (normals);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::MovingLeastSquares::config_callback (MLSConfig &config, uint32_t level)
-{
-  // \Note Zoli, shouldn't this be implemented in MLS too?
-  /*if (k_ != config.k_search)
-  {
-    k_ = config.k_search;
-    NODELET_DEBUG ("[config_callback] Setting the k_search to: %d.", k_); 
-  }*/
-  if (search_radius_ != config.search_radius)
-  {
-    search_radius_ = config.search_radius;
-    NODELET_DEBUG ("[config_callback] Setting the search radius: %f.", search_radius_);
-    impl_.setSearchRadius (search_radius_);
-  }
-  if (spatial_locator_type_ != config.spatial_locator)
-  {
-    spatial_locator_type_ = config.spatial_locator;
-    NODELET_DEBUG ("[config_callback] Setting the spatial locator to type: %d.", spatial_locator_type_);
-  }
-  if (use_polynomial_fit_ != config.use_polynomial_fit)
-  {
-    use_polynomial_fit_ = config.use_polynomial_fit;
-    NODELET_DEBUG ("[config_callback] Setting the use_polynomial_fit flag to: %d.", use_polynomial_fit_);
-    impl_.setPolynomialFit (use_polynomial_fit_);
-  }
-  if (polynomial_order_ != config.polynomial_order)
-  {
-    polynomial_order_ = config.polynomial_order;
-    NODELET_DEBUG ("[config_callback] Setting the polynomial order to: %d.", polynomial_order_);
-    impl_.setPolynomialOrder (polynomial_order_);
-  }
-  if (gaussian_parameter_ != config.gaussian_parameter)
-  {
-    gaussian_parameter_ = config.gaussian_parameter;
-    NODELET_DEBUG ("[config_callback] Setting the gaussian parameter to: %f.", gaussian_parameter_);
-    impl_.setSqrGaussParam (gaussian_parameter_ * gaussian_parameter_);
-  }
-}
-
 typedef pcl_ros::MovingLeastSquares MovingLeastSquares;
-PLUGINLIB_EXPORT_CLASS(MovingLeastSquares, nodelet::Nodelet)
+//PLUGINLIB_EXPORT_CLASS(MovingLeastSquares, nodelet::Nodelet)

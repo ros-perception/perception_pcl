@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/moment_invariants.h"
 
 void 
@@ -63,12 +63,12 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
   PointCloudOut output;
   impl_.compute (output);
 
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
   pub_output_.publish (output.makeShared ());
 }
 
 typedef pcl_ros::MomentInvariantsEstimation MomentInvariantsEstimation;
-PLUGINLIB_EXPORT_CLASS(MomentInvariantsEstimation, nodelet::Nodelet)
+//PLUGINLIB_EXPORT_CLASS(MomentInvariantsEstimation, nodelet::Nodelet)
 

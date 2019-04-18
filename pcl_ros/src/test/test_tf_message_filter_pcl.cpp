@@ -34,12 +34,9 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 
-#include <tf/message_filter.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
-
-#include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <tf2_ros/message_filter.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -48,7 +45,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace tf;
+using namespace tf2_ros;
 
 // using a random point type, as we want to make sure that it does work with
 // other points than just XYZ
@@ -58,20 +55,20 @@ typedef pcl::PointCloud<pcl::PointXYZRGBNormal> PCDType;
 /// Sets pcl_stamp from stamp, BUT alters stamp
 /// a little to round it to millisecond. This is because converting back
 /// and forth from pcd to ros time induces some rounding errors.
-void setStamp(ros::Time &stamp, pcl::uint64_t &pcl_stamp)
+void setStamp(rclcpp::Time &stamp, pcl::uint64_t &pcl_stamp)
 {
   // round to millisecond
   static const uint32_t mult = 1e6;
-  stamp.nsec /= mult;
-  stamp.nsec *= mult;
+  stamp.nanoseconds() /= mult;
+  stamp.nanoseconds() *= mult;
 
   pcl_conversions::toPCL(stamp, pcl_stamp);
 
   // verify
   {
-    ros::Time t;
+    rclcpp::Time t;
     pcl_conversions::fromPCL(pcl_stamp, t);
-    ROS_ASSERT_MSG(t==stamp, "%d/%d vs %d/%d", t.sec, t.nsec, stamp.sec, stamp.nsec);
+    ROS_ASSERT_MSG(t==stamp, "%d/%d vs %d/%d", t.seconds(), t.nanoseconds(), stamp.seconds(), stamp.nanoseconds());
   }
 }
 
@@ -102,13 +99,14 @@ public:
 
 TEST(MessageFilter, noTransforms)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
-  ros::Time stamp = ros::Time::now();
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
   filter.add(msg);
@@ -118,13 +116,14 @@ TEST(MessageFilter, noTransforms)
 
 TEST(MessageFilter, noTransformsSameFrame)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
-  ros::Time stamp = ros::Time::now();
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame1";
   filter.add(msg);
@@ -134,17 +133,18 @@ TEST(MessageFilter, noTransformsSameFrame)
 
 TEST(MessageFilter, preexistingTransforms)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
-
-  ros::Time stamp = ros::Time::now();
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf2::StampedTransform transform(tf2::Transform(tf::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame2";
@@ -158,9 +158,10 @@ TEST(MessageFilter, postTransforms)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
-
-  ros::Time stamp = ros::Time::now();
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
@@ -169,24 +170,25 @@ TEST(MessageFilter, postTransforms)
 
   EXPECT_EQ(0, n.count_);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
-  ros::WallDuration(0.1).sleep();
-  ros::spinOnce();
+  rclcpp::WallDuration(0.1).sleep();
+  rclcpp::spinOnce();
 
   EXPECT_EQ(1, n.count_);
 }
 
 TEST(MessageFilter, queueSize)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2:ros::TransformListener> tf_client;
   Notification n(10);
   MessageFilter<PCDType> filter(tf_client, "frame1", 10);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
-
-  ros::Time stamp = ros::Time::now();
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   pcl::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
 
@@ -202,21 +204,21 @@ TEST(MessageFilter, queueSize)
   EXPECT_EQ(0, n.count_);
   EXPECT_EQ(10, n.failure_count_);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf2::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
-  ros::WallDuration(0.1).sleep();
-  ros::spinOnce();
+  rclcpp::WallDuration(0.1).sleep();
+  rclcpp::spinOnce();
 
   EXPECT_EQ(10, n.count_);
 }
 
 TEST(MessageFilter, setTargetFrame)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
   filter.setTargetFrame("frame1000");
 
   ros::Time stamp = ros::Time::now();
@@ -238,25 +240,26 @@ TEST(MessageFilter, multipleTargetFrames)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
 
   std::vector<std::string> target_frames;
   target_frames.push_back("frame1");
   target_frames.push_back("frame2");
   filter.setTargetFrames(target_frames);
-
-  ros::Time stamp = ros::Time::now();
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame3");
+  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame3");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame3";
   filter.add(msg);
 
-  ros::WallDuration(0.1).sleep();
-  ros::spinOnce();
+  rclcpp::WallDuration(0.1).sleep();
+  rclcpp::spinOnce();
 
   EXPECT_EQ(0, n.count_); // frame1->frame3 exists, frame2->frame3 does not (yet)
 
@@ -265,25 +268,26 @@ TEST(MessageFilter, multipleTargetFrames)
   transform.child_frame_id_ = "frame2";
   tf_client.setTransform(transform);
 
-  ros::WallDuration(0.1).sleep();
-  ros::spinOnce();
+  rclcpp::WallTimer(0.1).sleep();
+  rclcpp::spinOnce();
 
   EXPECT_EQ(1, n.count_);  // frame2->frame3 now exists
 }
 
 TEST(MessageFilter, tolerance)
 {
-  ros::Duration offset(0.2);
-  tf::TransformListener tf_client;
+  rclcpp::Duration offset(0.2);
+  tf2_ros::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
   filter.setTolerance(offset);
-
-  ros::Time stamp = ros::Time::now();
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  ros::Time stamp = clock_->now();
   pcl::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   PCDType::Ptr msg(new PCDType);
@@ -298,8 +302,8 @@ TEST(MessageFilter, tolerance)
   transform.stamp_ += offset*1.1;
   tf_client.setTransform(transform);
 
-  ros::WallDuration(0.1).sleep();
-  ros::spinOnce();
+  rclcpp::WallTimer(0.1).sleep();
+  rclcpp::spinOnce();
 
   EXPECT_EQ(1, n.count_); // Now have data for the message published earlier
 
@@ -314,16 +318,17 @@ TEST(MessageFilter, tolerance)
 
 TEST(MessageFilter, outTheBackFailure)
 {
-  tf::TransformListener tf_client;
+  tf2_ros::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
-
-  ros::Time stamp = ros::Time::now();
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   transform.stamp_ = stamp + ros::Duration(10000);
@@ -337,10 +342,10 @@ TEST(MessageFilter, outTheBackFailure)
 
 TEST(MessageFilter, emptyFrameIDFailure)
 {
-  tf::TransformListener tf_client;
+  std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
 
   PCDType::Ptr msg(new PCDType);
   msg->header.frame_id = "";
@@ -352,26 +357,26 @@ TEST(MessageFilter, emptyFrameIDFailure)
 TEST(MessageFilter, removeCallback)
 {
   // Callback queue in separate thread
-  ros::CallbackQueue cbqueue;
-  ros::AsyncSpinner spinner(1, &cbqueue);
-  ros::NodeHandle threaded_nh;
+  rclcpp::CallbackQueue cbqueue;
+  rclcpp::AsyncSpinner spinner(1, &cbqueue);
+  auto threaded_nh = std::make_shared<rclcpp::Node>("threaded_nh");
   threaded_nh.setCallbackQueue(&cbqueue);
 
   // TF filters; no data needs to be published
-  boost::scoped_ptr<tf::TransformListener> tf_listener;
-  boost::scoped_ptr<tf::MessageFilter<PCDType> > tf_filter;
+  std::unique_ptr<tf2_ros::TransformListener> tf_listener;
+  std::unique_ptr<tf2::MessageFilter<PCDType> > tf_filter;
 
   spinner.start();
   for (int i = 0; i < 3; ++i) {
-    tf_listener.reset(new tf::TransformListener());
+    tf_listener.reset(new tf2_ros::TransformListener());
     // Have callback fire at high rate to increase chances of race condition
     tf_filter.reset(
-      new tf::MessageFilter<PCDType>(*tf_listener,
+      new tf2::MessageFilter<PCDType>(*tf_listener,
                                      "map", 5, threaded_nh,
-                                     ros::Duration(0.000001)));
+                                     rclcpp::Duration(0.000001)));
 
     // Sleep and reset; sleeping increases chances of race condition
-    ros::Duration(0.001).sleep();
+    rclcpp::Duration(0.001).sleep();
     tf_filter.reset();
     tf_listener.reset();
   }
@@ -382,9 +387,10 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
 
-  ros::Time::setNow(ros::Time());
-  ros::init(argc, argv, "test_message_filter");
-  ros::NodeHandle nh;
+  rclcpp::Time::setNow(rclcpp::Time());
+  rclcpp::init(argc, argv);
+  
+  auto node = std_make_shared<rclcpp::Node>("test_message_filter")
 
   int ret = RUN_ALL_TESTS();
 

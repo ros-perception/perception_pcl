@@ -1,1 +1,7 @@
 *.pyc
+
+build/
+install/
+log/
+
+perception_pcl.xcodeproj/

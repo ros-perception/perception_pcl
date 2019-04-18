@@ -88,14 +88,10 @@ namespace pcl_ros
       message_filters::Subscriber<ModelCoefficients> sub_model_;
 
       /** \brief Synchronized input, indices, and model coefficients.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
       /** \brief The PCL filter implementation used. */
       pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
-
-      /** \brief Nodelet initialization routine. */
-      virtual void 
-      onInit ();
 
       /** \brief NodeletLazy connection routine. */
       void subscribe ();

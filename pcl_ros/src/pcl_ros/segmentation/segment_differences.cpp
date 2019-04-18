@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/segmentation/segment_differences.h"
 #include <pcl/io/io.h>
 
@@ -44,11 +44,11 @@ void
 pcl_ros::SegmentDifferences::onInit ()
 {
   // Call the super onInit ()
-  PCLNodelet::onInit ();
+  PCLNode::onInit ();
 
-  pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
+  pub_output_ = advertise<PointCloud> ("output", max_queue_size_);
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - max_queue_size    : %d",
                  getName ().c_str (),
                  max_queue_size_);
@@ -61,23 +61,18 @@ void
 pcl_ros::SegmentDifferences::subscribe ()
 {
   // Subscribe to the input using a filter
-  sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
-  sub_target_filter_.subscribe (*pnh_, "target", max_queue_size_);
-
-  // Enable the dynamic reconfigure service
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<SegmentDifferencesConfig> > (*pnh_);
-  dynamic_reconfigure::Server<SegmentDifferencesConfig>::CallbackType f =  boost::bind (&SegmentDifferences::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+  sub_input_filter_.subscribe ("input", max_queue_size_);
+  sub_target_filter_.subscribe ("target", max_queue_size_);
 
   if (approximate_sync_)
   {
-    sync_input_target_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > (max_queue_size_);
+    sync_input_target_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_a_->connectInput (sub_input_filter_, sub_target_filter_);
     sync_input_target_a_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
   }
   else
   {
-    sync_input_target_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > (max_queue_size_);
+    sync_input_target_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_e_->connectInput (sub_input_filter_, sub_target_filter_);
     sync_input_target_e_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
   }
@@ -91,17 +86,6 @@ pcl_ros::SegmentDifferences::unsubscribe ()
   sub_target_filter_.unsubscribe ();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SegmentDifferences::config_callback (SegmentDifferencesConfig &config, uint32_t level)
-{
-  if (impl_.getDistanceThreshold () != config.distance_threshold)
-  {
-    impl_.setDistanceThreshold (config.distance_threshold);
-    NODELET_DEBUG ("[%s::config_callback] Setting new distance threshold to: %f.", getName ().c_str (), config.distance_threshold);
-  }
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -113,7 +97,7 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
 
   if (!isValid (cloud) || !isValid (cloud_target, "target")) 
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
     PointCloud output;
     output.header = cloud->header;
     pub_output_.publish (output.makeShared ());
@@ -124,8 +108,8 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  getName ().c_str (),
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.toSec (), cloud_target->header.frame_id.c_str (), pnh_->resolveName ("target").c_str ());
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
+                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.seconds (), cloud_target->header.frame_id.c_str (), this->resolveName ("target").c_str ());
 
   impl_.setInputCloud (cloud);
   impl_.setTargetCloud (cloud_target);
@@ -134,10 +118,10 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
   impl_.segment (output);
 
   pub_output_.publish (output.makeShared ());
-  NODELET_DEBUG ("[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", getName ().c_str (),
-                     output.points.size (), fromPCL(output.header).stamp.toSec (), pnh_->resolveName ("output").c_str ());
+  RCLCPP_DEBUG (this->get_logger(), "[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", getName ().c_str (),
+                     output.points.size (), fromPCL(output.header).stamp.seconds (), this->resolveName ("output").c_str ());
 }
 
 typedef pcl_ros::SegmentDifferences SegmentDifferences;
-PLUGINLIB_EXPORT_CLASS(SegmentDifferences, nodelet::Nodelet)
+//PLUGINLIB_EXPORT_CLASS(SegmentDifferences, nodelet::Nodelet)
 

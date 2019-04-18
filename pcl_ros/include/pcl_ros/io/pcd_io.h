@@ -39,7 +39,7 @@
 #define PCL_ROS_IO_PCD_IO_H_
 
 #include <pcl/io/pcd_io.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_node.h"
 
 namespace pcl_ros
 {
@@ -47,17 +47,15 @@ namespace pcl_ros
   /** \brief Point Cloud Data (PCD) file format reader.
     * \author Radu Bogdan Rusu
     */
-  class PCDReader : public PCLNodelet
+  class PCDReader : public PCLNode
   {
     public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
+      typedef sensor_msgs::msg::PointCloud2 PointCloud2;
       typedef PointCloud2::Ptr PointCloud2Ptr;
       typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
 
       /** \brief Empty constructor. */
       PCDReader () : publish_rate_ (0), tf_frame_ ("/base_link") {};
-
-      virtual void onInit ();
 
       /** \brief Set the publishing rate in seconds.
         * \param publish_rate the publishing rate in seconds
@@ -99,20 +97,19 @@ namespace pcl_ros
   /** \brief Point Cloud Data (PCD) file format writer.
     * \author Radu Bogdan Rusu
     */
-  class PCDWriter : public PCLNodelet
+  class PCDWriter : public PCLNode
   {
     public:
       PCDWriter () : file_name_ (""), binary_mode_ (true) {}
 
-      typedef sensor_msgs::PointCloud2 PointCloud2;
+      typedef sensor_msgs::msg::PointCloud2 PointCloud2;
       typedef PointCloud2::Ptr PointCloud2Ptr;
       typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
 
-      virtual void onInit ();
       void input_callback (const PointCloud2ConstPtr &cloud);
 
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+      rclcpp::Subscriber sub_input_;
 
     protected:
       /** \brief The name of the file that contains the PointCloud data. */

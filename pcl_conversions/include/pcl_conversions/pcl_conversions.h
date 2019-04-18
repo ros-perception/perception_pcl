@@ -47,25 +47,25 @@
 #include <std_msgs/msg/header.hpp>
 
 #include <pcl/PCLImage.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.hpp>
 
 #include <pcl/PCLPointField.h>
-#include <sensor_msgs/PointField.h>
+#include <sensor_msgs/msg/point_field.hpp>
 
 #include <pcl/PCLPointCloud2.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <pcl/PointIndices.h>
-#include <pcl_msgs/PointIndices.h>
+#include <pcl_msgs/msg/point_indices.hpp>
 
 #include <pcl/ModelCoefficients.h>
-#include <pcl_msgs/ModelCoefficients.h>
+#include <pcl_msgs/msg/model_coefficients.hpp>
 
 #include <pcl/Vertices.h>
-#include <pcl_msgs/Vertices.h>
+#include <pcl_msgs/msg/vertices.hpp>
 
 #include <pcl/PolygonMesh.h>
-#include <pcl_msgs/PolygonMesh.h>
+#include <pcl_msgs/msg/polygon_mesh.hpp>
 
 #include <pcl/io/pcd_io.h>
 
@@ -79,13 +79,14 @@ namespace pcl_conversions {
   inline
   void fromPCL(const pcl::uint64_t &pcl_stamp, rclcpp::Time &stamp)
   {
-    stamp.fromNSec(pcl_stamp * 1000ull);  // Convert from us to ns
+    stamp = rclcpp::Time(nanoseconds=pcl_stamp * 1000ull); // Convert from us to ns
+    //stamp.nanoseconds(pcl_stamp * 1000ull);
   }
 
   inline
   void toPCL(const rclcpp::Time &stamp, pcl::uint64_t &pcl_stamp)
   {
-    pcl_stamp = stamp.toNSec() / 1000ull;  // Convert from ns to us
+    pcl_stamp = stamp.nanoseconds() / 1000ull;  // Convert from ns to us
   }
 
   inline
@@ -107,18 +108,16 @@ namespace pcl_conversions {
   /** PCLHeader <=> Header **/
 
   inline
-  void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::Header &header)
+  void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::msg::Header &header)
   {
     fromPCL(pcl_header.stamp, header.stamp);
-    header.seq = pcl_header.seq;
     header.frame_id = pcl_header.frame_id;
   }
 
   inline
-  void toPCL(const std_msgs::Header &header, pcl::PCLHeader &pcl_header)
+  void toPCL(const std_msgs::msg::Header &header, pcl::PCLHeader &pcl_header)
   {
     toPCL(header.stamp, pcl_header.stamp);
-    pcl_header.seq = header.seq;
     pcl_header.frame_id = header.frame_id;
   }
 
@@ -141,7 +140,7 @@ namespace pcl_conversions {
   /** PCLImage <=> Image **/
 
   inline
-  void copyPCLImageMetaData(const pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
+  void copyPCLImageMetaData(const pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
   {
     fromPCL(pcl_image.header, image.header);
     image.height = pcl_image.height;
@@ -152,21 +151,21 @@ namespace pcl_conversions {
   }
 
   inline
-  void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
+  void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
   {
     copyPCLImageMetaData(pcl_image, image);
     image.data = pcl_image.data;
   }
 
   inline
-  void moveFromPCL(pcl::PCLImage &pcl_image, sensor_msgs::Image &image)
+  void moveFromPCL(pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
   {
     copyPCLImageMetaData(pcl_image, image);
     image.data.swap(pcl_image.data);
   }
 
   inline
-  void copyImageMetaData(const sensor_msgs::Image &image, pcl::PCLImage &pcl_image)
+  void copyImageMetaData(const sensor_msgs::msg::Image &image, pcl::PCLImage &pcl_image)
   {
     toPCL(image.header, pcl_image.header);
     pcl_image.height = image.height;
@@ -193,7 +192,7 @@ namespace pcl_conversions {
   /** PCLPointField <=> PointField **/
 
   inline
-  void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::PointField &pf)
+  void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::msg::PointField &pf)
   {
     pf.name = pcl_pf.name;
     pf.offset = pcl_pf.offset;
@@ -202,7 +201,7 @@ namespace pcl_conversions {
   }
 
   inline
-  void fromPCL(const std::vector<pcl::PCLPointField> &pcl_pfs, std::vector<sensor_msgs::PointField> &pfs)
+  void fromPCL(const std::vector<pcl::PCLPointField> &pcl_pfs, std::vector<sensor_msgs::msg::PointField> &pfs)
   {
     pfs.resize(pcl_pfs.size());
     std::vector<pcl::PCLPointField>::const_iterator it = pcl_pfs.begin();
@@ -291,7 +290,7 @@ namespace pcl_conversions {
   /** pcl::PointIndices <=> pcl_msgs::PointIndices **/
 
   inline
-  void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::PointIndices &pi)
+  void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::msg::PointIndices &pi)
   {
     fromPCL(pcl_pi.header, pi.header);
     pi.indices = pcl_pi.indices;
@@ -378,7 +377,7 @@ namespace pcl_conversions {
   {
     verts.resize(pcl_verts.size());
     std::vector<pcl::Vertices>::iterator it = pcl_verts.begin();
-    std::vector<pcl_msgs::Vertices>::iterator jt = verts.begin();
+    std::vector<pcl_msgs::msg::Vertices>::iterator jt = verts.begin();
     for (; it != pcl_verts.end() && jt != verts.end(); ++it, ++jt) {
       moveFromPCL(*(it), *(jt));
     }
@@ -421,7 +420,7 @@ namespace pcl_conversions {
   /** pcl::PolygonMesh <=> pcl_msgs::PolygonMesh **/
 
   inline
-  void fromPCL(const pcl::PolygonMesh &pcl_mesh, pcl_msgs::PolygonMesh &mesh)
+  void fromPCL(const pcl::PolygonMesh &pcl_mesh, pcl_msgs::msg::PolygonMesh &mesh)
   {
     fromPCL(pcl_mesh.header, mesh.header);
     fromPCL(pcl_mesh.cloud, mesh.cloud);
@@ -609,9 +608,9 @@ namespace pcl {
   /** Overload asdf **/
 
   inline
-  bool concatenatePointCloud (const sensor_msgs::PointCloud2 &cloud1,
-                              const sensor_msgs::PointCloud2 &cloud2,
-                              sensor_msgs::PointCloud2 &cloud_out)
+  bool concatenatePointCloud (const sensor_msgs::msg::PointCloud2 &cloud1,
+                              const sensor_msgs::msg::PointCloud2 &cloud2,
+                              sensor_msgs::msg::PointCloud2 &cloud_out)
   {
     //if one input cloud has no points, but the other input does, just return the cloud with points
     if (cloud1.width * cloud1.height == 0 && cloud2.width * cloud2.height > 0)

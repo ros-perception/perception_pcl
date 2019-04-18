@@ -53,9 +53,6 @@ namespace pcl_ros
   class VoxelGrid : public Filter
   {
     protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > srv_;
-
       /** \brief The PCL filter implementation used. */
       pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
 
@@ -73,14 +70,8 @@ namespace pcl_ros
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
       bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
+      child_init (bool &has_service);
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void 
-      config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

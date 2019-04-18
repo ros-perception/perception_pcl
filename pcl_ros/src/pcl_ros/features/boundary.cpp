@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/boundary.h"
 
 void
@@ -71,4 +71,4 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::BoundaryEstimation BoundaryEstimation;
-PLUGINLIB_EXPORT_CLASS(BoundaryEstimation, nodelet::Nodelet)
+//PLUGINLIB_EXPORT_CLASS(BoundaryEstimation, nodelet::Nodelet)

@@ -39,8 +39,8 @@
 #define PCL_IO_CONCATENATE_DATA_H_
 
 // ROS includes
-#include <tf/transform_listener.h>
-#include <nodelet_topic_tools/nodelet_lazy.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_listener.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/pass_through.h>
@@ -57,10 +57,10 @@ namespace pcl_ros
     * PointCloud output message.
     * \author Radu Bogdan Rusu
     */
-  class PointCloudConcatenateDataSynchronizer: public nodelet_topic_tools::NodeletLazy
+  class PointCloudConcatenateDataSynchronizer: public rclcpp::Node
   {
     public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
+      typedef sensor_msgs::msg::PointCloud2 PointCloud2;
       typedef PointCloud2::Ptr PointCloud2Ptr;
       typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
 
@@ -75,13 +75,9 @@ namespace pcl_ros
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateDataSynchronizer () {};
 
-      void onInit ();
-      void subscribe ();
-      void unsubscribe ();
-
     private:
       /** \brief The output PointCloud publisher. */
-      ros::Publisher pub_output_;
+      rclcpp::Publisher pub_output_;
 
       /** \brief The maximum number of messages that we can store in the queue. */
       int maximum_queue_size_;
@@ -90,7 +86,7 @@ namespace pcl_ros
       bool approximate_sync_;
 
       /** \brief A vector of message filters. */
-      std::vector<boost::shared_ptr<message_filters::Subscriber<PointCloud2> > > filters_;
+      std::vector<std::shared_ptr<message_filters::Subscriber<PointCloud2> > > filters_;
 
       /** \brief Output TF frame the concatenated points should be transformed to. */
       std::string output_frame_;
@@ -99,7 +95,7 @@ namespace pcl_ros
       XmlRpc::XmlRpcValue input_topics_;
 
       /** \brief TF listener object. */
-      tf::TransformListener tf_;
+      tf2_ros2::TransformListener tf_;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */
@@ -108,8 +104,8 @@ namespace pcl_ros
       /** \brief Synchronizer.
         * \note This will most likely be rewritten soon using the DynamicTimeSynchronizer.
         */
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_a_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_e_;
 
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
@@ -120,7 +116,7 @@ namespace pcl_ros
       {
         PointCloud2 cloud;
         cloud.header.stamp = input->header.stamp;
-        nf_.add (boost::make_shared<PointCloud2> (cloud));
+        nf_.add (std::make_shared<PointCloud2> (cloud));
       }
 
       /** \brief Input callback for 8 synchronized topics. */

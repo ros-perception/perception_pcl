@@ -38,7 +38,7 @@
 #ifndef PCL_ROS_MOVING_LEAST_SQUARES_H_
 #define PCL_ROS_MOVING_LEAST_SQUARES_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_node.h"
 
 // PCL includes
 #include <pcl/surface/mls.h>
@@ -56,7 +56,7 @@ namespace pcl_ros
     * Normals are estimated at each point as well and published on a separate topic.
     * \author Radu Bogdan Rusu, Zoltan-Csaba Marton
     */
-  class MovingLeastSquares : public PCLNodelet
+  class MovingLeastSquares : public PCLNode
   {
     typedef pcl::PointXYZ PointIn;
     typedef pcl::PointNormal NormalOut;
@@ -101,22 +101,7 @@ namespace pcl_ros
         * 2: Organized spatial dataset index
         */
       int spatial_locator_type_;
-    
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<MLSConfig> > srv_;
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object  
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (MLSConfig &config, uint32_t level); 
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
 
     private:
       /** \brief Input point cloud callback.
@@ -132,14 +117,14 @@ namespace pcl_ros
       pcl::MovingLeastSquares<PointIn, NormalOut> impl_;
       
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+      rclcpp::Subscriber sub_input_;
 
       /** \brief The output PointCloud (containing the normals) publisher. */
-      ros::Publisher pub_normals_;
+      rclcpp::Publisher pub_normals_;
 
       /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointIndices> > > sync_input_indices_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointIndices> > >       sync_input_indices_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointIndices> > > sync_input_indices_a_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

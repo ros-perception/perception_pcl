@@ -54,10 +54,7 @@ namespace pcl_ros
     */
   class RadiusOutlierRemoval : public Filter
   {
-    protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > srv_;
-
+    protected:    
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
@@ -80,14 +77,12 @@ namespace pcl_ros
         * \param nh ROS node handle
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
-    virtual inline bool child_init (ros::NodeHandle &nh, bool &has_service);
+    virtual inline bool child_init (bool &has_service);
 
       /** \brief Dynamic reconfigure callback
         * \param config the config object
         * \param level the dynamic reconfigure level
         */
-      void config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level);
-
     
     private:
       /** \brief The PCL filter implementation used. */

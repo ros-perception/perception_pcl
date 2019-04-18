@@ -34,7 +34,7 @@
  *
  */
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.h>
 #include <pcl/common/io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -45,8 +45,8 @@ namespace pcl_ros
 {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-transformPointCloud (const std::string &target_frame, const sensor_msgs::PointCloud2 &in, 
-                     sensor_msgs::PointCloud2 &out, const tf::TransformListener &tf_listener)
+transformPointCloud (const std::string &target_frame, const sensor_msgs::msg::PointCloud2 &in,
+                     sensor_msgs::msg::PointCloud2 &out, const tf2_ros::TransformListener &tf_listener)
 {
   if (in.header.frame_id == target_frame)
   {
@@ -55,19 +55,19 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::PointCl
   }
 
   // Get the TF transform
-  tf::StampedTransform transform;
+  tf2::StampedTransform transform;
   try
   {
     tf_listener.lookupTransform (target_frame, in.header.frame_id, in.header.stamp, transform);
   }
   catch (tf::LookupException &e)
   {
-    ROS_ERROR ("%s", e.what ());
+    //RCLCPP_ERROR (this->get_logger(), "%s", e.what ());
     return (false);
   }
-  catch (tf::ExtrapolationException &e)
+  catch (tf2::ExtrapolationException &e)
   {
-    ROS_ERROR ("%s", e.what ());
+    //RCLCPP_ERROR (this->get_logger(), "%s", e.what ());
     return (false);
   }
 
@@ -83,8 +83,8 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::PointCl
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void 
-transformPointCloud (const std::string &target_frame, const tf::Transform &net_transform,
-                     const sensor_msgs::PointCloud2 &in, sensor_msgs::PointCloud2 &out)
+transformPointCloud (const std::string &target_frame, const tf2::Transform &net_transform,
+                     const sensor_msgs::msg::PointCloud2 &in, sensor_msgs::msg::PointCloud2 &out)
 {
   if (in.header.frame_id == target_frame)
   {
@@ -103,8 +103,8 @@ transformPointCloud (const std::string &target_frame, const tf::Transform &net_t
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void 
-transformPointCloud (const Eigen::Matrix4f &transform, const sensor_msgs::PointCloud2 &in,
-                     sensor_msgs::PointCloud2 &out)
+transformPointCloud (const Eigen::Matrix4f &transform, const sensor_msgs::msg::PointCloud2 &in,
+                     sensor_msgs::msg::PointCloud2 &out)
 {
   // Get X-Y-Z indices
   int x_idx = pcl::getFieldIndex (in, "x");
@@ -113,15 +113,15 @@ transformPointCloud (const Eigen::Matrix4f &transform, const sensor_msgs::PointC
 
   if (x_idx == -1 || y_idx == -1 || z_idx == -1)
   {
-    ROS_ERROR ("Input dataset has no X-Y-Z coordinates! Cannot convert to Eigen format.");
+    //RCLCPP_ERROR (this->get_logger(), "Input dataset has no X-Y-Z coordinates! Cannot convert to Eigen format.");
     return;
   }
 
-  if (in.fields[x_idx].datatype != sensor_msgs::PointField::FLOAT32 || 
-      in.fields[y_idx].datatype != sensor_msgs::PointField::FLOAT32 || 
-      in.fields[z_idx].datatype != sensor_msgs::PointField::FLOAT32)
+  if (in.fields[x_idx].datatype != sensor_msgs::msg::PointField::FLOAT32 ||
+      in.fields[y_idx].datatype != sensor_msgs::msg::PointField::FLOAT32 ||
+      in.fields[z_idx].datatype != sensor_msgs::msg::PointField::FLOAT32)
   {
-    ROS_ERROR ("X-Y-Z coordinates not floats. Currently only floats are supported.");
+    //RCLCPP_ERROR (this->get_logger(), "X-Y-Z coordinates not floats. Currently only floats are supported.");
     return;
   }
 
@@ -209,7 +209,7 @@ transformPointCloud (const Eigen::Matrix4f &transform, const sensor_msgs::PointC
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-transformAsMatrix (const tf::Transform& bt, Eigen::Matrix4f &out_mat)
+transformAsMatrix (const tf2::Transform& bt, Eigen::Matrix4f &out_mat)
 {
   double mv[12];
   bt.getBasis ().getOpenGLSubMatrix (mv);

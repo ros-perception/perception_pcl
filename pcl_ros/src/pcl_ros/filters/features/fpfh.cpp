@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/fpfh.h"
 
 void 
@@ -68,12 +68,12 @@ pcl_ros::FPFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
   PointCloudOut output;
   impl_.compute (output);
 
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
   pub_output_.publish (output.makeShared ());
 }
 
 typedef pcl_ros::FPFHEstimation FPFHEstimation;
-PLUGINLIB_EXPORT_CLASS(FPFHEstimation,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(FPFHEstimation,nodelet::Nodelet);
 

@@ -39,13 +39,12 @@
 #define PCL_IO_CONCATENATE_FIELDS_H_
 
 // ROS includes
-#include <nodelet_topic_tools/nodelet_lazy.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.h>
 
 namespace pcl_ros
 {
@@ -54,10 +53,10 @@ namespace pcl_ros
     * a single PointCloud output message.
     * \author Radu Bogdan Rusu
     */
-  class PointCloudConcatenateFieldsSynchronizer: public nodelet_topic_tools::NodeletLazy
+  class PointCloudConcatenateFieldsSynchronizer: public rclcpp::Node
   {
     public:
-      typedef sensor_msgs::PointCloud2 PointCloud;
+      typedef sensor_msgs::msg::PointCloud2 PointCloud;
       typedef PointCloud::Ptr PointCloudPtr;
       typedef PointCloud::ConstPtr PointCloudConstPtr;
 
@@ -72,17 +71,14 @@ namespace pcl_ros
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
-      void onInit ();
-      void subscribe ();
-      void unsubscribe ();
       void input_callback (const PointCloudConstPtr &cloud);
 
     private:
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+      rclcpp::Subscriber sub_input_;
 
       /** \brief The output PointCloud publisher. */
-      ros::Publisher pub_output_;
+      rclcpp::Publisher pub_output_;
 
       /** \brief The number of input messages that we expect on the input topic. */
       int input_messages_;
@@ -94,7 +90,7 @@ namespace pcl_ros
       double maximum_seconds_;
 
       /** \brief A queue for messages. */
-      std::map<ros::Time, std::vector<PointCloudConstPtr> > queue_;
+      std::map<rclcpp::Time, std::vector<PointCloudConstPtr> > queue_;
   };
 }
 

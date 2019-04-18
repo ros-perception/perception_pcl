@@ -157,11 +157,11 @@ transformPointCloud (const std::string &target_frame,
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
 transformPointCloud (const std::string &target_frame,
-                     const ros::Time & target_time,
+                     const rclcpp::Time & target_time,
                      const pcl::PointCloud <PointT> &cloud_in,
                      const std::string &fixed_frame,
                      pcl::PointCloud <PointT> &cloud_out, 
-                     const tf::TransformListener &tf_listener)
+                     const tf2::TransformListener &tf_listener)
 {
   tf::StampedTransform transform;
   try
@@ -190,7 +190,7 @@ transformPointCloud (const std::string &target_frame,
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
 transformPointCloudWithNormals (const std::string &target_frame,
-                                const ros::Time & target_time,
+                                const rclcpp::Time & target_time,
                                 const pcl::PointCloud <PointT> &cloud_in,
                                 const std::string &fixed_frame,
                                 pcl::PointCloud <PointT> &cloud_out, 

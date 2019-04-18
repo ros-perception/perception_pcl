@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/io/concatenate_data.h"
@@ -46,44 +46,42 @@
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 {
-  nodelet_topic_tools::NodeletLazy::onInit ();
-
   // ---[ Mandatory parameters
-  pnh_->getParam ("output_frame", output_frame_);
-  pnh_->getParam ("approximate_sync", approximate_sync_);
+  this->get_parameter ("output_frame", output_frame_);
+  this->get_parameter ("approximate_sync", approximate_sync_);
 
   if (output_frame_.empty ())
   {
-    NODELET_ERROR ("[onInit] Need an 'output_frame' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onInit] Need an 'output_frame' parameter to be set before continuing!");
     return;
   }
 
-  if (!pnh_->getParam ("input_topics", input_topics_))
+  if (!this->get_parameter ("input_topics", input_topics_))
   {
-    NODELET_ERROR ("[onInit] Need a 'input_topics' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'input_topics' parameter to be set before continuing!");
     return;
   }
   if (input_topics_.getType () != XmlRpc::XmlRpcValue::TypeArray)
   {
-    NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
+    RCLCPP_ERROR (this->get_logger(), "[onInit] Invalid 'input_topics' parameter given!");
     return;
   }
   if (input_topics_.size () == 1)
   {
-    NODELET_ERROR ("[onInit] Only one topic given. Need at least two topics to continue.");
+    RCLCPP_ERROR (this->get_logger(), "[onInit] Only one topic given. Need at least two topics to continue.");
     return;
   }
   if (input_topics_.size () > 8)
   {
-    NODELET_ERROR ("[onInit] More than 8 topics passed!");
+    RCLCPP_ERROR (this->get_logger(), "[onInit] More than 8 topics passed!");
     return;
   }
 
   // ---[ Optional parameters
-  pnh_->getParam ("max_queue_size", maximum_queue_size_);
+  this->get_parameter ("max_queue_size", maximum_queue_size_);
 
   // Output
-  pub_output_ = advertise<PointCloud2> (*pnh_, "output", maximum_queue_size_);
+  pub_output_ = advertise<PointCloud2> ("output", maximum_queue_size_);
 
   onInitPostProcess ();
 }
@@ -92,9 +90,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 {
-  ROS_INFO_STREAM ("Subscribing to " << input_topics_.size () << " user given topics as inputs:");
+  RCLCPP_INFO ("Subscribing to %d user given topics as inputs:" input_topics_.size ());
   for (int d = 0; d < input_topics_.size (); ++d)
-    ROS_INFO_STREAM (" - " << (std::string)(input_topics_[d]));
+    RCLCPP_INFO (" - %s", (std::string)(input_topics_[d]));
 
   // Subscribe to the filters
   filters_.resize (input_topics_.size ());
@@ -115,7 +113,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   for (int d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-    filters_[d]->subscribe (*pnh_, (std::string)(input_topics_[d]), maximum_queue_size_);
+    filters_[d]->subscribe ((std::string)(input_topics_[d]), maximum_queue_size_);
   }
 
   // Bogus null filter
@@ -181,15 +179,15 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
     }
     default:
     {
-      NODELET_FATAL ("Invalid 'input_topics' parameter given!");
+      RCLCPP_FATAL (this->get_logger(), "Invalid 'input_topics' parameter given!");
       return;
     }
   }
 
   if (approximate_sync_)
-    ts_a_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_a_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
   else
-    ts_e_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_e_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,12 +212,12 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
   if (output_frame_ != in1.header.frame_id)
     pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
   else
-    in1_t = boost::make_shared<PointCloud2> (in1);
+    in1_t = std::make_shared<PointCloud2> (in1);
 
   if (output_frame_ != in2.header.frame_id)
     pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
   else
-    in2_t = boost::make_shared<PointCloud2> (in2);
+    in2_t = std::make_shared<PointCloud2> (in2);
 
   // Concatenate the results
   pcl::concatenatePointCloud (*in1_t, *in2_t, out);
@@ -261,9 +259,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
       }
     }
   }
-  pub_output_.publish (boost::make_shared<PointCloud2> (*out1)); 
+  pub_output_.publish (std::make_shared<PointCloud2> (*out1));
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
 

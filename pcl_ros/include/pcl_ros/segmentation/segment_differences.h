@@ -39,10 +39,8 @@
 #define PCL_ROS_SEGMENT_DIFFERENCES_H_
 
 #include <pcl/segmentation/segment_differences.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_node.h"
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
 #include "pcl_ros/SegmentDifferencesConfig.h"
 
 
@@ -57,7 +55,7 @@ namespace pcl_ros
     * difference between them for a maximum given distance threshold.
     * \author Radu Bogdan Rusu
     */
-  class SegmentDifferences : public PCLNodelet
+  class SegmentDifferences : public PCLNode
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
     typedef PointCloud::Ptr PointCloudPtr;
@@ -72,24 +70,11 @@ namespace pcl_ros
       message_filters::Subscriber<PointCloud> sub_target_filter_;
 
       /** \brief Synchronized input, and planar hull.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > sync_input_target_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > sync_input_target_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > sync_input_target_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > sync_input_target_a_;
 
       /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig> > srv_;
-
-      /** \brief Nodelet initialization routine. */
-      void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      void subscribe ();
-      void unsubscribe ();
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (SegmentDifferencesConfig &config, uint32_t level);
+      std::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig> > srv_;
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud

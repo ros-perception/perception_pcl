@@ -59,10 +59,10 @@ namespace pcl_ros
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
-      childInit (ros::NodeHandle &nh)
+      childInit ()
       {
         // Create the output publisher
-        pub_output_ = advertise<PointCloud> (nh, "output", max_queue_size_);
+        pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
         return (true);
       }
 

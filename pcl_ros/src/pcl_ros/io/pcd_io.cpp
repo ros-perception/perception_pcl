@@ -35,65 +35,64 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.h>
 #include <pcl_ros/io/pcd_io.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PCDReader::onInit ()
 {
-  PCLNodelet::onInit ();
   // Provide a latched topic
-  ros::Publisher pub_output = pnh_->advertise<PointCloud2> ("output", max_queue_size_, true);
+  rclcpp::Publisher pub_output = this->create_publisher<PointCloud2> ("output", max_queue_size_, true);
 
-  pnh_->getParam ("publish_rate", publish_rate_);
-  pnh_->getParam ("tf_frame", tf_frame_);
+  this->get_parameter ("publish_rate", publish_rate_);
+  this->get_parameter ("tf_frame", tf_frame_);
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - publish_rate : %f\n"
                  " - tf_frame     : %s",
                  getName ().c_str (),
                  publish_rate_, tf_frame_.c_str ());
 
   PointCloud2Ptr output_new;
-  output_ = boost::make_shared<PointCloud2> ();
-  output_new = boost::make_shared<PointCloud2> ();
+  output_ = std::make_shared<PointCloud2> ();
+  output_new = std::make_shared<PointCloud2> ();
 
   // Wait in a loop until someone connects
   do
   {
-    ROS_DEBUG_ONCE ("[%s::onInit] Waiting for a client to connect...", getName ().c_str ());
-    ros::spinOnce ();
-    ros::Duration (0.01).sleep ();
+    RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Waiting for a client to connect...", getName ().c_str ());
+    rclcpp::spinOnce ();
+    rclcpp::Duration (0.01).sleep ();
   }
-  while (pnh_->ok () && pub_output.getNumSubscribers () == 0);
+  while (this->ok () && pub_output.getNumSubscribers () == 0);
 
   std::string file_name;
 
-  while (pnh_->ok ())
+  while (this->ok ())
   {
     // Get the current filename parameter. If no filename set, loop
-    if (!pnh_->getParam ("filename", file_name_) && file_name_.empty ())
+    if (!this->get_parameter ("filename", file_name_) && file_name_.empty ())
     {
-      ROS_ERROR_ONCE ("[%s::onInit] Need a 'filename' parameter to be set before continuing!", getName ().c_str ());
-      ros::Duration (0.01).sleep ();
-      ros::spinOnce ();
+      RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'filename' parameter to be set before continuing!", getName ().c_str ());
+      rclcpp::Duration (0.01).sleep ();
+      rclcpp::spinOnce ();
       continue;
     }
 
     // If the filename parameter holds a different value than the last one we read
     if (file_name_.compare (file_name) != 0 && !file_name_.empty ())
     {
-      NODELET_INFO ("[%s::onInit] New file given: %s", getName ().c_str (), file_name_.c_str ());
+      RCLCPP_INFO (this->get_logger(), "[%s::onInit] New file given: %s", getName ().c_str (), file_name_.c_str ());
       file_name = file_name_;
       pcl::PCLPointCloud2 cloud;
       if (impl_.read (file_name_, cloud) < 0)
       {
-        NODELET_ERROR ("[%s::onInit] Error reading %s !", getName ().c_str (), file_name_.c_str ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Error reading %s !", getName ().c_str (), file_name_.c_str ());
         return;
       }
       pcl_conversions::moveFromPCL(cloud, *(output_));
-      output_->header.stamp    = ros::Time::now ();
+      output_->header.stamp    = this->now ();
       output_->header.frame_id = tf_frame_;
     }
 
@@ -105,7 +104,7 @@ pcl_ros::PCDReader::onInit ()
     {
       if (output_ != output_new)
       {
-        NODELET_DEBUG ("Publishing data once (%d points) on topic %s in frame %s.", output_->width * output_->height, getMTPrivateNodeHandle ().resolveName ("output").c_str (), output_->header.frame_id.c_str ());
+        RCLCPP_DEBUG (this->get_logger(), "Publishing data once (%d points) on topic %s in frame %s.", output_->width * output_->height, getMTPrivateNodeHandle ().resolveName ("output").c_str (), output_->header.frame_id.c_str ());
         pub_output.publish (output_);
         output_new = output_;
       }
@@ -113,17 +112,17 @@ pcl_ros::PCDReader::onInit ()
     }
     else
     {
-      NODELET_DEBUG ("Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, getMTPrivateNodeHandle ().resolveName ("output").c_str (), output_->header.frame_id.c_str ());
-      output_->header.stamp = ros::Time::now ();
+      RCLCPP_DEBUG (this->get_logger(), "Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, getMTPrivateNodeHandle ().resolveName ("output").c_str (), output_->header.frame_id.c_str ());
+      output_->header.stamp = this->now ();
       pub_output.publish (output_);
 
-      ros::Duration (publish_rate_).sleep ();
+      rclcpp::Duration (publish_rate_).sleep ();
     }
 
-    ros::spinOnce ();
+    rclcpp::spinOnce ();
     // Update parameters from server
-    pnh_->getParam ("publish_rate", publish_rate_);
-    pnh_->getParam ("tf_frame", tf_frame_);
+    this->get_parameter ("publish_rate", publish_rate_);
+    this->get_parameter ("tf_frame", tf_frame_);
   }
 
   onInitPostProcess ();
@@ -135,14 +134,13 @@ pcl_ros::PCDReader::onInit ()
 void
 pcl_ros::PCDWriter::onInit ()
 {
-  PCLNodelet::onInit ();
 
-  sub_input_ = pnh_->subscribe ("input", 1,  &PCDWriter::input_callback, this);
+  sub_input_ = this->create_subscription("input", 1,  &PCDWriter::input_callback, this);
   // ---[ Optional parameters
-  pnh_->getParam ("filename", file_name_);
-  pnh_->getParam ("binary_mode", binary_mode_);
+  this->get_parameter ("filename", file_name_);
+  this->get_parameter ("binary_mode", binary_mode_);
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - filename     : %s\n"
                  " - binary_mode  : %s", 
                  getName ().c_str (),
@@ -158,13 +156,13 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
   if (!isValid (cloud))
     return;
   
-  pnh_->getParam ("filename", file_name_);
+  this->get_parameter ("filename", file_name_);
 
-  NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
+  RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
  
   std::string fname;
   if (file_name_.empty ())
-    fname = boost::lexical_cast<std::string> (cloud->header.stamp.toSec ()) + ".pcd";
+    fname = std::lexical_cast<std::string> (cloud->header.stamp.seconds ()) + ".pcd";
   else
     fname = file_name_;
   pcl::PCLPointCloud2 pcl_cloud;
@@ -172,11 +170,11 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
   pcl_conversions::moveToPCL(*(const_cast<PointCloud2*>(cloud.get())), pcl_cloud);
   impl_.write (fname, pcl_cloud, Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), binary_mode_);
 
-  NODELET_DEBUG ("[%s::input_callback] Data saved to %s", getName ().c_str (), fname.c_str ());
+  RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] Data saved to %s", getName ().c_str (), fname.c_str ());
 }
 
 typedef pcl_ros::PCDReader PCDReader;
 typedef pcl_ros::PCDWriter PCDWriter;
-PLUGINLIB_EXPORT_CLASS(PCDReader,nodelet::Nodelet);
-PLUGINLIB_EXPORT_CLASS(PCDWriter,nodelet::Nodelet);
+//(PCDReader,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(PCDWriter,nodelet::Nodelet);
 
