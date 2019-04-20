@@ -38,14 +38,6 @@
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/passthrough.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::PassThrough::child_init (bool &has_service)
-{
-  has_service = true;
-  return (true);
-}
-
 typedef pcl_ros::PassThrough PassThrough;
 //PLUGINLIB_EXPORT_CLASS(PassThrough,nodelet::Nodelet);
 

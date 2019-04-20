@@ -86,18 +86,15 @@ namespace pcl_ros
       // The minimum number of inliers a model must have in order to be considered valid.
       int min_inliers_;
 
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The output PointIndices publisher. */
-      rclcpp::Publisher pub_indices_;
+      rclcpp::Publisher<pcl_msgs::msg::PointIndices>::SharedPtr pub_indices_;
 
       /** \brief The output ModelCoefficients publisher. */
-      rclcpp::Publisher pub_model_;
+      rclcpp::Publisher<pcl_msgs::msg::ModelCoefficients>::SharedPtr pub_model_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      std::shared_ptr<dynamic_reconfigure::Server<SACSegmentationConfig> > srv_;
+      rclcpp::Subscription<sensor:msgs::msg::PointCloud>::SharedPtr sub_input_;
 
       /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
       std::string tf_input_frame_;
@@ -196,10 +193,7 @@ namespace pcl_ros
       message_filters::Subscriber<PointCloudN> sub_normals_filter_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_axis_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      std::shared_ptr<dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig> > srv_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_axis_;
     
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
@@ -228,12 +222,6 @@ namespace pcl_ros
         * \param model the sample consensus model found
         */
       void axis_callback (const pcl_msgs::ModelCoefficientsConstPtr &model);
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (SACSegmentationFromNormalsConfig &config, uint32_t level);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud

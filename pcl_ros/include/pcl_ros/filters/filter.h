@@ -42,8 +42,6 @@
 #include <pcl/filters/filter.h>
 #include "pcl_ros/pcl_node.h"
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
 #include "pcl_ros/FilterConfig.h"
 
 namespace pcl_ros
@@ -66,7 +64,7 @@ namespace pcl_ros
 
     protected:
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
 
       message_filters::Subscriber<PointCloud2> sub_input_filter_;
 
@@ -94,16 +92,6 @@ namespace pcl_ros
       /** \brief Internal mutex. */
       std::mutex mutex_;
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      /*virtual bool
-      child_init (ros::NodeHandle &nh, bool &has_service) 
-      { 
-        has_service = false; 
-        return (true); 
-      }*/
 
       /** \brief Virtual abstract filter method. To be implemented by every child. 
         * \param input the input point cloud dataset.

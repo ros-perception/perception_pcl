@@ -39,14 +39,6 @@
 #include "pcl_ros/filters/voxel_grid.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::VoxelGrid::child_init (bool &has_service)
-{
-  has_service = true;
-  return (true);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::VoxelGrid::filter (const PointCloud2::ConstPtr &input, 
                             const IndicesPtr &indices, 

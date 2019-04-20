@@ -71,18 +71,7 @@ namespace pcl_ros
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
-
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      virtual bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
-
-      /** \brief Dynamic reconfigure service callback. */
-      void 
-      config_callback (pcl_ros::ExtractIndicesConfig &config, uint32_t level);
-
+    
     private:
       /** \brief The PCL filter implementation used. */
       pcl::ExtractIndices<pcl::PCLPointCloud2> impl_;

@@ -52,12 +52,9 @@
 #include <message_filters/null_types.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::Feature::onInit ()
+pcl_ros::Feature::Feature () : rclcpp::Node("feature_node"), Feature::PCLNode(), /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),
+use_surface_(false), spatial_locator_type_(-1),
 {
-  // Call the child init
-  childInit ();
-
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
   //pub_output_ = this->template advertise<PointCloud2> ("output", max_queue_size_);
@@ -65,12 +62,12 @@ pcl_ros::Feature::onInit ()
   // ---[ Mandatory parameters
   if (!this->get_parameter ("k_search", k_) && !this->get_parameter ("radius_search", search_radius_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::constructor] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   {
-    RCLCPP_ERROR (this-get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this-get_logger(), "[%s::constructor] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
     return;
   }
 
@@ -131,7 +128,7 @@ pcl_ros::Feature::onInit ()
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ = this->create_subscription<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"
@@ -226,10 +223,6 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
 void
 pcl_ros::FeatureFromNormals::onInit ()
 {
-
-  // Call the child init
-  childInit ();
-
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
   //pub_output_ = this->template advertise<PointCloud2> ("output", max_queue_size_);
@@ -237,12 +230,12 @@ pcl_ros::FeatureFromNormals::onInit ()
   // ---[ Mandatory parameters
   if (!this->get_parameter ("k_search", k_) && !this->get_parameter ("radius_search", search_radius_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::constructor] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::constructor] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
     return;
   }
   // ---[ Optional parameters
@@ -312,7 +305,7 @@ pcl_ros::FeatureFromNormals::onInit ()
   else
     sync_input_normals_surface_indices_e_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
 
-  RCLCPP_DEBUG (this-get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"

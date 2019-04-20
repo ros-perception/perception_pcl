@@ -37,6 +37,11 @@
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/shot_omp.h"
 
+// Create the output publisher
+pcl_ros::Feature::SHOTEstimationOMP() : rclcpp::Node("shot_omp"), pcl_ros::Feature:FeatureFromNormals() {
+  pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
+}
+
 void 
 pcl_ros::SHOTEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {

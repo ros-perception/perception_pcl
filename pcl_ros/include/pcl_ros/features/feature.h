@@ -40,7 +40,7 @@
 
 // PCL includes
 #include <pcl/features/feature.h>
-#include <pcl_msgs/msg/point_indices.h>
+#include <pcl_msgs/msg/point_indices.hpp>
 
 #include "pcl_ros/pcl_node.h"
 #include <message_filters/pass_through.h>
@@ -69,15 +69,13 @@ namespace pcl_ros
 
       typedef pcl::PointCloud<pcl::PointXYZ> PointCloudIn;
       typedef PointCloudIn::Ptr PointCloudInPtr;
-      typedef PointCloudIn::ConstPtr PointCloudInConstPtr;
+      typedef PointCl oudIn::ConstPtr PointCloudInConstPtr;
 
       typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      Feature () : /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),
-                   use_surface_(false), spatial_locator_type_(-1) 
-      {};
+      Feature () {};
 
     protected:
       /** \brief The input point cloud dataset. */
@@ -114,9 +112,6 @@ namespace pcl_ros
         * 2: Organized spatial dataset index
         */
       int spatial_locator_type_;
-
-      /** \brief Child initialization routine. Internal method. */
-      virtual bool childInit (ros::NodeHandle &nh) = 0;
 
       /** \brief Publish an empty point cloud of the feature output type. */
       virtual void emptyPublish (const PointCloudInConstPtr &cloud) = 0;

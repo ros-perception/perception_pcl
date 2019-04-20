@@ -41,8 +41,8 @@
 
 **/
 
-#ifndef PCL_NODELET_H_
-#define PCL_NODELET_H_
+#ifndef PCL_NODE_H_
+#define PCL_NODE_H_
 
 #include <rclcpp/rclcpp.hpp>
 #include <rcutils/error_handling.h>
@@ -54,7 +54,7 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
-// ROS Nodelet includes
+// ROS Node includes
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -93,7 +93,26 @@ namespace pcl_ros
 
       /** \brief Empty constructor. */
       PCLNode () : use_indices_ (false), latched_indices_ (false),
-                      max_queue_size_ (3), approximate_sync_ (false) {};
+                    max_queue_size_ (3), approximate_sync_ (false) {
+                      // Parameters that we care about only at startup
+                      this->get_parameter ("max_queue_size", max_queue_size_);
+                      
+                      // ---[ Optional parameters
+                      this->get_parameter ("use_indices", use_indices_);
+                      this->get_parameter ("latched_indices", latched_indices_);
+                      this->get_parameter ("approximate_sync", approximate_sync_);
+                      
+                      RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] PCL Node successfully created with the following parameters:\n"
+                                    " - approximate_sync : %s\n"
+                                    " - use_indices      : %s\n"
+                                    " - latched_indices  : %s\n"
+                                    " - max_queue_size   : %d",
+                                    getName ().c_str (),
+                                    (approximate_sync_) ? "true" : "false",
+                                    (use_indices_) ? "true" : "false",
+                                    (latched_indices_) ? "true" : "false",
+                                    max_queue_size_);
+                      };
 
     protected:
       /** \brief Set to true if point indices are used.
@@ -194,30 +213,6 @@ namespace pcl_ros
           return (false);
         }*/
         return (true);
-      }
-
-      /** \brief Nodelet initialization routine. Reads in global parameters used by all nodelets. */
-      virtual void
-      onInit ()
-      {
-        // Parameters that we care about only at startup
-        this->get_parameter ("max_queue_size", max_queue_size_);
-        
-        // ---[ Optional parameters
-        this->get_parameter ("use_indices", use_indices_);
-        this->get_parameter ("latched_indices", latched_indices_);
-        this->get_parameter ("approximate_sync", approximate_sync_);
-
-        RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] PCL Nodelet successfully created with the following parameters:\n"
-            " - approximate_sync : %s\n"
-            " - use_indices      : %s\n"
-            " - latched_indices  : %s\n"
-            " - max_queue_size   : %d",
-            getName ().c_str (), 
-            (approximate_sync_) ? "true" : "false",
-            (use_indices_) ? "true" : "false", 
-            (latched_indices_) ? "true" : "false", 
-            max_queue_size_);
       }
 
     public:

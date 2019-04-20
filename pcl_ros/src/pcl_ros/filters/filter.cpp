@@ -59,6 +59,15 @@
 //PLUGINLIB_EXPORT_CLASS(FilterDimension,nodelet::Nodelet);
 */
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+pcl_ros::Filter::Filter () : rclcpp::Node("filter_node"), pcl_ros::Filter::PCLNode()
+{
+  
+  pub_output_ = advertise<PointCloud2> ("output", max_queue_size_);
+  
+  RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Node successfully created.", getName ().c_str ());
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const IndicesPtr &indices)
@@ -142,26 +151,6 @@ pcl_ros::Filter::unsubscribe()
   }
   else
     sub_input_.shutdown();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::Filter::onInit ()
-{
-  // Call the super onInit ()
-  PCLNode::onInit ();
-
-  // Call the child's local init
-  bool has_service = false;
-  if (!child_init (has_service))
-  {
-    RCLCPP_ERROR (this-get_logger(), "[%s::onInit] Initialization failed.", getName ().c_str ());
-    return;
-  }
-
-  pub_output_ = advertise<PointCloud2> ("output", max_queue_size_);
-
-  RCLCPP_DEBUG (this-get_logger(), "[%s::onInit] Nodelet successfully created.", getName ().c_str ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

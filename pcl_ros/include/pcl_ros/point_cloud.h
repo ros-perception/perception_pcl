@@ -7,7 +7,7 @@
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.h>
 
 namespace pcl 
 {
@@ -57,10 +57,6 @@ namespace pcl
 
 namespace rclcpp
 {
-  // In ROS 1.3.1+, we can specialize the functor used to create PointCloud<T> objects
-  // on the subscriber side. This allows us to generate the mapping between message
-  // data and object fields only once and reuse it.
-#if ROS_VERSION_MINIMUM(1, 3, 1)
   template<typename T>
   struct DefaultMessageCreator<pcl::PointCloud<T> >
   {
@@ -78,7 +74,6 @@ namespace rclcpp
       return msg;
     }
   };
-#endif
 
   namespace message_traits 
   {
@@ -97,13 +92,13 @@ namespace rclcpp
 
     template<typename T> struct DataType<pcl::PointCloud<T> >
     {
-      static const char* value() { return DataType<sensor_msgs::PointCloud2>::value(); }
+      static const char* value() { return DataType<sensor_msgs::msg::PointCloud2>::value(); }
       static const char* value(const pcl::PointCloud<T>&) { return value(); }
     };
 
     template<typename T> struct Definition<pcl::PointCloud<T> >
     {
-      static const char* value() { return Definition<sensor_msgs::PointCloud2>::value(); }
+      static const char* value() { return Definition<sensor_msgs::msg::PointCloud2>::value(); }
       static const char* value(const pcl::PointCloud<T>&) { return value(); }
     };
 
@@ -146,7 +141,7 @@ namespace rclcpp
       static std::string value(const pcl::PointCloud<T>& m) { return m.header.frame_id; }
     };
 
-  } // namespace ros::message_traits
+  } // namespace rclcpp::message_traits
 
   namespace serialization 
   {
@@ -286,10 +281,10 @@ namespace rclcpp
         return length;
       }
     };
-  } // namespace ros::serialization
+  } // namespace rclcpp::serialization
 
   /// @todo Printer specialization in message_operations
 
-} // namespace ros
+} // namespace rclcpp
 
 #endif

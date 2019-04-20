@@ -38,16 +38,6 @@
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/extract_indices.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool 
-pcl_ros::ExtractIndices::child_init (bool &has_service)
-{
-  has_service = true;
-
-  use_indices_ = true;
-  return (true);
-}
-
 typedef pcl_ros::ExtractIndices ExtractIndices;
 //PLUGINLIB_EXPORT_CLASS(ExtractIndices,nodelet::Nodelet);
 

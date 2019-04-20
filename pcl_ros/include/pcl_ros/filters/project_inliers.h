@@ -93,10 +93,6 @@ namespace pcl_ros
       /** \brief The PCL filter implementation used. */
       pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
 
-      /** \brief NodeletLazy connection routine. */
-      void subscribe ();
-      void unsubscribe ();
-
       /** \brief PointCloud2 + Indices + Model data callback. */
       void 
       input_indices_model_callback (const PointCloud2::ConstPtr &cloud, 

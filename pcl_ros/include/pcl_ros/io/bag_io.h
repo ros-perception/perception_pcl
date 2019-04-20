@@ -94,9 +94,6 @@ namespace pcl_ros
         bag_.close ();
       }
 
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
     private:
       /** \brief The publishing interval in seconds. Set to 0 to publish once (default). */
       double publish_rate_;

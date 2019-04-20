@@ -56,18 +56,15 @@ namespace pcl_ros
   {
     public:
       /** \brief Empty constructor. */
-      EuclideanClusterExtraction () : publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ()) {};
+      EuclideanClusterExtraction () : rclcpp::Node(), PCLNode(), publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ()) {};
                                       
     protected:
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief Publish indices or convert to PointCloud clusters. Default: false */
       bool publish_indices_;
 
       /** \brief Maximum number of clusters to publish. */
       int max_clusters_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      std::shared_ptr<dynamic_reconfigure::Server<EuclideanClusterExtractionConfig> > srv_;
 
       /** \brief Input point cloud callback. 
         * \param cloud the pointer to the input point cloud
@@ -80,7 +77,7 @@ namespace pcl_ros
       pcl::EuclideanClusterExtraction<pcl::PointXYZ> impl_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
 
       /** \brief Synchronized input, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;

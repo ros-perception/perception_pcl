@@ -45,8 +45,8 @@ Cloud Data) format.
  **/
 
 #include <sstream>
-#include <rosbag2/bag.h>
-#include <rosbag2/view.h>
+//#include <rosbag2/bag.h>
+//#include <rosbag2/view.h>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -59,6 +59,7 @@ typedef PointCloud::Ptr PointCloudPtr;
 typedef PointCloud::ConstPtr PointCloudConstPtr;
 
 /* ---[ */
+/**
 int
   main (int argc, char** argv)
 {
@@ -72,16 +73,16 @@ int
   }
 
   // TF
-  tf2_ros::TransformListener tf_listener;
-  tf2_ros::TransformBroadcaster tf_broadcaster;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener;
+  //std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster;
 
-  rosbag2::Bag bag;
-  rosbag2::View view;
-  rosbag2::View::iterator view_it;
+  //rosbag2::Bag bag;
+  //rosbag2::View view;
+  //rosbag2::View::iterator view_it;
 
   try
   {
-    bag.open (argv[1], rosbag2::bagmode::Read);
+    //bag.open (argv[1], rosbag2::bagmode::Read);
   } 
   catch (rosbag2::BagException)
   {
@@ -90,7 +91,7 @@ int
   }
 
   view.addQuery (bag, rosbag2::TypeQuery ("sensor_msgs/PointCloud2"));
-  view.addQuery (bag, rosbag2::TypeQuery ("tf/tfMessage"));
+  view.addQuery (bag, rosbag2::TypeQuery ("tf2/tfMessage"));
   view.addQuery (bag, rosbag2::TypeQuery ("tf2_msgs/TFMessage"));
   view_it = view.begin ();
 
@@ -162,4 +163,5 @@ int
 
   return (0);
 }
+ **/
 /* ]--- */

@@ -44,10 +44,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
+pcl_ros::PointCloudConcatenateFieldsSynchronizer () : rclcpp::Node("")
 {
-
   // ---[ Mandatory parameters
   if (!this->get_parameter ("input_messages", input_messages_))
   {
@@ -62,16 +60,15 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
   // ---[ Optional parameters
   this->get_parameter ("max_queue_size", maximum_queue_size_);
   this->get_parameter ("maximum_seconds", maximum_seconds_);
-  pub_output_ = advertise<sensor_msgs::msg::PointCloud2> ("output", maximum_queue_size_);
+  pub_output_ = this-create_publisher<sensor_msgs::msg::PointCloud2> ("output", maximum_queue_size_);
 
-  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->subscribe ("input", maximum_queue_size_,  &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
+  sub_input_ = this->create_subscription ("input", maximum_queue_size_,  std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

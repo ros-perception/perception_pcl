@@ -69,7 +69,7 @@ namespace pcl_ros
 
     protected:
        /** \brief The output PointIndices publisher. */
-      rclcpp::Publisher pub_output_;
+      rclcpp::Publisher<pcl_msgs::msg::PointIndices>::SharedPtr pub_output_;
 
       /** \brief The message filter subscriber for PointCloud2. */
       message_filters::Subscriber<PointCloud> sub_hull_filter_;
@@ -77,9 +77,6 @@ namespace pcl_ros
       /** \brief Synchronized input, planar hull, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud, PointIndices> > > sync_input_hull_indices_e_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud, PointIndices> > > sync_input_hull_indices_a_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      std::shared_ptr<dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig> > srv_;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */

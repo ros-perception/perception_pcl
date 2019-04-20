@@ -72,7 +72,9 @@ namespace pcl_ros
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
       void input_callback (const PointCloudConstPtr &cloud);
-
+    
+      void subscribe();
+      void unsubscribe();
     private:
       /** \brief The input PointCloud subscriber. */
       rclcpp::Subscriber sub_input_;

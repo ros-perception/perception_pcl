@@ -73,9 +73,6 @@ namespace pcl_ros
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > sync_input_target_e_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > sync_input_target_a_;
 
-      /** \brief Pointer to a dynamic reconfigure service. */
-      std::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig> > srv_;
-
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
         * \param cloud_target the pointcloud that we want to segment \a cloud from

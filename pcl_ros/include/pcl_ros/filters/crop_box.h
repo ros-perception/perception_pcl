@@ -76,13 +76,6 @@ namespace pcl_ros
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
-
     private:
       /** \brief The PCL filter implementation used. */
       pcl::CropBox<pcl::PCLPointCloud2> impl_;

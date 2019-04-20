@@ -47,18 +47,10 @@ namespace pcl_ros
   class SHOTEstimationOMP : public FeatureFromNormals
   {
     private:
+      SHOTEstimationOMP() {}
       pcl::SHOTEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
 
       typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit ()
-      {
-        // Create the output publisher
-        pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type. */
       void emptyPublish (const PointCloudInConstPtr &cloud);

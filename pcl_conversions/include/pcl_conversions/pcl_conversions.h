@@ -40,6 +40,8 @@
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
+#include <message_filters/message_event.h>
+#include <message_filters/message_traits.h>
 
 #include <pcl/conversions.h>
 
@@ -79,7 +81,7 @@ namespace pcl_conversions {
   inline
   void fromPCL(const pcl::uint64_t &pcl_stamp, rclcpp::Time &stamp)
   {
-    stamp = rclcpp::Time(nanoseconds=pcl_stamp * 1000ull); // Convert from us to ns
+    stamp = rclcpp::Time(pcl_stamp * 1000ull); // Convert from us to ns
     //stamp.nanoseconds(pcl_stamp * 1000ull);
   }
 
@@ -716,7 +718,7 @@ namespace pcl {
 
 } // namespace pcl
 
-namespace rclcpp
+namespace message_filters
 {
   template<>
   struct DefaultMessageCreator<pcl::PCLPointCloud2>
@@ -727,7 +729,8 @@ namespace rclcpp
       return msg;
     }
   };
-
+  
+  //https://github.com/ros2/message_filters/commit/46e1229a1d8c0ecca68e01b9cf0d8c13f9f6f87a#diff-651c2688431bf33a7ed4f0c68f9d86d2
   namespace message_traits
   {
     template<>
@@ -759,7 +762,7 @@ namespace rclcpp
     };
 
     template<> struct HasHeader<pcl::PCLPointCloud2> : TrueType {};
-  } // namespace ros::message_traits
+  } // namespace rclcpp::message_traits
 
   namespace serialization
   {
@@ -898,9 +901,9 @@ namespace rclcpp
         return length;
       }
     };
-  } // namespace ros::serialization
+  } // namespace rclcpp::serialization
 
-} // namespace ros
+} // namespace rclcpp
 
 
 #endif /* PCL_CONVERSIONS_H__ */

@@ -65,13 +65,6 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output);
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (bool &has_service);
-
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

@@ -39,13 +39,6 @@
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/crop_box.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::CropBox::child_init (bool &has_service)
-{
-  return (true);
-}
-
 typedef pcl_ros::CropBox CropBox;
 //PLUGINLIB_EXPORT_CLASS(CropBox,nodelet::Nodelet);
 
