@@ -47,8 +47,8 @@
  **/
 
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/image.h>
-#include <sensor_msgs/msg/point_cloud2.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>

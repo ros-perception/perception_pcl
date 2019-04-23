@@ -48,7 +48,7 @@ pcl_ros::ProjectInliers::onInit ()
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'model_type' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
     return;
   }
   // ---[ Optional parameters
@@ -64,13 +64,13 @@ pcl_ros::ProjectInliers::onInit ()
   pub_output_ = advertise<PointCloud2> ("output", max_queue_size_);
 
   // Subscribe to the input using a filter
-  sub_input_filter_.subscribe ("input", max_queue_size_);
+  sub_input_filter_->subscribe ("input", max_queue_size_);
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - model_type      : %d\n"
                  " - copy_all_data   : %s\n"
                  " - copy_all_fields : %s",
-                 getName ().c_str (),
+                 this->get_name (),
                  model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
 
   // Set given parameters here
@@ -90,9 +90,9 @@ pcl_ros::ProjectInliers::subscribe ()
   if (use_indices_)
   {*/
 
-  sub_indices_filter_.subscribe ("indices", max_queue_size_);
+  sub_indices_filter_->subscribe ("indices", max_queue_size_);
 
-  sub_model_.subscribe ("model", max_queue_size_);
+  sub_model_->subscribe ("model", max_queue_size_);
 
   if (approximate_sync_)
   {
@@ -127,12 +127,12 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstP
                                                        const PointIndicesConstPtr &indices,
                                                        const ModelCoefficientsConstPtr &model)
 {
-  if (pub_output_.getNumSubscribers () <= 0)
+  if (pub_output_.count_subscribers () <= 0)
     return;
 
   if (!isValid (model) || !isValid (indices) || !isValid (cloud))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_model_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_model_callback] Invalid input!", this->get_name ());
     return;
   }
 
@@ -140,10 +140,10 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstP
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                  "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.\n"
                  "                                 - ModelCoefficients with %zu values, stamp %f, and frame %s on topic %s received.",
-                 getName ().c_str (),
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                 indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), this->resolveName ("inliers").c_str (),
-                 model->values.size (), model->header.stamp.seconds (), model->header.frame_id.c_str (), this->resolveName ("model").c_str ());
+                 this->get_name (),
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
+                 indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "inliers",
+                 model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), "model");
 
   tf_input_orig_frame_ = cloud->header.frame_id;
 

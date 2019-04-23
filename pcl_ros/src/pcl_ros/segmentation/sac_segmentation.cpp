@@ -44,16 +44,15 @@
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::onInit ()
+pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
 {
   // Call the super onInit ()
   PCLNode::onInit ();
 
 
   // Advertise the output topics
-  pub_indices_ = advertise<PointIndices> ("inliers", max_queue_size_);
-  pub_model_   = advertise<ModelCoefficients> ("model", max_queue_size_);
+  pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
+  pub_model_   = this->create_publisher<ModelCoefficients> ("model", max_queue_size_);
 
   // ---[ Mandatory parameters
   int model_type;
@@ -83,14 +82,14 @@ pcl_ros::SACSegmentation::onInit ()
     {
       if (axis_param.size () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", getName ().c_str (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
         if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
         {
-          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", getName ().c_str ());
+          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
         double value = axis_param[i]; axis[i] = value;
@@ -111,7 +110,7 @@ pcl_ros::SACSegmentation::onInit ()
                  " - method_type              : %d\n"
                  " - model_threshold          : %f\n"
                  " - axis                     : [%f, %f, %f]\n",
-                 getName ().c_str (), model_type, method_type, threshold, 
+                 this->get_name (), model_type, method_type, threshold,
                  axis[0], axis[1], axis[2]);
 
   // Set given parameters here
@@ -130,8 +129,8 @@ pcl_ros::SACSegmentation::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe ("input", max_queue_size_);
-    sub_indices_filter_.subscribe ("indices", max_queue_size_);
+    sub_input_filter_->subscribe ("input", max_queue_size_);
+    sub_indices_filter_->subscribe ("indices", max_queue_size_);
 
     // when "use_indices" is set to true, and "latched_indices" is set to true,
     // we'll subscribe and get a separate callback for PointIndices that will 
@@ -201,17 +200,17 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   // If cloud is given, check if it's valid
   if (!isValid (cloud)) 
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
-    pub_indices_.publish (inliers);
-    pub_model_.publish (model);
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
+    pub_indices_->publish (inliers);
+    pub_model_->publish (model);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    RCLCPP_ERROR (this->get_logger()"[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
-    pub_indices_.publish (inliers);
-    pub_model_.publish (model);
+    RCLCPP_ERROR (this->get_logger()"[%s::input_indices_callback] Invalid indices!", this->get_name ());
+    pub_indices_->publish (inliers);
+    pub_model_->publish (model);
     return;
   }
 
@@ -220,12 +219,12 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), this->resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
   else
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str ());
+                   this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
   ///
 
   // Check whether the user has given a different input TF frame
@@ -272,14 +271,14 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   }
 
   // Publish
-  pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-  pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+  pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+  pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
   RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
-                 getName ().c_str (), inliers.indices.size (), this->resolveName ("inliers").c_str (),
-                 model.values.size (), this->resolveName ("model").c_str ());
+                 this->get_name (), inliers.indices.size (), "inliers",
+                 model.values.size (), "model");
 
   if (inliers.indices.empty ())
-    RCLCPP_WARN (this->get_logger(). "[%s::input_indices_callback] No inliers found!", getName ().c_str ());
+    RCLCPP_WARN (this->get_logger(). "[%s::input_indices_callback] No inliers found!", this->get_name ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -297,13 +296,13 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
   {
-    RCLCPP_ERROR ("[%s::onInit] Need a 'model_type' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR ("[%s::onInit] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
     return;
   }
   double threshold; // unused - set via dynamic reconfigure in the callback
   if (!this->get_parameter ("distance_threshold", threshold))
   {
-    RCLCPP_ERROR ("[%s::onInit] Need a 'distance_threshold' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR ("[%s::onInit] Need a 'distance_threshold' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -321,14 +320,14 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
     {
       if (axis_param.size () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", getName ().c_str (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
         if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
         {
-          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", getName ().c_str ());
+          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
         double value = axis_param[i]; axis[i] = value;
@@ -349,7 +348,7 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
                  " - method_type              : %d\n"
                  " - model_threshold          : %f\n"
                  " - axis                     : [%f, %f, %f]\n",
-                 getName ().c_str (), model_type, method_type, threshold, 
+                 this->get_name (), model_type, method_type, threshold,
                  axis[0], axis[1], axis[2]);
 
   // Set given parameters here
@@ -365,8 +364,8 @@ void
 pcl_ros::SACSegmentationFromNormals::subscribe ()
 {
   // Subscribe to the input and normals using filters
-  sub_input_filter_.subscribe ("input", max_queue_size_);
-  sub_normals_filter_.subscribe ("normals", max_queue_size_);
+  sub_input_filter_->subscribe ("input", max_queue_size_);
+  sub_normals_filter_->subscribe ("normals", max_queue_size_);
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
   sub_axis_ = this->subscribe ("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
@@ -380,7 +379,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_indices_filter_.subscribe ("indices", max_queue_size_);
+    sub_indices_filter_->subscribe ("indices", max_queue_size_);
 
     if (approximate_sync_)
       sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);
@@ -425,10 +424,10 @@ pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::ModelCoeffic
 
   if (model->values.size () < 3)
   {
-    NODELET_ERROR ("[%s::axis_callback] Invalid axis direction / model coefficients with %zu values sent on %s!", getName ().c_str (), model->values.size (), this->resolveName ("axis").c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::axis_callback] Invalid axis direction / model coefficients with %zu values sent on %s!", this->get_name (), model->values.size (), "axis");
     return;
   }
-  NODELET_DEBUG ("[%s::axis_callback] Received axis direction: %f %f %f", getName ().c_str (), model->values[0], model->values[1], model->values[2]);
+  RCLCPP_DEBUG (this->get_logger(), "[%s::axis_callback] Received axis direction: %f %f %f", this->get_name (), model->values[0], model->values[1], model->values[2]);
 
   Eigen::Vector3f axis (model->values[0], model->values[1], model->values[2]);
   impl_.setAxis (axis);
@@ -452,25 +451,25 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
 
   if (impl_.getModelType () < 0)
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Model type not set!", getName ().c_str ());
-    pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Model type not set!", this->get_name ());
+    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
   if (!isValid (cloud))// || !isValid (cloud_normals, "normals")) 
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Invalid input!", getName ().c_str ());
-    pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Invalid input!", this->get_name ());
+    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Invalid indices!", getName ().c_str ());
-    pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Invalid indices!", this->get_name ());
+    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
@@ -480,17 +479,17 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.seconds (), cloud_normals->header.frame_id.c_str (), this->resolveName ("normals").c_str (),
-                   indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), this->resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.sec, cloud_normals->header.frame_id.c_str (), "normals",
+                   indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
   else
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_normals_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.seconds (), cloud_normals->header.frame_id.c_str (), tbis->resolveName ("normals").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), fromPCL(cloud_normals->header).stamp.sec, cloud_normals->header.frame_id.c_str (), "normals");
   ///
 
 
@@ -499,9 +498,9 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   int cloud_normals_nr_points = cloud_normals->width * cloud_normals->height;
   if (cloud_nr_points != cloud_normals_nr_points)
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs from the number of points in the normals (%d)!", getName ().c_str (), cloud_nr_points, cloud_normals_nr_points);
-    pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs from the number of points in the normals (%d)!", this->get_name (), cloud_nr_points, cloud_normals_nr_points);
+    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
@@ -533,13 +532,13 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   }
 
   // Publish
-  pub_indices_.publish (std::make_shared<const PointIndices> (inliers));
-  pub_model_.publish (std::make_shared<const ModelCoefficients> (model));
+  pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
+  pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
   RCLCPP_DEBUG (this->get_logger(), "[%s::input_normals_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
-      getName ().c_str (), inliers.indices.size (), this->resolveName ("inliers").c_str (),
-      model.values.size (), this->resolveName ("model").c_str ());
+      this->get_name (), inliers.indices.size (), "inliers",
+      model.values.size (), "model");
   if (inliers.indices.empty ())
-    NODELET_WARN ("[%s::input_indices_callback] No inliers found!", getName ().c_str ());
+    RCLCPP_WARN ("[%s::input_indices_callback] No inliers found!", this->get_name ());
 }
 
 typedef pcl_ros::SACSegmentation SACSegmentation;

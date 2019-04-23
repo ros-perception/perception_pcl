@@ -78,7 +78,7 @@ pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
   this->get_parameter ("publish_rate", publish_rate_);
   this->get_parameter ("max_queue_size", max_queue_size);
 
-  rclcpp::Publisher pub_output = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", max_queue_size);
+  auto pub_output = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", max_queue_size);
 
   RCLCPP_DEBUG (this->get_loggeR(), "[onInit] Nodelet successfully created with the following parameters:\n"
                  " - file_name    : %s\n"
@@ -95,10 +95,10 @@ pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
   while (this->ok ())
   {
     PointCloudConstPtr cloud = getNextCloud ();
-    RCLCPP_DEBUG (this->get_logger(), "Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, this->resolveName ("output").c_str (), output_->header.frame_id.c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, "output", output_->header.frame_id.c_str ());
     output_->header.stamp = this->now ();
 
-    pub_output.publish (output_);
+    pub_output->publish (output_);
 
     rclcpp::Duration (publish_rate_).sleep ();
     rclcpp::spinOnce ();

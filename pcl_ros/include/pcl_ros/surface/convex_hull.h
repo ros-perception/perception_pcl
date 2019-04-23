@@ -63,16 +63,19 @@ namespace pcl_ros
         */
       void input_indices_callback (const PointCloudConstPtr &cloud, 
                                    const PointIndicesConstPtr &indices);
-
-    private:
+    
+      // TODO: Fix
+      void subscribe();
+      void unsubscribe();
+    
       /** \brief The PCL implementation used. */
       pcl::ConvexHull<pcl::PointXYZ> impl_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
-
+      rclcpp::Subscription<pcl_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+    
       /** \brief Publisher for PolygonStamped. */
-      rclcpp::Publisher pub_plane_;
+      rclcpp::Publisher<geometry_msgs::msg::PolygonStamped>::SharedPtr pub_plane_;
 
       /** \brief Synchronized input, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;

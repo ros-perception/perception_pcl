@@ -50,7 +50,7 @@ pcl_ros::SegmentDifferences::onInit ()
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
                  " - max_queue_size    : %d",
-                 getName ().c_str (),
+                 this->get_name (),
                  max_queue_size_);
 
   onInitPostProcess ();
@@ -61,8 +61,8 @@ void
 pcl_ros::SegmentDifferences::subscribe ()
 {
   // Subscribe to the input using a filter
-  sub_input_filter_.subscribe ("input", max_queue_size_);
-  sub_target_filter_.subscribe ("target", max_queue_size_);
+  sub_input_filter_->subscribe ("input", max_queue_size_);
+  sub_target_filter_->subscribe ("target", max_queue_size_);
 
   if (approximate_sync_)
   {
@@ -92,24 +92,24 @@ void
 pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cloud, 
                                                     const PointCloudConstPtr &cloud_target)
 {
-  if (pub_output_.getNumSubscribers () <= 0)
+  if (pub_output_.count_subscribers () <= 0)
     return;
 
   if (!isValid (cloud) || !isValid (cloud_target, "target")) 
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     PointCloud output;
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_->publish (output.makeShared ());
     return;
   }
 
   NODELET_DEBUG ("[%s::input_indices_callback]\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                 getName ().c_str (),
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.seconds (), cloud_target->header.frame_id.c_str (), this->resolveName ("target").c_str ());
+                 this->get_name (),
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                 cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.sec, cloud_target->header.frame_id.c_str (), "target");
 
   impl_.setInputCloud (cloud);
   impl_.setTargetCloud (cloud_target);
@@ -117,9 +117,9 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
   PointCloud output;
   impl_.segment (output);
 
-  pub_output_.publish (output.makeShared ());
-  RCLCPP_DEBUG (this->get_logger(), "[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", getName ().c_str (),
-                     output.points.size (), fromPCL(output.header).stamp.seconds (), this->resolveName ("output").c_str ());
+  pub_output_->publish (output.makeShared ());
+  RCLCPP_DEBUG (this->get_logger(), "[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", this->get_name (),
+                     output.points.size (), fromPCL(output.header).stamp.sec, "output");
 }
 
 typedef pcl_ros::SegmentDifferences SegmentDifferences;

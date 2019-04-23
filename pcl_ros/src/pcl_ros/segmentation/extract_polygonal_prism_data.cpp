@@ -62,8 +62,8 @@ pcl_ros::ExtractPolygonalPrismData::onInit ()
 void
 pcl_ros::ExtractPolygonalPrismData::subscribe ()
 {
-  sub_hull_filter_.subscribe ("planar_hull", max_queue_size_);
-  sub_input_filter_.subscribe ("input", max_queue_size_);
+  sub_hull_filter_->subscribe ("planar_hull", max_queue_size_);
+  sub_input_filter_->subscribe ("input", max_queue_size_);
 
   // Create the objects here
   if (approximate_sync_)
@@ -73,7 +73,7 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
 
   if (use_indices_)
   {
-    sub_indices_filter_.subscribe ("indices", max_queue_size_);
+    sub_indices_filter_->subscribe ("indices", max_queue_size_);
     if (approximate_sync_)
       sync_input_hull_indices_a_->connectInput (sub_input_filter_, sub_hull_filter_, sub_indices_filter_);
     else
@@ -115,7 +115,7 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
     const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
+  if (pub_output_.count_subscribers () <= 0)
     return;
 
   // Copy the header (stamp + frame_id)
@@ -125,15 +125,15 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   // If cloud is given, check if it's valid
   if (!isValid (cloud) || !isValid (hull, "planar_hull"))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_hull_indices_callback] Invalid input!", getName ().c_str ());
-    pub_output_.publish (inliers);
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_hull_indices_callback] Invalid input!", this->get_name ());
+    pub_output_->publish (inliers);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_hull_indices_callback] Invalid indices!", getName ().c_str ());
-    pub_output_.publish (inliers);
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_hull_indices_callback] Invalid indices!", this->get_name ());
+    pub_output_->publish (inliers);
     return;
   }
 
@@ -143,27 +143,27 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (), 
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.seconds (), hull->header.frame_id.c_str (), this->resolveName ("planar_hull").c_str (),
-                   indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), this->resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.sec, hull->header.frame_id.c_str (), "planar_hull",
+                   indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
   else
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_hull_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.seconds (), hull->header.frame_id.c_str (), this->resolveName ("planar_hull").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   hull->width * hull->height, pcl::getFieldsList (*hull).c_str (), fromPCL(hull->header).stamp.sec, hull->header.frame_id.c_str (), "planar_hull");
   ///
 
   if (cloud->header.frame_id != hull->header.frame_id)
   {
-    RCLCPP_DEBUG (this->get_logger(), "[%s::input_hull_callback] Planar hull has a different TF frame (%s) than the input point cloud (%s)! Using TF to transform.", getName ().c_str (), hull->header.frame_id.c_str (), cloud->header.frame_id.c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_hull_callback] Planar hull has a different TF frame (%s) than the input point cloud (%s)! Using TF to transform.", this->get_name (), hull->header.frame_id.c_str (), cloud->header.frame_id.c_str ());
     PointCloud planar_hull;
     if (!pcl_ros::transformPointCloud (cloud->header.frame_id, *hull, planar_hull, tf_listener_))
     {
       // Publish empty before return
-      pub_output_.publish (inliers);
+      pub_output_->publish (inliers);
       return;
     }
     impl_.setInputPlanarHull (planar_hull.makeShared ());
@@ -187,8 +187,8 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   }
   // Enforce that the TF frame and the timestamp are copied
   inliers.header = fromPCL(cloud->header);
-  pub_output_.publish (inliers);
-  RCLCPP_DEBUG (this->get_logger(), "[%s::input_hull_callback] Publishing %zu indices.", getName ().c_str (), inliers.indices.size ());
+  pub_output_->publish (inliers);
+  RCLCPP_DEBUG (this->get_logger(), "[%s::input_hull_callback] Publishing %zu indices.", this->get_name (), inliers.indices.size ());
 }
 
 typedef pcl_ros::ExtractPolygonalPrismData ExtractPolygonalPrismData;

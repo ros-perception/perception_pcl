@@ -38,6 +38,7 @@
 #define pcl_ROS_TRANSFORMS_H_
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl/common/transforms.h>
 #include <tf2/transform_datatypes.h>
 #include <tf2_ros/transform_listener.h>
@@ -53,7 +54,7 @@ namespace pcl_ros
   template <typename PointT> void 
   transformPointCloudWithNormals (const pcl::PointCloud <PointT> &cloud_in, 
                                   pcl::PointCloud <PointT> &cloud_out, 
-                                  const tf2_ros::Transform &transform);
+                                  const tf2::Transform &transform);
 
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to

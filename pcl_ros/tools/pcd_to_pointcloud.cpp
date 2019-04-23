@@ -56,31 +56,31 @@
 
 #include "pcl_ros/publisher.h"
 
-using namespace std;
-
 class PCDGenerator : public rclcpp::Node
 {
-  protected:
-    string tf_frame_;
+  //protected:
+  //  std::string tf_frame_;
   public:
-
+    std::string tf_frame_;
+  
     // ROS messages
     sensor_msgs::msg::PointCloud2 cloud_;
 
-    string file_name_, cloud_topic_;
+    std::string file_name_, cloud_topic_;
     double wait_;
 
     pcl_ros::Publisher<sensor_msgs::msg::PointCloud2> pub_;
 
     ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator () : rclcpp::Node("pcd_to_pointcloud"), tf_frame_ ("/base_link")
+    PCDGenerator (std::string node_name) : rclcpp::Node (node_name), tf_frame_ ("/base_link")
     {
       // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
       cloud_topic_ = "cloud_pcd";
       pub_->create_publisher (cloud_topic_.c_str (), 1);
-      this->get_parameter("frame_id", tf_frame_, std::string("/base_link"));
-      RCLCPP_INFO (this->get_logger(), "Publishing data on topic %s with frame_id %s.", nh_.resolveName (cloud_topic_).c_str (), tf_frame_.c_str());
+      this->get_parameter ("frame_id", tf_frame_);
+      this->get_parameter_or ("frame_id", tf_frame_, std::string("/base_link"));
+      RCLCPP_INFO (this->get_logger(), "Publishing data on topic %s with frame_id %s.", cloud_topic_.c_str (), tf_frame_.c_str());
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -99,16 +99,16 @@ class PCDGenerator : public rclcpp::Node
     bool spin ()
     {
       int nr_points      = cloud_.width * cloud_.height;
-      string fields_list = pcl::getFieldsList (cloud_);
+      std::string fields_list = pcl::getFieldsList (cloud_);
       double interval = wait_ * 1e+6;
-      while (this->ok ())
+      while (rclcpp::ok ())
       {
-        RCLCPP_DEBUG (this->get_logger(), "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
+        RCLCPP_DEBUG (this->get_logger(), "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), cloud_topic_, cloud_.header.frame_id.c_str ());
         cloud_.header.stamp = this->now ();
 
-        if (pub_.getNumSubscribers () > 0)
+        if (pub_.count_subscribers () > 0)
         {
-          RCLCPP_DEBUG (this->get_logger(), "Publishing data to %d subscribers.", pub_.getNumSubscribers ());
+          RCLCPP_DEBUG (this->get_logger(), "Publishing data to %d subscribers.", pub_.count_subscribers ());
           pub_->publish (cloud_);
         }
         else
@@ -145,7 +145,7 @@ int
 
   rclcpp::init (argc, argv);
 
-  auto c = std::make_shared<PCDGenerator>();
+  auto c = std::make_shared<PCDGenerator>("pcd_to_pointcloud");
   c.file_name_ = string (argv[1]);
   // check if publishing interval is given
   if (argc == 2)

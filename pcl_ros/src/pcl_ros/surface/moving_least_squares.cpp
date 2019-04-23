@@ -49,13 +49,13 @@ pcl_ros::MovingLeastSquares::onInit ()
   //if (!this->getParam ("k_search", k_) && !this->getParam ("search_radius", search_radius_))  
   if (!this->get_parameter ("search_radius", search_radius_))
   {
-    //NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'search_radius' parameter to be set before continuing!", getName ().c_str ());
+    //NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'search_radius' parameter to be set before continuing!", this->get_name ());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   { 
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -78,9 +78,9 @@ pcl_ros::MovingLeastSquares::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe ("input", 1);
+    sub_input_filter_->subscribe ("input", 1);
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_.subscribe ("indices", 1);
+    sub_indices_filter_->subscribe ("indices", 1);
 
     if (approximate_sync_)
     {
@@ -121,7 +121,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
                                                      const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0 && pub_normals_.getNumSubscribers () <= 0)
+  if (pub_output_.count_subscribers () <= 0 && pub_normals_.count_subscribers () <= 0)
     return;
 
   // Output points have the same type as the input, they are only smoothed
@@ -133,17 +133,17 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // If cloud is given, check if it's valid
   if (!isValid (cloud)) 
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_->publish (output.makeShared ());
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices, "indices"))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_->publish (output.makeShared ());
     return;
   }
 
@@ -152,11 +152,11 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_model_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
-                   indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
   else
-    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
   ///
 
   // Reset the indices and surface pointers
@@ -176,9 +176,9 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
   normals->header = cloud->header;
-  pub_normals_.publish (normals);
+  pub_normals_->publish (normals);
 }
 
 typedef pcl_ros::MovingLeastSquares MovingLeastSquares;

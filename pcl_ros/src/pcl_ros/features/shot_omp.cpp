@@ -38,7 +38,7 @@
 #include "pcl_ros/features/shot_omp.h"
 
 // Create the output publisher
-pcl_ros::Feature::SHOTEstimationOMP() : rclcpp::Node("shot_omp"), pcl_ros::Feature:FeatureFromNormals() {
+pcl_ros::Feature::SHOTEstimationOMP(std::string node_name) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
 
@@ -47,7 +47,7 @@ pcl_ros::SHOTEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
 }
 
 void 
@@ -72,7 +72,7 @@ pcl_ros::SHOTEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
 }
 
 typedef pcl_ros::SHOTEstimationOMP SHOTEstimationOMP;

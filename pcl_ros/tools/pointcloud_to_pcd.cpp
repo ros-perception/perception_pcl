@@ -38,7 +38,7 @@
 // ROS core
 #include <rclcpp/rclcpp.hpp>
 
-#include <sensor_msgs/msg/point_cloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -127,7 +127,7 @@ class PointCloudToPCD : public rclcpp::Node
     }
 
   ////////////////////////////////////////////////////////////////////////////////
-  PointCloudToPCD () : rclcpp::Node("pointcloud_to_pcd"), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
+  PointCloudToPCD () : rclcpp::Node("pointcloud_to_pcd"), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
   {
     // Check if a prefix parameter is defined for output file names.
     if (this->get_parameter ("prefix", prefix_))
@@ -175,7 +175,7 @@ int
 
   auto b = std::make_shared<PointCloudToPCD> ("pointcloud_to_pcd");
   rclcpp::spin (b);
-
+  rclcpp::shutdown();
   return (0);
 }
 /* ]--- */

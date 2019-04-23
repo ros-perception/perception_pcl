@@ -57,13 +57,13 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
   double cluster_tolerance;
   if (!this->get_parameter ("cluster_tolerance", cluster_tolerance))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'cluster_tolerance' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'cluster_tolerance' parameter to be set before continuing!", this->get_name ());
     return;
   }
   int spatial_locator;
   if (!this->get_parameter ("spatial_locator", spatial_locator))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -79,7 +79,7 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
                  " - max_queue_size    : %d\n"
                  " - use_indices       : %s\n"
                  " - cluster_tolerance : %f\n",
-                 getName ().c_str (),
+                 this->get_name (),
                  max_queue_size_,
                  (use_indices_) ? "true" : "false", cluster_tolerance);
 
@@ -97,8 +97,8 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe ("input", max_queue_size_);
-    sub_indices_filter_.subscribe ("indices", max_queue_size_);
+    sub_input_filter_->subscribe ("input", max_queue_size_);
+    sub_indices_filter_->subscribe ("indices", max_queue_size_);
 
     if (approximate_sync_)
     {
@@ -138,19 +138,19 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
+  if (pub_output_.count_subscribers () <= 0)
     return;
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     return;
   }
 
@@ -161,11 +161,11 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud_header.stamp.seconds (), cloud_header.frame_id.c_str (), this->resolveName ("input").c_str (),
-                   indices->indices.size (), indices_header.stamp.seconds (), indices_header.frame_id.c_str (), this->resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud_header.stamp.sec, cloud_header.frame_id.c_str (), "input",
+                   indices->indices.size (), indices_header.stamp.sec, indices_header.frame_id.c_str (), "indices");
   } else {
-    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName ("input").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
   }
   ///
 
@@ -189,10 +189,10 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       pcl_msgs::msg::PointIndices ros_pi;
       moveFromPCL(clusters[i], ros_pi);
       ros_pi.header.stamp += rclcpp::Duration (i * 0.001);
-      pub_output_.publish (ros_pi);
+      pub_output_->publish (ros_pi);
     }
 
-    RCLCPP_DEBUG (this->get_logger(), "[segmentAndPublish] Published %zu clusters (PointIndices) on topic %s", clusters.size (), this->resolveName ("output").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[segmentAndPublish] Published %zu clusters (PointIndices) on topic %s", clusters.size (), "output");
   }
   else
   {
@@ -210,9 +210,9 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       header.stamp += rclcpp::Duration (i * 0.001);
       toPCL(header, output.header);
       // Publish a shared ptr const data
-      pub_output_.publish (output.makeShared ());
+      pub_output_->publish (output.makeShared ());
       RCLCPP_DEBUG (this->get_logger(), "[segmentAndPublish] Published cluster %zu (with %zu values and stamp %f) on topic %s",
-                     i, clusters[i].indices.size (), header.stamp.seconds (), this->resolveName ("output").c_str ());
+                     i, clusters[i].indices.size (), header.stamp.sec, "output");
     }
   }
 }

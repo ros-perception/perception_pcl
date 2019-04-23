@@ -259,7 +259,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
       }
     }
   }
-  pub_output_.publish (std::make_shared<PointCloud2> (*out1));
+  pub_output_->publish (std::make_shared<PointCloud2> (*out1));
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;

@@ -55,8 +55,8 @@ Cloud Data) format.
 #include <tf/transform_broadcaster.h>
 
 typedef sensor_msgs::msg::PointCloud2 PointCloud;
-typedef PointCloud::Ptr PointCloudPtr;
-typedef PointCloud::ConstPtr PointCloudConstPtr;
+typedef PointCloud::SharedPtr PointCloudPtr;
+typedef PointCloud::ConstSharedPtr PointCloudConstPtr;
 
 /* ---[ */
 /**
@@ -116,7 +116,7 @@ int
   while (view_it != view.end ())
   {
     // Handle TF messages first
-    tf2::msg::tfMessage::ConstPtr tf = view_it->instantiate<tf2::msg::tfMessage> ();
+    tf2::msg::tfMessage::ConstSharedPtr tf = view_it->instantiate<tf2::msg::tfMessage> ();
     if (tf != NULL)
     {
       tf_broadcaster.sendTransform (tf->transforms);

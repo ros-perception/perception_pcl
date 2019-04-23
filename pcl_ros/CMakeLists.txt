@@ -44,17 +44,24 @@ find_package(rosbag2 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
+find_package(boost REQUIRED)
+
 
 ## Add include directories
 include_directories(include
   ${rclcpp_INCLUDE_DIRS}
   ${pcl_msgs_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
+  ${sensor_msgs_INCLUDE_DIRS}
   ${pcl_conversions_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+  ${BOOST_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+
 )
 
 ## Declare the ament package

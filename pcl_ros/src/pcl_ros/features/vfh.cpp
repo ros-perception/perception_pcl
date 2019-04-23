@@ -43,7 +43,7 @@ pcl_ros::VFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
 }
 
 void 
@@ -68,7 +68,7 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
 }
 
 typedef pcl_ros::VFHEstimation VFHEstimation;

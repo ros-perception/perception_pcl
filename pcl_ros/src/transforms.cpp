@@ -34,7 +34,7 @@
  *
  */
 
-#include <sensor_msgs/msg/point_cloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl/common/io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -55,12 +55,12 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::msg::Po
   }
 
   // Get the TF transform
-  tf2::StampedTransform transform;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
     tf_listener.lookupTransform (target_frame, in.header.frame_id, in.header.stamp, transform);
   }
-  catch (tf::LookupException &e)
+  catch (tf2::LookupException &e)
   {
     //RCLCPP_ERROR (this->get_logger(), "%s", e.what ());
     return (false);
@@ -214,7 +214,7 @@ transformAsMatrix (const tf2::Transform& bt, Eigen::Matrix4f &out_mat)
   double mv[12];
   bt.getBasis ().getOpenGLSubMatrix (mv);
 
-  tf::Vector3 origin = bt.getOrigin ();
+  tf2::Vector3 origin = bt.getOrigin ();
 
   out_mat (0, 0) = mv[0]; out_mat (0, 1) = mv[4]; out_mat (0, 2) = mv[8];
   out_mat (1, 0) = mv[1]; out_mat (1, 1) = mv[5]; out_mat (1, 2) = mv[9];

@@ -50,7 +50,7 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 // PCL includes
 #include <pcl_msgs/msg/point_indices.hpp>
-#include <pcl_msgs/msg/model_coefficients.h>
+#include <pcl_msgs/msg/model_coefficients.hpp>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
@@ -81,19 +81,19 @@ namespace pcl_ros
       typedef PointCloud::ConstPtr PointCloudConstPtr;
 
       typedef pcl_msgs::msg::PointIndices PointIndices;
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+      typedef PointIndices::SharedPtr PointIndicesPtr;
+      typedef PointIndices::ConstSharedPtr PointIndicesConstPtr;
 
       typedef pcl_msgs::msg::ModelCoefficients ModelCoefficients;
-      typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
-      typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
+      typedef ModelCoefficients::SharedPtr ModelCoefficientsPtr;
+      typedef ModelCoefficients::ConstSharedPtr ModelCoefficientsConstPtr;
 
       typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      PCLNode () : use_indices_ (false), latched_indices_ (false),
-                    max_queue_size_ (3), approximate_sync_ (false) {
+      PCLNode (std::string node_name) : rclcpp::Node(node_name), tf_buffer_(this->get_clock()), use_indices_ (false), latched_indices_ (false),
+                    max_queue_size_ (3), approximate_sync_ (false), tf_listener_(tf_buffer_) {
                       // Parameters that we care about only at startup
                       this->get_parameter ("max_queue_size", max_queue_size_);
                       
@@ -102,12 +102,11 @@ namespace pcl_ros
                       this->get_parameter ("latched_indices", latched_indices_);
                       this->get_parameter ("approximate_sync", approximate_sync_);
                       
-                      RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] PCL Node successfully created with the following parameters:\n"
+                      RCLCPP_DEBUG (this->get_logger(), "[PCLNode::constructor] PCL Node successfully created with the following parameters:\n"
                                     " - approximate_sync : %s\n"
                                     " - use_indices      : %s\n"
                                     " - latched_indices  : %s\n"
                                     " - max_queue_size   : %d",
-                                    getName ().c_str (),
                                     (approximate_sync_) ? "true" : "false",
                                     (use_indices_) ? "true" : "false",
                                     (latched_indices_) ? "true" : "false",
@@ -136,13 +135,14 @@ namespace pcl_ros
       bool latched_indices_;
 
       /** \brief The message filter subscriber for PointCloud2. */
-      message_filters::Subscriber<PointCloud> sub_input_filter_;
+      message_filters::Subscriber<sensor_msgs::msg::PointCloud2> sub_input_filter_;
 
       /** \brief The message filter subscriber for PointIndices. */
-      message_filters::Subscriber<PointIndices> sub_indices_filter_;
+      message_filters::Subscriber<pcl_msgs::msg::PointIndices> sub_indices_filter_;
 
       /** \brief The output PointCloud publisher. */
-      std::rclcpp::Publisher pub_output_;
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_output_;
+
 
       /** \brief The maximum queue size (default: 3). */
       int max_queue_size_;
@@ -151,18 +151,19 @@ namespace pcl_ros
       bool approximate_sync_;
 
       /** \brief TF listener object. */
-      tf2::TransformListener tf_listener_;
+      tf2_ros::Buffer tf_buffer_;
+      tf2_ros::TransformListener tf_listener_;
 
       /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
         * \param cloud the point cloud to test
         * \param topic_name an optional topic name (only used for printing, defaults to "input")
         */
       inline bool
-      isValid (const PointCloud2::ConstPtr &cloud, const std::string &topic_name = "input")
+      isValid (const PointCloud2::ConstSharedPtr &cloud, const std::string &topic_name = "input")
       {
         if (cloud->width * cloud->height * cloud->point_step != cloud->data.size ())
         {
-          RCLCPP_WARN(this->get_logger(), "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->data.size (), cloud->width, cloud->height, cloud->point_step, cloud->header.stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName (topic_name).c_str ());
+          RCLCPP_WARN(this->get_logger(), "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!", this->get_name (), cloud->data.size (), cloud->width, cloud->height, cloud->point_step, cloud->header.stamp.sec , cloud->header.frame_id.c_str (), topic_name.c_str ());
 
           return (false);
         }
@@ -178,7 +179,7 @@ namespace pcl_ros
       {
         if (cloud->width * cloud->height != cloud->points.size ())
         {
-          RCLCPP_WARN (this->get_logger(), "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.seconds (), cloud->header.frame_id.c_str (), this->resolveName (topic_name).c_str ());
+          RCLCPP_WARN (this->get_logger(), "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", this->get_name (), cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), topic_name.c_str ());
 
           return (false);
         }
@@ -194,7 +195,7 @@ namespace pcl_ros
       {
         /*if (indices->indices.empty ())
         {
-          NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), indices->indices.size (), indices->header.stamp.seconds (), indices->header.frame_id.c_str (), this->resolveName (topic_name).c_str ());
+          NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), topic_name.c_str ());
           return (true);
         }*/
         return (true);
@@ -209,7 +210,7 @@ namespace pcl_ros
       {
         /*if (model->values.empty ())
         {
-          NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), model->values.size (), model->header.stamp.seconds (), model->header.frame_id.c_str (), this->resolveName (topic_name).c_str ());
+          NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), topic_name.c_str ());
           return (false);
         }*/
         return (true);
@@ -220,4 +221,4 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_NODELET_H_
+#endif  //#ifndef PCL_NODE_H_

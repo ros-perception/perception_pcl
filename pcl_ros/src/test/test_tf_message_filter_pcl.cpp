@@ -41,7 +41,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <gtest/gtest.h>
 
@@ -68,7 +68,7 @@ void setStamp(rclcpp::Time &stamp, pcl::uint64_t &pcl_stamp)
   {
     rclcpp::Time t;
     pcl_conversions::fromPCL(pcl_stamp, t);
-    ROS_ASSERT_MSG(t==stamp, "%d/%d vs %d/%d", t.seconds(), t.nanoseconds(), stamp.seconds(), stamp.nanoseconds());
+    //ROS_ASSERT_MSG(t==stamp, "%d/%d vs %d/%d", t.seconds(), t.nanoseconds(), stamp.sec, stamp.nanosec);
   }
 }
 
@@ -144,7 +144,7 @@ TEST(MessageFilter, preexistingTransforms)
   rclcpp::Time stamp = clock_->now();
   setStamp(stamp, msg->header.stamp);
 
-  tf2::StampedTransform transform(tf2::Transform(tf::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame2";
@@ -155,7 +155,7 @@ TEST(MessageFilter, preexistingTransforms)
 
 TEST(MessageFilter, postTransforms)
 {
-  tf::TransformListener tf_client;
+  tf2_ros::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(std::bind(&Notification::notify, &n, _1));
@@ -170,7 +170,7 @@ TEST(MessageFilter, postTransforms)
 
   EXPECT_EQ(0, n.count_);
 
-  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   rclcpp::WallDuration(0.1).sleep();
@@ -204,7 +204,7 @@ TEST(MessageFilter, queueSize)
   EXPECT_EQ(0, n.count_);
   EXPECT_EQ(10, n.failure_count_);
 
-  tf2::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   rclcpp::WallDuration(0.1).sleep();
@@ -220,13 +220,14 @@ TEST(MessageFilter, setTargetFrame)
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(std::bind(&Notification::notify, &n, _1));
   filter.setTargetFrame("frame1000");
-
-  ros::Time stamp = ros::Time::now();
+  
+  auto clock_ = std::make_shared<rclcpp::Clock>();
+  rclcpp::Time stamp = clock_->now();
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1000", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1000", "frame2");
   tf_client.setTransform(transform);
 
   filter.add(msg);
@@ -252,7 +253,7 @@ TEST(MessageFilter, multipleTargetFrames)
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame3");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame3");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame3";
@@ -284,10 +285,10 @@ TEST(MessageFilter, tolerance)
   filter.setTolerance(offset);
   
   auto clock_ = std::make_shared<rclcpp::Clock>();
-  ros::Time stamp = clock_->now();
+  rclcpp::Time stamp = clock_->now();
   pcl::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
-  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   PCDType::Ptr msg(new PCDType);
@@ -328,7 +329,7 @@ TEST(MessageFilter, outTheBackFailure)
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf2::StampedTransform transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  geometry_msgs::msg::TransformStamped transform(tf2_ros::Transform(tf2::Quaternion(0,0,0,1), tf2::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
   transform.stamp_ = stamp + ros::Duration(10000);

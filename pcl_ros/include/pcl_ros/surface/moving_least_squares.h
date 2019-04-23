@@ -43,9 +43,7 @@
 // PCL includes
 #include <pcl/surface/mls.h>
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include "pcl_ros/MLSConfig.h"   
+#include "pcl_ros/MLSConfig.h"
 
 namespace pcl_ros
 {
@@ -117,10 +115,10 @@ namespace pcl_ros
       pcl::MovingLeastSquares<PointIn, NormalOut> impl_;
       
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
 
       /** \brief The output PointCloud (containing the normals) publisher. */
-      rclcpp::Publisher pub_normals_;
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_normals_;
 
       /** \brief Synchronized input, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointIndices> > >       sync_input_indices_e_;

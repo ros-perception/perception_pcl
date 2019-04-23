@@ -41,8 +41,8 @@
 // ROS core
 #include <rclcpp/rclcpp.hpp>
 //Image message
-#include <sensor_msgs/msg/image.h>
-#include <sensor_msgs/msg/point_cloud2.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 //pcl::toROSMsg
 #include <pcl/io/pcd_io.h>
 //conversions from PCL custom types
@@ -53,20 +53,20 @@
 class PointCloudToImage : public rclcpp::Node
 {
 public:
-  PointCloudToImage () : rclcpp::Node("convert_pointcloud_to_image"), cloud_topic_("input"), image_topic_("output")
+  PointCloudToImage (std::string node_name) : rclcpp::Node(node_name), cloud_topic_("input"), image_topic_("output")
   {
     
-    sub_ = this->create_subscription<sensor_msgs::msg::Image> (cloud_topic_,
-                                                               std::bind(&PointCloudToImage::cloud_cb, this, std::placeholders::_1));
+    sub_ = this->create_subscription<sensor_msgs::msg::Image> (cloud_topic_, std::bind(&PointCloudToImage::cloud_cb, this, std::placeholders::_1));
+    
     image_pub_ = this->create_publisher<sensor_msgs::msg::Image> (image_topic_, 30);
 
     //print some info about the node
-    //RCLCPP_INFO(this-get_logger(), "Listening for incoming data on topic %s", cloud_topic_.c_str() );
-    //RCLCPP_INFO(this-get_logger(), "Publishing image on topic %s", image_topic_.c_str() );
+    RCLCPP_INFO(this->get_logger(), "Listening for incoming data on topic %s", cloud_topic_.c_str() );
+    RCLCPP_INFO(this->get_logger(), "Publishing image on topic %s", image_topic_.c_str() );
   }
   
   void
-  cloud_cb (const std::shared_ptr<sensor_msgs::msg::PointCloud2> cloud)
+  cloud_cb (const sensor_msgs::msg::PointCloud2::SharedPtr cloud)
   {
     if (cloud->height <= 1)
     {
@@ -90,7 +90,7 @@ private:
   std::string cloud_topic_; //default input
   std::string image_topic_; //default output
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
-  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr sub_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
 };
 
 int

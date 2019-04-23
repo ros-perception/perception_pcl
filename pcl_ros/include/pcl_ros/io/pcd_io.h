@@ -109,7 +109,7 @@ namespace pcl_ros
       void input_callback (const PointCloud2ConstPtr &cloud);
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
 
     protected:
       /** \brief The name of the file that contains the PointCloud data. */

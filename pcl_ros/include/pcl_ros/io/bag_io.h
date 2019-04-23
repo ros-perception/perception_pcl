@@ -39,7 +39,7 @@
 #define PCL_ROS_IO_BAG_IO_H_
 
 #include <pcl_ros/pcl_node.h>
-#include <sensor_msgs/msg/point_cloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <rosbag2/bag.h>
 #include <rosbag2/view.h>
 

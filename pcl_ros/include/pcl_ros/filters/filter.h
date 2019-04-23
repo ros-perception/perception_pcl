@@ -42,7 +42,7 @@
 #include <pcl/filters/filter.h>
 #include "pcl_ros/pcl_node.h"
 
-#include "pcl_ros/FilterConfig.h"
+//#include "pcl_ros/FilterConfig.h"
 
 namespace pcl_ros
 {
@@ -60,7 +60,7 @@ namespace pcl_ros
       typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
-      Filter () {}
+      Filter (std::string node_name);
 
     protected:
       /** \brief The input PointCloud subscriber. */
@@ -99,7 +99,7 @@ namespace pcl_ros
         * \param output the resultant filtered PointCloud2
         */ 
       virtual void 
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output) = 0;
 
       /** \brief Call the child filter () method, optionally transform the result, and publish it.

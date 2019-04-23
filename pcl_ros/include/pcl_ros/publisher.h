@@ -46,7 +46,7 @@
 #define PCL_ROS_PUBLISHER_H_
 
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl/conversions.h>
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -65,19 +65,19 @@ namespace pcl_ros
       std::string 
         getTopic ()
       {
-        return (pub_->getTopic ());
+        return (pub_->get_topic ());
       }
 
       uint32_t 
-        getNumSubscribers () const
+        count_subscribers () const
       {
-        return (pub_->getNumSubscribers ());
+        return (pub_->count_subscribers ());
       }
 
       void 
         shutdown ()
       {
-        pub_->shutdown ();
+        //pub_->shutdown ();
       }
 
       operator void*() const
@@ -86,7 +86,7 @@ namespace pcl_ros
       }
 
     protected:
-      std::shared_ptr<rclcpp::Publisher> pub_;
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
   };
 
   template <typename PointT>
@@ -114,7 +114,7 @@ namespace pcl_ros
         // Fill point cloud binary data
         sensor_msgs::msg::PointCloud2 msg;
         pcl::toROSMsg (point_cloud, msg);
-        pub_.publish (std::make_shared<const sensor_msgs::msg::PointCloud2> (msg));
+        pub_->publish (std::make_shared<const sensor_msgs::msg::PointCloud2> (msg));
       }
   };
 
@@ -122,7 +122,7 @@ namespace pcl_ros
   class Publisher<sensor_msgs::msg::PointCloud2> : public BasePublisher
   {
     public:
-      Publisher () {}
+      Publisher ();
 
       Publisher (const std::string& topic, uint32_t queue_size)
       {
@@ -132,17 +132,17 @@ namespace pcl_ros
       ~Publisher () {}
 
       void 
-      publish (const sensor_msgs::msg::PointCloud2Ptr& point_cloud) const
+      publish (const sensor_msgs::msg::PointCloud2& point_cloud) const
       {
         pub_->publish (point_cloud);
-        //pub_.publish (*point_cloud);
+        //pub_->publish (*point_cloud);
       }
 
       void 
       publish (const sensor_msgs::msg::PointCloud2& point_cloud) const
       {
         pub_->publish (std::make_shared<const sensor_msgs::msg::PointCloud2> (point_cloud));
-        //pub_.publish (point_cloud);
+        //pub_->publish (point_cloud);
       }
   };
 }

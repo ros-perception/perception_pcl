@@ -45,8 +45,6 @@
 #include "pcl_ros/pcl_node.h"
 #include <message_filters/pass_through.h>
 
-#include "pcl_ros/FeatureConfig.h"
-
 // PCL conversions
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -69,13 +67,13 @@ namespace pcl_ros
 
       typedef pcl::PointCloud<pcl::PointXYZ> PointCloudIn;
       typedef PointCloudIn::Ptr PointCloudInPtr;
-      typedef PointCl oudIn::ConstPtr PointCloudInConstPtr;
+      typedef PointCloudIn::ConstPtr PointCloudInConstPtr;
 
       typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      Feature () {};
+      Feature (std::string node_name);
 
     protected:
       /** \brief The input point cloud dataset. */
@@ -101,7 +99,8 @@ namespace pcl_ros
       message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
       
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+
 
       /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */
       bool use_surface_;
@@ -147,6 +146,8 @@ namespace pcl_ros
       std::shared_ptr <message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices> > > sync_input_surface_indices_e_;
 
 
+      virtual void subscribe ();
+      virtual void unsubscribe ();
       /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
         * \param cloud the pointer to the input point cloud
         * \param cloud_surface the pointer to the surface point cloud
@@ -172,14 +173,11 @@ namespace pcl_ros
       typedef PointCloudN::Ptr PointCloudNPtr;
       typedef PointCloudN::ConstPtr PointCloudNConstPtr;
 
-      FeatureFromNormals () : normals_() {};
+      FeatureFromNormals ();
 
     protected:
       /** \brief A pointer to the input dataset that contains the point normals of the XYZ dataset. */
       PointCloudNConstPtr normals_;
-
-      /** \brief Child initialization routine. Internal method. */
-      virtual bool childInit () = 0;
 
       /** \brief Publish an empty point cloud of the feature output type. */
       virtual void emptyPublish (const PointCloudInConstPtr &cloud) = 0;
@@ -197,7 +195,10 @@ namespace pcl_ros
       /** \brief Synchronized input, normals, surface, and point indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointCloudN, PointCloudIn, PointIndices> > > sync_input_normals_surface_indices_a_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudN, PointCloudIn, PointIndices> > > sync_input_normals_surface_indices_e_;
-
+    
+      virtual void subscribe ();
+      virtual void unsubscribe ();
+    
       /** \brief Internal method. */
       void computePublish (const PointCloudInConstPtr &, 
                            const PointCloudInConstPtr &,
