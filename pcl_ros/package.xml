@@ -30,6 +30,7 @@
 
   <depend>dynamic_reconfigure</depend>
   <depend>eigen</depend>
+  <depend>geometry_msgs</depend>
   <depend>message_filters</depend>
   <depend>nodelet</depend>
   <depend>nodelet_topic_tools</depend>
@@ -42,7 +43,9 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>tf</depend>
+  <depend>tf2</depend>
   <depend>tf2_eigen</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>rostest</test_depend>
 
