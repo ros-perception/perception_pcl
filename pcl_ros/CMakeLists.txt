@@ -53,11 +53,14 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Add include directories
-include_directories(include
-  ${Boost_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
+include_directories(include)
+
+include_directories(
+  SYSTEM
+    ${Boost_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
 )
 
 ## Generate dynamic_reconfigure
@@ -198,17 +201,17 @@ target_link_libraries(convert_pointcloud_to_image ${Boost_LIBRARIES} ${catkin_LI
 
 ## Downloads
 
-catkin_download(table_scene_lms400.pcd http://download.ros.org/data/pcl/table_scene_lms400.pcd
-  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/samples/data
-  MD5 546b5b4822fb1de21b0cf83d41ad6683
-)
-add_custom_target(download ALL DEPENDS download_extra_data)
-
 #############
 ## Testing ##
 #############
 
 if(CATKIN_ENABLE_TESTING)
+  catkin_download(table_scene_lms400.pcd http://download.ros.org/data/pcl/table_scene_lms400.pcd
+    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/samples/data
+    MD5 546b5b4822fb1de21b0cf83d41ad6683
+  )
+  add_custom_target(download ALL DEPENDS download_extra_data)
+
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_tf_message_filter_pcl tests/test_tf_message_filter_pcl.launch src/test/test_tf_message_filter_pcl.cpp)
   target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
@@ -217,6 +220,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(samples/pcl_ros/filters/sample_voxel_grid.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/segmentation/sample_extract_clusters.launch ARGS gui:=false)
   add_rostest(samples/pcl_ros/surface/sample_convex_hull.launch ARGS gui:=false)
+
 endif(CATKIN_ENABLE_TESTING)
 
 
