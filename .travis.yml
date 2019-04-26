@@ -12,6 +12,9 @@ env:
     - ROS_DISTRO="melodic"
     - ROS_REPO=ros
     - CCACHE_DIR=$HOME/.ccache
+    # To avoid memory error on Travis.
+    - ROS_PARALLEL_JOBS=-j1
+    - ROS_PARALLEL_TEST_JOBS=-j1
     # travis build will time out with no output unless we use verbose output
     - VERBOSE_OUTPUT=true
     - VERBOSE_TESTS=true
@@ -22,4 +25,4 @@ env:
 install:
   - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
-  - travis_wait 40 .industrial_ci/travis.sh
+  - .industrial_ci/travis.sh
