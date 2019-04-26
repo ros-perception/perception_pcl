@@ -41,6 +41,7 @@
 #include <pcl/common/transforms.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
+#include <tf2_ros/buffer.h>
 
 namespace pcl_ros
 {
@@ -55,6 +56,17 @@ namespace pcl_ros
                                   pcl::PointCloud <PointT> &cloud_out, 
                                   const tf::Transform &transform);
 
+   /** \brief Transform a point cloud and rotate its normals using an Eigen transform.
+    * \param cloud_in the input point cloud
+    * \param cloud_out the input point cloud
+    * \param transform a rigid transformation from tf
+    * \note calls the Eigen version
+    */
+  template <typename PointT> void
+  transformPointCloudWithNormals (const pcl::PointCloud <PointT> &cloud_in,
+                                  pcl::PointCloud <PointT> &cloud_out,
+                                  const geometry_msgs::Transform &transform);
+
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
     * \param cloud_in the input point cloud
@@ -66,6 +78,18 @@ namespace pcl_ros
                                   const pcl::PointCloud <PointT> &cloud_in, 
                                   pcl::PointCloud <PointT> &cloud_out, 
                                   const tf::TransformListener &tf_listener);
+
+  /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
+    * \param target_frame the target TF frame the point cloud should be transformed to
+    * \param cloud_in the input point cloud
+    * \param cloud_out the input point cloud
+    * \param tf_buffer a TF2 buffer object
+    */
+  template <typename PointT> bool
+  transformPointCloudWithNormals (const std::string &target_frame,
+                                  const pcl::PointCloud <PointT> &cloud_in,
+                                  pcl::PointCloud <PointT> &cloud_out,
+                                  const tf2_ros::Buffer &tf_buffer);
 
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
@@ -83,6 +107,22 @@ namespace pcl_ros
                                    pcl::PointCloud <PointT> &cloud_out, 
                                    const tf::TransformListener &tf_listener);
 
+  /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
+    * \param target_frame the target TF frame the point cloud should be transformed to
+    * \param target_time the target timestamp
+    * \param cloud_in the input point cloud
+    * \param fixed_frame fixed TF frame
+    * \param cloud_out the input point cloud
+    * \param tf_buffer a TF2 buffer object
+    */
+   template <typename PointT> bool
+   transformPointCloudWithNormals (const std::string &target_frame,
+                                   const ros::Time & target_time,
+                                   const pcl::PointCloud <PointT> &cloud_in,
+                                   const std::string &fixed_frame,
+                                   pcl::PointCloud <PointT> &cloud_out,
+                                   const tf2_ros::Buffer &tf_buffer);
+
   /** \brief Apply a rigid transform defined by a 3D offset and a quaternion
     * \param cloud_in the input point cloud
     * \param cloud_out the input point cloud
@@ -93,6 +133,17 @@ namespace pcl_ros
   transformPointCloud (const pcl::PointCloud <PointT> &cloud_in, 
                        pcl::PointCloud <PointT> &cloud_out, 
                        const tf::Transform &transform);
+
+  /** \brief Apply a rigid transform defined by a 3D offset and a quaternion
+    * \param cloud_in the input point cloud
+    * \param cloud_out the input point cloud
+    * \param transform a rigid transformation from tf
+    * \note calls the Eigen version
+    */
+  template <typename PointT> void
+  transformPointCloud (const pcl::PointCloud <PointT> &cloud_in,
+                       pcl::PointCloud <PointT> &cloud_out,
+                       const geometry_msgs::Transform &transform);
 
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
@@ -105,6 +156,18 @@ namespace pcl_ros
                        const pcl::PointCloud <PointT> &cloud_in, 
                        pcl::PointCloud <PointT> &cloud_out, 
                        const tf::TransformListener &tf_listener);
+
+  /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
+    * \param target_frame the target TF frame the point cloud should be transformed to
+    * \param cloud_in the input point cloud
+    * \param cloud_out the input point cloud
+    * \param tf_buffer a TF2 buffer object
+    */
+  template <typename PointT> bool
+  transformPointCloud (const std::string &target_frame,
+                       const pcl::PointCloud <PointT> &cloud_in,
+                       pcl::PointCloud <PointT> &cloud_out,
+                       const tf2_ros::Buffer &tf_buffer);
 
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
@@ -121,6 +184,21 @@ namespace pcl_ros
                        pcl::PointCloud <PointT> &cloud_out, 
                        const tf::TransformListener &tf_listener);
 
+  /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
+    * \param target_frame the target TF frame the point cloud should be transformed to
+    * \param target_time the target timestamp
+    * \param cloud_in the input point cloud
+    * \param fixed_frame fixed TF frame
+    * \param cloud_out the input point cloud
+    * \param tf_buffer a TF2 buffer object
+    */
+  template <typename PointT> bool
+  transformPointCloud (const std::string &target_frame, const ros::Time & target_time,
+                       const pcl::PointCloud <PointT> &cloud_in,
+                       const std::string &fixed_frame,
+                       pcl::PointCloud <PointT> &cloud_out,
+                       const tf2_ros::Buffer &tf_buffer);
+
   /** \brief Transform a sensor_msgs::PointCloud2 dataset from its frame to a given TF target frame.
     * \param target_frame the target TF frame
     * \param in the input PointCloud2 dataset
@@ -135,6 +213,18 @@ namespace pcl_ros
 
   /** \brief Transform a sensor_msgs::PointCloud2 dataset from its frame to a given TF target frame.
     * \param target_frame the target TF frame
+    * \param in the input PointCloud2 dataset
+    * \param out the resultant transformed PointCloud2 dataset
+    * \param tf_buffer a TF2 buffer object
+    */
+  bool
+  transformPointCloud (const std::string &target_frame,
+                       const sensor_msgs::PointCloud2 &in,
+                       sensor_msgs::PointCloud2 &out,
+                       const tf2_ros::Buffer &tf_buffer);
+
+  /** \brief Transform a sensor_msgs::PointCloud2 dataset from its frame to a given TF target frame.
+    * \param target_frame the target TF frame
     * \param net_transform the TF transformer object
     * \param in the input PointCloud2 dataset
     * \param out the resultant transformed PointCloud2 dataset
@@ -143,6 +233,18 @@ namespace pcl_ros
   transformPointCloud (const std::string &target_frame, 
                        const tf::Transform &net_transform, 
                        const sensor_msgs::PointCloud2 &in, 
+                       sensor_msgs::PointCloud2 &out);
+
+  /** \brief Transform a sensor_msgs::PointCloud2 dataset from its frame to a given TF target frame.
+    * \param target_frame the target TF frame
+    * \param net_transform the TF transformer object
+    * \param in the input PointCloud2 dataset
+    * \param out the resultant transformed PointCloud2 dataset
+    */
+  void
+  transformPointCloud (const std::string &target_frame,
+                       const geometry_msgs::Transform &net_transform,
+                       const sensor_msgs::PointCloud2 &in,
                        sensor_msgs::PointCloud2 &out);
 
   /** \brief Transform a sensor_msgs::PointCloud2 dataset using an Eigen 4x4 matrix.
@@ -161,6 +263,13 @@ namespace pcl_ros
     */
   void 
   transformAsMatrix (const tf::Transform& bt, Eigen::Matrix4f &out_mat);
+
+  /** \brief Obtain the transformation matrix from TF into an Eigen form
+    * \param bt the TF transformation
+    * \param out_mat the Eigen transformation
+    */
+  void
+  transformAsMatrix (const geometry_msgs::Transform& bt, Eigen::Matrix4f &out_mat);
 }
 
 #endif // PCL_ROS_TRANSFORMS_H_

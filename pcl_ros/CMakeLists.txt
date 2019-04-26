@@ -36,6 +36,7 @@ endif()
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
+  geometry_msgs
   message_filters
   nodelet
   nodelet_topic_tools
@@ -49,7 +50,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  tf2
   tf2_eigen
+  tf2_ros
 )
 
 ## Add include directories
@@ -89,6 +92,7 @@ catkin_package(
     pcl_ros_tf
   CATKIN_DEPENDS
     dynamic_reconfigure
+    geometry_msgs
     message_filters
     nodelet
     nodelet_topic_tools
@@ -99,6 +103,9 @@ catkin_package(
     sensor_msgs
     std_msgs
     tf
+    tf2
+    tf2_eigen
+    tf2_ros
   DEPENDS
     Boost
     EIGEN3
