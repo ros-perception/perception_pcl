@@ -53,11 +53,14 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Add include directories
-include_directories(include
-  ${Boost_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
+include_directories(include)
+
+include_directories(
+  SYSTEM
+    ${Boost_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
 )
 
 ## Generate dynamic_reconfigure
