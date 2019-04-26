@@ -12,9 +12,10 @@ env:
     - ROS_DISTRO="melodic"
     - ROS_REPO=ros
     - CCACHE_DIR=$HOME/.ccache
+    - VERBOSE_OUTPUT=true
+    - VERBOSE_TESTS=true
   matrix:
     - OS_NAME=ubuntu OS_CODE_NAME=bionic
-    - OS_NAME=ubuntu OS_CODE_NAME=artful
     - OS_NAME=debian OS_CODE_NAME=stretch
 
 install:
