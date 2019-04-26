@@ -12,6 +12,7 @@ env:
     - ROS_DISTRO="melodic"
     - ROS_REPO=ros
     - CCACHE_DIR=$HOME/.ccache
+    # travis build will time out with no output unless we use verbose output
     - VERBOSE_OUTPUT=true
     - VERBOSE_TESTS=true
   matrix:
@@ -21,4 +22,4 @@ env:
 install:
   - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
-  - .industrial_ci/travis.sh
+  - travis_wait 40 .industrial_ci/travis.sh
