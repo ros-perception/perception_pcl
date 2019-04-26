@@ -59,6 +59,7 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::PointCl
   tf::StampedTransform transform;
   try
   {
+    tf_listener.waitForTransform (target_frame, in.header.frame_id, in.header.stamp, ros::Duration(1));
     tf_listener.lookupTransform (target_frame, in.header.frame_id, in.header.stamp, transform);
   }
   catch (tf::LookupException &e)
