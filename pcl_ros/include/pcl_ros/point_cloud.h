@@ -94,12 +94,14 @@ namespace message_filters
       static rclcpp::Time* pointer(typename pcl::PointCloud<T> &m) {
         header_.reset(new std_msgs::msg::Header());
         pcl_conversions::fromPCL(m.header, *(header_));
-        return &(header_->stamp);
+        stamp_.reset(new rclcpp::Time(header_->stamp));
+        return &(*stamp_);
       }
       static rclcpp::Time const* pointer(const typename pcl::PointCloud<T>& m) {
         header_const_.reset(new std_msgs::msg::Header());
         pcl_conversions::fromPCL(m.header, *(header_const_));
-        return &(header_const_->stamp);
+        stamp_const_.reset(new rclcpp::Time(header_const_->stamp));
+        return &(*stamp_const_);
       }
       static rclcpp::Time value(const typename pcl::PointCloud<T>& m) {
         return pcl_conversions::fromPCL(m.header).stamp;
@@ -107,6 +109,8 @@ namespace message_filters
     private:
       static std::shared_ptr<std_msgs::msg::Header> header_;
       static std::shared_ptr<std_msgs::msg::Header> header_const_;
+      static std::shared_ptr<rclcpp::Time> stamp_;
+      static std::shared_ptr<rclcpp::Time> stamp_const_;
     };
 
     template<typename T>

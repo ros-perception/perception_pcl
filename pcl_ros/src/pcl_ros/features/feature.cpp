@@ -52,7 +52,7 @@
 #include <message_filters/null_types.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::Feature::Feature (std::string node_name) : pcl_ros::PCLNode(node_name)
+pcl_ros::Feature::Feature (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::PCLNode(node_name, options)
 {
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
@@ -141,7 +141,7 @@ pcl_ros::Feature::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

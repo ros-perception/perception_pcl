@@ -46,16 +46,11 @@ using pcl_conversions::moveFromPCL;
 using pcl_conversions::moveToPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ExtractPolygonalPrismData::onInit ()
+pcl_ros::ExtractPolygonalPrismData::ExtractPolygonalPrismData (std::string node_name, const rclcpp::NodeOptions& options) : ros_pcl::PCLNode(node_name, options)
 {
-  // Call the super onInit ()
-  PCLNode::onInit ();
-
   // Advertise the output topics
   pub_output_ = advertise<PointIndices> ("output", max_queue_size_);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

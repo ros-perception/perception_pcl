@@ -46,8 +46,10 @@ namespace pcl_ros
     */
   class SHOTEstimationOMP : public FeatureFromNormals
   {
+    public:
+      SHOTEstimationOMP(std::string node_name, const rclcpp::NodeOptions& options);
+    
     private:
-      SHOTEstimationOMP(std::string node_name);
       pcl::SHOTEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
 
       typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;

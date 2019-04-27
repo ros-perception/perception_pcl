@@ -38,7 +38,7 @@
 #include "pcl_ros/features/shot_omp.h"
 
 // Create the output publisher
-pcl_ros::Feature::SHOTEstimationOMP(std::string node_name) {
+pcl_ros::SHOTEstimationOMP::SHOTEstimationOMP(std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::FeatureFromNormals (node_name, options) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
 

@@ -112,8 +112,8 @@ namespace pcl_conversions {
   inline
   void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::msg::Header &header)
   {
-    //auto time_stamp = new rclcpp::Time(header.stamp);
-    fromPCL(pcl_header.stamp, header.stamp);
+    auto time_stamp = std::make_shared<rclcpp::Time>(header.stamp);
+    fromPCL(pcl_header.stamp, *time_stamp);
     header.frame_id = pcl_header.frame_id;
   }
 

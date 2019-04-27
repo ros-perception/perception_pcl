@@ -47,12 +47,8 @@ using pcl_conversions::moveFromPCL;
 using pcl_conversions::toPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::EuclideanClusterExtraction::onInit ()
+pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::PCLNode(node_name, options)
 {
-  // Call the super onInit ()
-  PCLNode::onInit ();
-
   // ---[ Mandatory parameters
   double cluster_tolerance;
   if (!this->get_parameter ("cluster_tolerance", cluster_tolerance))
@@ -115,7 +111,7 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud> ("input", max_queue_size_, bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

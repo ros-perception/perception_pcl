@@ -40,8 +40,7 @@
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ProjectInliers::onInit ()
+pcl_ros::ProjectInliers::ProjectInliers () : pcl_ros::Filter()
 {
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
@@ -78,7 +77,6 @@ pcl_ros::ProjectInliers::onInit ()
   impl_.setCopyAllFields (copy_all_fields);
   impl_.setCopyAllData (copy_all_data);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

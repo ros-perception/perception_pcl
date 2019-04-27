@@ -53,7 +53,7 @@
 class PointCloudToImage : public rclcpp::Node
 {
 public:
-  PointCloudToImage (std::string node_name) : rclcpp::Node(node_name), cloud_topic_("input"), image_topic_("output")
+  PointCloudToImage (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), cloud_topic_("input"), image_topic_("output")
   {
     
     sub_ = this->create_subscription<sensor_msgs::msg::Image> (cloud_topic_, std::bind(&PointCloudToImage::cloud_cb, this, std::placeholders::_1));

@@ -52,8 +52,8 @@
 #include <message_filters/null_types.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::Feature::Feature () : Feature::PCLNode("feature_node"), /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),
-use_surface_(false), spatial_locator_type_(-1),
+pcl_ros::Feature::Feature (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::PCLNode(node_name, options), /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),
+use_surface_(false), spatial_locator_type_(-1)
 {
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
@@ -126,7 +126,7 @@ use_surface_(false), spatial_locator_type_(-1),
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
@@ -220,8 +220,7 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::FeatureFromNormals::onInit ()
+pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Feature(node_name, options)
 {
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc

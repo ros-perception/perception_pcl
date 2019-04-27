@@ -66,6 +66,9 @@ namespace pcl_ros
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
     typedef PointCloud::Ptr PointCloudPtr;
     typedef PointCloud::ConstPtr PointCloudConstPtr;
+    
+    public:
+      ExtractPolygonalPrismData(std::string node_name, const rclcpp::NodeOptions& options);
 
     protected:
        /** \brief The output PointIndices publisher. */
@@ -82,6 +85,9 @@ namespace pcl_ros
         * synchronizer */
       message_filters::PassThrough<PointIndices> nf_;
 
+    
+      void subscribe();
+      void unsubscribe();
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
         * empty elements with the same timestamp.

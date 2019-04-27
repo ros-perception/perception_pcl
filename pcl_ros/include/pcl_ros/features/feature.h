@@ -73,7 +73,7 @@ namespace pcl_ros
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      Feature (std::string node_name);
+      Feature (std::string node_name, const rclcpp::NodeOptions& options);
 
     protected:
       /** \brief The input point cloud dataset. */
@@ -173,7 +173,7 @@ namespace pcl_ros
       typedef PointCloudN::Ptr PointCloudNPtr;
       typedef PointCloudN::ConstPtr PointCloudNConstPtr;
 
-      FeatureFromNormals ();
+      FeatureFromNormals (std::string node_name, const rclcpp::NodeOptions& options);
 
     protected:
       /** \brief A pointer to the input dataset that contains the point normals of the XYZ dataset. */

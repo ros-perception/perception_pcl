@@ -59,8 +59,8 @@ void setStamp(rclcpp::Time &stamp, pcl::uint64_t &pcl_stamp)
 {
   // round to millisecond
   static const uint32_t mult = 1e6;
-  stamp.nanoseconds() /= mult;
-  stamp.nanoseconds() *= mult;
+  stamp = rclcpp::Time(stamp.nanoseconds() / mult);
+  stamp rclcpp::Time(stamp.nanoseconds() * mult);
 
   pcl_conversions::toPCL(stamp, pcl_stamp);
 

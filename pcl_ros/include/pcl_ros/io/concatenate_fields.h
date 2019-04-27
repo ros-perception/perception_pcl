@@ -58,24 +58,25 @@ namespace pcl_ros
   {
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud;
-      typedef PointCloud::SharedPtr PointCloudPtr;
-      typedef PointCloud::ConstSharedPtr PointCloudConstPtr;
+      typedef PointCloud::SharedPtr PointCloudSharedPtr;
+      typedef PointCloud::ConstSharedPtr PointCloudConstSharedPtr;
 
       /** \brief Empty constructor. */
-      PointCloudConcatenateFieldsSynchronizer (std::string node_name) : rclcpp::Node(node_name) {};
+      PointCloudConcatenateFieldsSynchronizer (std::string node_name, const rclcpp::NodeOptions& options);
 
       /** \brief Empty constructor.
         * \param queue_size the maximum queue size
         */
-      PointCloudConcatenateFieldsSynchronizer (int queue_size, std::string node_name) : rclcpp::Node(node_name), maximum_queue_size_ (queue_size), maximum_seconds_ (0) {};
+      PointCloudConcatenateFieldsSynchronizer (int queue_size, std::string node_name, const rclcpp::NodeOptions& options);
 
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
-      void input_callback (const PointCloudConstPtr &cloud);
+      void input_callback (const PointCloudConstSharedPtr &cloud);
     
       void subscribe();
       void unsubscribe();
+    
     private:
       /** \brief The input PointCloud subscriber. */
       rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
@@ -93,7 +94,7 @@ namespace pcl_ros
       double maximum_seconds_;
 
       /** \brief A queue for messages. */
-      std::map<rclcpp::Time, std::vector<PointCloudConstPtr> > queue_;
+      std::map<rclcpp::Time, std::vector<PointCloudConstSharedPtr> > queue_;
   };
 }
 

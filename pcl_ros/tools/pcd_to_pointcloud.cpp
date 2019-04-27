@@ -72,7 +72,7 @@ class PCDGenerator : public rclcpp::Node
     pcl_ros::Publisher<sensor_msgs::msg::PointCloud2> pub_;
 
     ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator (std::string node_name) : rclcpp::Node (node_name), tf_frame_ ("/base_link")
+    PCDGenerator (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node (node_name, options), tf_frame_ ("/base_link")
     {
       // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 

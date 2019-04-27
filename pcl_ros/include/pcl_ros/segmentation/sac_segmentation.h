@@ -44,9 +44,6 @@
 // PCL includes
 #include <pcl/segmentation/sac_segmentation.h>
 
-#include "pcl_ros/SACSegmentationConfig.h"
-#include "pcl_ros/SACSegmentationFromNormalsConfig.h"
-
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;

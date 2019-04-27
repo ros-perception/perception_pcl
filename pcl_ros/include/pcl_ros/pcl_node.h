@@ -92,7 +92,7 @@ namespace pcl_ros
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      PCLNode (std::string node_name) : rclcpp::Node(node_name), tf_buffer_(this->get_clock()), use_indices_ (false), latched_indices_ (false),
+      PCLNode (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), use_indices_ (false), latched_indices_ (false),
                     max_queue_size_ (3), approximate_sync_ (false), tf_listener_(tf_buffer_) {
                       // Parameters that we care about only at startup
                       this->get_parameter ("max_queue_size", max_queue_size_);

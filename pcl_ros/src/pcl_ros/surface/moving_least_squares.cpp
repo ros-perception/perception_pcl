@@ -99,7 +99,7 @@ pcl_ros::MovingLeastSquares::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()), 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

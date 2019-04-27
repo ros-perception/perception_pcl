@@ -44,7 +44,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PointCloudConcatenateFieldsSynchronizer (std::string node_name) : rclcpp::Node (node_name), maximum_queue_size_ (3), maximum_seconds_ (0)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSynchronizer (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node (node_name, options), maximum_queue_size_ (3), maximum_seconds_ (0)
 {
   // ---[ Mandatory parameters
   if (!this->get_parameter ("input_messages", input_messages_))
@@ -60,7 +60,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer (std::string node_name) : rclcp
   // ---[ Optional parameters
   this->get_parameter ("max_queue_size", maximum_queue_size_);
   this->get_parameter ("maximum_seconds", maximum_seconds_);
-  pub_output_ = this-create_publisher<sensor_msgs::msg::PointCloud2> ("output", maximum_queue_size_);
+  pub_output_ = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", maximum_queue_size_);
 
 }
 
@@ -68,19 +68,20 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer (std::string node_name) : rclcp
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->create_subscription ("input", maximum_queue_size_,  std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this));
+  this->create
+  sub_input_ = this->create_subscription ("input", std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this), maximum_queue_size_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 {
-  sub_input_.shutdown ();
+  sub_input_->shutdown ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstSharedPtr &cloud)
 {
   RCLCPP_DEBUG (this->get_logger(), "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input");

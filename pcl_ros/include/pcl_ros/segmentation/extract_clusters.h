@@ -56,7 +56,7 @@ namespace pcl_ros
   {
     public:
       /** \brief Empty constructor. */
-      EuclideanClusterExtraction () : rclcpp::Node(), PCLNode(), publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ()) {};
+    EuclideanClusterExtraction (std::string node_name, const rclcpp::NodeOptions& options) : pcl_rosPCLNode(node_name, options), publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ());
                                       
     protected:
       // ROS node attributes

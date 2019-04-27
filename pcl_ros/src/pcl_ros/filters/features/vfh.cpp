@@ -37,6 +37,10 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/vfh.h"
+pcl_ros::VFHEstimation::VFHEstimation() : FeatureFromNormals()
+{
+  pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
+}
 
 void 
 pcl_ros::VFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)

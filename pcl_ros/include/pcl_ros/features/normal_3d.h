@@ -52,6 +52,8 @@ namespace pcl_ros
     */
   class NormalEstimation: public Feature
   {
+    public:
+      NormalEstimation (std::string node_name, const rclcpp::NodeOptions& options);
     private:
       /** \brief PCL implementation object. */
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
@@ -69,7 +71,6 @@ namespace pcl_ros
                            const IndicesPtr &indices);
 
     public:
-      NormalEstimation (std::string node_name)
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }

@@ -37,7 +37,9 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d.h"
-
+pcl_ros::NormalEstimation::NormalEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Feature(node_name, options) {
+  
+}
 void 
 pcl_ros::NormalEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {

@@ -55,9 +55,6 @@ namespace pcl_ros
     */
   class ProjectInliers : public Filter
   {
-    public:
-      ProjectInliers () : model_ () {}
-
     protected:
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
@@ -65,7 +62,7 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
@@ -95,10 +92,11 @@ namespace pcl_ros
 
       /** \brief PointCloud2 + Indices + Model data callback. */
       void 
-      input_indices_model_callback (const PointCloud2::ConstPtr &cloud, 
+      input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
                                     const PointIndicesConstPtr &indices, 
                                     const ModelCoefficientsConstPtr &model);
     public:
+      ProjectInliers () : model_ ();
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }

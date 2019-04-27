@@ -37,6 +37,10 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d_omp.h"
+pcl_ros::NormalEstimationOMP::NormalEstimationOMP() : Feature() {
+  pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
+
+}
 
 void 
 pcl_ros::NormalEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)

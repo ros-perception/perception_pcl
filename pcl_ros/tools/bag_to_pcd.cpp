@@ -55,8 +55,8 @@ Cloud Data) format.
 #include <tf/transform_broadcaster.h>
 
 typedef sensor_msgs::msg::PointCloud2 PointCloud;
-typedef PointCloud::SharedPtr PointCloudPtr;
-typedef PointCloud::ConstSharedPtr PointCloudConstPtr;
+typedef PointCloud::SharedPtr PointCloudSharedPtr;
+typedef PointCloud::ConstSharedPtr PointCloudConstSharedPtr;
 
 /* ---[ */
 /**

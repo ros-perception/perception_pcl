@@ -57,10 +57,10 @@ namespace pcl_ros
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
 
-      typedef std::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
+      typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
+      typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
 
-      Filter (std::string node_name);
+      Filter (std::string node_name, const rclcpp::NodeOptions& options);
 
     protected:
       /** \brief The input PointCloud subscriber. */
@@ -91,7 +91,9 @@ namespace pcl_ros
 
       /** \brief Internal mutex. */
       std::mutex mutex_;
-
+    
+      void subscribe();
+      void unsubscribe();
 
       /** \brief Virtual abstract filter method. To be implemented by every child. 
         * \param input the input point cloud dataset.
@@ -107,7 +109,7 @@ namespace pcl_ros
         * \param indices a pointer to the vector of point indices to use.   
         */
       void 
-      computePublish (const PointCloud2::ConstPtr &input, const IndicesPtr &indices);
+      computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices);
 
     private:
       /** \brief Synchronized input, and indices.*/
@@ -116,7 +118,7 @@ namespace pcl_ros
 
       /** \brief PointCloud2 + Indices data callback. */
       void 
-      input_indices_callback (const PointCloud2::ConstPtr &cloud, 
+      input_indices_callback (const PointCloud2::ConstSharedPtr &cloud, 
                               const PointIndicesConstPtr &indices);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
