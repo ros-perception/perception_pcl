@@ -77,7 +77,7 @@ namespace pcl_ros
       void 
         shutdown ()
       {
-        //pub_->shutdown ();
+        //this->shutdown ();
       }
 
       operator void*() const

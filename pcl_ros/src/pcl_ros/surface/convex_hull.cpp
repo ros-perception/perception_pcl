@@ -38,23 +38,21 @@
 //#include <pluginlib/class_list_macros.h>
 #include <pcl/common/io.h>
 #include "pcl_ros/surface/convex_hull.h"
-#include <geometry_msgs/PolygonStamped.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ConvexHull2D() : rclcpp::Node("convex_hull_node"), PCLNode("convex_hull_node")
+pcl_ros::ConvexHull2D::ConvexHull2D (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
-  pub_output_ = this->create_publisher<pcl_msgs::msgs::PointCloud> ("output", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
   pub_plane_  = this->create_publisher<geometry_msgs::msg::PolygonStamped> ("output_polygon", max_queue_size_);
 
   // ---[ Optional parameters
   this->get_parameter ("use_indices", use_indices_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstruction] Node successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - use_indices    : %s",
                  this->get_name (),
                  (use_indices_) ? "true" : "false");
 
-  onInitPostProcess();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,9 +63,9 @@ pcl_ros::ConvexHull2D::subscribe()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", 1);
+    sub_input_filter_.subscribe ("input", 1);
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_->subscribe ("indices", 1);
+    sub_indices_filter_.subscribe ("indices", 1);
 
     if (approximate_sync_)
     {
@@ -99,7 +97,9 @@ pcl_ros::ConvexHull2D::unsubscribe()
     sub_indices_filter_.unsubscribe();
   }
   else
-    sub_input_.shutdown();
+    // FIXME
+    std::cout << "shutdown" << std::endl;
+    //sub_input_.shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ void
                                                  const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.count_subscribers () <= 0 && pub_plane_.count_subscribers () <= 0)
+  if (pub_output_->count_subscribers () <= 0 && pub_plane_->count_subscribers () <= 0)
     return;
 
   PointCloud output;

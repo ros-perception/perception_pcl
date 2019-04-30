@@ -53,13 +53,13 @@ pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (std::string nod
   double cluster_tolerance;
   if (!this->get_parameter ("cluster_tolerance", cluster_tolerance))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'cluster_tolerance' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'cluster_tolerance' parameter to be set before continuing!", this->get_name ());
     return;
   }
   int spatial_locator;
   if (!this->get_parameter ("spatial_locator", spatial_locator))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -71,7 +71,7 @@ pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (std::string nod
   else
     pub_output_ = advertise<PointCloud> ("output", max_queue_size_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - max_queue_size    : %d\n"
                  " - use_indices       : %s\n"
                  " - cluster_tolerance : %f\n",
@@ -82,7 +82,6 @@ pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (std::string nod
   // Set given parameters here
   impl_.setClusterTolerance (cluster_tolerance);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

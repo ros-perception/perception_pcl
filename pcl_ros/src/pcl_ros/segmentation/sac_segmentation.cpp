@@ -44,13 +44,9 @@
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
+pcl_ros::SACSegmentation(std::string, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
-  // Call the super onInit ()
-  PCLNode::onInit ();
-
-
-  // Advertise the output topics
+  // Create publishers for the output topics
   pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
   pub_model_   = this->create_publisher<ModelCoefficients> ("model", max_queue_size_);
 
@@ -58,13 +54,13 @@ pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'model_type' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onConstructor] Need a 'model_type' parameter to be set before continuing!");
     return;
   }
   double threshold; // unused - set via dynamic reconfigure in the callback
   if (!this->get_parameter ("distance_threshold", threshold))
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'distance_threshold' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onConstructor] Need a 'distance_threshold' parameter to be set before continuing!");
     return;
   }
 
@@ -82,14 +78,14 @@ pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
     {
       if (axis_param.size () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
         if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
         {
-          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", this->get_name ());
+          RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
         double value = axis_param[i]; axis[i] = value;
@@ -105,7 +101,7 @@ pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
   // Initialize the random number generator
   srand (time (0));
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - model_type               : %d\n"
                  " - method_type              : %d\n"
                  " - model_threshold          : %f\n"
@@ -118,7 +114,6 @@ pcl_ros::SACSegmentation() : rclcpp::Node(), PCLNode()
   impl_.setMethodType (method_type);
   impl_.setAxis (axis);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +176,7 @@ pcl_ros::SACSegmentation::unsubscribe ()
     sub_indices_filter_.unsubscribe ();
   }
   else
-    sub_input_.shutdown ();
+    this->shutdown ();
 }
 
 
@@ -282,27 +277,23 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentationFromNormals::onInit ()
+pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
-  // Call the super onInit ()
-  PCLNode::onInit ();
-  
-  // Advertise the output topics
-  pub_indices_ = advertise<PointIndices> ("inliers", max_queue_size_);
-  pub_model_   = advertise<ModelCoefficients> ("model", max_queue_size_);
+  // Create publishers for the output topics
+  pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
+  pub_model_   = this->create_publisher<ModelCoefficients> ("model", max_queue_size_);
 
   // ---[ Mandatory parameters
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
   {
-    RCLCPP_ERROR ("[%s::onInit] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR ("[%s::onConstructor] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
     return;
   }
   double threshold; // unused - set via dynamic reconfigure in the callback
   if (!this->get_parameter ("distance_threshold", threshold))
   {
-    RCLCPP_ERROR ("[%s::onInit] Need a 'distance_threshold' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR ("[%s::onConstructor] Need a 'distance_threshold' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -320,14 +311,14 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
     {
       if (axis_param.size () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onConstruct] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
         if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
         {
-          RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need floating point values for 'axis' parameter.", this->get_name ());
+          RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
         double value = axis_param[i]; axis[i] = value;
@@ -343,7 +334,7 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
   // Initialize the random number generator
   srand (time (0));
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - model_type               : %d\n"
                  " - method_type              : %d\n"
                  " - model_threshold          : %f\n"
@@ -355,8 +346,6 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
   impl_.setModelType (model_type);
   impl_.setMethodType (method_type);
   impl_.setAxis (axis);
-
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

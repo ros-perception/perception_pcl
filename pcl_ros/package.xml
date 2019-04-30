@@ -28,6 +28,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>eigen</depend>
+  <depend>boost</depend>
   <depend>message_filters</depend>
   <depend>libpcl-all-dev</depend>
   <depend>pcl_conversions</depend>

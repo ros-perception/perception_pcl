@@ -39,7 +39,7 @@
 #include "pcl_ros/io/bag_io.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool 
+/*bool
 pcl_ros::BAGReader::open (const std::string &file_name, const std::string &topic_name)
 {
   try
@@ -58,19 +58,19 @@ pcl_ros::BAGReader::open (const std::string &file_name, const std::string &topic
   }
   return (true);
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
+/*pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
 {
   // ---[ Mandatory parameters
   if (!this->get_parameter ("file_name", file_name_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'file_name' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onConstructor] Need a 'file_name' parameter to be set before continuing!");
     return;
   }
    if (!this->get_parameter ("topic_name", topic_name_))
   {
-    RCLCPP_ERROR ("[onInit] Need a 'topic_name' parameter to be set before continuing!");
+    RCLCPP_ERROR ("[onConstructor] Need a 'topic_name' parameter to be set before continuing!");
     return;
   }
   // ---[ Optional parameters
@@ -80,10 +80,12 @@ pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
 
   auto pub_output = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", max_queue_size);
 
-  RCLCPP_DEBUG (this->get_loggeR(), "[onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - file_name    : %s\n"
                  " - topic_name   : %s",
-                 file_name_.c_str (), topic_name_.c_str ());
+                this->get_name(),
+                file_name_.c_str (),
+                topic_name_.c_str ());
 
   if (!open (file_name_, topic_name_))
     return;
@@ -104,7 +106,7 @@ pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
     rclcpp::spinOnce ();
   }
 }
-
-typedef pcl_ros::BAGReader BAGReader;
+*/
+//typedef pcl_ros::BAGReader BAGReader;
 //PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet);
 

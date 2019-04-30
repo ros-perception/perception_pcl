@@ -37,7 +37,7 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/fpfh.h"
-pcl_ros::FPFHEstimation::FPFHEstimation() : FeatureFromNormals() {
+pcl_ros::FPFHEstimation::FPFHEstimation(std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
 

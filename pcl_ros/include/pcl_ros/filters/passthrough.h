@@ -49,7 +49,7 @@ namespace pcl_ros
     * \author Radu Bogdan Rusu
     */
   class PassThrough : public Filter
-  {
+  {    
     protected:
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset

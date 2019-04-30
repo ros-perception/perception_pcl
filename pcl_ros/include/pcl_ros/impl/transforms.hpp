@@ -92,7 +92,7 @@ template <typename PointT> bool
 transformPointCloudWithNormals (const std::string &target_frame,
                                 const pcl::PointCloud <PointT> &cloud_in,
                                 pcl::PointCloud <PointT> &cloud_out, 
-                                const tf2_ros::TransformListener &tf_listener)
+                                const tf2_ros::Buffer &tf_buffer_)
 {
   if (cloud_in.header.frame_id == target_frame)
   {
@@ -126,7 +126,7 @@ template <typename PointT> bool
 transformPointCloud (const std::string &target_frame,
                      const pcl::PointCloud <PointT> &cloud_in,
                      pcl::PointCloud <PointT> &cloud_out, 
-                     const tf2_ros::TransformListener &tf_listener)
+                     const tf2_ros::Buffer &tf_buffer_)
 {
   if (cloud_in.header.frame_id == target_frame)
   {
@@ -162,7 +162,7 @@ transformPointCloud (const std::string &target_frame,
                      const pcl::PointCloud <PointT> &cloud_in,
                      const std::string &fixed_frame,
                      pcl::PointCloud <PointT> &cloud_out, 
-                     const tf2_ros::TransformListener &tf_listener)
+                     const tf2_ros::Buffer &tf_buffer_)
 {
   geometry_msgs::msg::TransformStamped transform;
   try
@@ -195,7 +195,7 @@ transformPointCloudWithNormals (const std::string &target_frame,
                                 const pcl::PointCloud <PointT> &cloud_in,
                                 const std::string &fixed_frame,
                                 pcl::PointCloud <PointT> &cloud_out, 
-                                const tf2_ros::TransformListener &tf_listener)
+                                const tf2_ros::Buffer &tf_buffer_)
 {
   geometry_msgs::msg::TransformStamped transform;
   try

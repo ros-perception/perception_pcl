@@ -60,30 +60,30 @@
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::Filter::Filter (std::string nodename) : rclcpp::Node(), pcl_ros::Filter::PCLNode("filter_node")
+pcl_ros::Filter::Filter (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
   
-  pub_output_ = advertise<PointCloud2> ("output", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloud2> ("output", max_queue_size_);
   
-  RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Node successfully created.", this->get_name ());
+  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Node successfully created.", this->get_name ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const IndicesPtr &indices)
+pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices)
 {
   PointCloud2 output;
   // Call the virtual method in the child
   filter (input, indices, output);
 
-  PointCloud2::Ptr cloud_tf (new PointCloud2 (output));   // set the output by default
+  PointCloud2::SharedPtr cloud_tf (new PointCloud2 (output));   // set the output by default
   // Check whether the user has given a different output TF frame
   if (!tf_output_frame_.empty () && output.header.frame_id != tf_output_frame_)
   {
     RCLCPP_DEBUG (this->get_logger(), "[%s::computePublish] Transforming output dataset from %s to %s.", this->get_name (), output.header.frame_id.c_str (), tf_output_frame_.c_str ());
     // Convert the cloud into the different frame
     PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud (tf_output_frame_, output, cloud_transformed, tf_listener_))
+    if (!pcl_ros::transformPointCloud (tf_output_frame_, output, cloud_transformed, tf_buffer_))
     {
       RCLCPP_ERROR (this->get_logger(), "[%s::computePublish] Error converting output dataset from %s to %s.", this->get_name (), output.header.frame_id.c_str (), tf_output_frame_.c_str ());
       return;
@@ -96,7 +96,7 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstPtr &input, const Indic
     RCLCPP_DEBUG (this->get_logger(), "[%s::computePublish] Transforming output dataset from %s back to %s.", this->get_name (), output.header.frame_id.c_str (), tf_input_orig_frame_.c_str ());
     // Convert the cloud into the different frame
     PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud (tf_input_orig_frame_, output, cloud_transformed, tf_listener_))
+    if (!pcl_ros::transformPointCloud (tf_input_orig_frame_, output, cloud_transformed, tf_buffer_))
     {
       RCLCPP_ERROR (this->get_logger(), "[%s::computePublish] Error converting output dataset from %s back to %s.", this->get_name (), output.header.frame_id.c_str (), tf_input_orig_frame_.c_str ());
       return;
@@ -124,20 +124,20 @@ pcl_ros::Filter::subscribe()
 
     if (approximate_sync_)
     {
-      sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, pcl_msgs::PointIndices> > >(max_queue_size_);
+      sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback (bind (&Filter::input_indices_callback, this, _1, _2));
     }
     else
     {
-      sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, pcl_msgs::PointIndices> > >(max_queue_size_);
+      sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback (bind (&Filter::input_indices_callback, this, _1, _2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->subscribe<sensor_msgs::msg::PointCloud2> ("input", max_queue_size_,  bind (&Filter::input_indices_callback, this, _1, pcl_msgs::PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, pcl_msgs::PointIndicesConstPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,24 +150,9 @@ pcl_ros::Filter::unsubscribe()
     sub_indices_filter_.unsubscribe();
   }
   else
-    sub_input_.shutdown();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::Filter::config_callback (pcl_ros::FilterConfig &config, uint32_t level)
-{
-  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
-  if (tf_input_frame_ != config.input_frame)
-  {
-    tf_input_frame_ = config.input_frame;
-    RCLCPP_DEBUG (this->get_logger(), "[%s::config_callback] Setting the input TF frame to: %s.", this->get_name (), tf_input_frame_.c_str ());
-  }
-  if (tf_output_frame_ != config.output_frame)
-  {
-    tf_output_frame_ = config.output_frame;
-    RCLCPP_DEBUG (this-get_logger(), "[%s::config_callback] Setting the output TF frame to: %s.", this->get_name (), tf_output_frame_.c_str ());
-  }
+    // FIXME
+    std::cout << "shutdown" << std::endl;
+    //this->shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,14 +186,14 @@ pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, con
 
   // Check whether the user has given a different input TF frame
   tf_input_orig_frame_ = cloud->header.frame_id;
-  PointCloud2::ConstPtr cloud_tf;
+  PointCloud2::ConstSharedPtr cloud_tf;
   if (!tf_input_frame_.empty () && cloud->header.frame_id != tf_input_frame_)
   {
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] Transforming input dataset from %s to %s.", this->get_name (), cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
     // Save the original frame ID
     // Convert the cloud into the different frame
     PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud (tf_input_frame_, *cloud, cloud_transformed, tf_listener_))
+    if (!pcl_ros::transformPointCloud (tf_input_frame_, *cloud, cloud_transformed, tf_buffer_))
     {
       RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Error converting input dataset from %s to %s.", this->get_name (), cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
       return;

@@ -39,6 +39,7 @@
 #define PCL_ROS_CONVEX_HULL_2D_H_
 
 #include "pcl_ros/pcl_node.h"
+#include <geometry_msgs/msg/polygon_stamped.hpp>
 
 // PCL includes
 #include <pcl/surface/convex_hull.h>
@@ -55,7 +56,10 @@ namespace pcl_ros
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
     typedef PointCloud::Ptr PointCloudPtr;
     typedef PointCloud::ConstPtr PointCloudConstPtr;
-
+    
+    public:
+    ConvexHull2D (std::string node_name, const rclcpp::NodeOptions& options);
+    
     private:
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
@@ -72,11 +76,13 @@ namespace pcl_ros
       pcl::ConvexHull<pcl::PointXYZ> impl_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<pcl_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
     
       /** \brief Publisher for PolygonStamped. */
       rclcpp::Publisher<geometry_msgs::msg::PolygonStamped>::SharedPtr pub_plane_;
-
+      /** \brief Publisher for PointCloud. */
+      rclcpp::Publisher<PointCloud>::SharedPtr pub_output_;
+    
       /** \brief Synchronized input, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > sync_input_indices_a_;

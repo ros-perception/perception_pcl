@@ -5,3 +5,5 @@ install/
 log/
 
 perception_pcl.xcodeproj/
+
+build.log

@@ -67,6 +67,9 @@ namespace pcl_ros
     */
   class FPFHEstimation : public FeatureFromNormals
   {
+    public:
+      FPFHEstimation(std::string node_name, const rclcpp::NodeOptions& options);
+
     private:
       pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
 
@@ -82,7 +85,6 @@ namespace pcl_ros
                            const IndicesPtr &indices);
 
     public:
-      FPFHEstimation();
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }

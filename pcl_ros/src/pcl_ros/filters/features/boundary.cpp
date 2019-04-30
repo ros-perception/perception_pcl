@@ -37,7 +37,7 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/boundary.h"
-pcl_ros::BoundaryEstimation::BoundaryEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::FeatureFromNormals (node_name, options) {};
+pcl_ros::BoundaryEstimation::BoundaryEstimation (std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals (node_name, options) {};
 
 void 
 pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)

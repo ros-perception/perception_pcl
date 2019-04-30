@@ -47,7 +47,7 @@ pcl_ros::ProjectInliers::ProjectInliers () : pcl_ros::Filter()
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstruct] Need a 'model_type' parameter to be set before continuing!", this->get_name ());
     return;
   }
   // ---[ Optional parameters
@@ -60,12 +60,12 @@ pcl_ros::ProjectInliers::ProjectInliers () : pcl_ros::Filter()
   this->get_parameter ("copy_all_data", copy_all_data);
   this->get_parameter ("copy_all_fields", copy_all_fields);
 
-  pub_output_ = advertise<PointCloud2> ("output", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloud2> ("output", max_queue_size_);
 
   // Subscribe to the input using a filter
   sub_input_filter_->subscribe ("input", max_queue_size_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstruct] Nodelet successfully created with the following parameters:\n"
                  " - model_type      : %d\n"
                  " - copy_all_data   : %s\n"
                  " - copy_all_fields : %s",

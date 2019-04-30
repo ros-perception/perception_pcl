@@ -43,8 +43,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
+pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options)
 {
   // ---[ Mandatory parameters
   this->get_parameter ("output_frame", output_frame_);
@@ -52,28 +51,28 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
 
   if (output_frame_.empty ())
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need an 'output_frame' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need an 'output_frame' parameter to be set before continuing!", this->get_name());
     return;
   }
 
   if (!this->get_parameter ("input_topics", input_topics_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'input_topics' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'input_topics' parameter to be set before continuing!", this->get_name());
     return;
   }
   if (input_topics_.getType () != XmlRpc::XmlRpcValue::TypeArray)
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Invalid 'input_topics' parameter given!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Invalid 'input_topics' parameter given!", this->get_name());
     return;
   }
   if (input_topics_.size () == 1)
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Only one topic given. Need at least two topics to continue.");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Only one topic given. Need at least two topics to continue.", this->get_name());
     return;
   }
   if (input_topics_.size () > 8)
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] More than 8 topics passed!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] More than 8 topics passed!", this->get_name());
     return;
   }
 
@@ -81,9 +80,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
   this->get_parameter ("max_queue_size", maximum_queue_size_);
 
   // Output
-  pub_output_ = advertise<PointCloud2> ("output", maximum_queue_size_);
-
-  onInitPostProcess ();
+  pub_output_ = this->create_publisher<PointCloud2> ("output", maximum_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

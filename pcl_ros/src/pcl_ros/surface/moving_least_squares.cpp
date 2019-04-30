@@ -39,35 +39,33 @@
 #include "pcl_ros/surface/moving_least_squares.h"
 #include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::MovingLeastSquares::onInit ()
+pcl_ros::MovingLeastSquares::MovingLeastSquares (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
   //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
-  pub_output_ = advertise<PointCloudIn> ("output", max_queue_size_);
-  pub_normals_ = advertise<NormalCloudOut> ("normals", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloudIn> ("output", max_queue_size_);
+  pub_normals_ = this->create_publisher<NormalCloudOut> ("normals", max_queue_size_);
   
   //if (!this->getParam ("k_search", k_) && !this->getParam ("search_radius", search_radius_))  
   if (!this->get_parameter ("search_radius", search_radius_))
   {
-    //NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", this->get_name ());
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'search_radius' parameter to be set before continuing!", this->get_name ());
+    //NODELET_ERROR ("[%s::onConstructor] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'search_radius' parameter to be set before continuing!", this->get_name ());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   { 
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
   // ---[ Optional parameters
   this->get_parameter ("use_indices", use_indices_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - use_indices    : %s",
                  getName ().c_str (), 
                  (use_indices_) ? "true" : "false");
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

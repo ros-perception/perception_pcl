@@ -49,12 +49,12 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
   // ---[ Mandatory parameters
   if (!this->get_parameter ("input_messages", input_messages_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Need a 'input_messages' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s onConstructor] Need a 'input_messages' parameter to be set before continuing!", this->get_name());
     return;
   }
   if (input_messages_ < 2)
   {
-    RCLCPP_ERROR (this->get_logger(), "[onInit] Invalid 'input_messages' parameter given!");
+    RCLCPP_ERROR (this->get_logger(), "[%s onConstructor] Invalid 'input_messages' parameter given!", this->get_name());
     return;
   }
   // ---[ Optional parameters
@@ -68,7 +68,6 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  this->create
   sub_input_ = this->create_subscription ("input", std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this), maximum_queue_size_);
 }
 
@@ -76,7 +75,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 {
-  sub_input_->shutdown ();
+  this->shutdown ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +88,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
   // Erase old data in the queue
   if (maximum_seconds_ > 0 && queue_.size () > 0)
   {
-    while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ) > maximum_seconds_ && queue_.size () > 0)
+    while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ) > maximum_seconds_ && queue_.size () > 0)
     {
       RCLCPP_WARN (this-get_loggeR(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
                  (*queue_.begin ()).first.toSec (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ));

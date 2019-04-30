@@ -9,6 +9,7 @@ endif()
 ## Find system dependencies
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
+find_package(Boost REQUIRED)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # For debian: https://github.com/ros-perception/perception_pcl/issues/139
@@ -48,7 +49,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
-find_package(boost REQUIRED)
 
 
 ## Add include directories
@@ -69,13 +69,14 @@ ament_export_dependencies(
   message_filters
   pcl_conversions
   pcl_msgs
-  rosbag2
   rclcpp
+  rosbag2
   sensor_msgs
   std_msgs
   tf2
   EIGEN3
   PCL
+  BOOST
 )
 
 ament_export_libraries(

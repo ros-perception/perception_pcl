@@ -48,6 +48,7 @@
 #include <rcutils/error_handling.h>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
+
 // PCL includes
 #include <pcl_msgs/msg/point_indices.hpp>
 #include <pcl_msgs/msg/model_coefficients.hpp>

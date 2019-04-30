@@ -61,19 +61,19 @@ pcl_ros::Feature::Feature (std::string node_name, const rclcpp::NodeOptions& opt
   // ---[ Mandatory parameters
   if (!this->get_parameter ("k_search", k_) && !this->get_parameter ("radius_search", search_radius_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", this->get_name());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", this->get_name());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
   // ---[ Optional parameters
   this->get_parameter ("use_surface", use_surface_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"
@@ -256,18 +256,18 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals () : normals_()
   // ---[ Mandatory parameters
   if (!this->get_parameter ("k_search", k_) && !this->get_parameter ("radius_search", search_radius_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.", this->get_name ());
     return;
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   {
-    RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
   // ---[ Optional parameters
   this->get_parameter ("use_surface", use_surface_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"

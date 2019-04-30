@@ -67,7 +67,7 @@ use_surface_(false), spatial_locator_type_(-1)
   }
   if (!this->get_parameter ("spatial_locator", spatial_locator_type_))
   {
-    RCLCPP_ERROR (this-get_logger(), "[%s::constructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::constructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
@@ -84,15 +84,15 @@ use_surface_(false), spatial_locator_type_(-1)
       sync_input_surface_indices_e_ = std::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices> > >(max_queue_size_);
 
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this(), "input");
     if (use_indices_)
     {
       // If indices are enabled, subscribe to the indices
-      sub_indices_filter_->subscribe ("indices", max_queue_size_);
+      sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
       if (use_surface_)     // Use both indices and surface
       {
         // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
-        sub_surface_filter_->subscribe ("surface", max_queue_size_);
+        sub_surface_filter_.subscribe (this->shared_from_this(), "surface");
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, sub_indices_filter_);
         else
@@ -100,7 +100,7 @@ use_surface_(false), spatial_locator_type_(-1)
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+        sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
         // surface not enabled, connect the input-indices duo and register
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, nf_pc_, sub_indices_filter_);
@@ -110,9 +110,9 @@ use_surface_(false), spatial_locator_type_(-1)
     }
     else                    // Use only surface
     {
-      sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
       // indices not enabled, connect the input-surface duo and register
-      sub_surface_filter_->subscribe ("surface", max_queue_size_);
+      sub_surface_filter_.subscribe (this->shared_from_this(), "surface");
       if (approximate_sync_)
         sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -120,13 +120,13 @@ use_surface_(false), spatial_locator_type_(-1)
     }
     // Register callbacks
     if (approximate_sync_)
-      sync_input_surface_indices_a_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_a_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
     else
-      sync_input_surface_indices_e_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_e_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
@@ -144,7 +144,7 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
     const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.count_subscribers () <= 0)
+  if (pub_output_->count_subscribers () <= 0)
     return;
 
   // If cloud is given, check if it's valid

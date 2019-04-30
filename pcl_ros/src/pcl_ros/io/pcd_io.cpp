@@ -39,7 +39,7 @@
 #include <pcl_ros/io/pcd_io.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PCDReader() : PCLNode("pcd_reader")
+pcl_ros::PCDReader::PCDReader (std::string node_name, const rclcpp::NodeOptions& node_options) : PCLNode(node_name, options)
 {
   // Provide a latched topic
   auto pub_output = this->create_publisher<PointCloud2> ("output", max_queue_size_, true);
@@ -47,7 +47,7 @@ pcl_ros::PCDReader() : PCLNode("pcd_reader")
   this->get_parameter ("publish_rate", publish_rate_);
   this->get_parameter ("tf_frame", tf_frame_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - publish_rate : %f\n"
                  " - tf_frame     : %s",
                  this->get_name (),
@@ -60,7 +60,7 @@ pcl_ros::PCDReader() : PCLNode("pcd_reader")
   // Wait in a loop until someone connects
   do
   {
-    RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Waiting for a client to connect...", this->get_name ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Waiting for a client to connect...", this->get_name ());
     rclcpp::spinOnce ();
     rclcpp::Duration (0.01).sleep ();
   }
@@ -73,7 +73,7 @@ pcl_ros::PCDReader() : PCLNode("pcd_reader")
     // Get the current filename parameter. If no filename set, loop
     if (!this->get_parameter ("filename", file_name_) && file_name_.empty ())
     {
-      RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Need a 'filename' parameter to be set before continuing!", this->get_name ());
+      RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'filename' parameter to be set before continuing!", this->get_name ());
       rclcpp::Duration (0.01).sleep ();
       rclcpp::spinOnce ();
       continue;
@@ -82,12 +82,12 @@ pcl_ros::PCDReader() : PCLNode("pcd_reader")
     // If the filename parameter holds a different value than the last one we read
     if (file_name_.compare (file_name) != 0 && !file_name_.empty ())
     {
-      RCLCPP_INFO (this->get_logger(), "[%s::onInit] New file given: %s", this->get_name (), file_name_.c_str ());
+      RCLCPP_INFO (this->get_logger(), "[%s::onConstructor] New file given: %s", this->get_name (), file_name_.c_str ());
       file_name = file_name_;
       pcl::PCLPointCloud2 cloud;
       if (impl_.read (file_name_, cloud) < 0)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onInit] Error reading %s !", this->get_name (), file_name_.c_str ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Error reading %s !", this->get_name (), file_name_.c_str ());
         return;
       }
       pcl_conversions::moveFromPCL(cloud, *(output_));
@@ -124,7 +124,6 @@ pcl_ros::PCDReader() : PCLNode("pcd_reader")
     this->get_parameter ("tf_frame", tf_frame_);
   }
 
-  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,13 +137,12 @@ pcl_ros::PCDWriter() : PCLNode()
   this->get_parameter ("filename", file_name_);
   this->get_parameter ("binary_mode", binary_mode_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - filename     : %s\n"
                  " - binary_mode  : %s", 
                  this->get_name (),
                  file_name_.c_str (), (binary_mode_) ? "true" : "false");
 
-  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

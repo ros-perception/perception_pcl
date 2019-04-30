@@ -40,20 +40,15 @@
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SegmentDifferences::onInit ()
+pcl_ros::SegmentDifferences::SegmentDifferences (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
-  // Call the super onInit ()
-  PCLNode::onInit ();
+  pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
 
-  pub_output_ = advertise<PointCloud> ("output", max_queue_size_);
-
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Nodelet successfully created with the following parameters:\n"
                  " - max_queue_size    : %d",
                  this->get_name (),
                  max_queue_size_);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

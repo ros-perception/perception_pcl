@@ -42,9 +42,6 @@
 #include <pcl/filters/voxel_grid.h>
 #include "pcl_ros/filters/filter.h"
 
-// Dynamic reconfigure
-#include "pcl_ros/VoxelGridConfig.h"
-
 namespace pcl_ros
 {
   /** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
