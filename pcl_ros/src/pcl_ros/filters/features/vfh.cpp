@@ -47,14 +47,14 @@ pcl_ros::VFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
 pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                         const PointCloudNConstPtr &normals,
                                         const PointCloudInConstPtr &surface,
-                                        const IndicesPtr &indices)
+                                        const IndicesSharedPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);
@@ -65,7 +65,7 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (indices.get());
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -75,7 +75,7 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::VFHEstimation VFHEstimation;

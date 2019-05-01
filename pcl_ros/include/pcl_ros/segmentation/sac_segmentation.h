@@ -104,7 +104,7 @@ namespace pcl_ros
 
       /** \brief Null passthrough filter, used for pushing empty elements in the
         * synchronizer */
-      message_filters::PassThrough<pcl_msgs::PointIndices> nf_pi_;
+    message_filters::PassThrough<pcl_msgs::msg::PointIndices> nf_pi_;
 
       /** \brief Input point cloud callback. Used when \a use_indices is set.
         * \param cloud the pointer to the input point cloud

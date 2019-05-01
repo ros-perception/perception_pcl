@@ -40,15 +40,15 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::VoxelGrid::filter (const PointCloud2::ConstPtr &input, 
-                            const IndicesPtr &indices, 
+pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
+                            const IndicesSharedPtr &indices, 
                             PointCloud2 &output)
 {
-  std::mutex::scoped_lock lock (mutex_);
+  //std::mutex::scoped_lock lock (mutex_);
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
   pcl_conversions::toPCL (*(input), *(pcl_input));
   impl_.setInputCloud (pcl_input);
-  impl_.setIndices (indices);
+  impl_.setIndices (indices.get());
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter (pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);

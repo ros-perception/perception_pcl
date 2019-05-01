@@ -54,6 +54,7 @@ namespace pcl_ros
   {
     public:
       NormalEstimation (std::string node_name, const rclcpp::NodeOptions& options);
+    
     private:
       /** \brief PCL implementation object. */
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;

@@ -57,10 +57,10 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices,
               PointCloud2 &output)
       {
-        std::mutex::scoped_lock lock (mutex_);
+        //std::scoped_lock lock (Filter::mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
@@ -73,6 +73,8 @@ namespace pcl_ros
     private:
       /** \brief The PCL filter implementation used. */
       pcl::PassThrough<pcl::PCLPointCloud2> impl_;
+    
+      std::mutex mutex_;
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

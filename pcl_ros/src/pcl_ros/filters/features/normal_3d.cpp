@@ -37,9 +37,7 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d.h"
-pcl_ros::NormalEstimation::NormalEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Feature(node_name, options) {
-  
-}
+pcl_ros::NormalEstimation::NormalEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Feature(node_name, options) {}
 void 
 pcl_ros::NormalEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
@@ -51,7 +49,7 @@ pcl_ros::NormalEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 void 
 pcl_ros::NormalEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                            const PointCloudInConstPtr &surface,
-                                           const IndicesPtr &indices)
+                                           const IndicesSharedPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);
@@ -62,7 +60,7 @@ pcl_ros::NormalEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (indices.get());
   impl_.setSearchSurface (surface);
   // Estimate the feature
   PointCloudOut output;
@@ -71,7 +69,7 @@ pcl_ros::NormalEstimation::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::NormalEstimation NormalEstimation;

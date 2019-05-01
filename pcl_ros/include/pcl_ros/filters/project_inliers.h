@@ -55,6 +55,9 @@ namespace pcl_ros
     */
   class ProjectInliers : public Filter
   {
+    public:
+      ProjectInliers (std::string node_name, const rclcpp::NodeOptions& options);
+
     protected:
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
@@ -62,13 +65,13 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices,
               PointCloud2 &output)
       {
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
+        impl_.setIndices (indices.get());
         pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
         pcl_conversions::toPCL(*(model_), *(pcl_model));
         impl_.setModelCoefficients (pcl_model);
@@ -79,7 +82,7 @@ namespace pcl_ros
 
     private:
       /** \brief A pointer to the vector of model coefficients. */
-      ModelCoefficientsConstPtr model_;
+      ModelCoefficientsConstSharedPtr model_;
 
       /** \brief The message filter subscriber for model coefficients. */
       message_filters::Subscriber<ModelCoefficients> sub_model_;
@@ -89,14 +92,16 @@ namespace pcl_ros
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
       /** \brief The PCL filter implementation used. */
       pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
+    
+      void subscribe ();
+      void unsubscribe ();
 
       /** \brief PointCloud2 + Indices + Model data callback. */
       void 
       input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
-                                    const PointIndicesConstPtr &indices, 
-                                    const ModelCoefficientsConstPtr &model);
+                                    const PointIndicesConstSharedPtr &indices,
+                                    const ModelCoefficientsConstSharedPtr &model);
     public:
-      ProjectInliers () : model_ ();
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }

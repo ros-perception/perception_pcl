@@ -70,7 +70,7 @@ pcl_ros::Filter::Filter (std::string node_name, const rclcpp::NodeOptions& optio
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices)
+pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices)
 {
   PointCloud2 output;
   // Call the virtual method in the child
@@ -119,8 +119,8 @@ pcl_ros::Filter::subscribe()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", max_queue_size_);
-    sub_indices_filter_->subscribe ("indices", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this(), "input");
+    sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
 
     if (approximate_sync_)
     {
@@ -137,7 +137,7 @@ pcl_ros::Filter::subscribe()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, pcl_msgs::PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, PointIndicesConstSharedPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, con
     cloud_tf = cloud;
 
   // Need setInputCloud () here because we have to extract x/y/z
-  IndicesPtr vindices;
+  IndicesSharedPtr vindices;
   if (indices)
     vindices.reset (new std::vector<int> (indices->indices));
 

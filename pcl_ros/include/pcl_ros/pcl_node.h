@@ -82,15 +82,15 @@ namespace pcl_ros
       typedef PointCloud::ConstPtr PointCloudConstPtr;
 
       typedef pcl_msgs::msg::PointIndices PointIndices;
-      typedef PointIndices::SharedPtr PointIndicesPtr;
-      typedef PointIndices::ConstSharedPtr PointIndicesConstPtr;
+      typedef PointIndices::SharedPtr PointIndicesSharedPtr;
+      typedef PointIndices::ConstSharedPtr PointIndicesConstSharedPtr;
 
       typedef pcl_msgs::msg::ModelCoefficients ModelCoefficients;
-      typedef ModelCoefficients::SharedPtr ModelCoefficientsPtr;
-      typedef ModelCoefficients::ConstSharedPtr ModelCoefficientsConstPtr;
+      typedef ModelCoefficients::SharedPtr ModelCoefficientsSharedPtr;
+      typedef ModelCoefficients::ConstSharedPtr ModelCoefficientsConstSharedPtr;
 
-      typedef std::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
+      typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
+      typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
 
       /** \brief Empty constructor. */
       PCLNode (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), use_indices_ (false), latched_indices_ (false),
@@ -192,7 +192,7 @@ namespace pcl_ros
         * \param topic_name an optional topic name (only used for printing, defaults to "indices")
         */
       inline bool
-      isValid (const PointIndicesConstPtr &indices, const std::string &topic_name = "indices")
+      isValid (const PointIndicesConstSharedPtr &indices, const std::string &topic_name = "indices")
       {
         /*if (indices->indices.empty ())
         {
@@ -207,7 +207,7 @@ namespace pcl_ros
         * \param topic_name an optional topic name (only used for printing, defaults to "model")
         */
       inline bool
-      isValid (const ModelCoefficientsConstPtr &model, const std::string &topic_name = "model")
+      isValid (const ModelCoefficientsConstSharedPtr &model, const std::string &topic_name = "model")
       {
         /*if (model->values.empty ())
         {

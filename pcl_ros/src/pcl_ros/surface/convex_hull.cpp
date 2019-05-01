@@ -63,9 +63,9 @@ pcl_ros::ConvexHull2D::subscribe()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe ("input", 1);
+    sub_input_filter_.subscribe (this->shared_from_this(), "input", 1);
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_.subscribe ("indices", 1);
+    sub_indices_filter_.subscribe (this->shared_from_this(), "indices", 1);
 
     if (approximate_sync_)
     {
@@ -144,12 +144,12 @@ void
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
 
   // Reset the indices and surface pointers
-  IndicesPtr indices_ptr;
+  IndicesSharedPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (indices_ptr.get());
 
   // Estimate the feature
   impl_.reconstruct (output);

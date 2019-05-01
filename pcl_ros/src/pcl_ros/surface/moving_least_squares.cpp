@@ -160,11 +160,11 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // Reset the indices and surface pointers
   impl_.setInputCloud (cloud);
 
-  IndicesPtr indices_ptr;
+  IndicesSharedPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (indices_ptr.get());
 
   // Initialize the spatial locator
   
@@ -174,7 +174,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
   normals->header = cloud->header;
   pub_normals_->publish (normals);
 }

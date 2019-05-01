@@ -42,9 +42,6 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include "pcl_ros/filters/filter.h"
 
-// Dynamic reconfigure
-#include "pcl_ros/StatisticalOutlierRemovalConfig.h"
-
 namespace pcl_ros
 {
   /** \brief @b StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data. For more
@@ -67,14 +64,14 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices, 
               PointCloud2 &output)
       {
         std::mutex::scoped_lock lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
+        impl_.setIndices (indices.get());
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);

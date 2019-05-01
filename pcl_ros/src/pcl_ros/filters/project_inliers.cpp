@@ -40,7 +40,7 @@
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ProjectInliers::ProjectInliers () : pcl_ros::Filter()
+pcl_ros::ProjectInliers::ProjectInliers (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Filter(node_name, options), model_ ()
 {
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
@@ -63,7 +63,7 @@ pcl_ros::ProjectInliers::ProjectInliers () : pcl_ros::Filter()
   pub_output_ = this->create_publisher<PointCloud2> ("output", max_queue_size_);
 
   // Subscribe to the input using a filter
-  sub_input_filter_->subscribe ("input", max_queue_size_);
+  sub_input_filter_->subscribe (this->shared_from_this()"input", max_queue_size_);
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::onConstruct] Nodelet successfully created with the following parameters:\n"
                  " - model_type      : %d\n"
@@ -88,9 +88,9 @@ pcl_ros::ProjectInliers::subscribe ()
   if (use_indices_)
   {*/
 
-  sub_indices_filter_->subscribe ("indices", max_queue_size_);
+  sub_indices_filter_.subscribe (this->shared_from_this(), "indices", max_queue_size_);
 
-  sub_model_->subscribe ("model", max_queue_size_);
+  sub_model_.subscribe (this->shared_from_this(), "model", max_queue_size_);
 
   if (approximate_sync_)
   {
@@ -121,11 +121,11 @@ pcl_ros::ProjectInliers::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstPtr &cloud, 
-                                                       const PointIndicesConstPtr &indices,
-                                                       const ModelCoefficientsConstPtr &model)
+pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
+                                                       const PointIndicesConstSharedPtr &indices,
+                                                       const ModelCoefficientsConstSharedPtr &model)
 {
-  if (pub_output_.count_subscribers () <= 0)
+  if (pub_output_->count_subscribers () <= 0)
     return;
 
   if (!isValid (model) || !isValid (indices) || !isValid (cloud))
@@ -145,7 +145,7 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstP
 
   tf_input_orig_frame_ = cloud->header.frame_id;
 
-  IndicesPtr vindices;
+  IndicesSharedPtr vindices;
   if (indices)
     vindices.reset (new std::vector<int> (indices->indices));
 

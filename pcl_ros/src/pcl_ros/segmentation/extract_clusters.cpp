@@ -164,12 +164,12 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
   }
   ///
 
-  IndicesPtr indices_ptr;
+  IndicesSharedPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (indices_ptr.get());
 
   std::vector<pcl::PointIndices> clusters;
   impl_.extract (clusters);

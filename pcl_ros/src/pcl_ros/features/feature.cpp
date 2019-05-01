@@ -235,7 +235,7 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
   }
 
   // If indices given...
-  IndicesPtr vindices;
+  IndicesSharedPtr vindices;
   if (indices && !indices->header.frame_id.empty ())
     vindices.reset (new std::vector<int> (indices->indices));
 
@@ -448,7 +448,7 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
   }
 
   // If indices given...
-  IndicesPtr vindices;
+  IndicesSharedPtr vindices;
   if (indices && !indices->header.frame_id.empty ())
     vindices.reset (new std::vector<int> (indices->indices));
 

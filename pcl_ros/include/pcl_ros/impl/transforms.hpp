@@ -100,10 +100,16 @@ transformPointCloudWithNormals (const std::string &target_frame,
     return (true);
   }
 
-  geometry_msgs::msg::TransformStamped transform;
+  tf2::Transform transform;
+  geometry_msgs::msg::TransformStamped transform_msg;
   try
-  {
-    tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, transform);
+    {
+      // TODO put in a general function?
+      builtin_interfaces::msg::Time time_stamp = fromPCL(cloud_in.header).stamp;
+      tf2::TimePoint time_point = tf2::TimePoint(
+                                                 std::chrono::seconds(time_stamp.sec) +
+                                                 std::chrono::nanoseconds(time_stamp.nanosec));
+    transform_msg = tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, time_point);
   }
   catch (tf2::LookupException &e)
   {
@@ -135,10 +141,17 @@ transformPointCloud (const std::string &target_frame,
   }
   
   //http://wiki.ros.org/tf2/Tutorials/Migration/DataConversions
-  geometry_msgs::msg::TransformStamped transform;
+  //http://wiki.ros.org/tf2/Tutorials/Migration/DataConversions
+  tf2::Transform transform;
+  geometry_msgs::msg::TransformStamped transform_msg;
   try
   {
-    tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, transform);
+    // TODO put in a general function?
+    builtin_interfaces::msg::Time time_stamp = fromPCL(cloud_in.header).stamp;
+    tf2::TimePoint time_point = tf2::TimePoint(
+                                               std::chrono::seconds(time_stamp.sec) +
+                                               std::chrono::nanoseconds(time_stamp.nanosec));
+    transform_msg = tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, time_point);
   }
   catch (tf2::LookupException &e)
   {
@@ -164,10 +177,23 @@ transformPointCloud (const std::string &target_frame,
                      pcl::PointCloud <PointT> &cloud_out, 
                      const tf2_ros::Buffer &tf_buffer_)
 {
-  geometry_msgs::msg::TransformStamped transform;
+  tf2::Transform transform;
+  geometry_msgs::msg::TransformStamped transform_msg;
   try
   {
-    tf_buffer_.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, fixed_frame, transform);
+    // TODO put in a general function?
+    builtin_interfaces::msg::Time time_stamp = fromPCL(cloud_in.header).stamp;
+    tf2::TimePoint time_point = tf2::TimePoint(
+                                               std::chrono::seconds(time_stamp.sec) +
+                                               std::chrono::nanoseconds(time_stamp.nanosec));
+    //transform_msg = tf_buffer_.lookupTransform (target_frame, target_time, time_point, fixed_frame);
+    /*
+     const std::string& target_frame, const TimePoint& target_time,
+     153          const std::string& source_frame, const TimePoint& source_time,
+     154          const std::string& fixed_frame
+     */
+    transform_msg = tf_buffer_.lookupTransform (target_frame, fixed_frame, target_time, time_point);
+
   }
   catch (tf2::LookupException &e)
   {
@@ -180,7 +206,7 @@ transformPointCloud (const std::string &target_frame,
     return (false);
   }
 
-  transformPointCloud (cloud_in, cloud_out, transform);
+  transformPointCloud (cloud_in, cloud_out, transform_msg);
   cloud_out.header.frame_id = target_frame;
   std_msgs::msg::Header header;
   header.stamp = target_time;
@@ -197,10 +223,17 @@ transformPointCloudWithNormals (const std::string &target_frame,
                                 pcl::PointCloud <PointT> &cloud_out, 
                                 const tf2_ros::Buffer &tf_buffer_)
 {
-  geometry_msgs::msg::TransformStamped transform;
+  tf2::Transform transform;
+  geometry_msgs::msg::TransformStamped transform_msg;
   try
   {
-    tf_buffer_.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header).stamp, fixed_frame, transform);
+    // TODO put in a general function?
+    builtin_interfaces::msg::Time time_stamp = fromPCL(cloud_in.header).stamp;
+    tf2::TimePoint time_point = tf2::TimePoint(
+                                               std::chrono::seconds(time_stamp.sec) +
+                                               std::chrono::nanoseconds(time_stamp.nanosec));
+    //transform_msg = tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, time_point, fixed_frame);
+    transform_msg = tf_buffer_.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, time_point, fixed_frame);
   }
   catch (tf2::LookupException &e)
   {

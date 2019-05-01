@@ -61,8 +61,8 @@ namespace pcl_ros
   {
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
-      typedef PointCloud2::Ptr PointCloud2Ptr;
-      typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
+      typedef PointCloud2::SharedPtr PointCloud2SharedPtr;
+      typedef PointCloud2::ConstSharedPtr PointCloud2ConstSharedPtr;
 
       /** \brief Empty constructor. */
       PointCloudConcatenateDataSynchronizer () : maximum_queue_size_ (3) {};
@@ -77,6 +77,8 @@ namespace pcl_ros
 
     private:
       /** \brief The output PointCloud publisher. */
+      rclcpp::Publisher<PointCloud2>::SharedPtr pub_output_;
+
       rclcpp::Publisher pub_output_;
 
       /** \brief The maximum number of messages that we can store in the queue. */

@@ -50,7 +50,7 @@ void
 pcl_ros::PFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                         const PointCloudNConstPtr &normals,
                                         const PointCloudInConstPtr &surface,
-                                        const IndicesPtr &indices)
+                                        const IndicesSharedPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);
@@ -58,7 +58,7 @@ pcl_ros::PFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (indices.get());
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature

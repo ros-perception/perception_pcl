@@ -166,12 +166,12 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   else
     impl_.setInputPlanarHull (hull);
 
-  IndicesPtr indices_ptr;
+  IndicesSharedPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (indices_ptr.get());
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty ()) {

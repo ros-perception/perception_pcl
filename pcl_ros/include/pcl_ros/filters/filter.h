@@ -101,7 +101,7 @@ namespace pcl_ros
         * \param output the resultant filtered PointCloud2
         */ 
       virtual void 
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices,
               PointCloud2 &output) = 0;
 
       /** \brief Call the child filter () method, optionally transform the result, and publish it.
@@ -109,7 +109,7 @@ namespace pcl_ros
         * \param indices a pointer to the vector of point indices to use.   
         */
       void 
-      computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices);
+      computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices);
 
     private:
       /** \brief Synchronized input, and indices.*/
@@ -119,7 +119,7 @@ namespace pcl_ros
       /** \brief PointCloud2 + Indices data callback. */
       void 
       input_indices_callback (const PointCloud2::ConstSharedPtr &cloud, 
-                              const PointIndicesConstPtr &indices);
+                              const PointIndicesConstSharedPtr &indices);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
