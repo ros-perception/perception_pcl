@@ -186,14 +186,17 @@ transformPointCloud (const std::string &target_frame,
     tf2::TimePoint time_point = tf2::TimePoint(
                                                std::chrono::seconds(time_stamp.sec) +
                                                std::chrono::nanoseconds(time_stamp.nanosec));
+
+    tf2::TimePoint target_time_point = tf2::TimePoint(std::chrono::seconds(static_cast<unsigned long>(target_time.seconds())) +
+                                                      std::chrono::nanoseconds(static_cast<unsigned long>(target_time.nanoseconds())));
     //transform_msg = tf_buffer_.lookupTransform (target_frame, target_time, time_point, fixed_frame);
     /*
      const std::string& target_frame, const TimePoint& target_time,
      153          const std::string& source_frame, const TimePoint& source_time,
      154          const std::string& fixed_frame
      */
-    transform_msg = tf_buffer_.lookupTransform (target_frame, fixed_frame, target_time, time_point);
-
+    transform_msg = tf_buffer_.lookupTransform (target_frame, target_time_point, cloud_in.header.frame_id, time_point, fixed_frame);
+                                                //(target_frame, target_time, cloud_in.header.frame_id, time_point, fixed_frame, transform);
   }
   catch (tf2::LookupException &e)
   {
@@ -206,7 +209,7 @@ transformPointCloud (const std::string &target_frame,
     return (false);
   }
 
-  transformPointCloud (cloud_in, cloud_out, transform_msg);
+  transformPointCloud (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
   std_msgs::msg::Header header;
   header.stamp = target_time;
@@ -232,8 +235,12 @@ transformPointCloudWithNormals (const std::string &target_frame,
     tf2::TimePoint time_point = tf2::TimePoint(
                                                std::chrono::seconds(time_stamp.sec) +
                                                std::chrono::nanoseconds(time_stamp.nanosec));
+    
+    tf2::TimePoint target_time_point = tf2::TimePoint(std::chrono::seconds(static_cast<unsigned long>(target_time.seconds())) +
+                                                      std::chrono::nanoseconds(static_cast<unsigned long>(target_time.nanoseconds())));
     //transform_msg = tf_buffer_.lookupTransform (target_frame, cloud_in.header.frame_id, time_point, fixed_frame);
-    transform_msg = tf_buffer_.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, time_point, fixed_frame);
+    transform_msg = tf_buffer_.lookupTransform (target_frame, target_time_point, cloud_in.header.frame_id, time_point, fixed_frame);
+                                              //(target_frame, target_time, cloud_in.header.frame_id, time_point, fixed_frame, transform);
   }
   catch (tf2::LookupException &e)
   {

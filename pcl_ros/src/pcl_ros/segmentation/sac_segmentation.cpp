@@ -44,7 +44,7 @@
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentation(std::string, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
+pcl_ros::SACSegmentation::SACSegmentation (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options), min_inliers_(0)
 {
   // Create publishers for the output topics
   pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
@@ -124,8 +124,8 @@ pcl_ros::SACSegmentation::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", max_queue_size_);
-    sub_indices_filter_->subscribe ("indices", max_queue_size_);
+    sub_input_filter_.subscribe ("input", max_queue_size_);
+    sub_indices_filter_.subscribe ("indices", max_queue_size_);
 
     // when "use_indices" is set to true, and "latched_indices" is set to true,
     // we'll subscribe and get a separate callback for PointIndices that will 
@@ -530,7 +530,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
     RCLCPP_WARN ("[%s::input_indices_callback] No inliers found!", this->get_name ());
 }
 
-typedef pcl_ros::SACSegmentation SACSegmentation;
+//typedef pcl_ros::SACSegmentation SACSegmentation;
 typedef pcl_ros::SACSegmentationFromNormals SACSegmentationFromNormals;
 //PLUGINLIB_EXPORT_CLASS(SACSegmentation, nodelet::Nodelet)
 //PLUGINLIB_EXPORT_CLASS(SACSegmentationFromNormals, nodelet::Nodelet)

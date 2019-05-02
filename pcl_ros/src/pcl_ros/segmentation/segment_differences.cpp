@@ -44,7 +44,7 @@ pcl_ros::SegmentDifferences::SegmentDifferences (std::string node_name, const rc
 {
   pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - max_queue_size    : %d",
                  this->get_name (),
                  max_queue_size_);
@@ -56,8 +56,8 @@ void
 pcl_ros::SegmentDifferences::subscribe ()
 {
   // Subscribe to the input using a filter
-  sub_input_filter_->subscribe ("input", max_queue_size_);
-  sub_target_filter_->subscribe ("target", max_queue_size_);
+  sub_input_filter_.subscribe (this->shared_from_this(), "input");
+  sub_target_filter_.subscribe (this->shared_from_this(), "target");
 
   if (approximate_sync_)
   {

@@ -99,15 +99,15 @@ pcl_ros::Feature::subscribe ()
       sync_input_surface_indices_e_ = std::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices> > >(max_queue_size_);
 
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this(), "input", max_queue_size_);
     if (use_indices_)
     {
       // If indices are enabled, subscribe to the indices
-      sub_indices_filter_->subscribe ("indices", max_queue_size_);
+      sub_indices_filter_.subscribe (this->shared_from_this(), "indices", max_queue_size_);
       if (use_surface_)     // Use both indices and surface
       {
         // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
-        sub_surface_filter_->subscribe ("surface", max_queue_size_);
+        sub_surface_filter_.subscribe (this->shared_from_this(), "surface", max_queue_size_);
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, sub_indices_filter_);
         else
@@ -115,7 +115,7 @@ pcl_ros::Feature::subscribe ()
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+        sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
         // surface not enabled, connect the input-indices duo and register
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, nf_pc_, sub_indices_filter_);
@@ -127,7 +127,7 @@ pcl_ros::Feature::subscribe ()
     {
       sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
       // indices not enabled, connect the input-surface duo and register
-      sub_surface_filter_->subscribe ("surface", max_queue_size_);
+      sub_surface_filter_.subscribe (this->shared_from_this(), "surface", max_queue_size_);
       if (approximate_sync_)
         sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -141,7 +141,7 @@ pcl_ros::Feature::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstSharedPtr ()), max_queue_size_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,17 +161,19 @@ pcl_ros::Feature::unsubscribe ()
       sub_surface_filter_.unsubscribe ();
   }
   else
-    sub_input_.shutdown ();
+    // FIXME
+    std::cout << "shutdown" << std::endl;
+    //sub_input_.shutdown ();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
-    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
+    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstSharedPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.count_subscribers () <= 0)
+  if (pub_output_->count_subscribers () <= 0)
     return;
 
   // If cloud is given, check if it's valid

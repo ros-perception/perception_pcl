@@ -42,8 +42,6 @@
 #include <pcl/filters/filter.h>
 #include "pcl_ros/pcl_node.h"
 
-//#include "pcl_ros/FilterConfig.h"
-
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;
@@ -59,7 +57,7 @@ namespace pcl_ros
 
       typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
-
+    
       Filter (std::string node_name, const rclcpp::NodeOptions& options);
 
     protected:

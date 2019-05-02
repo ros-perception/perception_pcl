@@ -37,7 +37,7 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/voxel_grid.h"
-
+#include "pcl_ros/ptr_helper.h"
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
@@ -48,7 +48,7 @@ pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
   pcl_conversions::toPCL (*(input), *(pcl_input));
   impl_.setInputCloud (pcl_input);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr(indices));
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter (pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);

@@ -41,8 +41,6 @@
 #include <pcl/segmentation/segment_differences.h>
 #include "pcl_ros/pcl_node.h"
 
-#include "pcl_ros/SegmentDifferencesConfig.h"
-
 
 namespace pcl_ros
 {
@@ -63,7 +61,7 @@ namespace pcl_ros
 
     public:
       /** \brief Empty constructor. */
-      SegmentDifferences () {};
+      SegmentDifferences (std::string node_name, const rclcpp::NodeOptions& options);
                                       
     protected:
       /** \brief The message filter subscriber for PointCloud2. */
@@ -79,7 +77,13 @@ namespace pcl_ros
         */
       void input_target_callback (const PointCloudConstPtr &cloud, 
                                   const PointCloudConstPtr &cloud_target);
+    
+      void subscribe();
+      void unsubscribe();
+    
+      rclcpp::Publisher<PointCloud>::SharedPtr pub_output_;
 
+    
     private:
       /** \brief The PCL implementation used. */
       pcl::SegmentDifferences<pcl::PointXYZ> impl_;

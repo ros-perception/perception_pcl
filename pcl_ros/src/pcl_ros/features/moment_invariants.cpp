@@ -37,19 +37,19 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/moment_invariants.h"
-
+#include "pcl_ros/ptr_helper.h"
 void 
 pcl_ros::MomentInvariantsEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
 pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                                      const PointCloudInConstPtr &surface,
-                                                     const IndicesSharedPtr &indices)
+                                                     const IndicesPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);
@@ -57,7 +57,7 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   // Estimate the feature
   PointCloudOut output;
