@@ -122,8 +122,8 @@ pcl_ros::ProjectInliers::unsubscribe ()
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
-                                                       const PointIndicesConstSharedPtr &indices,
-                                                       const ModelCoefficientsConstSharedPtr &model)
+                                                       const PointIndicesConstPtr &indices,
+                                                       const ModelCoefficientsConstPtr &model)
 {
   if (pub_output_->count_subscribers () <= 0)
     return;

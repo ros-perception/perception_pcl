@@ -126,7 +126,7 @@ use_surface_(false), spatial_locator_type_(-1)
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstSharedPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"

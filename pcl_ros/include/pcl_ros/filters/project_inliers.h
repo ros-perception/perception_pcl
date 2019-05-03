@@ -82,7 +82,7 @@ namespace pcl_ros
 
     private:
       /** \brief A pointer to the vector of model coefficients. */
-      ModelCoefficientsConstSharedPtr model_;
+      ModelCoefficientsConstPtr model_;
 
       /** \brief The message filter subscriber for model coefficients. */
       message_filters::Subscriber<ModelCoefficients> sub_model_;
@@ -99,8 +99,8 @@ namespace pcl_ros
       /** \brief PointCloud2 + Indices + Model data callback. */
       void 
       input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
-                                    const PointIndicesConstSharedPtr &indices,
-                                    const ModelCoefficientsConstSharedPtr &model);
+                                    const PointIndicesConstPtr &indicesPointIndicesConstPtr
+                                    const ModelCoefficientsConstPtr &model);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

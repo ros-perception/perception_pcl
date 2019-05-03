@@ -137,8 +137,8 @@ namespace pcl_ros
         indices.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
         PointCloudIn cloud;
         cloud.header.stamp = input->header.stamp;
-        nf_pc_.add (cloud);
-        nf_pi_.add (indices);
+        nf_pc_.add (std::make_shared<PointCloudIn> (cloud));
+        nf_pi_.add (std::make_shared<PointIndices> (indices));
       }
 
     private:
@@ -156,7 +156,7 @@ namespace pcl_ros
         */
       void input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
                                            const PointCloudInConstPtr &cloud_surface, 
-                                           const PointIndicesConstSharedPtr &indices);
+                                           const PointIndicesConstPtr &indices);
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -214,7 +214,7 @@ namespace pcl_ros
       void input_normals_surface_indices_callback (const PointCloudInConstPtr &cloud, 
                                                    const PointCloudNConstPtr &cloud_normals, 
                                                    const PointCloudInConstPtr &cloud_surface, 
-                                                   const PointIndicesConstSharedPtr &indices);
+                                                   const PointIndicesConstPtr &indices);
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

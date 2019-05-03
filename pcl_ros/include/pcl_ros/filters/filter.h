@@ -56,7 +56,7 @@ namespace pcl_ros
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
 
       typedef std::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
+      typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
     
       Filter (std::string node_name, const rclcpp::NodeOptions& options);
 
@@ -117,7 +117,7 @@ namespace pcl_ros
       /** \brief PointCloud2 + Indices data callback. */
       void 
       input_indices_callback (const PointCloud2::ConstSharedPtr &cloud, 
-                              const PointIndicesConstSharedPtr &indices);
+                              const PointIndicesConstPtr &indices);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

@@ -141,7 +141,7 @@ pcl_ros::Feature::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstSharedPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ pcl_ros::Feature::unsubscribe ()
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
-    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstSharedPtr &indices)
+    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
   if (pub_output_->count_subscribers () <= 0)
@@ -249,7 +249,7 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::FeatureFromNormals::FeatureFromNormals () : normals_()
+pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : Feature(node_name, options), normals_()
 {
   // Allow each individual class that inherits from us to declare their own Publisher
   // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc

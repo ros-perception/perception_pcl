@@ -110,7 +110,7 @@ namespace pcl_ros
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesConstSharedPtr &indices);
+      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices);
 
       /** \brief Pointer to a set of indices stored internally.
        * (used when \a latched_indices_ is set). 
@@ -121,7 +121,7 @@ namespace pcl_ros
         * \param indices the pointer to the input point cloud indices
         */
       inline void
-      indices_callback (const PointIndicesConstSharedPtr &indices)
+      indices_callback (const PointIndicesConstPtr &indices)
       {
         indices_ = *indices.get();
       }
@@ -133,7 +133,7 @@ namespace pcl_ros
       input_callback (const PointCloudConstPtr &input)
       {
         indices_.header = fromPCL(input->header);
-        PointIndicesConstSharedPtr indices;
+        PointIndicesConstPtr indices;
         indices.reset (new PointIndices (indices_));
         nf_pi_.add (indices);
       }
@@ -218,7 +218,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::msg::ModelCoefficientsConstSharedPtr &model);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficientsConstPtr &model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
@@ -227,7 +227,7 @@ namespace pcl_ros
         */
       void input_normals_indices_callback (const PointCloudConstPtr &cloud, 
                                            const PointCloudNConstPtr &cloud_normals, 
-                                           const PointIndicesConstSharedPtr &indices);
+                                           const PointIndicesConstPtr &indices);
    
     private:
       /** \brief Internal mutex. */

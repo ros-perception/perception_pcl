@@ -137,7 +137,7 @@ pcl_ros::Filter::subscribe()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, PointIndicesConstSharedPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
