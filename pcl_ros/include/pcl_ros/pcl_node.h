@@ -136,10 +136,10 @@ namespace pcl_ros
       bool latched_indices_;
 
       /** \brief The message filter subscriber for PointCloud2. */
-      message_filters::Subscriber<sensor_msgs::msg::PointCloud2> sub_input_filter_;
+      message_filters::Subscriber<PointCloud> sub_input_filter_;
 
       /** \brief The message filter subscriber for PointIndices. */
-      message_filters::Subscriber<pcl_msgs::msg::PointIndices> sub_indices_filter_;
+      message_filters::Subscriber<PointIndices> sub_indices_filter_;
 
       /** \brief The output PointCloud publisher. */
       rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_output_;

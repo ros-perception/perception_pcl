@@ -47,7 +47,7 @@ pcl_ros::SHOTEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -62,7 +62,7 @@ pcl_ros::SHOTEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature

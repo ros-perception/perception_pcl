@@ -44,6 +44,8 @@
 
 #include <message_filters/subscriber.h>
 
+#include "pcl_ros/ptr_helper.h"
+
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;
@@ -71,7 +73,7 @@ namespace pcl_ros
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices.get());
+        impl_.setIndices (to_boost_ptr(indices));
         pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
         pcl_conversions::toPCL(*(model_), *(pcl_model));
         impl_.setModelCoefficients (pcl_model);
@@ -99,7 +101,7 @@ namespace pcl_ros
       /** \brief PointCloud2 + Indices + Model data callback. */
       void 
       input_indices_model_callback (const PointCloud2::ConstSharedPtr &cloud,
-                                    const PointIndicesConstPtr &indicesPointIndicesConstPtr
+                                    const PointIndicesConstPtr &indices,
                                     const ModelCoefficientsConstPtr &model);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
