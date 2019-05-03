@@ -50,7 +50,7 @@ void
 pcl_ros::PrincipalCurvaturesEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                                         const PointCloudNConstPtr &normals,
                                                         const PointCloudInConstPtr &surface,
-                                                        const IndicesSharedPtr &indices)
+                                                        const IndicesPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);

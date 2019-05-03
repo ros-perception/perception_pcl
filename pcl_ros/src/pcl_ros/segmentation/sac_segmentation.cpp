@@ -40,6 +40,7 @@
 #include <pcl/io/io.h>
 
 #include <pcl_conversions/pcl_conversions.h>
+#include <XmlRpcCpp.h>
 
 using pcl_conversions::fromPCL;
 
@@ -238,7 +239,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   else*/
     cloud_tf = cloud;
 
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
@@ -496,7 +497,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   impl_.setInputCloud (cloud);
   impl_.setInputNormals (cloud_normals);
 
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 

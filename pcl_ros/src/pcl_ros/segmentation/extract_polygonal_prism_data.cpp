@@ -166,7 +166,7 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
   else
     impl_.setInputPlanarHull (hull);
 
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 

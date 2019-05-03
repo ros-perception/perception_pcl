@@ -55,7 +55,7 @@ namespace pcl_ros
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
 
-      typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
+      typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
     
       Filter (std::string node_name, const rclcpp::NodeOptions& options);
@@ -99,7 +99,7 @@ namespace pcl_ros
         * \param output the resultant filtered PointCloud2
         */ 
       virtual void 
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices,
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
               PointCloud2 &output) = 0;
 
       /** \brief Call the child filter () method, optionally transform the result, and publish it.
@@ -107,7 +107,7 @@ namespace pcl_ros
         * \param indices a pointer to the vector of point indices to use.   
         */
       void 
-      computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices);
+      computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices);
 
     private:
       /** \brief Synchronized input, and indices.*/

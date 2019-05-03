@@ -7,3 +7,5 @@ log/
 perception_pcl.xcodeproj/
 
 build.log
+
+.vscode/

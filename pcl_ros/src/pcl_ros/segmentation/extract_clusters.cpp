@@ -164,7 +164,7 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
   }
   ///
 
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 

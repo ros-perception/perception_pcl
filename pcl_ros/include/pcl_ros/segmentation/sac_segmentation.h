@@ -218,7 +218,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::msg::ModelCoefficientsConstPtr &model);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficientsConstSharedPtr &model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud

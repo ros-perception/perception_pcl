@@ -38,14 +38,6 @@
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/statistical_outlier_removal.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::StatisticalOutlierRemoval::child_init (bool &has_service)
-{
-  has_service = true;
-  return (true);
-}
-
 typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
 //PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval,nodelet::Nodelet);
 

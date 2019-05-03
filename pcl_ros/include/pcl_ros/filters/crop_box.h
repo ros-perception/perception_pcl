@@ -63,7 +63,7 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
         std::mutex::scoped_lock lock (mutex_);

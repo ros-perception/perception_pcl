@@ -70,7 +70,7 @@ pcl_ros::Filter::Filter (std::string node_name, const rclcpp::NodeOptions& optio
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices)
+pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices)
 {
   PointCloud2 output;
   // Call the virtual method in the child
@@ -204,7 +204,7 @@ pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, con
     cloud_tf = cloud;
 
   // Need setInputCloud () here because we have to extract x/y/z
-  IndicesSharedPtr vindices;
+  IndicesPtr vindices;
   if (indices)
     vindices.reset (new std::vector<int> (indices->indices));
 

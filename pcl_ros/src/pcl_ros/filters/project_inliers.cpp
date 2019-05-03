@@ -145,7 +145,7 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstS
 
   tf_input_orig_frame_ = cloud->header.frame_id;
 
-  IndicesSharedPtr vindices;
+  IndicesPtr vindices;
   if (indices)
     vindices.reset (new std::vector<int> (indices->indices));
 

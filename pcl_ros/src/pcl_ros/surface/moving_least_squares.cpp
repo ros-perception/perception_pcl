@@ -160,7 +160,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
   // Reset the indices and surface pointers
   impl_.setInputCloud (cloud);
 
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 

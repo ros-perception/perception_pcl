@@ -41,6 +41,7 @@
 // PCL includes
 #include <pcl/filters/statistical_outlier_removal.h>
 #include "pcl_ros/filters/filter.h"
+#include <mutex>
 
 namespace pcl_ros
 {
@@ -58,20 +59,24 @@ namespace pcl_ros
   class StatisticalOutlierRemoval : public Filter
   {
     protected:
+      std::mutex mutex_;
+
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
+    
       inline void
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        std::mutex::scoped_lock lock (mutex_);
+        std::lock(mutex_);
+        std::lock_guard<std::mutex> lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices.get());
+        impl_.setIndices (indices);
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);

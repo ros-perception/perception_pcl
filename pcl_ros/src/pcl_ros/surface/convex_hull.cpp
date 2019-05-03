@@ -144,7 +144,7 @@ void
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
 
   // Reset the indices and surface pointers
-  IndicesSharedPtr indices_ptr;
+  IndicesPtr indices_ptr;
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 

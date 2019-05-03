@@ -70,8 +70,8 @@ namespace pcl_ros
       typedef PointCloudIn::Ptr PointCloudInPtr;
       typedef PointCloudIn::ConstPtr PointCloudInConstPtr;
 
-      typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
-      typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
+      typedef std::shared_ptr <std::vector<int> > IndicesPtr;
+      typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
       Feature (std::string node_name, const rclcpp::NodeOptions& options);
@@ -119,7 +119,7 @@ namespace pcl_ros
       /** \brief Compute the feature and publish it. Internal method. */
       virtual void computePublish (const PointCloudInConstPtr &cloud, 
                                    const PointCloudInConstPtr &surface,
-                                   const IndicesSharedPtr &indices) = 0;
+                                   const IndicesPtr &indices) = 0;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */
@@ -187,7 +187,7 @@ namespace pcl_ros
       virtual void computePublish (const PointCloudInConstPtr &cloud, 
                                    const PointCloudNConstPtr &normals,
                                    const PointCloudInConstPtr &surface,
-                                   const IndicesSharedPtr &indices) = 0;
+                                   const IndicesPtr &indices) = 0;
 
     private:
       /** \brief The normals PointCloud subscriber filter. */
@@ -203,7 +203,7 @@ namespace pcl_ros
       /** \brief Internal method. */
       void computePublish (const PointCloudInConstPtr &, 
                            const PointCloudInConstPtr &,
-                           const IndicesSharedPtr &) {} // This should never be called
+                           const IndicesPtr &) {} // This should never be called
 
       /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
         * \param cloud the pointer to the input point cloud

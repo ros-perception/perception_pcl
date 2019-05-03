@@ -49,7 +49,7 @@ pcl_ros::NormalEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 void 
 pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
                                               const PointCloudInConstPtr &surface,
-                                              const IndicesSharedPtr &indices)
+                                              const IndicesPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);

@@ -65,7 +65,7 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstSharedPtr &input, const IndicesSharedPtr &indices,
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
               PointCloud2 &output)
       {
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);

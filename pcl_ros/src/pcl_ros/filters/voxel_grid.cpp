@@ -41,7 +41,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
-                            const IndicesSharedPtr &indices, 
+                            const IndicesPtr &indices, 
                             PointCloud2 &output)
 {
   //std::mutex::scoped_lock lock (mutex_);

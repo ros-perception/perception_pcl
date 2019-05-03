@@ -49,7 +49,7 @@ pcl_ros::MomentInvariantsEstimation::emptyPublish (const PointCloudInConstPtr &c
 void 
 pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr &cloud,
                                                      const PointCloudInConstPtr &surface,
-                                                     const IndicesSharedPtr &indices)
+                                                     const IndicesPtr &indices)
 {
   // Set the parameters
   impl_.setKSearch (k_);

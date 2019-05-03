@@ -89,7 +89,7 @@ namespace pcl_ros
       typedef ModelCoefficients::SharedPtr ModelCoefficientsSharedPtr;
       typedef ModelCoefficients::ConstSharedPtr ModelCoefficientsConstSharedPtr;
 
-      typedef std::shared_ptr <std::vector<int> > IndicesSharedPtr;
+      typedef std::shared_ptr <std::vector<int> > IndicesPtr;
       typedef std::shared_ptr <const std::vector<int> > IndicesConstSharedPtr;
 
       /** \brief Empty constructor. */

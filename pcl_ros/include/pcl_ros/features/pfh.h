@@ -82,7 +82,7 @@ namespace pcl_ros
       void computePublish (const PointCloudInConstPtr &cloud,
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
-                           const IndicesSharedPtr &indices);
+                           const IndicesPtr &indices);
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
