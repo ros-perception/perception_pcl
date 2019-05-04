@@ -164,7 +164,7 @@ pcl_ros::SACSegmentation::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->subscribe<PointCloud> ("input", max_queue_size_,  bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloud> ("input",  bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -354,11 +354,11 @@ void
 pcl_ros::SACSegmentationFromNormals::subscribe ()
 {
   // Subscribe to the input and normals using filters
-  sub_input_filter_->subscribe ("input", max_queue_size_);
-  sub_normals_filter_->subscribe ("normals", max_queue_size_);
+  sub_input_filter_.subscribe (this->shared_from_this (), "input");
+  sub_normals_filter_.subscribe (this->shared_from_this (), "normals");
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
-  sub_axis_ = this->subscribe ("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
+  sub_axis_ = this->create_subscription ("axis", std::bind(&SACSegmentationFromNormals::axis_callback, this), 1);
 
   if (approximate_sync_)
     sync_input_normals_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
@@ -369,7 +369,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_indices_filter_->subscribe ("indices", max_queue_size_);
+    sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
 
     if (approximate_sync_)
       sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_indices_filter_);

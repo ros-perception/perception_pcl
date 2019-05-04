@@ -92,8 +92,8 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", max_queue_size_);
-    sub_indices_filter_->subscribe ("indices", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     if (approximate_sync_)
     {

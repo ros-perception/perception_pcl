@@ -75,7 +75,8 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 {
-  this->shutdown ();
+  std::cout << "shutdown" << std::endl;
+  //this->shutdown ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,8 +91,8 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
   {
     while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ) > maximum_seconds_ && queue_.size () > 0)
     {
-      RCLCPP_WARN (this-get_loggeR(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
-                 (*queue_.begin ()).first.toSec (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ));
+      RCLCPP_WARN (this-get_logger(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
+                 (*queue_.begin ()).first.seconds (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ));
       queue_.erase (queue_.begin ());
     }
   }

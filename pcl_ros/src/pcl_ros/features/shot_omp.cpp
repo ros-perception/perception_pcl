@@ -36,6 +36,7 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/shot_omp.h"
+#include "pcl_ros/ptr_helper.h"
 
 // Create the output publisher
 pcl_ros::SHOTEstimationOMP::SHOTEstimationOMP(std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::FeatureFromNormals (node_name, options) {
@@ -62,6 +63,7 @@ pcl_ros::SHOTEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
+  
   impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);

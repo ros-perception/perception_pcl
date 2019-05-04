@@ -43,7 +43,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options)
+pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_), maximum_queue_size_ (3), approximate_sync_(false)
 {
   // ---[ Mandatory parameters
   this->get_parameter ("output_frame", output_frame_);
@@ -110,7 +110,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   for (int d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-    filters_[d]->subscribe ((std::string)(input_topics_[d]), maximum_queue_size_);
+    filters_[d].subscribe (this->shared_from_this (), (std::string)(input_topics_[d]));
   }
 
   // Bogus null filter
@@ -207,12 +207,12 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
 
   // Transform the point clouds into the specified output frame
   if (output_frame_ != in1.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
+    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_listener_);
   else
     in1_t = std::make_shared<PointCloud2> (in1);
 
   if (output_frame_ != in2.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
+    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_listener_);
   else
     in2_t = std::make_shared<PointCloud2> (in2);
 
@@ -259,6 +259,6 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
   pub_output_->publish (std::make_shared<PointCloud2> (*out1));
 }
 
-typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
+//typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
 //PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
 

@@ -65,12 +65,12 @@ namespace pcl_ros
       typedef PointCloud2::ConstSharedPtr PointCloud2ConstSharedPtr;
 
       /** \brief Empty constructor. */
-      PointCloudConcatenateDataSynchronizer () : maximum_queue_size_ (3) {};
+      PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options);
 
       /** \brief Empty constructor.
         * \param queue_size the maximum queue size
         */
-      PointCloudConcatenateDataSynchronizer (int queue_size) : maximum_queue_size_(queue_size), approximate_sync_(false) {};
+      //PointCloudConcatenateDataSynchronizer (int queue_size) : maximum_queue_size_(queue_size), approximate_sync_(false) {};
 
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateDataSynchronizer () {};
@@ -97,7 +97,8 @@ namespace pcl_ros
       XmlRpc::XmlRpcValue input_topics_;
 
       /** \brief TF listener object. */
-      tf2_ros2::TransformListener tf_;
+      tf2_ros2::Buffer tf_buffer_;
+      tf2_ros2::TransformListener tf_listener_;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */

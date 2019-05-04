@@ -56,8 +56,8 @@ void
 pcl_ros::SegmentDifferences::subscribe ()
 {
   // Subscribe to the input using a filter
-  sub_input_filter_.subscribe (this->shared_from_this(), "input");
-  sub_target_filter_.subscribe (this->shared_from_this(), "target");
+  sub_input_filter_.subscribe (this->shared_from_this (), "input");
+  sub_target_filter_.subscribe (this->shared_from_this (), "target");
 
   if (approximate_sync_)
   {

@@ -63,9 +63,9 @@ pcl_ros::ProjectInliers::ProjectInliers (std::string node_name, const rclcpp::No
   pub_output_ = this->create_publisher<PointCloud2> ("output", max_queue_size_);
 
   // Subscribe to the input using a filter
-  sub_input_filter_->subscribe (this->shared_from_this()"input");
+  sub_input_filter_.subscribe (this->shared_from_this (),"input");
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstruct] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstruct] Node successfully created with the following parameters:\n"
                  " - model_type      : %d\n"
                  " - copy_all_data   : %s\n"
                  " - copy_all_fields : %s",
@@ -88,9 +88,9 @@ pcl_ros::ProjectInliers::subscribe ()
   if (use_indices_)
   {*/
 
-  sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
+  sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
-  sub_model_.subscribe (this->shared_from_this(), "model");
+  sub_model_.subscribe (this->shared_from_this (), "model");
 
   if (approximate_sync_)
   {

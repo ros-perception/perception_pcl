@@ -84,15 +84,15 @@ use_surface_(false), spatial_locator_type_(-1)
       sync_input_surface_indices_e_ = std::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices> > >(max_queue_size_);
 
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (this->shared_from_this(), "input");
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
     if (use_indices_)
     {
       // If indices are enabled, subscribe to the indices
-      sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
+      sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
       if (use_surface_)     // Use both indices and surface
       {
         // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
-        sub_surface_filter_.subscribe (this->shared_from_this(), "surface");
+        sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, sub_indices_filter_);
         else
@@ -112,7 +112,7 @@ use_surface_(false), spatial_locator_type_(-1)
     {
       sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
       // indices not enabled, connect the input-surface duo and register
-      sub_surface_filter_.subscribe (this->shared_from_this(), "surface");
+      sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
       if (approximate_sync_)
         sync_input_surface_indices_a_->connectInput (sub_input_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -240,8 +240,8 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   // ---[ Optional parameters
   this->get_parameter ("use_surface", use_surface_);
 
-  sub_input_filter_->subscribe ("input", max_queue_size_);
-  sub_normals_filter_->subscribe ("normals", max_queue_size_);
+  sub_input_filter_.subscribe (this->shared_from_this (), "input");
+  sub_normals_filter_.subscribe ("normals", max_queue_size_);
 
   // Create the objects here
   if (approximate_sync_)
@@ -255,11 +255,11 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
     if (use_indices_)
     {
       // If indices are enabled, subscribe to the indices
-      sub_indices_filter_->subscribe ("indices", max_queue_size_);
+      sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
       if (use_surface_)     // Use both indices and surface
       {
         // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
-        sub_surface_filter_->subscribe ("surface", max_queue_size_);
+        sub_surface_filter_.subscribe (this->shared_from_this(), "surface");
         if (approximate_sync_)
           sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_surface_filter_, sub_indices_filter_);
         else
@@ -279,7 +279,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
     else                    // Use only surface
     {
       // indices not enabled, connect the input-surface duo and register
-      sub_surface_filter_->subscribe ("surface", max_queue_size_);
+      sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
 
       sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
       if (approximate_sync_)

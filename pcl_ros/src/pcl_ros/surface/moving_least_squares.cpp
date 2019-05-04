@@ -76,9 +76,9 @@ pcl_ros::MovingLeastSquares::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_->subscribe ("input", 1);
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_->subscribe ("indices", 1);
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     if (approximate_sync_)
     {

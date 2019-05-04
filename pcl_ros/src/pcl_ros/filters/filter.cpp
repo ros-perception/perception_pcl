@@ -119,8 +119,8 @@ pcl_ros::Filter::subscribe()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (this->shared_from_this(), "input");
-    sub_indices_filter_.subscribe (this->shared_from_this(), "indices");
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     if (approximate_sync_)
     {

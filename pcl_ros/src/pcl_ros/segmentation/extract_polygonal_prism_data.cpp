@@ -46,10 +46,10 @@ using pcl_conversions::moveFromPCL;
 using pcl_conversions::moveToPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ExtractPolygonalPrismData::ExtractPolygonalPrismData (std::string node_name, const rclcpp::NodeOptions& options) : ros_pcl::PCLNode(node_name, options)
+pcl_ros::ExtractPolygonalPrismData::ExtractPolygonalPrismData (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
   // Advertise the output topics
-  pub_output_ = advertise<PointIndices> ("output", max_queue_size_);
+  pub_output_ = create_publisher<PointIndices> ("output", max_queue_size_);
 
 }
 
@@ -57,8 +57,8 @@ pcl_ros::ExtractPolygonalPrismData::ExtractPolygonalPrismData (std::string node_
 void
 pcl_ros::ExtractPolygonalPrismData::subscribe ()
 {
-  sub_hull_filter_->subscribe ("planar_hull", max_queue_size_);
-  sub_input_filter_->subscribe ("input", max_queue_size_);
+  sub_hull_filter_.subscribe (this->shared_from_this (), "planar_hull");
+  sub_input_filter_.subscribe (this->shared_from_this (), "input");
 
   // Create the objects here
   if (approximate_sync_)
@@ -68,7 +68,7 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
 
   if (use_indices_)
   {
-    sub_indices_filter_->subscribe ("indices", max_queue_size_);
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
     if (approximate_sync_)
       sync_input_hull_indices_a_->connectInput (sub_input_filter_, sub_hull_filter_, sub_indices_filter_);
     else
