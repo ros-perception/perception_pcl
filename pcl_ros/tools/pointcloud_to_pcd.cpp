@@ -127,7 +127,7 @@ class PointCloudToPCD : public rclcpp::Node
     }
 
   ////////////////////////////////////////////////////////////////////////////////
-  PointCloudToPCD () : rclcpp::Node("pointcloud_to_pcd"), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
+  PointCloudToPCD (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
   {
     // Check if a prefix parameter is defined for output file names.
     if (this->get_parameter ("prefix", prefix_))

@@ -65,7 +65,7 @@ namespace pcl_ros
       typedef PointCloud2::ConstSharedPtr PointCloud2ConstSharedPtr;
 
       /** \brief Empty constructor. */
-      PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options);
+      PointCloudConcatenateDataSynchronizer (std::string node_name, const rclcpp::NodeOptions& options);
 
       /** \brief Empty constructor.
         * \param queue_size the maximum queue size
@@ -78,8 +78,6 @@ namespace pcl_ros
     private:
       /** \brief The output PointCloud publisher. */
       rclcpp::Publisher<PointCloud2>::SharedPtr pub_output_;
-
-      rclcpp::Publisher pub_output_;
 
       /** \brief The maximum number of messages that we can store in the queue. */
       int maximum_queue_size_;
@@ -97,8 +95,8 @@ namespace pcl_ros
       XmlRpc::XmlRpcValue input_topics_;
 
       /** \brief TF listener object. */
-      tf2_ros2::Buffer tf_buffer_;
-      tf2_ros2::TransformListener tf_listener_;
+      //tf2_ros2::Buffer tf_buffer_;
+      //tf2_ros2::TransformListener tf_listener_;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */

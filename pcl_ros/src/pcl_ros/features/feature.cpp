@@ -125,7 +125,7 @@ pcl_ros::Feature::subscribe ()
     }
     else                    // Use only surface
     {
-      sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
       if (approximate_sync_)
@@ -135,9 +135,9 @@ pcl_ros::Feature::subscribe ()
     }
     // Register callbacks
     if (approximate_sync_)
-      sync_input_surface_indices_a_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_a_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
     else
-      sync_input_surface_indices_e_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_e_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
   }
   else
     // Subscribe in an old fashion to input only (no filters)

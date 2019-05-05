@@ -58,8 +58,8 @@ namespace pcl_ros
   {
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud;
-      typedef PointCloud::SharedPtr PointCloudSharedPtr;
-      typedef PointCloud::ConstSharedPtr PointCloudConstSharedPtr;
+      typedef PointCloud::SharedPtr PointCloudPtr;
+      typedef PointCloud::ConstSharedPtr PointCloudConstPtr;
 
       /** \brief Empty constructor. */
       PointCloudConcatenateFieldsSynchronizer (std::string node_name, const rclcpp::NodeOptions& options);
@@ -72,14 +72,14 @@ namespace pcl_ros
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
-      void input_callback (const PointCloudConstSharedPtr &cloud);
+      void input_callback (const PointCloudConstPtr &cloud);
     
       void subscribe();
       void unsubscribe();
     
     private:
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloudConstPtr>::SharedPtr sub_input_;
 
       /** \brief The output PointCloud publisher. */
       rclcpp::Publisher<PointCloud>::SharedPtr pub_output_;
@@ -94,7 +94,7 @@ namespace pcl_ros
       double maximum_seconds_;
 
       /** \brief A queue for messages. */
-      std::map<rclcpp::Time, std::vector<PointCloudConstSharedPtr> > queue_;
+      std::map<rclcpp::Time, std::vector<PointCloudConstPtr> > queue_;
   };
 }
 

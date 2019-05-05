@@ -63,7 +63,9 @@ namespace pcl_ros
       void computePublish (const PointCloudInConstPtr &cloud,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
-
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

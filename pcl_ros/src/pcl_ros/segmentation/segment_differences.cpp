@@ -63,13 +63,13 @@ pcl_ros::SegmentDifferences::subscribe ()
   {
     sync_input_target_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_a_->connectInput (sub_input_filter_, sub_target_filter_);
-    sync_input_target_a_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
+    sync_input_target_a_->registerCallback (std::bind (&SegmentDifferences::input_target_callback, this, _1, _2));
   }
   else
   {
     sync_input_target_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_e_->connectInput (sub_input_filter_, sub_target_filter_);
-    sync_input_target_e_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
+    sync_input_target_e_->registerCallback (std::bind (&SegmentDifferences::input_target_callback, this, _1, _2));
   }
 }
 

@@ -267,7 +267,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+        sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
         if (approximate_sync_)
           // surface not enabled, connect the input-indices duo and register
           sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, sub_indices_filter_);
@@ -281,7 +281,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
 
-      sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
       if (approximate_sync_)
         sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -290,7 +290,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   }
   else
   {
-    sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
 
     if (approximate_sync_)
       sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, nf_pi_);
@@ -300,9 +300,9 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
 
   // Register callbacks
   if (approximate_sync_)
-    sync_input_normals_surface_indices_a_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_a_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
   else
-    sync_input_normals_surface_indices_e_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_e_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
 
   RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"

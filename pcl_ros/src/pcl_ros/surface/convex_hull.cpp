@@ -72,19 +72,19 @@ pcl_ros::ConvexHull2D::subscribe()
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<pcl_msgs::msg::PointCloud2> ("input", std::bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()), 1);
+    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input", std::bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()), 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

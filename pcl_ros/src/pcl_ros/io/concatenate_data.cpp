@@ -43,9 +43,10 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_), maximum_queue_size_ (3), approximate_sync_(false)
+pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), maximum_queue_size_ (3), approximate_sync_(false)
 {
   // ---[ Mandatory parameters
+  this->get_parameter("output_frame");
   this->get_parameter ("output_frame", output_frame_);
   this->get_parameter ("approximate_sync", approximate_sync_);
 
@@ -114,7 +115,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   }
 
   // Bogus null filter
-  filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
+  filters_[0]->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
 
   switch (input_topics_.size ())
   {

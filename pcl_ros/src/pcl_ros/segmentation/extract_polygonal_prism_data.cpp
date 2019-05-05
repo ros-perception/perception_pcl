@@ -76,7 +76,7 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   else
   {
-    sub_input_filter_.registerCallback (bind (&ExtractPolygonalPrismData::input_callback, this, _1));
+    sub_input_filter_.registerCallback (std::bind (&ExtractPolygonalPrismData::input_callback, this, _1));
 
     if (approximate_sync_)
       sync_input_hull_indices_a_->connectInput (sub_input_filter_, sub_hull_filter_, nf_);
@@ -85,9 +85,9 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   // Register callbacks
   if (approximate_sync_)
-    sync_input_hull_indices_a_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_a_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
   else
-    sync_input_hull_indices_e_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_e_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

@@ -85,14 +85,14 @@ pcl_ros::MovingLeastSquares::subscribe ()
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
     }
   }
   else

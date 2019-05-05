@@ -49,6 +49,9 @@ namespace pcl_ros
     */
   class NormalEstimationOMP: public Feature
   {
+    public:
+      NormalEstimationOMP(std::string node_name, const rclcpp::NodeOptions& options);
+
     private:
       pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> impl_;
 
@@ -61,9 +64,11 @@ namespace pcl_ros
       void computePublish (const PointCloudInConstPtr &cloud,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
 
     public:
-      NormalEstimationOMP();
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }

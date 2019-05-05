@@ -68,7 +68,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->create_subscription ("input", std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this), maximum_queue_size_);
+  sub_input_ = this->create_subscription ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this), maximum_queue_size_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstSharedPtr &cloud)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
 {
   RCLCPP_DEBUG (this->get_logger(), "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input");
@@ -91,8 +91,8 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
   {
     while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ) > maximum_seconds_ && queue_.size () > 0)
     {
-      RCLCPP_WARN (this-get_logger(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
-                 (*queue_.begin ()).first.seconds (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ));
+      /*RCLCPP_WARN (this->get_logger(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
+                 (*queue_.begin ()).first.seconds (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ));*/
       queue_.erase (queue_.begin ());
     }
   }

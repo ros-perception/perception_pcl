@@ -41,6 +41,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <XmlRpcCpp.h>
+#include <XmlRpcValue.h>
 
 using pcl_conversions::fromPCL;
 
@@ -125,8 +126,8 @@ pcl_ros::SACSegmentation::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe ("input", max_queue_size_);
-    sub_indices_filter_.subscribe ("indices", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     // when "use_indices" is set to true, and "latched_indices" is set to true,
     // we'll subscribe and get a separate callback for PointIndices that will 
@@ -135,15 +136,15 @@ pcl_ros::SACSegmentation::subscribe ()
     if (latched_indices_)
     {
       // Subscribe to a callback that saves the indices
-      sub_indices_filter_.registerCallback (bind (&SACSegmentation::indices_callback, this, _1));
+      sub_indices_filter_.registerCallback (std::bind (&SACSegmentation::indices_callback, this, _1));
       // Subscribe to a callback that sets the header of the saved indices to the cloud header
-      sub_input_filter_.registerCallback (bind (&SACSegmentation::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&SACSegmentation::input_callback, this, _1));
 
       // Synchronize the two topics. No need for an approximate synchronizer here, as we'll
       // match the timestamps exactly
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, nf_pi_);
-      sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&SACSegmentation::input_indices_callback, this, _1, _2));
     }
     // "latched_indices" not set, proceed with regular <input,indices> pairs
     else
@@ -152,19 +153,19 @@ pcl_ros::SACSegmentation::subscribe ()
       {
         sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
         sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-        sync_input_indices_a_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+        sync_input_indices_a_->registerCallback (std::bind (&SACSegmentation::input_indices_callback, this, _1, _2));
       }
       else
       {
         sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
         sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-        sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+        sync_input_indices_e_->registerCallback (std::bind (&SACSegmentation::input_indices_callback, this, _1, _2));
       }
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud> ("input",  bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +178,8 @@ pcl_ros::SACSegmentation::unsubscribe ()
     sub_indices_filter_.unsubscribe ();
   }
   else
-    this->shutdown ();
+    std::cout << "shutdown" << std::endl;
+    //this->shutdown ();
 }
 
 
@@ -186,7 +188,7 @@ void
 pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &cloud, 
                                                   const PointIndicesConstPtr &indices)
 {
-  std::mutex::scoped_lock lock (mutex_);
+  std::guard_lock lock (mutex_);
 
   pcl_msgs::msg::PointIndices inliers;
   pcl_msgs::msg::ModelCoefficients model;
@@ -204,7 +206,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    RCLCPP_ERROR (this->get_logger()"[%s::input_indices_callback] Invalid indices!", this->get_name ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     pub_indices_->publish (inliers);
     pub_model_->publish (model);
     return;
@@ -379,7 +381,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   else
   {
     // Create a different callback for copying over the timestamp to fake indices
-    sub_input_filter_.registerCallback (bind (&SACSegmentationFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback (std::bind (&SACSegmentationFromNormals::input_callback, this, _1));
 
     if (approximate_sync_)
       sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
@@ -388,9 +390,9 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   }
 
   if (approximate_sync_)
-    sync_input_normals_indices_a_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+    sync_input_normals_indices_a_->registerCallback (std::bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
   else
-    sync_input_normals_indices_e_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+    sync_input_normals_indices_e_->registerCallback (std::bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,9 +410,9 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::ModelCoefficientsConstPtr &model)
+pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::msg::ModelCoefficients::ConstSharedPtr &model)
 {
-  std::mutex::scoped_lock lock (mutex_);
+  std::guard_lock lock (mutex_);
 
   if (model->values.size () < 3)
   {

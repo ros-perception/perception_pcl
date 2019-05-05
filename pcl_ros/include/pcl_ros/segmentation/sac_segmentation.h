@@ -78,7 +78,9 @@ namespace pcl_ros
       
       /** \brief Get the TF frame the PointCloud should be transformed into after processing. */
       inline std::string getOutputTFframe () { return (tf_output_frame_); }
-
+    
+      void subscribe ();
+      void unsubscribe ();
     protected:
       // The minimum number of inliers a model must have in order to be considered valid.
       int min_inliers_;
@@ -218,7 +220,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::msg::ModelCoefficientsConstPtr &model);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficients::ConstSharedPtr &model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
@@ -239,7 +241,7 @@ namespace pcl_ros
       /** \brief Synchronized input, normals, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_a_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_e_;
-
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

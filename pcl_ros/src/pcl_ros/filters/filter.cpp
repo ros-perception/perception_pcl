@@ -126,13 +126,13 @@ pcl_ros::Filter::subscribe()
     {
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&Filter::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&Filter::input_indices_callback, this, _1, _2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&Filter::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&Filter::input_indices_callback, this, _1, _2));
     }
   }
   else
