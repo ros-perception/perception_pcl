@@ -36,8 +36,9 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/shot.h"
+#include "pcl_ros/ptr_helper.h"
 
-pcl_ros::SHOTEstimation::SHOTEstimation () : FeatureFromNormals()
+pcl_ros::SHOTEstimation::SHOTEstimation (std::string node_name, rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options)
 {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
@@ -48,7 +49,7 @@ pcl_ros::SHOTEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (to_std_ptr(output.makeShared ()));
 }
 
 void 
@@ -63,7 +64,7 @@ pcl_ros::SHOTEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -73,7 +74,7 @@ pcl_ros::SHOTEstimation::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::SHOTEstimation SHOTEstimation;

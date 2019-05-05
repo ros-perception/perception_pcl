@@ -93,7 +93,7 @@ namespace pcl_ros
       rclcpp::Publisher<pcl_msgs::msg::ModelCoefficients>::SharedPtr pub_model_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
 
       /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
       std::string tf_input_frame_;
@@ -112,7 +112,7 @@ namespace pcl_ros
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices);
+      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesPtr &indices);
 
       /** \brief Pointer to a set of indices stored internally.
        * (used when \a latched_indices_ is set). 
@@ -170,6 +170,8 @@ namespace pcl_ros
     typedef PointCloudN::ConstPtr PointCloudNConstPtr;
 
     public:
+    
+      SACSegmentationFromNormals(std::string node_name, const rclcpp::NodeOptions& options);
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
         * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
         */
@@ -192,7 +194,7 @@ namespace pcl_ros
       message_filters::Subscriber<PointCloudN> sub_normals_filter_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_axis_;
+      rclcpp::Subscription<pcl_msgs::msg::ModelCoefficients>::SharedPtr sub_axis_;
     
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
@@ -220,7 +222,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::msg::ModelCoefficients::ConstSharedPtr &model);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr &model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
@@ -241,6 +243,9 @@ namespace pcl_ros
       /** \brief Synchronized input, normals, and indices.*/
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_a_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_e_;
+    
+      void subscribe();
+      void unsubscribe();
     
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

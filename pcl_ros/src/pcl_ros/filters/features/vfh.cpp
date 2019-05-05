@@ -37,6 +37,8 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/vfh.h"
+#include "pcl_ros/ptr_helper.h"
+
 pcl_ros::VFHEstimation::VFHEstimation(std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options)
 {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
@@ -65,7 +67,7 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature

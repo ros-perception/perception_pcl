@@ -47,6 +47,9 @@ namespace pcl_ros
     */
   class SHOTEstimation : public FeatureFromNormals
   {
+    public:
+      SHOTEstimation(std::string node_name, rclcpp::NodeOptions& options);
+    
     private:
       pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
 
@@ -60,7 +63,9 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
-
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

@@ -141,7 +141,6 @@ transformPointCloud (const std::string &target_frame,
   }
   
   //http://wiki.ros.org/tf2/Tutorials/Migration/DataConversions
-  //http://wiki.ros.org/tf2/Tutorials/Migration/DataConversions
   tf2::Transform transform;
   geometry_msgs::msg::TransformStamped transform_msg;
   try

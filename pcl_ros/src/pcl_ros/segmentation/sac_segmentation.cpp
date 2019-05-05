@@ -41,7 +41,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <XmlRpcCpp.h>
-#include <XmlRpcValue.h>
+#include "pcl_ros/ptr_helper.h"
 
 using pcl_conversions::fromPCL;
 
@@ -70,27 +70,26 @@ pcl_ros::SACSegmentation::SACSegmentation (std::string node_name, const rclcpp::
   int method_type = 0;
   this->get_parameter ("method_type", method_type);
 
-  XmlRpc::XmlRpcValue axis_param;
+  XmlRpcValue axis_param;
   this->get_parameter ("axis", axis_param);
   Eigen::Vector3f axis = Eigen::Vector3f::Zero ();
-
   switch (axis_param.getType ())
   {
-    case XmlRpc::XmlRpcValue::TypeArray:
+    case XMLRPC_TYPE_ARRAY:
     {
-      if (axis_param.size () != 3)
+      if (axis_param.arraySize () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.arraySize ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
-        if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
+        if (axis_param.arrayGetItem (i).getType () != XMLRPC_TYPE_DOUBLE)
         {
           RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
-        double value = axis_param[i]; axis[i] = value;
+        double value = axis_param.arrayGetItem (i).getDouble(); axis[i] = value;
       }
       break;
     }
@@ -165,7 +164,7 @@ pcl_ros::SACSegmentation::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, std::placeholders::_1, to_std_ptr (PointIndicesPtr ())), max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,9 +185,9 @@ pcl_ros::SACSegmentation::unsubscribe ()
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &cloud, 
-                                                  const PointIndicesConstPtr &indices)
+                                                  const PointIndicesPtr &indices)
 {
-  std::guard_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock (mutex_);
 
   pcl_msgs::msg::PointIndices inliers;
   pcl_msgs::msg::ModelCoefficients model;
@@ -246,7 +245,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud_tf);
-  impl_.setIndices (indices_ptr.get());
+  impl_.setIndices (to_boost_ptr(indices_ptr));
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty ()) {
@@ -276,16 +275,16 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
                  model.values.size (), "model");
 
   if (inliers.indices.empty ())
-    RCLCPP_WARN (this->get_logger(). "[%s::input_indices_callback] No inliers found!", this->get_name ());
+    RCLCPP_WARN (this->get_logger(), "[%s::input_indices_callback] No inliers found!", this->get_name ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
+pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : SACSegmentation(node_name, options)
 {
   // Create publishers for the output topics
   pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
   pub_model_   = this->create_publisher<ModelCoefficients> ("model", max_queue_size_);
-
+  
   // ---[ Mandatory parameters
   int model_type;
   if (!this->get_parameter ("model_type", model_type))
@@ -304,27 +303,27 @@ pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (std::string nod
   int method_type = 0;
   this->get_parameter ("method_type", method_type);
 
-  XmlRpc::XmlRpcValue axis_param;
+  XmlRpcValue axis_param;
   this->get_parameter ("axis", axis_param);
   Eigen::Vector3f axis = Eigen::Vector3f::Zero ();
 
   switch (axis_param.getType ())
   {
-    case XmlRpc::XmlRpcValue::TypeArray:
+    case XMLRPC_TYPE_ARRAY:
     {
-      if (axis_param.size () != 3)
+      if (axis_param.arraySize () != 3)
       {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onConstruct] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.size ());
+        RCLCPP_ERROR (this->get_logger(), "[%s::onConstruct] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.arraySize ());
         return;
       }
       for (int i = 0; i < 3; ++i)
       {
-        if (axis_param[i].getType () != XmlRpc::XmlRpcValue::TypeDouble)
+        if (axis_param.arrayGetItem (i).getType () != XMLRPC_TYPE_DOUBLE)
         {
           RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
           return;
         }
-        double value = axis_param[i]; axis[i] = value;
+        double value = axis_param.arrayGetItem (i).getDouble (); axis[i] = value;
       }
       break;
     }
@@ -401,8 +400,9 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe ()
 {
   sub_input_filter_.unsubscribe ();
   sub_normals_filter_.unsubscribe ();
-
-  sub_axis_.shutdown ();
+  
+  std::cout << "shutdown" << std::endl;
+  //sub_axis_.shutdown ();
 
   if (use_indices_)
     sub_indices_filter_.unsubscribe ();
@@ -410,9 +410,9 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::msg::ModelCoefficients::ConstSharedPtr &model)
+pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr &model)
 {
-  std::guard_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock (mutex_);
 
   if (model->values.size () < 3)
   {
@@ -434,7 +434,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
       const PointIndicesConstPtr &indices
       )
 {
-  std::mutex::scoped_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock (mutex_);
 
   PointIndices inliers;
   ModelCoefficients model;
@@ -503,7 +503,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setIndices (indices_ptr.get());
+  impl_.setIndices (to_boost_ptr (indices_ptr));
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty ()) {

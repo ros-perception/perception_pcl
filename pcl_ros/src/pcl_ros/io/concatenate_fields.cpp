@@ -68,7 +68,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->create_subscription ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this), maximum_queue_size_);
+  sub_input_ = this->create_subscription ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

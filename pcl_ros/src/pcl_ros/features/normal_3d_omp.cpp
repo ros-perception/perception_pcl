@@ -37,13 +37,14 @@
 
 //#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d_omp.h"
+#include "pcl_ros/ptr_helper.h"
 
 void 
 pcl_ros::NormalEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (to_std_ptr(output.makeShared ()));
 }
 
 void 
@@ -57,7 +58,7 @@ pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   // Estimate the feature
   PointCloudOut output;

@@ -44,7 +44,7 @@ pcl_ros::VFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output);
+  pub_output_->publish (to_std_ptr(output.makeShared()));
 }
 
 void 
