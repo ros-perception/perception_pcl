@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 // Include the implementations here instead of compiling them separately to speed up compile time
 //#include "normal_3d.cpp"
 //#include "boundary.cpp"
@@ -100,7 +100,7 @@ use_surface_(false), spatial_locator_type_(-1)
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
+        sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, std::placeholders::_1));
         // surface not enabled, connect the input-indices duo and register
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, nf_pc_, sub_indices_filter_);
@@ -110,7 +110,7 @@ use_surface_(false), spatial_locator_type_(-1)
     }
     else                    // Use only surface
     {
-      sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&Feature::input_callback, this, std::placeholders::_1));
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
       if (approximate_sync_)
@@ -120,13 +120,13 @@ use_surface_(false), spatial_locator_type_(-1)
     }
     // Register callbacks
     if (approximate_sync_)
-      sync_input_surface_indices_a_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_a_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     else
-      sync_input_surface_indices_e_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_e_->registerCallback (std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
@@ -144,8 +144,11 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
     const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+  count_subscribers not implemented yet in ROS2
   if (pub_output_->count_subscribers () <= 0)
     return;
+  */
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
@@ -267,7 +270,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
+        sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, std::placeholders::_1));
         if (approximate_sync_)
           // surface not enabled, connect the input-indices duo and register
           sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, sub_indices_filter_);
@@ -281,7 +284,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (this->shared_from_this (), "surface");
 
-      sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
+      sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, std::placeholders::_1));
       if (approximate_sync_)
         sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -290,7 +293,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   }
   else
   {
-    sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback (std::bind (&FeatureFromNormals::input_callback, this, std::placeholders::_1));
 
     if (approximate_sync_)
       sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, nf_pi_);
@@ -300,9 +303,9 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
 
   // Register callbacks
   if (approximate_sync_)
-    sync_input_normals_surface_indices_a_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_a_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
   else
-    sync_input_normals_surface_indices_e_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_e_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
   RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"

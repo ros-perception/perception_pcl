@@ -88,7 +88,7 @@ namespace pcl_ros
 
       /** \brief A pointer to the spatial search object. */
       KdTreePtr tree_;
-
+      // pcl::search::KdTree<pcl::PointXYZ>::Ptr tree 
       /** \brief The number of K nearest neighbors to use for each point. */
       int k_;
 
@@ -137,7 +137,7 @@ namespace pcl_ros
         indices.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
         PointCloudIn cloud;
         cloud.header.stamp = input->header.stamp;
-        nf_pc_.add (std::make_shared<PointCloudIn> (cloud));
+        nf_pc_.add (to_std_ptr (cloud.makeShared()));
         nf_pi_.add (std::make_shared<PointIndices> (indices));
       }
 

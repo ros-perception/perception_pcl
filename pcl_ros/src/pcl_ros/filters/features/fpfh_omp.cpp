@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/fpfh_omp.h"
 
 void 
@@ -56,12 +56,13 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  // initTree (spatial_locator_type_, tree_, k_);
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -75,5 +76,4 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::FPFHEstimationOMP FPFHEstimationOMP;
-//PLUGINLIB_EXPORT_CLASS(FPFHEstimationOMP,nodelet::Nodelet);
-
+CLASS_LOADER_REGISTER_CLASS(FPFHEstimationOMP, rclcpp::Node)

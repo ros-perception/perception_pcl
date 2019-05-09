@@ -35,7 +35,6 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/pfh.h"
 
 void 
@@ -58,7 +57,7 @@ pcl_ros::PFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -72,5 +71,6 @@ pcl_ros::PFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::PFHEstimation PFHEstimation;
-//PLUGINLIB_EXPORT_CLASS(PFHEstimation, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PFHEstimation)

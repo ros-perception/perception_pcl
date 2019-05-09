@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include <pcl/io/io.h>
 #include <pcl/PointIndices.h>
 #include "pcl_ros/segmentation/extract_clusters.h"
@@ -47,7 +47,7 @@ using pcl_conversions::moveFromPCL;
 using pcl_conversions::toPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::PCLNode(node_name, options)
+pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (const rclcpp::NodeOptions& options) : PCLNode("EuclideanClusterExtraction", options), publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ())
 {
   // ---[ Mandatory parameters
   double cluster_tolerance;
@@ -99,18 +99,18 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
     {
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
+    sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,5 +213,5 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
 }
 
 typedef pcl_ros::EuclideanClusterExtraction EuclideanClusterExtraction;
-//PLUGINLIB_EXPORT_CLASS(EuclideanClusterExtraction, nodelet::Nodelet)
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(EuclideanClusterExtraction)

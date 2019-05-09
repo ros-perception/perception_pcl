@@ -35,9 +35,8 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
 typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-//PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(RadiusOutlierRemoval)

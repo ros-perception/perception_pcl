@@ -35,11 +35,10 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/vfh.h"
 #include "pcl_ros/ptr_helper.h"
 
-pcl_ros::VFHEstimation::VFHEstimation(std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options)
+pcl_ros::VFHEstimation::VFHEstimation(const rclcpp::NodeOptions& options) : FeatureFromNormals("VFHEstimationNode", options)
 {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
@@ -62,7 +61,8 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  //initTree (spatial_locator_type_, tree_, k_);
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
@@ -81,5 +81,5 @@ pcl_ros::VFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::VFHEstimation VFHEstimation;
-//PLUGINLIB_EXPORT_CLASS(VFHEstimation,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(VFHEstimation)

@@ -35,7 +35,6 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/voxel_grid.h"
 #include "pcl_ros/ptr_helper.h"
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,5 +55,5 @@ pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
 
 
 typedef pcl_ros::VoxelGrid VoxelGrid;
-//PLUGINLIB_EXPORT_CLASS(VoxelGrid,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(VoxelGrid)

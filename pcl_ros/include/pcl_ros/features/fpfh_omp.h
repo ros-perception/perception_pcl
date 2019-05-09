@@ -64,19 +64,13 @@ namespace pcl_ros
     */
   class FPFHEstimationOMP : public FeatureFromNormals
   {
+    public:
+      FPFHEstimationOMP (const rclcpp::NodeOptions& options);
+    
     private:
       pcl::FPFHEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
 
       typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit ()
-      {
-        // Create the output publisher
-        pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type. */
       void emptyPublish (const PointCloudInConstPtr &cloud);
@@ -86,6 +80,11 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    
+      // FIXME Temporary fix
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

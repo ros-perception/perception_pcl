@@ -51,6 +51,9 @@ namespace pcl_ros
     */
   class MomentInvariantsEstimation: public Feature
   {
+    public:
+      MomentInvariantsEstimation(const rclcpp::NodeOptions& options) : Feature("MomentInvariantsEstimationNode", options) {};
+    
     private:
       pcl::MomentInvariantsEstimation<pcl::PointXYZ, pcl::MomentInvariants> impl_;
 
@@ -66,6 +69,8 @@ namespace pcl_ros
     
       rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
     
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
+
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

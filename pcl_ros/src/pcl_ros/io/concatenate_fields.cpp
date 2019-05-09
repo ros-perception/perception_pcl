@@ -37,7 +37,7 @@
 
 /** \author Radu Bogdan Rusu */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include <pcl/io/io.h>
 #include "pcl_ros/io/concatenate_fields.h"
 
@@ -163,5 +163,5 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;
-//PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudConcatenateFieldsSynchronizer)

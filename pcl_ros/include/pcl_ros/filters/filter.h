@@ -62,7 +62,7 @@ namespace pcl_ros
 
     protected:
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
 
       message_filters::Subscriber<PointCloud2> sub_input_filter_;
 

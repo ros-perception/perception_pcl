@@ -58,7 +58,7 @@ namespace pcl_ros
   class ProjectInliers : public Filter
   {
     public:
-      ProjectInliers (std::string node_name, const rclcpp::NodeOptions& options);
+      ProjectInliers (const rclcpp::NodeOptions& options);
 
     protected:
       /** \brief Call the actual filter. 

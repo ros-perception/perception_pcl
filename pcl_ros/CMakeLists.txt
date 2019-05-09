@@ -89,7 +89,6 @@ ament_export_include_directories(
   include
 )
 
-
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
 target_link_libraries(pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
@@ -160,6 +159,9 @@ add_library (pcl_ros_surface
 )
 target_link_libraries(pcl_ros_surface ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 class_loader_hide_library_symbols(pcl_ros_surface)
+
+## register node plugins
+rclcpp_register_node_plugins(${PROJECT_NAME} "${PROJECT_NAME}::PclNode")
 
 ## Tools
 

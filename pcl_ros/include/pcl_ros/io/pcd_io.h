@@ -55,7 +55,7 @@ namespace pcl_ros
       typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
 
       /** \brief Empty constructor. */
-      PCDReader (std::string node_name, const rclcpp::NodeOptions& options) : publish_rate_ (0), tf_frame_ ("/base_link") {};
+      PCDReader (const rclcpp::NodeOptions& options);
 
       /** \brief Set the publishing rate in seconds.
         * \param publish_rate the publishing rate in seconds

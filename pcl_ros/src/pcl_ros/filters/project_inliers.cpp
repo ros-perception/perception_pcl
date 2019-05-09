@@ -35,12 +35,12 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/filters/project_inliers.h"
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ProjectInliers::ProjectInliers (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::Filter(node_name, options), model_ ()
+pcl_ros::ProjectInliers::ProjectInliers (const rclcpp::NodeOptions& options) : Filter("ProjectInliersNode", options), model_ ()
 {
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
@@ -96,13 +96,13 @@ pcl_ros::ProjectInliers::subscribe ()
   {
     sync_input_indices_model_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > (max_queue_size_);
     sync_input_indices_model_a_->connectInput (sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_a_->registerCallback (std::bind (&ProjectInliers::input_indices_model_callback, this, _1, _2, _3));
+    sync_input_indices_model_a_->registerCallback (std::bind (&ProjectInliers::input_indices_model_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
   else
   {
     sync_input_indices_model_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > (max_queue_size_);
     sync_input_indices_model_e_->connectInput (sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_e_->registerCallback (std::bind (&ProjectInliers::input_indices_model_callback, this, _1, _2, _3));
+    sync_input_indices_model_e_->registerCallback (std::bind (&ProjectInliers::input_indices_model_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 }
 
@@ -125,8 +125,11 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstS
                                                        const PointIndicesConstPtr &indices,
                                                        const ModelCoefficientsConstPtr &model)
 {
-  if (pub_output_->count_subscribers () <= 0)
+  /*
+   No count_subscribers functionality yet in ROS2
+   if (pub_output_->count_subscribers () <= 0)
     return;
+   */
 
   if (!isValid (model) || !isValid (indices) || !isValid (cloud))
   {
@@ -154,5 +157,5 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstS
 }
 
 typedef pcl_ros::ProjectInliers ProjectInliers;
-//PLUGINLIB_EXPORT_CLASS(ProjectInliers,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(ProjectInliers)

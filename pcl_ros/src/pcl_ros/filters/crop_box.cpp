@@ -36,9 +36,8 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/filters/crop_box.h"
 
 typedef pcl_ros::CropBox CropBox;
-//PLUGINLIB_EXPORT_CLASS(CropBox,nodelet::Nodelet);
-
+CLASS_LOADER_REGISTER_CLASS(CropBox, rclcpp::Node)

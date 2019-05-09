@@ -68,7 +68,7 @@ namespace pcl_ros
   class FPFHEstimation : public FeatureFromNormals
   {
     public:
-      FPFHEstimation(std::string node_name, const rclcpp::NodeOptions& options);
+      FPFHEstimation(const rclcpp::NodeOptions& options);
 
     private:
       pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
@@ -83,7 +83,11 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+      // FIXME Temporary fix
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
 
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

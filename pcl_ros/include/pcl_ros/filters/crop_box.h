@@ -70,7 +70,7 @@ namespace pcl_ros
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices.get());
+        impl_.setIndices (to_boost_ptr (indices));
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);

@@ -35,8 +35,10 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/fpfh.h"
+#include "pcl_ros/ptr_helper.h"
+
 pcl_ros::FPFHEstimation::FPFHEstimation(std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
@@ -46,7 +48,7 @@ pcl_ros::FPFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -59,12 +61,14 @@ pcl_ros::FPFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  // initTree (spatial_locator_type_, tree_, k_);
+  // https://github.com/PointCloudLibrary/pcl/blob/master/keypoints/include/pcl/keypoints/impl/keypoint.hpp
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -78,5 +82,4 @@ pcl_ros::FPFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::FPFHEstimation FPFHEstimation;
-//PLUGINLIB_EXPORT_CLASS(FPFHEstimation,nodelet::Nodelet);
-
+CLASS_LOADER_REGISTER_CLASS(FPFHEstimation, rclcpp::Node)

@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/boundary.h"
 pcl_ros::BoundaryEstimation::BoundaryEstimation (std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals (node_name, options) {};
 
@@ -44,7 +44,7 @@ pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -57,12 +57,13 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  // initTree (spatial_locator_type_, tree_, k_);
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -75,4 +76,4 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::BoundaryEstimation BoundaryEstimation;
-//PLUGINLIB_EXPORT_CLASS(BoundaryEstimation,nodelet::Nodelet);
+CLASS_LOADER_REGISTER_CLASS(BoundaryEstimation, rclcpp::Node)

@@ -35,7 +35,6 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/io/concatenate_data.h"
@@ -46,7 +45,6 @@
 pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), maximum_queue_size_ (3), approximate_sync_(false)
 {
   // ---[ Mandatory parameters
-  this->get_parameter("output_frame");
   this->get_parameter ("output_frame", output_frame_);
   this->get_parameter ("approximate_sync", approximate_sync_);
 
@@ -115,7 +113,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   }
 
   // Bogus null filter
-  filters_[0]->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
+  filters_[0]->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, std::placeholders::_1));
 
   switch (input_topics_.size ())
   {
@@ -183,9 +181,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   }
 
   if (approximate_sync_)
-    ts_a_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_a_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7, std::placeholders::_8));
   else
-    ts_e_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_e_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7, std::placeholders::_8));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,6 +258,6 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
   pub_output_->publish (std::make_shared<PointCloud2> (*out1));
 }
 
-//typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
-//PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
-
+typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudConcatenateDataSynchronizer)

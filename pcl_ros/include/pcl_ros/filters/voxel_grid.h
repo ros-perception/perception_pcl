@@ -49,6 +49,10 @@ namespace pcl_ros
     */
   class VoxelGrid : public Filter
   {
+    public:
+    /** \brief Empty constructor */
+    VoxelGrid(const rclcpp::NodeOptions& options) : Filter("VoxelGridNode", options) {};
+    
     protected:
       /** \brief The PCL filter implementation used. */
       pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;

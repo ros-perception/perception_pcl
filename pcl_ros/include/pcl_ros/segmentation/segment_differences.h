@@ -61,7 +61,7 @@ namespace pcl_ros
 
     public:
       /** \brief Empty constructor. */
-      SegmentDifferences (std::string node_name, const rclcpp::NodeOptions& options);
+      SegmentDifferences (const rclcpp::NodeOptions& options);
                                       
     protected:
       /** \brief The message filter subscriber for PointCloud2. */

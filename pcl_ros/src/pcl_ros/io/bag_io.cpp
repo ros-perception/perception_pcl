@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/io/bag_io.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,5 +108,6 @@ pcl_ros::BAGReader::open (const std::string &file_name, const std::string &topic
 }
 */
 //typedef pcl_ros::BAGReader BAGReader;
-//PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet);
+//CLASS_LOADER_REGISTER_CLASS(BAGReader, rclcpp::Node)
+
 

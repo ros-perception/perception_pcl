@@ -66,7 +66,10 @@ namespace pcl_ros
 
     typedef pcl::KdTree<PointIn> KdTree;
     typedef pcl::KdTree<PointIn>::Ptr KdTreePtr; 
-
+    
+    public:
+      MovingLeastSquares(std::string node_name, const rclcpp::NodeOptions& options);
+    
     protected:
       /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
       PointCloudInConstPtr surface_;

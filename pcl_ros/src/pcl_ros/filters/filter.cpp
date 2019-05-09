@@ -38,7 +38,7 @@
 #include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/filters/filter.h"
-
+#include "pcl_ros/ptr_helper.h"
 /*//#include <pcl/filters/pixel_grid.h>
 //#include <pcl/filters/filter_dimension.h>
 */
@@ -126,18 +126,19 @@ pcl_ros::Filter::subscribe()
     {
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (std::bind (&Filter::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (std::bind (&Filter::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, _1, PointIndicesConstPtr ()), max_queue_size_);
+    // PointIndicesConstPtr () needs to be a const PointIndicesConstPtr () somehow
+    sub_input_ = this->create_subscription<PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +158,7 @@ pcl_ros::Filter::unsubscribe()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstPtr &cloud, const PointIndicesConstPtr &indices)
+pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstSharedPtr &cloud, const PointIndicesConstPtr &indices)
 {
   // If cloud is given, check if it's valid
   if (!isValid (cloud))

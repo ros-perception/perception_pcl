@@ -53,7 +53,7 @@ namespace pcl_ros
   class VFHEstimation : public FeatureFromNormals
   {
     public:
-      VFHEstimation(std::string node_name, const rclcpp::NodeOptions& options);
+      VFHEstimation(const rclcpp::NodeOptions& options);
 
     private:
       pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> impl_;
@@ -68,7 +68,9 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
-    
+    // FIXME: Temporary
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
+
     rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
 
     public:

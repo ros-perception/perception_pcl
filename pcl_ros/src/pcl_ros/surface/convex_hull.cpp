@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include <pcl/common/io.h>
 #include "pcl_ros/surface/convex_hull.h"
 
@@ -72,19 +72,19 @@ pcl_ros::ConvexHull2D::subscribe()
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input", std::bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()), 1);
+    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input", std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ void
     RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_->publish (output.makeShared ());
+    pub_output_->publish (output);
     return;
   }
   // If indices are given, check if they are valid
@@ -128,7 +128,7 @@ void
     RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_->publish (output.makeShared ());
+    pub_output_->publish (output);
     return;
   }
 
@@ -192,9 +192,10 @@ void
   }
   // Publish a shared ptr const data
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::ConvexHull2D ConvexHull2D;
-//PLUGINLIB_EXPORT_CLASS(ConvexHull2D, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(ConvexHull2D)

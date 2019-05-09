@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/segmentation/segment_differences.h"
 #include <pcl/io/io.h>
 
@@ -69,7 +69,7 @@ pcl_ros::SegmentDifferences::subscribe ()
   {
     sync_input_target_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_e_->connectInput (sub_input_filter_, sub_target_filter_);
-    sync_input_target_e_->registerCallback (std::bind (&SegmentDifferences::input_target_callback, this, _1, _2));
+    sync_input_target_e_->registerCallback (std::bind (&SegmentDifferences::input_target_callback, this, std::placeholders::_1, std::placeholders::_2));
   }
 }
 
@@ -118,5 +118,5 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
 }
 
 typedef pcl_ros::SegmentDifferences SegmentDifferences;
-//PLUGINLIB_EXPORT_CLASS(SegmentDifferences, nodelet::Nodelet)
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(SegmentDifferences)

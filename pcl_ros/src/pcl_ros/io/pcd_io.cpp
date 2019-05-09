@@ -35,11 +35,10 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include <pcl_ros/io/pcd_io.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PCDReader::PCDReader (std::string node_name, const rclcpp::NodeOptions& node_options) : PCLNode(node_name, options)
+pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PCDReaderNode", options), publish_rate_ (0), tf_frame_ ("/base_link")
 {
   // Provide a latched topic
   auto pub_output = this->create_publisher<PointCloud2> ("output", max_queue_size_, true);
@@ -172,5 +171,6 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
 typedef pcl_ros::PCDReader PCDReader;
 typedef pcl_ros::PCDWriter PCDWriter;
 //(PCDReader,nodelet::Nodelet);
-//PLUGINLIB_EXPORT_CLASS(PCDWriter,nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PCDWriter)
 

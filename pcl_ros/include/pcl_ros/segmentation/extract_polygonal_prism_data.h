@@ -68,7 +68,7 @@ namespace pcl_ros
     typedef PointCloud::ConstPtr PointCloudConstPtr;
     
     public:
-      ExtractPolygonalPrismData(std::string node_name, const rclcpp::NodeOptions& options);
+      ExtractPolygonalPrismData(const rclcpp::NodeOptions& options);
 
     protected:
        /** \brief The output PointIndices publisher. */

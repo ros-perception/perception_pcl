@@ -35,7 +35,6 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/segmentation/extract_polygonal_prism_data.h"
 #include <pcl/io/io.h>
@@ -76,7 +75,7 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   else
   {
-    sub_input_filter_.registerCallback (std::bind (&ExtractPolygonalPrismData::input_callback, this, _1));
+    sub_input_filter_.registerCallback (std::bind (&ExtractPolygonalPrismData::input_callback, this, std::placeholders::_1));
 
     if (approximate_sync_)
       sync_input_hull_indices_a_->connectInput (sub_input_filter_, sub_hull_filter_, nf_);
@@ -85,9 +84,9 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   // Register callbacks
   if (approximate_sync_)
-    sync_input_hull_indices_a_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_a_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   else
-    sync_input_hull_indices_e_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_e_->registerCallback (std::bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,8 +109,11 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
     const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.count_subscribers () <= 0)
+  /*
+   count_subscribers not yet implemented in ROS2
+   if (pub_output_.count_subscribers () <= 0)
     return;
+  */
 
   // Copy the header (stamp + frame_id)
   pcl_msgs::PointIndices inliers;
@@ -187,5 +189,5 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
 }
 
 typedef pcl_ros::ExtractPolygonalPrismData ExtractPolygonalPrismData;
-//PLUGINLIB_EXPORT_CLASS(ExtractPolygonalPrismData, nodelet::Nodelet)
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(ExtractPolygonalPrismData)

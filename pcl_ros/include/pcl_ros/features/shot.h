@@ -48,7 +48,7 @@ namespace pcl_ros
   class SHOTEstimation : public FeatureFromNormals
   {
     public:
-      SHOTEstimation(std::string node_name, rclcpp::NodeOptions& options);
+      SHOTEstimation(const rclcpp::NodeOptions& options);
     
     private:
       pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;

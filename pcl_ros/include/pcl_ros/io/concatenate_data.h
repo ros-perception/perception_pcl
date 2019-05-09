@@ -65,7 +65,7 @@ namespace pcl_ros
       typedef PointCloud2::ConstSharedPtr PointCloud2ConstSharedPtr;
 
       /** \brief Empty constructor. */
-      PointCloudConcatenateDataSynchronizer (std::string node_name, const rclcpp::NodeOptions& options);
+      PointCloudConcatenateDataSynchronizer (const rclcpp::NodeOptions& options);
 
       /** \brief Empty constructor.
         * \param queue_size the maximum queue size

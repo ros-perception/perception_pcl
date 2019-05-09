@@ -35,9 +35,9 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/passthrough.h"
 
 typedef pcl_ros::PassThrough PassThrough;
-//PLUGINLIB_EXPORT_CLASS(PassThrough,nodelet::Nodelet);
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PassThrough)

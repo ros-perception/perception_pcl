@@ -35,11 +35,10 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d_omp.h"
 #include "pcl_ros/ptr_helper.h"
 
-pcl_ros::NormalEstimationOMP::NormalEstimationOMP(std::string node_name, const rclcpp::NodeOptions& options) : Feature(node_name, options) {
+pcl_ros::NormalEstimationOMP::NormalEstimationOMP(const rclcpp::NodeOptions& options) : Feature("NormalEstimationOMPNode", options) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 
 }
@@ -61,7 +60,8 @@ pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  // initTree (spatial_locator_type_, tree_, k_);
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
@@ -79,5 +79,3 @@ pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::NormalEstimationOMP NormalEstimationOMP;
-//PLUGINLIB_EXPORT_CLASS(NormalEstimationOMP,nodelet::Nodelet);
-

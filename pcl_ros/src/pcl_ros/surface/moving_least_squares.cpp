@@ -35,15 +35,15 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/surface/moving_least_squares.h"
 #include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl_ros::MovingLeastSquares::MovingLeastSquares (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
   //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
-  pub_output_ = this->create_publisher<PointCloudIn> ("output", max_queue_size_);
-  pub_normals_ = this->create_publisher<NormalCloudOut> ("normals", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloudIn> ("output");
+  pub_normals_ = this->create_publisher<NormalCloudOut> ("normals");
   
   //if (!this->getParam ("k_search", k_) && !this->getParam ("search_radius", search_radius_))  
   if (!this->get_parameter ("search_radius", search_radius_))
@@ -85,19 +85,19 @@ pcl_ros::MovingLeastSquares::subscribe ()
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&MovingLeastSquares::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()), 1);
+    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&MovingLeastSquares::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,4 +180,6 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
 }
 
 typedef pcl_ros::MovingLeastSquares MovingLeastSquares;
-//PLUGINLIB_EXPORT_CLASS(MovingLeastSquares, nodelet::Nodelet)
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(MovingLeastSquares)

@@ -35,7 +35,6 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d_omp.h"
 #include "pcl_ros/ptr_helper.h"
 
@@ -44,7 +43,7 @@ pcl_ros::NormalEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (to_std_ptr(output.makeShared ()));
+  pub_output_->publish (output);
 }
 
 void 
@@ -71,5 +70,6 @@ pcl_ros::NormalEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::NormalEstimationOMP NormalEstimationOMP;
-//PLUGINLIB_EXPORT_CLASS(NormalEstimationOMP, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(NormalEstimationOMP)

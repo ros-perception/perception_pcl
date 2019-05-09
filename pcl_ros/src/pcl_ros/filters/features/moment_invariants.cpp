@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/moment_invariants.h"
 #include "pcl_ros/ptr_helper.h"
 
@@ -56,7 +56,8 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
   impl_.setKSearch (k_);
   impl_.setRadiusSearch (search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
+  // Function removed in later versions of PCL
+  // initTree (spatial_locator_type_, tree_, k_);
   impl_.setSearchMethod (tree_);
 
   // Set the inputs
@@ -70,9 +71,9 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::MomentInvariantsEstimation MomentInvariantsEstimation;
-//PLUGINLIB_EXPORT_CLASS(MomentInvariantsEstimation,nodelet::Nodelet);
+CLASS_LOADER_REGISTER_CLASS(MomentInvariantsEstimation, rclcpp::Node)
 

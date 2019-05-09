@@ -59,6 +59,9 @@ namespace pcl_ros
     */
   class StatisticalOutlierRemoval : public Filter
   {
+    public:
+      StatisticalOutlierRemoval(const rclcpp::NodeOptions& options) : Filter("StatisticalOutlierRemoval", options) {};
+    
     protected:
       std::mutex mutex_;
 

@@ -34,11 +34,11 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/shot.h"
 #include "pcl_ros/ptr_helper.h"
 
-pcl_ros::SHOTEstimation::SHOTEstimation (std::string node_name, rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options)
+pcl_ros::SHOTEstimation::SHOTEstimation (const rclcpp::NodeOptions& options) : FeatureFromNormals("SHOTEstimationNode", options)
 {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
@@ -49,7 +49,7 @@ pcl_ros::SHOTEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (to_std_ptr(output.makeShared ()));
+  pub_output_->publish (output);
 }
 
 void 
@@ -78,5 +78,6 @@ pcl_ros::SHOTEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::SHOTEstimation SHOTEstimation;
-//PLUGINLIB_EXPORT_CLASS(SHOTEstimation, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(SHOTEstimation)

@@ -56,7 +56,7 @@ namespace pcl_ros
   class BoundaryEstimation: public FeatureFromNormals
   {
     public:
-      BoundaryEstimation(std::string node_name, const rclcpp::NodeOptions& options);
+      BoundaryEstimation(const rclcpp::NodeOptions& options);
 
     private:
       pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> impl_;
@@ -71,6 +71,10 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

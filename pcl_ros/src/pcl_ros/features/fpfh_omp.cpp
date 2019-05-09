@@ -35,15 +35,20 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/fpfh_omp.h"
 
-void 
+pcl_ros::FPFHEstimationOMP::FPFHEstimationOMP (const rclcpp::NodeOptions& options) : FeatureFromNormals("FPFHEstimationOMPNode", options) {
+  pub_output_ = this->create_publisher<PointCloudOut> ("output");
+}
+
+
+void
 pcl_ros::FPFHEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -58,7 +63,7 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices.get());
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -72,5 +77,6 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::FPFHEstimationOMP FPFHEstimationOMP;
-//PLUGINLIB_EXPORT_CLASS(FPFHEstimationOMP, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(FPFHEstimationOMP)

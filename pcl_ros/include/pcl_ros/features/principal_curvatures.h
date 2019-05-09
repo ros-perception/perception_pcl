@@ -53,6 +53,9 @@ namespace pcl_ros
     */
   class PrincipalCurvaturesEstimation : public FeatureFromNormals
   {
+    public:
+      PrincipalCurvaturesEstimation(const rclcpp::NodeOptions& options) : FeatureFromNormals("PrincipalCurvaturesEstimation", options) {};
+    
     private:
       pcl::PrincipalCurvaturesEstimation<pcl::PointXYZ, pcl::Normal, pcl::PrincipalCurvatures> impl_;
 
@@ -66,6 +69,9 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

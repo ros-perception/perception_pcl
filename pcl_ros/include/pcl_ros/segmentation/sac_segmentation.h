@@ -61,7 +61,7 @@ namespace pcl_ros
 
     public:
       /** \brief Constructor. */
-      SACSegmentation (std::string node_name, const rclcpp::NodeOptions& options);
+      SACSegmentation (const rclcpp::NodeOptions& options);
 
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
         * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
@@ -106,7 +106,7 @@ namespace pcl_ros
 
       /** \brief Null passthrough filter, used for pushing empty elements in the
         * synchronizer */
-    message_filters::PassThrough<pcl_msgs::msg::PointIndices> nf_pi_;
+      message_filters::PassThrough<pcl_msgs::msg::PointIndices> nf_pi_;
 
       /** \brief Input point cloud callback. Used when \a use_indices is set.
         * \param cloud the pointer to the input point cloud
