@@ -133,8 +133,11 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+   count_subscribers not yet implemented ROS2
   if (pub_output_.count_subscribers () <= 0)
     return;
+   */
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud))

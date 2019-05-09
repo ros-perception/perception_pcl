@@ -41,8 +41,6 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include "pcl_ros/pcl_node.h"
 
-#include "pcl_ros/EuclideanClusterExtractionConfig.h"
-
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;

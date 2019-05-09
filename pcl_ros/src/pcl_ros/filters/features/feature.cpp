@@ -323,9 +323,11 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+  count_subscribers not yet implemented ROS2
   if (pub_output_.count_subscribers () <= 0)
     return;
-
+   */
   // If cloud+normals is given, check if it's valid
   if (!isValid (cloud))// || !isValid (cloud_normals, "normals"))
   {

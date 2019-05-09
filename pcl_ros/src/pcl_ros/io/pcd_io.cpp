@@ -41,7 +41,7 @@
 pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PCDReaderNode", options), publish_rate_ (0), tf_frame_ ("/base_link")
 {
   // Provide a latched topic
-  auto pub_output = this->create_publisher<PointCloud2> ("output", max_queue_size_, true);
+  auto pub_output = this->create_publisher<PointCloud2> ("output", max_queue_size_);
 
   this->get_parameter ("publish_rate", publish_rate_);
   this->get_parameter ("tf_frame", tf_frame_);
@@ -63,11 +63,11 @@ pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PC
     rclcpp::spinOnce ();
     rclcpp::Duration (0.01).sleep ();
   }
-  while (this->ok () && pub_output.count_subscribers () == 0);
+  while (rclcpp::ok () && pub_output.count_subscribers () == 0);
 
   std::string file_name;
 
-  while (this->ok ())
+  while (rclcpp::ok ())
   {
     // Get the current filename parameter. If no filename set, loop
     if (!this->get_parameter ("filename", file_name_) && file_name_.empty ())
@@ -103,16 +103,16 @@ pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PC
       if (output_ != output_new)
       {
         RCLCPP_DEBUG (this->get_logger(), "Publishing data once (%d points) on topic %s in frame %s.", output_->width * output_->height, "output", output_->header.frame_id.c_str ());
-        pub_output.publish (output_);
+        pub_output_->publish (*output_);
         output_new = output_;
       }
-      ros::Duration (0.01).sleep ();
+      rclcpp::Duration (0.01).sleep ();
     }
     else
     {
       RCLCPP_DEBUG (this->get_logger(), "Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, "output", output_->header.frame_id.c_str ());
       output_->header.stamp = this->now ();
-      pub_output->publish (output_);
+      pub_output->publish (*output_);
 
       rclcpp::Duration (publish_rate_).sleep ();
     }
@@ -157,7 +157,7 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
  
   std::string fname;
   if (file_name_.empty ())
-    fname = std::lexical_cast<std::string> (cloud->header.stamp.sec) + ".pcd";
+    fname = std::to_string (cloud->header.stamp.sec) + ".pcd";
   else
     fname = file_name_;
   pcl::PCLPointCloud2 pcl_cloud;

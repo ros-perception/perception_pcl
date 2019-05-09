@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 // Include the implementations here instead of compiling them separately to speed up compile time
 //#include "normal_3d.cpp"
 //#include "boundary.cpp"
@@ -81,7 +80,7 @@ pcl_ros::Feature::Feature (std::string node_name, const rclcpp::NodeOptions& opt
                 this->get_name (),
                 (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
   
-  pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloud2> ("output", max_queue_size_);
 
 }
 
@@ -173,9 +172,11 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
     const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_->count_subscribers () <= 0)
+  /*
+   count_subscribers not implemented ROS2
+   if (pub_output_->count_subscribers () <= 0)
     return;
-
+ */
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
@@ -374,9 +375,12 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
    const PointCloudInConstPtr &cloud_surface, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+   count_subscribers not implemented ROS2
   if (pub_output_.count_subscribers () <= 0)
     return;
-
+  */
+  
   // If cloud+normals is given, check if it's valid
   if (!isValid (cloud))// || !isValid (cloud_normals, "normals"))
   {

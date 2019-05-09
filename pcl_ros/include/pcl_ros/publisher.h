@@ -51,7 +51,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
-namespace pcl_ros 
+/*namespace pcl_ros
 {
   class BasePublisher : rclcpp::Node
   {
@@ -65,13 +65,19 @@ namespace pcl_ros
       std::string 
         getTopic ()
       {
-        return (pub_->get_topic ());
+        return (pub_->get_topic_name ());
       }
 
       uint32_t 
         count_subscribers () const
       {
+        /*
+         Not yet implemented ROS2
         return (pub_->count_subscribers ());
+         */
+
+/*
+        return 0;
       }
 
       void 
@@ -146,4 +152,5 @@ namespace pcl_ros
       }
   };
 }
+ */
 #endif  //#ifndef PCL_ROS_PUBLISHER_H_

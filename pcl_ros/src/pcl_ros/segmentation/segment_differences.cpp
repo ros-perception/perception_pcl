@@ -87,19 +87,22 @@ void
 pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cloud, 
                                                     const PointCloudConstPtr &cloud_target)
 {
+  /*
+   count_subscribers not yet implemented ROS2
   if (pub_output_.count_subscribers () <= 0)
     return;
+   */
 
   if (!isValid (cloud) || !isValid (cloud_target, "target")) 
   {
     RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     PointCloud output;
     output.header = cloud->header;
-    pub_output_->publish (output.makeShared ());
+    pub_output_->publish (output);
     return;
   }
 
-  NODELET_DEBUG ("[%s::input_indices_callback]\n"
+  RCLCPP_DEBUG (this->get_logger (), "[%s::input_indices_callback]\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                  "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  this->get_name (),
@@ -112,7 +115,7 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
   PointCloud output;
   impl_.segment (output);
 
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
   RCLCPP_DEBUG (this->get_logger(), "[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", this->get_name (),
                      output.points.size (), fromPCL(output.header).stamp.sec, "output");
 }

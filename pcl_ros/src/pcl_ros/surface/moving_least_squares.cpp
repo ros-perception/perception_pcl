@@ -119,8 +119,11 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
                                                      const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+  count_subscribers not implemented yet ROS2
   if (pub_output_.count_subscribers () <= 0 && pub_normals_.count_subscribers () <= 0)
     return;
+  */
 
   // Output points have the same type as the input, they are only smoothed
   PointCloudIn output;

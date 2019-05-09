@@ -157,7 +157,9 @@ namespace pcl_ros
       void input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
                                            const PointCloudInConstPtr &cloud_surface, 
                                            const PointIndicesConstPtr &indices);
-
+    
+      rclcpp::Publisher<PointCloud2>::SharedPtr pub_output_;
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

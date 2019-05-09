@@ -270,8 +270,8 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   }
 
   // Publish
-  pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-  pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+  pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+  pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
   RCLCPP_DEBUG (this->get_logger (), "[%s::input_indices_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
                  this->get_name (), inliers.indices.size (), "inliers",
                  model.values.size (), "model");
@@ -361,7 +361,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   sub_normals_filter_.subscribe (this->shared_from_this (), "normals");
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
-  sub_axis_ = this->create_subscription ("axis", std::bind(&SACSegmentationFromNormals::axis_callback, this), 1);
+  sub_axis_ = this->create_subscription ("axis", std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1), 1);
 
   if (approximate_sync_)
     sync_input_normals_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);

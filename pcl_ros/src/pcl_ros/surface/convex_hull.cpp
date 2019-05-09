@@ -108,8 +108,11 @@ void
                                                  const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
+  /*
+  count_subscribers not implemented yet ROS2
   if (pub_output_->count_subscribers () <= 0 && pub_plane_->count_subscribers () <= 0)
     return;
+  */
 
   PointCloud output;
 
