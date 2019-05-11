@@ -35,12 +35,11 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/segmentation/segment_differences.h"
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SegmentDifferences::SegmentDifferences (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
+pcl_ros::SegmentDifferences::SegmentDifferences (const rclcpp::NodeOptions& options) : PCLNode("SegmentDifferencesNode", options)
 {
   pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
 

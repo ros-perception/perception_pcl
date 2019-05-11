@@ -160,7 +160,7 @@ class PointCloudToPCD : public rclcpp::Node
     }
     
     cloud_topic_ = "input";
-    sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2> (cloud_topic_, std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1), 1);
+    sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2> (cloud_topic_,  1, std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1));
     RCLCPP_INFO (this->get_logger(), "Listening for incoming data on topic %s",
                  cloud_topic_.c_str ());
   }

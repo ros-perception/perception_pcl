@@ -138,7 +138,7 @@ pcl_ros::Filter::subscribe()
   else
     // Subscribe in an old fashion to input only (no filters)
     // PointIndicesConstPtr () needs to be a const PointIndicesConstPtr () somehow
-    sub_input_ = this->create_subscription<PointCloud2> ("input",  std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloud2> ("input", max_queue_size_, std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

@@ -72,14 +72,14 @@ namespace pcl_ros
       /** \brief Empty destructor. */
       virtual ~PointCloudConcatenateFieldsSynchronizer () {};
 
-      void input_callback (const PointCloudConstPtr &cloud);
+      void input_callback (const PointCloudPtr cloud);
     
       void subscribe();
       void unsubscribe();
     
     private:
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<PointCloudConstPtr>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
 
       /** \brief The output PointCloud publisher. */
       rclcpp::Publisher<PointCloud>::SharedPtr pub_output_;

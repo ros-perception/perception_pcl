@@ -45,7 +45,7 @@
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentation::SACSegmentation (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options), min_inliers_(0)
+pcl_ros::SACSegmentation::SACSegmentation (const rclcpp::NodeOptions& options) : PCLNode("SACSegmentation", options), min_inliers_(0)
 {
   // Create publishers for the output topics
   auto custom_qos = rmw_qos_profile_system_default;
@@ -281,7 +281,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (std::string node_name, const rclcpp::NodeOptions& options) : SACSegmentation(node_name, options)
+pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (const rclcpp::NodeOptions& options) : SACSegmentation(options)
 {
   // Create publishers for the output topics
   pub_indices_ = this->create_publisher<PointIndices> ("inliers", max_queue_size_);
@@ -361,7 +361,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   sub_normals_filter_.subscribe (this->shared_from_this (), "normals");
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
-  sub_axis_ = this->create_subscription ("axis", std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1), 1);
+  sub_axis_ = this->create_subscription ("axis",  1, std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1));
 
   if (approximate_sync_)
     sync_input_normals_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);

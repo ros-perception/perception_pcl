@@ -37,14 +37,13 @@
 
 /** \author Radu Bogdan Rusu */
 
-#include "class_loader/register_macro.hpp"
 #include <pcl/io/io.h>
 #include "pcl_ros/io/concatenate_fields.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSynchronizer (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node (node_name, options), maximum_queue_size_ (3), maximum_seconds_ (0)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSynchronizer (const rclcpp::NodeOptions& options) : rclcpp::Node ("PointCloudConcatenateFieldsSynchronizerNode", options), maximum_queue_size_ (3), maximum_seconds_ (0)
 {
   // ---[ Mandatory parameters
   if (!this->get_parameter ("input_messages", input_messages_))
@@ -68,7 +67,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->create_subscription ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1));
+  sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +80,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudPtr cloud)
 {
   RCLCPP_DEBUG (this->get_logger(), "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                  cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input");
@@ -149,7 +148,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
         point_offset += clouds[i]->point_step;
       }
     }
-    pub_output_->publish (std::make_shared<const PointCloud> (cloud_out));
+    pub_output_->publish (*std::make_shared<const PointCloud> (cloud_out));
     queue_.erase (cloud->header.stamp);
   }
 
