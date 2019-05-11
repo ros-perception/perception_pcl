@@ -126,6 +126,7 @@ use_surface_(false), spatial_locator_type_(-1)
   }
   else
     // Subscribe in an old fashion to input only (no filters)
+    // Type masquerading not yet supported
     sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
 
   RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
@@ -181,31 +182,31 @@ pcl_ros::Feature::input_surface_indices_callback (const PointCloudInConstPtr &cl
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input".c_str (),
-                 cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.sec, cloud_surface->header.frame_id.c_str (), "surface",
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                 cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp, cloud_surface->header.frame_id.c_str (), "surface",
                  indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
     else
       RCLCPP_DEBUG (this->get_logger(), "[input_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.sec, cloud_surface->header.frame_id.c_str (), "surface");
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp, cloud_surface->header.frame_id.c_str (), "surface");
 
   else
     if (indices)
-      RCLCPP_DEBUG (this-get_logger(), "[input_surface_indices_callback]\n"
+      RCLCPP_DEBUG (this->get_logger(), "[input_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
                      indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
     else
-      RCLCPP_DEBUG (this->get_logger(), "[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", cloud->width * cloud->height, cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input");
+      RCLCPP_DEBUG (this->get_logger(), "[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", cloud->width * cloud->height, cloud->header.stamp, cloud->header.frame_id.c_str (), "input");
   ///
 
 
   if ((int)(cloud->width * cloud->height) < k_)
   {
-    RCLCPP_ERROR (this-get_logger(), "[input_surface_indices_callback] Requested number of k-nearest neighbors (%d) is larger than the PointCloud size (%d)!", k_, (int)(cloud->width * cloud->height));
+    RCLCPP_ERROR (this->get_logger(), "[input_surface_indices_callback] Requested number of k-nearest neighbors (%d) is larger than the PointCloud size (%d)!", k_, (int)(cloud->width * cloud->height));
     emptyPublish (cloud);
     return;
   }
@@ -244,7 +245,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   this->get_parameter ("use_surface", use_surface_);
 
   sub_input_filter_.subscribe (this->shared_from_this (), "input");
-  sub_normals_filter_.subscribe ("normals", max_queue_size_);
+  sub_normals_filter_.subscribe (this->shared_from_this (), "normals");
 
   // Create the objects here
   if (approximate_sync_)
@@ -307,7 +308,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   else
     sync_input_normals_surface_indices_e_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-  RCLCPP_DEBUG (this-get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"
@@ -361,9 +362,9 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                      this->get_name (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.sec, cloud_surface->header.frame_id.c_str (), "surface",
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.sec, cloud_normals->header.frame_id.c_str (), "normals",
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp, cloud_surface->header.frame_id.c_str (), "surface",
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp, cloud_normals->header.frame_id.c_str (), "normals",
                      indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
     else
       RCLCPP_DEBUG (this->get_logger(), "[%s::input_normals_surface_indices_callback]\n"
@@ -371,9 +372,9 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                      this->get_name (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
-                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp.sec, cloud_surface->header.frame_id.c_str (), "surface",
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.sec, cloud_normals->header.frame_id.c_str (), "normals");
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                     cloud_surface->width * cloud_surface->height, pcl::getFieldsList (*cloud_surface).c_str (), cloud_surface->header.stamp, cloud_surface->header.frame_id.c_str (), "surface",
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp, cloud_normals->header.frame_id.c_str (), "normals");
   else
     if (indices)
       RCLCPP_DEBUG (this->get_logger(), "[%s::input_normals_surface_indices_callback]\n"
@@ -381,16 +382,16 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback (
                      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                      this->get_name (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.sec, cloud_normals->header.frame_id.c_str (), "normals",
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp, cloud_normals->header.frame_id.c_str (), "normals",
                      indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
     else
       RCLCPP_DEBUG (this->get_logger(), "[%s::input_normals_surface_indices_callback]\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
                      this->get_name (),
-                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
-                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp.sec, cloud_normals->header.frame_id.c_str (), "normals");
+                     cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp, cloud->header.frame_id.c_str (), "input",
+                     cloud_normals->width * cloud_normals->height, pcl::getFieldsList (*cloud_normals).c_str (), cloud_normals->header.stamp, cloud_normals->header.frame_id.c_str (), "normals");
   ///
 
   if ((int)(cloud->width * cloud->height) < k_)

@@ -108,7 +108,7 @@ pcl_ros::Filter::computePublish (const PointCloud2::ConstSharedPtr &input, const
   cloud_tf->header.stamp = input->header.stamp;
 
   // Publish a shared ptr
-  pub_output_->publish (cloud_tf);
+  pub_output_->publish (*cloud_tf);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ pcl_ros::Filter::subscribe()
   else
     // Subscribe in an old fashion to input only (no filters)
     // PointIndicesConstPtr () needs to be a const PointIndicesConstPtr () somehow
-    sub_input_ = this->create_subscription<PointCloud2> ("input", max_queue_size_, std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloud2> ("input", std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ pcl_ros::Filter::unsubscribe()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstSharedPtr &cloud, const PointIndicesConstPtr &indices)
+pcl_ros::Filter::input_indices_callback (const PointCloud2::SharedPtr cloud, const PointIndicesConstPtr &indices)
 {
   // If cloud is given, check if it's valid
   if (!isValid (cloud))

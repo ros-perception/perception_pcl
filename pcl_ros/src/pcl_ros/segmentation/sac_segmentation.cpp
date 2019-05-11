@@ -45,7 +45,7 @@
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::SACSegmentation::SACSegmentation (const rclcpp::NodeOptions& options) : PCLNode("SACSegmentation", options), min_inliers_(0)
+pcl_ros::SACSegmentation::SACSegmentation (const rclcpp::NodeOptions& options) : PCLNode("SACSegmentationNode", options), min_inliers_(0)
 {
   // Create publishers for the output topics
   auto custom_qos = rmw_qos_profile_system_default;
@@ -166,6 +166,7 @@ pcl_ros::SACSegmentation::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
+    // Type masquerading not yet supported
     sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, std::placeholders::_1, PointIndicesPtr ()));
 }
 
@@ -186,8 +187,8 @@ pcl_ros::SACSegmentation::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &cloud, 
-                                                  const PointIndicesPtr &indices)
+pcl_ros::SACSegmentation::input_indices_callback (const PointCloudPtr cloud,
+                                                  const PointIndicesPtr indices)
 {
   std::lock_guard<std::mutex> lock (mutex_);
 
@@ -361,7 +362,8 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   sub_normals_filter_.subscribe (this->shared_from_this (), "normals");
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
-  sub_axis_ = this->create_subscription ("axis",  1, std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1));
+  // Type masquerading not yet supported
+  sub_axis_ = this->create_subscription<pcl_msgs::msg::ModelCoefficients> ("axis", std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1));
 
   if (approximate_sync_)
     sync_input_normals_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > (max_queue_size_);
@@ -412,7 +414,7 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr &model)
+pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr model)
 {
   std::lock_guard<std::mutex> lock (mutex_);
 
@@ -446,24 +448,24 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   if (impl_.getModelType () < 0)
   {
     RCLCPP_ERROR (this->get_logger (), "[%s::input_normals_indices_callback] Model type not set!", this->get_name ());
-    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+    pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
   if (!isValid (cloud))// || !isValid (cloud_normals, "normals")) 
   {
     RCLCPP_ERROR (this->get_logger (), "[%s::input_normals_indices_callback] Invalid input!", this->get_name ());
-    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+    pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
     RCLCPP_ERROR (this->get_logger (), "[%s::input_normals_indices_callback] Invalid indices!", this->get_name ());
-    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+    pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
@@ -493,8 +495,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   if (cloud_nr_points != cloud_normals_nr_points)
   {
     RCLCPP_ERROR (this->get_logger (), "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs from the number of points in the normals (%d)!", this->get_name (), cloud_nr_points, cloud_normals_nr_points);
-    pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-    pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+    pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+    pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
     return;
   }
 
@@ -526,8 +528,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
   }
 
   // Publish
-  pub_indices_->publish (std::make_shared<const PointIndices> (inliers));
-  pub_model_->publish (std::make_shared<const ModelCoefficients> (model));
+  pub_indices_->publish (*std::make_shared<const PointIndices> (inliers));
+  pub_model_->publish (*std::make_shared<const ModelCoefficients> (model));
   RCLCPP_DEBUG (this->get_logger (), "[%s::input_normals_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
       this->get_name (), inliers.indices.size (), "inliers",
       model.values.size (), "model");

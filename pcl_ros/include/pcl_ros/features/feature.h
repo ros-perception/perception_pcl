@@ -100,7 +100,7 @@ namespace pcl_ros
       message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
       
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloudIn>::SharedPtr sub_input_;
 
 
       /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */

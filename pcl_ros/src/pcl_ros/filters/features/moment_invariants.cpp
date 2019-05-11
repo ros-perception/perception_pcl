@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/moment_invariants.h"
 #include "pcl_ros/ptr_helper.h"
 
@@ -75,5 +74,5 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
 }
 
 typedef pcl_ros::MomentInvariantsEstimation MomentInvariantsEstimation;
-CLASS_LOADER_REGISTER_CLASS(MomentInvariantsEstimation, rclcpp::Node)
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(MomentInvariantsEstimation)

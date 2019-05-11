@@ -191,8 +191,8 @@ TEST(MessageFilter, queueSize)
   std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(10);
   MessageFilter<PCDType> filter(tf_client, "frame1", 10);
-  filter.registerCallback(std::bind(&Notification::notify, &n, _1));
-  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
+ filter.registerCallback(std::bind(&Notification::notify, &n, std::placeholders::_1));
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, std::placeholders::_1, std::placeholders::_2));
   
   auto clock_ = std::make_shared<rclcpp::Clock>();
   rclcpp::Time stamp = clock_->now();
@@ -333,7 +333,7 @@ TEST(MessageFilter, outTheBackFailure)
   tf2_ros::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, std::placeholders::_1, std::placeholders::_2));
   
   auto clock_ = std::make_shared<rclcpp::Clock>();
   rclcpp::Time stamp = clock_->now();
@@ -359,7 +359,7 @@ TEST(MessageFilter, emptyFrameIDFailure)
   std::shared_ptr<tf2_ros::TransformListener> tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(std::bind(&Notification::failure, &n, _1, _2));
+  filter.registerFailureCallback(std::bind(&Notification::failure, &n, std::placeholders::_1, std::placeholders::_2));
 
   PCDType::Ptr msg(new PCDType);
   msg->header.frame_id = "";

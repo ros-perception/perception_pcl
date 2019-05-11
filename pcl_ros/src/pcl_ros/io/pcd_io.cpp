@@ -130,8 +130,8 @@ pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PC
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 pcl_ros::PCDWriter() : PCLNode()
 {
-
-  sub_input_ = this->create_subscription("input", std::bind(&PCDWriter::input_callback, this),  1);
+  
+  sub_input_ = this->create_subscription<>("input", std::bind(&PCDWriter::input_callback, this));
   // ---[ Optional parameters
   this->get_parameter ("filename", file_name_);
   this->get_parameter ("binary_mode", binary_mode_);

@@ -58,14 +58,14 @@ namespace pcl_ros
     typedef PointCloud::ConstPtr PointCloudConstPtr;
     
     public:
-    ConvexHull2D (std::string node_name, const rclcpp::NodeOptions& options);
+    ConvexHull2D (const rclcpp::NodeOptions& options);
     
     private:
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, 
+      void input_indices_callback (const PointCloudPtr &cloud,
                                    const PointIndicesConstPtr &indices);
     
       // TODO: Fix
@@ -76,7 +76,7 @@ namespace pcl_ros
       pcl::ConvexHull<pcl::PointXYZ> impl_;
 
       /** \brief The input PointCloud subscriber. */
-      rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
+      rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
     
       /** \brief Publisher for PolygonStamped. */
       rclcpp::Publisher<geometry_msgs::msg::PolygonStamped>::SharedPtr pub_plane_;

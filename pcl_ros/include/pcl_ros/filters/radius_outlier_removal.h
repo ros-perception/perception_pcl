@@ -52,6 +52,9 @@ namespace pcl_ros
     */
   class RadiusOutlierRemoval : public Filter
   {
+    public:
+      RadiusOutlierRemoval(const rclcpp::NodeOptions& options) : Filter("RadiusOutlierRemovalNode", options) {};
+    
     protected:    
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset

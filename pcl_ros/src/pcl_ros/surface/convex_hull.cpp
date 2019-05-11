@@ -35,12 +35,12 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include <pcl/common/io.h>
 #include "pcl_ros/surface/convex_hull.h"
+#include "pcl_ros/ptr_helper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ConvexHull2D::ConvexHull2D (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
+pcl_ros::ConvexHull2D::ConvexHull2D (const rclcpp::NodeOptions& options) : PCLNode("ConvexHull2DNode", options)
 {
   pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
   pub_plane_  = this->create_publisher<geometry_msgs::msg::PolygonStamped> ("output_polygon", max_queue_size_);
@@ -84,7 +84,8 @@ pcl_ros::ConvexHull2D::subscribe()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2> ("input", std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    // Type masquerading not yet supported
+    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input",  1, std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +105,7 @@ pcl_ros::ConvexHull2D::unsubscribe()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-  pcl_ros::ConvexHull2D::input_indices_callback (const PointCloudConstPtr &cloud, 
+  pcl_ros::ConvexHull2D::input_indices_callback (const PointCloudPtr &cloud,
                                                  const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
@@ -152,7 +153,7 @@ void
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr.get());
+  impl_.setIndices (to_boost_ptr (indices_ptr));
 
   // Estimate the feature
   impl_.reconstruct (output);

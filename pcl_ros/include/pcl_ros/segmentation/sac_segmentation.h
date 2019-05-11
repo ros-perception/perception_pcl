@@ -112,7 +112,7 @@ namespace pcl_ros
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesPtr &indices);
+      void input_indices_callback (const PointCloudPtr cloud, const PointIndicesPtr indices);
 
       /** \brief Pointer to a set of indices stored internally.
        * (used when \a latched_indices_ is set). 
@@ -171,7 +171,7 @@ namespace pcl_ros
 
     public:
     
-      SACSegmentationFromNormals(std::string node_name, const rclcpp::NodeOptions& options);
+      SACSegmentationFromNormals(const rclcpp::NodeOptions& options);
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
         * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
         */
@@ -222,7 +222,7 @@ namespace pcl_ros
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr &model);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud

@@ -140,6 +140,7 @@ pcl_ros::Feature::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
+    // Type masquerading not yet supported
     sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
 }
 
