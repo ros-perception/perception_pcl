@@ -72,7 +72,7 @@ pcl_ros::Feature::Feature (std::string node_name, const rclcpp::NodeOptions& opt
   // ---[ Optional parameters
   this->get_parameter ("use_surface", use_surface_);
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"
@@ -141,7 +141,9 @@ pcl_ros::Feature::subscribe ()
   else
     // Subscribe in an old fashion to input only (no filters)
     // Type masquerading not yet supported
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    // sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not yet supported" << std::endl;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

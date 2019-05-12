@@ -42,7 +42,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), maximum_queue_size_ (3), approximate_sync_(false)
+pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (const rclcpp::NodeOptions& options) : rclcpp::Node("PointCloudConcatenateDataSynchronizerNode", options), maximum_queue_size_ (3), approximate_sync_(false), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
 {
   // ---[ Mandatory parameters
   this->get_parameter ("output_frame", output_frame_);
@@ -59,7 +59,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchro
     RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'input_topics' parameter to be set before continuing!", this->get_name());
     return;
   }
-  if (input_topics_.getType () != XmlRpc::XmlRpcValue::TypeArray)
+  if (typeid (input_topics_) != typeid (std::vector<std::string>))
   {
     RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Invalid 'input_topics' parameter given!", this->get_name());
     return;
@@ -86,9 +86,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchro
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 {
-  RCLCPP_INFO ("Subscribing to %d user given topics as inputs:" input_topics_.size ());
+  RCLCPP_INFO (this->get_logger (),"Subscribing to %d user given topics as inputs:", input_topics_.size () );
   for (int d = 0; d < input_topics_.size (); ++d)
-    RCLCPP_INFO (" - %s", (std::string)(input_topics_[d]));
+    RCLCPP_INFO (this->get_logger ()," - %s", input_topics_[d].c_str ());
 
   // Subscribe to the filters
   filters_.resize (input_topics_.size ());
@@ -109,7 +109,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   for (int d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-    filters_[d].subscribe (this->shared_from_this (), (std::string)(input_topics_[d]));
+    filters_[d].subscribe (this->shared_from_this (), input_topics_.arrayGetItem (d).getString().c_str ());
   }
 
   // Bogus null filter
@@ -201,17 +201,17 @@ void
 pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out)
 {
   //ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
-  PointCloud2::Ptr in1_t (new PointCloud2 ());
-  PointCloud2::Ptr in2_t (new PointCloud2 ());
+  PointCloud2::SharedPtr in1_t (new PointCloud2 ());
+  PointCloud2::SharedPtr in2_t (new PointCloud2 ());
 
   // Transform the point clouds into the specified output frame
   if (output_frame_ != in1.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_listener_);
+    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_buffer_);
   else
     in1_t = std::make_shared<PointCloud2> (in1);
 
   if (output_frame_ != in2.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_listener_);
+    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_buffer_);
   else
     in2_t = std::make_shared<PointCloud2> (in2);
 
@@ -224,13 +224,13 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void 
 pcl_ros::PointCloudConcatenateDataSynchronizer::input (
-    const PointCloud2::ConstPtr &in1, const PointCloud2::ConstPtr &in2, 
-    const PointCloud2::ConstPtr &in3, const PointCloud2::ConstPtr &in4, 
-    const PointCloud2::ConstPtr &in5, const PointCloud2::ConstPtr &in6, 
-    const PointCloud2::ConstPtr &in7, const PointCloud2::ConstPtr &in8)
+    const PointCloud2::ConstSharedPtr &in1, const PointCloud2::ConstSharedPtr &in2,
+    const PointCloud2::ConstSharedPtr &in3, const PointCloud2::ConstSharedPtr &in4,
+    const PointCloud2::ConstSharedPtr &in5, const PointCloud2::ConstSharedPtr &in6,
+    const PointCloud2::ConstSharedPtr &in7, const PointCloud2::ConstSharedPtr &in8)
 {
-  PointCloud2::Ptr out1 (new PointCloud2 ());
-  PointCloud2::Ptr out2 (new PointCloud2 ());
+  PointCloud2::SharedPtr out1 (new PointCloud2 ());
+  PointCloud2::SharedPtr out2 (new PointCloud2 ());
   pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1);
   if (in3 && in3->width * in3->height > 0)
   {
@@ -255,7 +255,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
       }
     }
   }
-  pub_output_->publish (std::make_shared<PointCloud2> (*out1));
+  pub_output_->publish (*std::make_shared<PointCloud2> (*out1));
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;

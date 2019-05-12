@@ -61,8 +61,8 @@ namespace pcl_ros
   {
     public:
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
-      typedef PointCloud2::SharedPtr PointCloud2SharedPtr;
-      typedef PointCloud2::ConstSharedPtr PointCloud2ConstSharedPtr;
+      typedef PointCloud2::SharedPtr PointCloud2Ptr;
+      typedef PointCloud2::ConstSharedPtr PointCloud2ConstPtr;
 
       /** \brief Empty constructor. */
       PointCloudConcatenateDataSynchronizer (const rclcpp::NodeOptions& options);
@@ -92,11 +92,11 @@ namespace pcl_ros
       std::string output_frame_;
 
       /** \brief Input point cloud topics. */
-      XmlRpc::XmlRpcValue input_topics_;
+      std::vector<std::string> input_topics_;
 
       /** \brief TF listener object. */
-      //tf2_ros2::Buffer tf_buffer_;
-      //tf2_ros2::TransformListener tf_listener_;
+      tf2_ros::Buffer tf_buffer_;
+      tf2_ros::TransformListener tf_listener_;
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
         * synchronizer */
@@ -107,7 +107,11 @@ namespace pcl_ros
         */
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_a_;
       std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2, PointCloud2> > > ts_e_;
-
+    
+    
+      virtual void subscribe();
+      virtual void unsubscribe();
+    
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
         * empty elements with the same timestamp.
@@ -121,10 +125,10 @@ namespace pcl_ros
       }
 
       /** \brief Input callback for 8 synchronized topics. */
-      void input (const PointCloud2::ConstPtr &in1, const PointCloud2::ConstPtr &in2, 
-                  const PointCloud2::ConstPtr &in3, const PointCloud2::ConstPtr &in4, 
-                  const PointCloud2::ConstPtr &in5, const PointCloud2::ConstPtr &in6, 
-                  const PointCloud2::ConstPtr &in7, const PointCloud2::ConstPtr &in8);
+      void input (const PointCloud2::ConstSharedPtr &in1, const PointCloud2::ConstSharedPtr &in2,
+                  const PointCloud2::ConstSharedPtr &in3, const PointCloud2::ConstSharedPtr &in4,
+                  const PointCloud2::ConstSharedPtr &in5, const PointCloud2::ConstSharedPtr &in6,
+                  const PointCloud2::ConstSharedPtr &in7, const PointCloud2::ConstSharedPtr &in8);
       
       void combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out);
   };

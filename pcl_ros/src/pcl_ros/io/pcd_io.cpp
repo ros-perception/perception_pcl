@@ -128,10 +128,10 @@ pcl_ros::PCDReader::PCDReader (const rclcpp::NodeOptions& options) : PCLNode("PC
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::PCDWriter() : PCLNode()
+pcl_ros::PCDWriter::PCDWriter(const rclcpp::NodeOptions& options) : PCLNode("PCDWriterNode", options), file_name_ (""), binary_mode_ (true)
 {
   
-  sub_input_ = this->create_subscription<>("input", std::bind(&PCDWriter::input_callback, this));
+  sub_input_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("input", std::bind(&PCDWriter::input_callback, this));
   // ---[ Optional parameters
   this->get_parameter ("filename", file_name_);
   this->get_parameter ("binary_mode", binary_mode_);
@@ -170,7 +170,6 @@ pcl_ros::PCDWriter::input_callback (const PointCloud2ConstPtr &cloud)
 
 typedef pcl_ros::PCDReader PCDReader;
 typedef pcl_ros::PCDWriter PCDWriter;
-//(PCDReader,nodelet::Nodelet);
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(PCDWriter)
 

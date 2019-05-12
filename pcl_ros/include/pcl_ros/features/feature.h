@@ -95,7 +95,7 @@ namespace pcl_ros
       /** \brief The nearest neighbors search radius for each point. */
       double search_radius_;
 
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The surface PointCloud subscriber filter. */
       message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
       
@@ -103,7 +103,7 @@ namespace pcl_ros
       rclcpp::Subscription<PointCloudIn>::SharedPtr sub_input_;
 
 
-      /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */
+      /** \brief Set to true if the node needs to listen for incoming point clouds representing the search surface. */
       bool use_surface_;
 
       /** \brief Parameter for the spatial locator tree. By convention, the values represent:

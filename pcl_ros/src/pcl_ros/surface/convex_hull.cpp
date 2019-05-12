@@ -85,7 +85,8 @@ pcl_ros::ConvexHull2D::subscribe()
   else
     // Subscribe in an old fashion to input only (no filters)
     // Type masquerading not yet supported
-    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input",  1, std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    // sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input",  1, std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

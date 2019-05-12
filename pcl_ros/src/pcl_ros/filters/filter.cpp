@@ -55,10 +55,6 @@
 //#include "statistical_outlier_removal.cpp"
 //#include "voxel_grid.cpp"
 
-/*//PLUGINLIB_EXPORT_CLASS(PixelGrid,nodelet::Nodelet);
-//PLUGINLIB_EXPORT_CLASS(FilterDimension,nodelet::Nodelet);
-*/
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl_ros::Filter::Filter (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
 {
@@ -137,8 +133,7 @@ pcl_ros::Filter::subscribe()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    // PointIndicesConstPtr () needs to be a const PointIndicesConstPtr () somehow
-    sub_input_ = this->create_subscription<PointCloud2> ("input", std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    sub_input_ = this->create_subscription<PointCloud2> ("input", std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesPtr));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +153,7 @@ pcl_ros::Filter::unsubscribe()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::input_indices_callback (const PointCloud2::SharedPtr cloud, const PointIndicesConstPtr &indices)
+pcl_ros::Filter::input_indices_callback (const PointCloud2::SharedPtr cloud, const PointIndicesPtr indices)
 {
   // If cloud is given, check if it's valid
   if (!isValid (cloud))

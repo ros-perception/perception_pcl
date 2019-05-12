@@ -110,7 +110,9 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    // Type masquerading not yet supported
+    // sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +125,8 @@ pcl_ros::EuclideanClusterExtraction::unsubscribe ()
     sub_indices_filter_.unsubscribe ();
   }
   else
-    sub_input_.shutdown ();
+    std::cout << "shutdown" << std::endl;
+    //sub_input_.shutdown ();
 }
 
 

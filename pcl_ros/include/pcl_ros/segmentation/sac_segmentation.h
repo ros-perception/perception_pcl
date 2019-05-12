@@ -156,7 +156,7 @@ namespace pcl_ros
   };
 
   ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b SACSegmentationFromNormals represents the PCL nodelet segmentation class for Sample Consensus methods and
+  /** \brief @b SACSegmentationFromNormals represents the PCL node segmentation class for Sample Consensus methods and
     * models that require the use of surface normals for estimation.
     */
   class SACSegmentationFromNormals: public SACSegmentation
@@ -189,7 +189,7 @@ namespace pcl_ros
       inline std::string getOutputTFframe () { return (tf_output_frame_); }
 
     protected:
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The normals PointCloud subscriber filter. */
       message_filters::Subscriber<PointCloudN> sub_normals_filter_;
 

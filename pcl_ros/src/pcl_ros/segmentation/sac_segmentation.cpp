@@ -39,7 +39,6 @@
 #include <pcl/io/io.h>
 
 #include <pcl_conversions/pcl_conversions.h>
-#include <XmlRpcCpp.h>
 #include "pcl_ros/ptr_helper.h"
 
 using pcl_conversions::fromPCL;
@@ -72,34 +71,28 @@ pcl_ros::SACSegmentation::SACSegmentation (const rclcpp::NodeOptions& options) :
   int method_type = 0;
   this->get_parameter ("method_type", method_type);
 
-  XmlRpcValue axis_param;
+  std::vector<double> axis_param;
+  // XmlRpcValue datatype not supported as parameter in ROS2 https://design.ros2.org/articles/ros_parameters.html
   this->get_parameter ("axis", axis_param);
   Eigen::Vector3f axis = Eigen::Vector3f::Zero ();
-  switch (axis_param.getType ())
+
+  if (axis_param.size () != 3)
   {
-    case XMLRPC_TYPE_ARRAY:
-    {
-      if (axis_param.arraySize () != 3)
-      {
-        RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.arraySize ());
-        return;
-      }
-      for (int i = 0; i < 3; ++i)
-      {
-        if (axis_param.arrayGetItem (i).getType () != XMLRPC_TYPE_DOUBLE)
-        {
-          RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
-          return;
-        }
-        double value = axis_param.arrayGetItem (i).getDouble(); axis[i] = value;
-      }
-      break;
-    }
-    default:
-    {
-      break;
-    }
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), sizeof (axis_param));
+    return;
   }
+
+  for (int i = 0; i < 3; ++i)
+  {
+    if (typeid (axis_param [i]) != typeid (double))
+    {
+      RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
+      return;
+    }
+    double value = axis_param[i]; axis[i] = value;
+  }
+
+
 
   // Initialize the random number generator
   srand (time (0));
@@ -167,7 +160,8 @@ pcl_ros::SACSegmentation::subscribe ()
   else
     // Subscribe in an old fashion to input only (no filters)
     // Type masquerading not yet supported
-    sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, std::placeholders::_1, PointIndicesPtr ()));
+    // sub_input_ = this->create_subscription<PointCloud> ("input",  std::bind (&SACSegmentation::input_indices_callback, this, std::placeholders::_1, PointIndicesPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +226,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudPtr cloud,
   PointCloudConstPtr cloud_tf;
 /*  if (!tf_input_frame_.empty () && cloud->header.frame_id != tf_input_frame_)
   {
-    NODELET_DEBUG ("[input_callback] Transforming input dataset from %s to %s.", cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
+    RCLCPP_DEBUG ("[input_callback] Transforming input dataset from %s to %s.", cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
     // Save the original frame ID
     // Convert the cloud into the different frame
     PointCloud cloud_transformed;
@@ -306,34 +300,23 @@ pcl_ros::SACSegmentationFromNormals::SACSegmentationFromNormals (const rclcpp::N
   int method_type = 0;
   this->get_parameter ("method_type", method_type);
 
-  XmlRpcValue axis_param;
+  std::vector<double> axis_param;
   this->get_parameter ("axis", axis_param);
   Eigen::Vector3f axis = Eigen::Vector3f::Zero ();
-
-  switch (axis_param.getType ())
+  
+  if (axis_param.size () != 3)
   {
-    case XMLRPC_TYPE_ARRAY:
+    RCLCPP_ERROR (this->get_logger (), "[%s::onConstruct] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), sizeof (axis_param));
+    return;
+  }
+  for (int i = 0; i < 3; ++i)
+  {
+    if (typeid (axis_param[i]) != typeid (double))
     {
-      if (axis_param.arraySize () != 3)
-      {
-        RCLCPP_ERROR (this->get_logger (), "[%s::onConstruct] Parameter 'axis' given but with a different number of values (%d) than required (3)!", this->get_name (), axis_param.arraySize ());
-        return;
-      }
-      for (int i = 0; i < 3; ++i)
-      {
-        if (axis_param.arrayGetItem (i).getType () != XMLRPC_TYPE_DOUBLE)
-        {
-          RCLCPP_ERROR (this->get_logger (), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
-          return;
-        }
-        double value = axis_param.arrayGetItem (i).getDouble (); axis[i] = value;
-      }
-      break;
+      RCLCPP_ERROR (this->get_logger (), "[%s::onConstructor] Need floating point values for 'axis' parameter.", this->get_name ());
+      return;
     }
-    default:
-    {
-      break;
-    }
+    double value = axis_param[i]; axis[i] = value;
   }
 
   // Initialize the random number generator

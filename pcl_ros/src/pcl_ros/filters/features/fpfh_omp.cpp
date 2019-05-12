@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/fpfh_omp.h"
 
 void 
@@ -43,7 +42,7 @@ pcl_ros::FPFHEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -72,8 +71,9 @@ pcl_ros::FPFHEstimationOMP::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::FPFHEstimationOMP FPFHEstimationOMP;
-CLASS_LOADER_REGISTER_CLASS(FPFHEstimationOMP, rclcpp::Node)
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(FPFHEstimationOMP)

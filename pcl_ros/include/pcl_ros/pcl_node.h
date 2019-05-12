@@ -31,7 +31,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: pcl_nodelet.h 33238 2010-03-11 00:46:58Z rusu $
+ * $Id: pcl_node.h 33238 2010-03-11 00:46:58Z rusu $
  *
  */
 
@@ -196,7 +196,7 @@ namespace pcl_ros
       {
         /*if (indices->indices.empty ())
         {
-          NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), topic_name.c_str ());
+          RCLCPP_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), topic_name.c_str ());
           return (true);
         }*/
         return (true);
@@ -211,7 +211,7 @@ namespace pcl_ros
       {
         /*if (model->values.empty ())
         {
-          NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), topic_name.c_str ());
+          RCLCPP_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), topic_name.c_str ());
           return (false);
         }*/
         return (true);

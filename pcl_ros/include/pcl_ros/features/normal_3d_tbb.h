@@ -39,51 +39,10 @@
 #define PCL_ROS_NORMAL_3D_TBB_H_
 
 //#include "pcl_ros/pcl_ros_config.h"
-//#if defined(HAVE_TBB)
+#if defined(HAVE_TBB)
 
-#include <pcl/features/normal_3d_tbb.h>
-#include "pcl_ros/features/normal_3d.h"
 
-namespace pcl_ros
-{
-  /** \brief @b NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and
-    * curvatures, in parallel, using Intel's Threading Building Blocks library.
-    * \author Radu Bogdan Rusu
-    */
-  class NormalEstimationTBB: public Feature
-  {
-    private:
-      pcl::NormalEstimationTBB<pcl::PointXYZ, pcl::Normal> impl_;
-
-      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit ()
-      {
-        // Create the output publisher
-        pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
-        return (true);
-      }
-
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-      // FIXME temporary
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
-
-      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
-}
-
-//#endif  // HAVE_TBB
+#endif  // HAVE_TBB
 
 #endif  //#ifndef PCL_ROS_NORMAL_3D_TBB_H_
 

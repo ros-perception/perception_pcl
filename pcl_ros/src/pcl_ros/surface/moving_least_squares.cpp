@@ -39,7 +39,7 @@
 #include "pcl_ros/surface/moving_least_squares.h"
 #include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::MovingLeastSquares::MovingLeastSquares (std::string node_name, const rclcpp::NodeOptions& options) : PCLNode(node_name, options)
+pcl_ros::MovingLeastSquares::MovingLeastSquares (const rclcpp::NodeOptions& options) : PCLNode("MovingLeastSquaresNode", options)
 {
   //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
   pub_output_ = this->create_publisher<PointCloudIn> ("output");
@@ -48,7 +48,6 @@ pcl_ros::MovingLeastSquares::MovingLeastSquares (std::string node_name, const rc
   //if (!this->getParam ("k_search", k_) && !this->getParam ("search_radius", search_radius_))  
   if (!this->get_parameter ("search_radius", search_radius_))
   {
-    //NODELET_ERROR ("[%s::onConstructor] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", this->get_name ());
     RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'search_radius' parameter to be set before continuing!", this->get_name ());
     return;
   }
@@ -98,7 +97,8 @@ pcl_ros::MovingLeastSquares::subscribe ()
   else
     // Subscribe in an old fashion to input only (no filters)
     // Type masquerading not yet supported
-    sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&MovingLeastSquares::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    //sub_input_ = this->create_subscription<PointCloudIn> ("input", std::bind (&MovingLeastSquares::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not yet supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

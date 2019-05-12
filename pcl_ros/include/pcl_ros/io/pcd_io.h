@@ -100,7 +100,7 @@ namespace pcl_ros
   class PCDWriter : public PCLNode
   {
     public:
-      PCDWriter () : file_name_ (""), binary_mode_ (true) {}
+      PCDWriter (const rclcpp::NodeOptions& options)
 
       typedef sensor_msgs::msg::PointCloud2 PointCloud2;
       typedef PointCloud2::Ptr PointCloud2Ptr;

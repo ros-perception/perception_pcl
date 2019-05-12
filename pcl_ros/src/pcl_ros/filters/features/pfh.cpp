@@ -35,11 +35,10 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/pfh.h"
 #include "pcl_ros/ptr_helper.h"
 
-pcl_ros::PFHEstimation::PFHEstimation(std::string node_name, const rclcpp::NodeOptions& options) : FeatureFromNormals(node_name, options) {
+pcl_ros::PFHEstimation::PFHEstimation(const rclcpp::NodeOptions& options) : FeatureFromNormals("PFHEstimationNode", options) {
   pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
 }
 
@@ -48,7 +47,7 @@ pcl_ros::PFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_->publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -81,4 +80,5 @@ pcl_ros::PFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
 }
 
 typedef pcl_ros::PFHEstimation PFHEstimation;
-CLASS_LOADER_REGISTER_CLASS(PFHEstimation, rclcpp::Node)
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PFHEstimation)

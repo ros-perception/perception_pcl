@@ -127,15 +127,15 @@ use_surface_(false), spatial_locator_type_(-1)
   else
     // Subscribe in an old fashion to input only (no filters)
     // Type masquerading not yet supported
-    sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
-
-  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
-                 " - use_surface    : %s\n"
-                 " - k_search       : %d\n"
-                 " - radius_search  : %f\n"
-                 " - spatial_locator: %d",
-                this->get_name (),
-                (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
+    // sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input", std::bind (&Feature::input_surface_indices_callback, this, std::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
+    RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Node successfully created with the following parameters:\n"
+                   " - use_surface    : %s\n"
+                   " - k_search       : %d\n"
+                   " - radius_search  : %f\n"
+                   " - spatial_locator: %d",
+                  this->get_name (),
+                  (use_surface_) ? "true" : "false", k_, search_radius_, spatial_locator_type_);
 }
 
 
@@ -308,7 +308,7 @@ pcl_ros::FeatureFromNormals::FeatureFromNormals (std::string node_name, const rc
   else
     sync_input_normals_surface_indices_e_->registerCallback (std::bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::constructor] Node successfully created with the following parameters:\n"
                  " - use_surface    : %s\n"
                  " - k_search       : %d\n"
                  " - radius_search  : %f\n"

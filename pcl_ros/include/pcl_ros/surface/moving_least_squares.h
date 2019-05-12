@@ -43,13 +43,11 @@
 // PCL includes
 #include <pcl/surface/mls.h>
 
-#include "pcl_ros/MLSConfig.h"
-
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b MovingLeastSquares represents a nodelet using the MovingLeastSquares implementation.
+  /** \brief @b MovingLeastSquares represents a node using the MovingLeastSquares implementation.
     * The type of the output is the same as the input, it only smooths the XYZ coordinates according to the parameters.
     * Normals are estimated at each point as well and published on a separate topic.
     * \author Radu Bogdan Rusu, Zoltan-Csaba Marton
@@ -68,7 +66,7 @@ namespace pcl_ros
     typedef pcl::KdTree<PointIn>::Ptr KdTreePtr; 
     
     public:
-      MovingLeastSquares(std::string node_name, const rclcpp::NodeOptions& options);
+      MovingLeastSquares(const rclcpp::NodeOptions& options);
     
     protected:
       /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
@@ -92,7 +90,7 @@ namespace pcl_ros
       /** \brief How 'flat' should the neighbor weighting gaussian be (the smaller, the more local the fit). */
       double gaussian_parameter_;
 
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The surface PointCloud subscriber filter. */
       message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
       

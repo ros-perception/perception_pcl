@@ -40,44 +40,5 @@
 
 #if defined HAVE_TBB
 
-void 
-pcl_ros::NormalEstimationTBB::emptyPublish (const PointCloudInConstPtr &cloud)
-{
-  PointCloud output;
-  output.header = cloud->header;
-  pub_output_->publish (output);
-}
-
-void 
-pcl_ros::NormalEstimationTBB::computePublish (const PointCloudInConstPtr &cloud,
-                                              const PointCloudInConstPtr &surface,
-                                              const IndicesPtr &indices)
-{
-  // Set the parameters
-  impl_.setKSearch (k_);
-  impl_.setRadiusSearch (search_radius_);
-  // Initialize the spatial locator
-  // Function removed in later versions of PCL
-  // initTree (spatial_locator_type_, tree_, k_);
-  impl_.setSearchMethod (tree_);
-
-  // Set the inputs
-  impl_.setInputCloud (cloud);
-  impl_.setIndices (to_boost_ptr (indices));
-  impl_.setSearchSurface (surface);
-  // Estimate the feature
-  PointCloudOut output;
-  impl_.compute (output);
-
-  // Publish a shared ptr const data
-  // Enforce that the TF frame and the timestamp are copied
-  output.header = cloud->header;
-  pub_output_->publish (output);
-}
-
-typedef pcl_ros::NormalEstimationTBB NormalEstimationTBB;
-#include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(NormalEstimationTBB)
-
 #endif // HAVE_TBB
 
