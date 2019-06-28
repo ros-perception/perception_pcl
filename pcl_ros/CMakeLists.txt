@@ -81,8 +81,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES
-    pcl_ros_filters
-    pcl_ros_io
+    pcl_ros_filter
     pcl_ros_tf
   CATKIN_DEPENDS
     dynamic_reconfigure
@@ -141,10 +140,16 @@ add_dependencies(pcl_ros_features ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_features)
 
 
+## Declare library for base filter plugin
+add_library(pcl_ros_filter
+  src/pcl_ros/filters/filter.cpp
+)
+target_link_libraries(pcl_ros_filter pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_dependencies(pcl_ros_filter ${PROJECT_NAME}_gencfg)
+
 ## Declare the pcl_ros_filters library
 add_library(pcl_ros_filters
   src/pcl_ros/filters/extract_indices.cpp
-  src/pcl_ros/filters/filter.cpp
   src/pcl_ros/filters/passthrough.cpp
   src/pcl_ros/filters/project_inliers.cpp
   src/pcl_ros/filters/radius_outlier_removal.cpp
@@ -152,7 +157,7 @@ add_library(pcl_ros_filters
   src/pcl_ros/filters/voxel_grid.cpp
   src/pcl_ros/filters/crop_box.cpp
 )
-target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_filters pcl_ros_filter pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
 class_loader_hide_library_symbols(pcl_ros_filters)
 
@@ -228,6 +233,7 @@ install(
     pcl_ros_tf
     pcl_ros_io
     pcl_ros_features
+    pcl_ros_filter
     pcl_ros_filters
     pcl_ros_surface
     pcl_ros_segmentation
