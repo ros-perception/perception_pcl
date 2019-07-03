@@ -69,6 +69,7 @@ class PointCloudToPCD
 
   private:
     std::string prefix_;
+    std::string filename_;
     bool binary_;
     bool compressed_;
     std::string fixed_frame_;
@@ -109,7 +110,14 @@ class PointCloudToPCD
       }
 
       std::stringstream ss;
-      ss << prefix_ << cloud->header.stamp << ".pcd";
+      if (filename_ != "")
+      {
+        ss << filename_ << ".pcd";
+      }
+      else
+      {
+        ss << prefix_ << cloud->header.stamp << ".pcd";
+      }
       ROS_INFO ("Data saved to %s", ss.str ().c_str ());
 
       pcl::PCDWriter writer;
@@ -149,6 +157,7 @@ class PointCloudToPCD
       priv_nh.getParam ("fixed_frame", fixed_frame_);
       priv_nh.getParam ("binary", binary_);
       priv_nh.getParam ("compressed", compressed_);
+      priv_nh.getParam ("filename", filename_);
       if(binary_)
 	{
 	  if(compressed_)
@@ -164,6 +173,11 @@ class PointCloudToPCD
 	{
 	  ROS_INFO_STREAM ("Saving as binary PCD");
 	}
+
+      if (filename_ != "")
+      {
+        ROS_INFO_STREAM ("Saving to fixed filename: " << filename_);
+      }
 
       cloud_topic_ = "input";
 
