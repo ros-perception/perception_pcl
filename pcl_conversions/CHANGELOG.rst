@@ -2,6 +2,13 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [Windows][melodic-devel] Fix Boost linkage issue and binary install location. (`#238 <https://github.com/ros-perception/perception_pcl/issues/238>`_)
+  * fix Windows build break. (`#6 <https://github.com/ros-perception/perception_pcl/issues/6>`_)
+  * Fix install path. (`#7 <https://github.com/ros-perception/perception_pcl/issues/7>`_)
+* Contributors: Sean Yen
+
 1.6.2 (2018-05-20)
 ------------------
 

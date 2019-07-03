@@ -2,6 +2,51 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added option for fixed filename (via local parameter) (`#102 <https://github.com/ros-perception/perception_pcl/issues/102>`_)
+  (cherry picked from commit bd38533523fa5c00f320e6505a2c533e90f9d97e)
+* rewrote pcd_to_pointcloud to publish using a latched topic (`#213 <https://github.com/ros-perception/perception_pcl/issues/213>`_)
+  * pointcloud is published as a latched topic now
+  * added functionality: ability to set config via parameters
+* Fix `#150 <https://github.com/ros-perception/perception_pcl/issues/150>`_: Allow bag_to_pcd to properly respond to topic argument (`#215 <https://github.com/ros-perception/perception_pcl/issues/215>`_)
+  * Properly respond to topic argument fixing `#150 <https://github.com/ros-perception/perception_pcl/issues/150>`_
+  Previously providing a topic name in argv[2], as indicated in the usage string,
+  modified the printouts indicating to the user that they were going to be
+  exporting the correct topic, but the rosbag::View::Query used still grabbed the
+  first sensor_msgs/PointCloud2 topic which was not necessarily what they had
+  specified.
+  * Added more useful printouts and type-checking on input topic
+* Catch tf::TransformException in transformPointCloud (`#223 <https://github.com/ros-perception/perception_pcl/issues/223>`_)
+  * Catch TransformException in transformPointCloud
+  This allows to catch all exceptions, not only tf::LookupException and
+  tf::ExtrapolationException.
+  Note that most of the code using transformPointCloud already
+  (implicitly) assumes this function doesn't throw any exception, and they
+  check the return value, which is false when an exception happened (or
+  something went wrong).
+  * Check for transformPointCloud return value
+  In pcl_ros/src/pcl_ros/io/concatenate_data.cpp, which seems to be the
+  only place where that check was missed.
+* Split off pcl_ros_filter into separate library (`#239 <https://github.com/ros-perception/perception_pcl/issues/239>`_)
+* [Windows][melodic-devel] Fix Boost linkage issue and binary install location. (`#238 <https://github.com/ros-perception/perception_pcl/issues/238>`_)
+  * fix Windows build break. (`#6 <https://github.com/ros-perception/perception_pcl/issues/6>`_)
+  * Fix install path. (`#7 <https://github.com/ros-perception/perception_pcl/issues/7>`_)
+* Wait for transform in transformPointCloud(). (`#214 <https://github.com/ros-perception/perception_pcl/issues/214>`_)
+* Added tf2 versions of functions in transforms.h/hpp. (`#231 <https://github.com/ros-perception/perception_pcl/issues/231>`_)
+* Switch to industrial_ci (`#233 <https://github.com/ros-perception/perception_pcl/issues/233>`_)
+  * Use industrial_ci
+  * Run for all melodic target platforms
+  * Artful EOL; verbose build and tests
+  * Use travis_wait
+  * Remove travis_wait
+  * Download to devel space
+  * Mark SYSTEM includes to avoid spurious warnings
+  * Don't double-build PRs
+* use <chrono> and <thread> on Windows (`#221 <https://github.com/ros-perception/perception_pcl/issues/221>`_)
+  * Changing from usleep to c++14 style sleep_for for Windows support
+* Contributors: Enrique Fernandez Perdomo, James Xu, Jarvis Schultz, Martin Pecka, Paul Bovbel, Sean Yen, Stefan Kohlbrecher, Wolfgang Merkt, moooeeeep
+
 1.6.2 (2018-05-20)
 ------------------
 * Fix exported includes in Ubuntu Artful
