@@ -1,32 +1,32 @@
-sudo: false
-dist: trusty
 language: generic
+
 services:
   - docker
-cache: ccache
+
+cache:
+  directories:
+    - $HOME/.ccache
+
 env:
+  global:
+    - ROS_DISTRO="melodic"
+    - ROS_REPO=ros
+    - CCACHE_DIR=$HOME/.ccache
+    # To avoid memory error on Travis.
+    - ROS_PARALLEL_JOBS=-j1
+    - ROS_PARALLEL_TEST_JOBS=-j1
+    # travis build will time out with no output unless we use verbose output
+    - VERBOSE_OUTPUT=true
+    - VERBOSE_TESTS=true
   matrix:
-    # Test the target distro.
-    - ROS_DISTRO=melodic DOCKER_IMAGE=debian:stretch
-    - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:artful
-    - ROS_DISTRO=melodic DOCKER_IMAGE=ubuntu:bionic
-    # To test backward compatibility for users who build from source.
-    - ROS_DISTRO=lunar DOCKER_IMAGE=debian:stretch NOT_TEST_INSTALL=true
-    - ROS_DISTRO=lunar DOCKER_IMAGE=ubuntu:xenial NOT_TEST_INSTALL=true
-    - ROS_DISTRO=kinetic DOCKER_IMAGE=debian:jessie NOT_TEST_INSTALL=true
-    - ROS_DISTRO=kinetic DOCKER_IMAGE=ubuntu:xenial NOT_TEST_INSTALL=true
-    - ROS_DISTRO=indigo DOCKER_IMAGE=ubuntu:trusty NOT_TEST_INSTALL=true
-# Install system dependencies, namely ROS.
-before_install:
-  # Define some config vars.
-  - export CI_SOURCE_PATH=$(pwd)
-  - export REPOSITORY_NAME=${PWD##*/}
+    - OS_NAME=ubuntu OS_CODE_NAME=bionic
+    - OS_NAME=debian OS_CODE_NAME=stretch
+
+install:
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
-  - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
-  - docker run --rm -i -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -v $HOME:$HOME -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -e "ROS_DISTRO=$ROS_DISTRO" -e "ROS_PARALLEL_JOBS=$ROS_PARALLEL_JOBS" -e "DOCKER_IMAGE=$DOCKER_IMAGE" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
-after_failure:
-  - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
-  - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done
+  - .industrial_ci/travis.sh
+
 branches:
   only:
     - /.*-devel$/
