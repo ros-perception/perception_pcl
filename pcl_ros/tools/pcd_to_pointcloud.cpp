@@ -49,124 +49,146 @@
 
 // ROS core
 #include <ros/ros.h>
-#include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include "pcl_ros/publisher.h"
+#include <string>
+#include <sstream>
 
-using namespace std;
+// helper function to return parsed parameter or default value
+template <typename T>
+T get_param(std::string const& name, T default_value) {
+    T value;
+    ros::param::param<T>(name, value, default_value);
+    return value;
+}
 
-class PCDGenerator
-{
-  protected:
-    string tf_frame_;
-    ros::NodeHandle nh_;
-    ros::NodeHandle private_nh_;
-  public:
+class pcd_to_pointcloud {
+    ros::NodeHandle nh;
+    // the topic to publish at, will be overwritten to give the remapped name
+    std::string cloud_topic;
+    // source file name, will be overwritten to produce actually configured file
+    std::string file_name;
+    // republish interval in seconds
+    double interval;
+    // tf2 frame_id
+    std::string frame_id;
+    // latched topic enabled/disabled
+    bool latch;
+    // pointcloud message and publisher
+    sensor_msgs::PointCloud2 cloud;
+    ros::Publisher pub;
+    // timer to handle republishing
+    ros::Timer timer;
 
-    // ROS messages
-    sensor_msgs::PointCloud2 cloud_;
-
-    string file_name_, cloud_topic_;
-    double wait_;
-
-    pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
-
-    ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator () : tf_frame_ ("/base_link"), private_nh_("~")
-    {
-      // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
-
-      cloud_topic_ = "cloud_pcd";
-      pub_.advertise (nh_, cloud_topic_.c_str (), 1);
-      private_nh_.param("frame_id", tf_frame_, std::string("/base_link"));
-      ROS_INFO ("Publishing data on topic %s with frame_id %s.", nh_.resolveName (cloud_topic_).c_str (), tf_frame_.c_str());
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Start
-    int
-      start ()
-    {
-      if (file_name_ == "" || pcl::io::loadPCDFile (file_name_, cloud_) == -1)
-        return (-1);
-      cloud_.header.frame_id = tf_frame_;
-      return (0);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Spin (!)
-    bool spin ()
-    {
-      int nr_points      = cloud_.width * cloud_.height;
-      string fields_list = pcl::getFieldsList (cloud_);
-      double interval = wait_ * 1e+6;
-      while (nh_.ok ())
-      {
-        ROS_DEBUG_ONCE ("Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
-        cloud_.header.stamp = ros::Time::now ();
-
-        if (pub_.getNumSubscribers () > 0)
-        {
-          ROS_DEBUG ("Publishing data to %d subscribers.", pub_.getNumSubscribers ());
-          pub_.publish (cloud_);
+    void publish() {
+        ROS_DEBUG_STREAM_ONCE("Publishing pointcloud");
+        ROS_DEBUG_STREAM_ONCE(" * number of points: " << cloud.width * cloud.height);
+        ROS_DEBUG_STREAM_ONCE(" * frame_id: " << cloud.header.frame_id);
+        ROS_DEBUG_STREAM_ONCE(" * topic_name: " << cloud_topic);
+        int num_subscribers = pub.getNumSubscribers();
+        if (num_subscribers > 0) {
+            ROS_DEBUG("Publishing data to %d subscribers.", num_subscribers);
         }
-        else
-        {
-					// check once a second if there is any subscriber
-          ros::Duration (1).sleep ();
-          continue;
-        }
-
-        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
-
-        if (interval == 0)	// We only publish once if a 0 seconds interval is given
-				{
-					// Give subscribers 3 seconds until point cloud decays... a little ugly!
-		      ros::Duration (3.0).sleep ();
-          break;
-				}
-      }
-      return (true);
+        // update timestamp and publish
+        cloud.header.stamp = ros::Time::now();
+        pub.publish(cloud);
     }
 
+    void timer_callback(ros::TimerEvent const&) {
+        // just re-publish
+        publish();
+    }
 
+public:
+    pcd_to_pointcloud()
+    : cloud_topic("cloud_pcd"), file_name(""), interval(0.0), frame_id("base_link"), latch(false)
+    {
+        // update potentially remapped topic name for later logging
+        cloud_topic = nh.resolveName(cloud_topic);
+    }
+
+    void parse_ros_params() {
+        file_name = get_param("~file_name", file_name);
+        interval = get_param("~interval", interval);
+        frame_id = get_param("~frame_id", frame_id);
+        latch = get_param("~latch", latch);
+    }
+
+    void parse_cmdline_args(int argc, char** argv) {
+        if (argc > 1) {
+            file_name = argv[1];
+        }
+        if (argc > 2) {
+            std::stringstream str(argv[2]);
+            double x;
+            if (str >> x)
+                interval = x;
+        }
+    }
+
+    bool try_load_pointcloud() {
+        if (file_name.empty()) {
+            ROS_ERROR_STREAM("Can't load pointcloud: no file name provided");
+            return false;
+        }
+        else if (pcl::io::loadPCDFile(file_name, cloud) < 0) {
+            ROS_ERROR_STREAM("Failed to parse pointcloud from file ('" << file_name << "')");
+            return false;
+        }
+        // success: set frame_id appropriately
+        cloud.header.frame_id = frame_id;
+        return true;
+    }
+
+    void init_run() {
+        // init publisher
+        pub = nh.advertise<sensor_msgs::PointCloud2>(cloud_topic, 1, latch);
+        // treat publishing once as a special case to interval publishing
+        bool oneshot = interval <= 0;
+        timer = nh.createTimer(ros::Duration(interval),
+                               &pcd_to_pointcloud::timer_callback,
+                               this,
+                               oneshot);
+    }
+
+    void print_config_info() {
+        ROS_INFO_STREAM("Recognized the following parameters");
+        ROS_INFO_STREAM(" * file_name: " << file_name);
+        ROS_INFO_STREAM(" * interval: " << interval);
+        ROS_INFO_STREAM(" * frame_id: " << frame_id);
+        ROS_INFO_STREAM(" * topic_name: " << cloud_topic);
+        ROS_INFO_STREAM(" * latch: " << std::boolalpha << latch);
+    }
+
+    void print_data_info() {
+        ROS_INFO_STREAM("Loaded pointcloud with the following stats");
+        ROS_INFO_STREAM(" * number of points: " << cloud.width * cloud.height);
+        ROS_INFO_STREAM(" * total size [bytes]: " << cloud.data.size());
+        ROS_INFO_STREAM(" * channel names: " << pcl::getFieldsList(cloud));
+    }
 };
 
-/* ---[ */
-int
-  main (int argc, char** argv)
-{
-  if (argc < 2)
-  {
-    std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" << std::endl;
-    return (-1);
-  }
-
-  ros::init (argc, argv, "pcd_to_pointcloud");
-
-  PCDGenerator c;
-  c.file_name_ = string (argv[1]);
-  // check if publishing interval is given
-  if (argc == 2)
-	{
-  	c.wait_ = 0;
-	}
-	else
-	{
-		c.wait_ = atof (argv[2]);
-	}
-
-  if (c.start () == -1)
-  {
-    ROS_ERROR ("Could not load file %s. Exiting.", argv[1]);
-    return (-1);
-  }
-  ROS_INFO ("Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
-  c.spin ();
-
-  return (0);
+int main (int argc, char** argv) {
+    // init ROS
+    ros::init(argc, argv, "pcd_to_pointcloud");
+    // set up node
+    pcd_to_pointcloud node;
+    // initializes from ROS parameters
+    node.parse_ros_params();
+    // also allow config to be provided via command line args
+    // the latter take precedence
+    node.parse_cmdline_args(argc, argv);
+    // print info about effective configuration settings
+    node.print_config_info();
+    // try to load pointcloud from file
+    if (!node.try_load_pointcloud()) {
+        return -1;
+    }
+    // print info about pointcloud
+    node.print_data_info();
+    // initialize run
+    node.init_run();
+    // blocking call to process callbacks etc
+    ros::spin();
 }
-/* ]--- */
