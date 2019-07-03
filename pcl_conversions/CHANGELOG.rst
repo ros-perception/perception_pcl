@@ -2,8 +2,8 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.0 (2019-07-03)
+------------------
 * [Windows][melodic-devel] Fix Boost linkage issue and binary install location. (`#238 <https://github.com/ros-perception/perception_pcl/issues/238>`_)
   * fix Windows build break. (`#6 <https://github.com/ros-perception/perception_pcl/issues/6>`_)
   * Fix install path. (`#7 <https://github.com/ros-perception/perception_pcl/issues/7>`_)

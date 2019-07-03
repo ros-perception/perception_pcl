@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.0 (2019-07-03)
+------------------
 * Added option for fixed filename (via local parameter) (`#102 <https://github.com/ros-perception/perception_pcl/issues/102>`_)
   (cherry picked from commit bd38533523fa5c00f320e6505a2c533e90f9d97e)
 * rewrote pcd_to_pointcloud to publish using a latched topic (`#213 <https://github.com/ros-perception/perception_pcl/issues/213>`_)
