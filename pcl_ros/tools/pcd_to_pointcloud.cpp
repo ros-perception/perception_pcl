@@ -43,10 +43,6 @@
 
  **/
 
-// STL
-#include <chrono>
-#include <thread>
-
 // ROS core
 #include <ros/ros.h>
 #include <pcl/io/pcd_io.h>
