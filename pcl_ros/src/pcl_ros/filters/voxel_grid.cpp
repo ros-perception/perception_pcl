@@ -81,6 +81,14 @@ pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t 
     NODELET_DEBUG ("[config_callback] Setting the downsampling leaf size to: %f.", leaf_size[0]);
     impl_.setLeafSize (leaf_size[0], leaf_size[1], leaf_size[2]);
   }
+  
+  unsigned int minPointsPerVoxel = impl_.getMinimumPointsNumberPerVoxel ();
+  if (minPointsPerVoxel != config.min_points_per_voxel)
+  {
+    minPointsPerVoxel = config.min_points_per_voxel;
+    NODELET_DEBUG ("[config_callback] Setting the minimum points per voxel to: %u.", minPointsPerVoxel);
+    impl_.setMinimumPointsNumberPerVoxel (minPointsPerVoxel);
+  }
 
   double filter_min, filter_max;
   impl_.getFilterLimits (filter_min, filter_max);
