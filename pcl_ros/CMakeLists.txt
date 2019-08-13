@@ -40,10 +40,9 @@ endif()
 find_package(message_filters REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(pcl_msgs REQUIRED)
-find_package(pluginlib REQUIRED)
 find_package(rosbag2 REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(message_filters REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -72,6 +71,7 @@ ament_export_dependencies(
   rclcpp
   rosbag2
   sensor_msgs
+  rclcpp_components
   std_msgs
   tf2
   EIGEN3
@@ -161,7 +161,7 @@ target_link_libraries(pcl_ros_surface ${rclcpp_LIBRARIES} ${rmw_implementation_L
 class_loader_hide_library_symbols(pcl_ros_surface)
 
 ## register node plugins
-rclcpp_register_node_plugins(${PROJECT_NAME} "${PROJECT_NAME}::PclNode")
+#rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::PclNode")
 
 ## Tools
 

@@ -53,7 +53,7 @@
 class PointCloudToImage : public rclcpp::Node
 {
 public:
-  PointCloudToImage (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), cloud_topic_("input"), image_topic_("output")
+  PointCloudToImage (const rclcpp::NodeOptions& options) : rclcpp::Node("convert_pointcloud_to_image", options), cloud_topic_("input"), image_topic_("output")
   {
     
     sub_ = this->create_subscription<sensor_msgs::msg::Image> (cloud_topic_, std::bind(&PointCloudToImage::cloud_cb, this, std::placeholders::_1));
@@ -97,8 +97,11 @@ int
 main (int argc, char **argv)
 {
   rclcpp::init (argc, argv);
-  auto pci = std::make_shared<PointCloudToImage>("convert_pointcloud_to_image"); //this loads up the node
-  rclcpp::spin(pci); //where she stops nobody knows
+
+  rclcpp::NodeOptions options;
+  auto pci = std::make_shared<PointCloudToImage>(options); //this loads up the node
+
+  rclcpp::spin(pci);
   rclcpp::shutdown();
   return 0;
 }

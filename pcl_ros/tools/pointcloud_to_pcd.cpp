@@ -127,7 +127,7 @@ class PointCloudToPCD : public rclcpp::Node
     }
 
   ////////////////////////////////////////////////////////////////////////////////
-  PointCloudToPCD (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
+  PointCloudToPCD (const rclcpp::NodeOptions& options) : rclcpp::Node("pointcloud_to_pcd", options), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
   {
     // Check if a prefix parameter is defined for output file names.
     if (this->get_parameter ("prefix", prefix_))
@@ -171,9 +171,9 @@ int
   main (int argc, char** argv)
 {
   rclcpp::init (argc, argv);
-  //ros::init_options::AnonymousName
 
-  auto b = std::make_shared<PointCloudToPCD> ("pointcloud_to_pcd");
+  rclcpp::NodeOptions options;
+  auto b = std::make_shared<PointCloudToPCD> (options);
   rclcpp::spin (b);
   rclcpp::shutdown();
   return (0);
