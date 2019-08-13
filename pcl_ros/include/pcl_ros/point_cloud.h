@@ -8,7 +8,6 @@
 #include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <boost/ref.hpp>
 
 namespace pcl 
 {
@@ -61,10 +60,10 @@ namespace message_filters
   template<typename T>
   struct DefaultMessageCreator<pcl::PointCloud<T> >
   {
-    boost::shared_ptr<pcl::MsgFieldMap> mapping_;
+    std::shared_ptr<pcl::MsgFieldMap> mapping_;
 
     DefaultMessageCreator()
-      : mapping_( boost::make_shared<pcl::MsgFieldMap>() )
+      : mapping_( std::make_shared<pcl::MsgFieldMap>() )
     {
     }
     

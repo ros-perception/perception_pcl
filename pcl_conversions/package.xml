@@ -20,7 +20,6 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_export_depend>eigen</build_export_depend>
-  <build_export_depend>boost</build_export_depend>
   <build_export_depend>libpcl-all-dev</build_export_depend>
   <build_export_depend>pcl_msgs</build_export_depend>
   <build_export_depend>rclcpp</build_export_depend>
