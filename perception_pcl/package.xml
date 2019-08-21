@@ -1,4 +1,6 @@
-<package format="2">
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>perception_pcl</name>
   <version>1.6.2</version>
   <description>
@@ -20,13 +22,13 @@
   <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
   <url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>pcl_conversions</exec_depend>
   <exec_depend>pcl_msgs</exec_depend>
-  <exec_depend>pcl_ros</exec_depend>
+  <!--<exec_depend>pcl_ros</exec_depend>-->
 
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

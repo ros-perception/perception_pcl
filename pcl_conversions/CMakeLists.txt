@@ -1,10 +1,23 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(pcl_conversions)
 
-find_package(catkin REQUIRED COMPONENTS)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
 
 find_package(PCL REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
+find_package(pcl_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 # There is a bug in the Ubuntu Artful (17.10) version of the VTK package,
 # where it includes /usr/include/*-linux-gnu/freetype2 in the include
@@ -21,24 +34,25 @@ if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
   endforeach()
 endif()
 
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS pcl_msgs roscpp sensor_msgs std_msgs
-  DEPENDS EIGEN3 PCL
+
+include_directories(${rclcpp_INCLUDE_DIRS})
+
+ament_export_include_directories(include)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
+#if(BUILD_TESTING)
+#  find_package(catkin REQUIRED COMPONENTS roscpp pcl_msgs sensor_msgs std_msgs)
+#  include_directories(
+#    include
+#    ${catkin_INCLUDE_DIRS}
+#    ${PCL_INCLUDE_DIRS}
+#    ${EIGEN3_INCLUDE_DIRS})
+#
+#  catkin_add_gtest(test_pcl_conversions test/test_pcl_conversions.cpp)
+#  target_link_libraries(test_pcl_conversions ${catkin_LIBRARIES})
+#endif()
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED COMPONENTS roscpp pcl_msgs sensor_msgs std_msgs)
-  include_directories(
-    include
-    ${catkin_INCLUDE_DIRS}
-    ${PCL_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIRS})
-
-  catkin_add_gtest(test_pcl_conversions test/test_pcl_conversions.cpp)
-  target_link_libraries(test_pcl_conversions ${catkin_LIBRARIES})
-endif()
+ament_package()
