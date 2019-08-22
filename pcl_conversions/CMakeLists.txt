@@ -39,6 +39,8 @@ include_directories(${rclcpp_INCLUDE_DIRS})
 
 ament_export_include_directories(include)
 
+ament_export_dependencies()
+
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}/
 )
