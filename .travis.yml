@@ -10,7 +10,7 @@ cache:
 env:
   global:
     - ROS_DISTRO="dashing"
-    - ROS_REPO=ros
+    - ROS_REPO=ros2
     - CCACHE_DIR=$HOME/.ccache
     # To avoid memory error on Travis.
     - ROS_PARALLEL_JOBS=-j1
@@ -23,8 +23,9 @@ env:
     - OS_NAME=debian OS_CODE_NAME=stretch
 
 install:
-  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+  - git clone --branch master --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
+  - apt-get install -y apt-transport-https
   - .industrial_ci/travis.sh
 
 branches:
