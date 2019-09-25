@@ -12,49 +12,51 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-find_package(PCL REQUIRED COMPONENTS common io)
+find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(message_filters REQUIRED)
+find_package(PCL REQUIRED QUIET COMPONENTS common io)
 find_package(pcl_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
-# There is a bug in the Ubuntu Artful (17.10) version of the VTK package,
-# where it includes /usr/include/*-linux-gnu/freetype2 in the include
-# directories (which doesn't exist).  This filters down to the PCL_INCLUDE_DIRS,
-# and causes downstream projects trying to use these libraries to fail to
-# configure properly.  Here we remove those bogus entries so that downstream
-# consumers of this package succeed.
-if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
-  foreach(item ${PCL_INCLUDE_DIRS})
-    string(REGEX MATCH "/usr/include/.*-linux-gnu/freetype2" item ${item})
-    if(item)
-      list(REMOVE_ITEM PCL_INCLUDE_DIRS ${item})
-    endif()
-  endforeach()
-endif()
-
-
-include_directories(${rclcpp_INCLUDE_DIRS})
-
-ament_export_include_directories(include)
-
-ament_export_dependencies()
+include_directories(
+  include
+  ${Eigen_INCLUDE_DIRS}
+  ${message_filters_INCLUDE_DIRS}
+  ${PCL_COMMON_INCLUDE_DIRS}
+  ${pcl_msgs_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
+)
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}/
 )
 
-#if(BUILD_TESTING)
-#  find_package(catkin REQUIRED COMPONENTS roscpp pcl_msgs sensor_msgs std_msgs)
-#  include_directories(
-#    include
-#    ${catkin_INCLUDE_DIRS}
-#    ${PCL_INCLUDE_DIRS}
-#    ${EIGEN3_INCLUDE_DIRS})
-#
-#  catkin_add_gtest(test_pcl_conversions test/test_pcl_conversions.cpp)
-#  target_link_libraries(test_pcl_conversions ${catkin_LIBRARIES})
-#endif()
+# Add gtest based cpp test target
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
+  ament_target_dependencies(${PROJECT_NAME}-test
+    "pcl_msgs"
+    "rclcpp"
+    "sensor_msgs"
+    "std_msgs"
+  )
+  target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES})
+endif()
+
+ament_export_include_directories(
+  include
+  ${Eigen_INCLUDE_DIRS}
+  ${message_filters_INCLUDE_DIRS}
+  ${PCL_COMMON_INCLUDE_DIRS}
+  ${pcl_msgs_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
+)
+
+ament_export_dependencies()
 
 ament_package()
