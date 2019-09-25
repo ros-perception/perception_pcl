@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>pcl_conversions</name>
-  <version>1.6.2</version>
+  <version>2.0.0</version>
   <description>Provides conversions from PCL data types and ROS message types</description>
 
   <author email="william@osrfoundation.org">William Woodall</author>
@@ -19,20 +18,26 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>eigen</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>pcl_msgs</build_depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+
   <build_export_depend>eigen</build_export_depend>
   <build_export_depend>libpcl-all-dev</build_export_depend>
+  <build_export_depend>message_filters</build_export_depend>
   <build_export_depend>pcl_msgs</build_export_depend>
   <build_export_depend>rclcpp</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
 
-  <test_depend>eigen</test_depend>
-  <test_depend>libpcl-all-dev</test_depend>
-  <test_depend>pcl_msgs</test_depend>
-  <test_depend>roscpp</test_depend>
-  <test_depend>sensor_msgs</test_depend>
-  <test_depend>std_msgs</test_depend>
-  
+  <exec_depend>libpcl-all-dev</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>
