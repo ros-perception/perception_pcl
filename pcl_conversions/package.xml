@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pcl_conversions</name>
-  <version>2.0.0</version>
+  <version>1.6.2</version>
   <description>Provides conversions from PCL data types and ROS message types</description>
 
   <author email="william@osrfoundation.org">William Woodall</author>
+  <author email="paul@bovbel.com">Paul Bovbel</author>
+  <author email="bill@neautomation.com">Bill Morris</author>
   <author email="ankl@kth.se">Andreas Klintberg</author>
 
   <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
