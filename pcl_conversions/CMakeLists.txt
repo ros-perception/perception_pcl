@@ -11,7 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-
 find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(message_filters REQUIRED)
@@ -21,13 +20,25 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
-include_directories(
+
+set(dependencies
+  pcl_msgs
+  rclcpp
+  sensor_msgs
+  std_msgs
+)
+
+set(includes
   include
   ${Eigen_INCLUDE_DIRS}
   ${message_filters_INCLUDE_DIRS}
   ${PCL_COMMON_INCLUDE_DIRS}
   ${pcl_msgs_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
+)
+
+include_directories(
+  ${includes}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -40,23 +51,13 @@ if(BUILD_TESTING)
 
   ament_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
   ament_target_dependencies(${PROJECT_NAME}-test
-    "pcl_msgs"
-    "rclcpp"
-    "sensor_msgs"
-    "std_msgs"
+    ${dependencies}
   )
   target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES})
 endif()
 
 ament_export_include_directories(
-  include
-  ${Eigen_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS}
-  ${PCL_COMMON_INCLUDE_DIRS}
-  ${pcl_msgs_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS}
+  ${includes}
 )
-
 ament_export_dependencies()
-
 ament_package()
