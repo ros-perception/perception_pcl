@@ -35,40 +35,77 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl_ros::RadiusOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_service)
+pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
 {
   // Enable the dynamic reconfigure service
   has_service = true;
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+
+  rcl_interfaces::msg::ParameterDescriptor rs_desc;
+  rs_desc.name = "radius_search",
+  rs_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  rs_desc.description = "Radius of the sphere that will determine which points are neighbors.";
+  rcl_interfaces::msg::FloatingPointRange rs_range;
+  rs_range.from_value = 0.0;
+  rs_range.to_value = 10.0;
+  rs_desc.floating_point_range.push_back (rs_range);
+  double radius_search = node_param->declare_parameter (rs_desc.name, 0.1, rs_desc);
+  node_param->get_parameter (rs_desc.name, radius_search);
+  impl_.setRadiusSearch (radius_search);
+
+  rcl_interfaces::msg::ParameterDescriptor mn_desc;
+  mn_desc.name = "min_neighbors";
+  mn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  mn_desc.description = "The number of neighbors that need to be present in order to be classified as an inlier.";
+  rcl_interfaces::msg::IntegerRange mn_range;
+  mn_range.from_value = 0;
+  mn_range.to_value = 1000;
+  mn_desc.integer_range.push_back (mn_range);
+  int min_neighbors = node_param->declare_parameter (mn_desc.name, 5, mn_desc);
+  node_param->get_parameter (mn_range.name, min_neighbors);
+  impl_.setMinNeighborsInRadius (min_neighbors);
+
+  // TODO
+  node_param->set_on_parameters_set_callback (boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2));
+
+  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
+  //dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
+  //srv_->setCallback (f);
 
   return (true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::RadiusOutlierRemoval::config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parameter> & params)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
-  if (impl_.getMinNeighborsInRadius () != config.min_neighbors)
+  for (const rclcpp::Parameter &param : params)
   {
-    impl_.setMinNeighborsInRadius (config.min_neighbors);
-    NODELET_DEBUG ("[%s::config_callback] Setting the number of neighbors in radius: %d.", getName ().c_str (), config.min_neighbors);
+    if (param.get_name () == "min_neighbors")
+    {
+      if (impl_.getMinNeighborsInRadius () != param.as_int ())
+      {
+        impl_.setMinNeighborsInRadius (param.as_int ());
+        // TODO replace NODELET_DEBUG, might need rclcpp::Node logging_interface
+        // TODO replace getName, probably don't need a Nodelet in ROS 2? Not sure what's best way
+        NODELET_DEBUG ("[%s::config_callback] Setting the number of neighbors in radius: %d.", getName ().c_str (), param.as_int ());
+      }
+    } 
+    else if (param.get_name () == "radius_search")
+    {
+      if (impl_.getRadiusSearch () != param.as_double ())
+      {
+        impl_.setRadiusSearch (param.as_double ());
+        NODELET_DEBUG ("[%s::config_callback] Setting the radius to search neighbors: %f.", getName ().c_str (), param.as_double ());
+      }
+    }
   }
-
-  if (impl_.getRadiusSearch () != config.radius_search)
-  {
-    impl_.setRadiusSearch (config.radius_search);
-    NODELET_DEBUG ("[%s::config_callback] Setting the radius to search neighbors: %f.", getName ().c_str (), config.radius_search);
-  }
-  
 }
 
 
