@@ -38,93 +38,90 @@
 #ifndef PCL_ROS_IO_BAG_IO_H_
 #define PCL_ROS_IO_BAG_IO_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
+#include <pcl_ros/pcl_node.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+//#include <rosbag2/bag.h>
+//#include <rosbag2/view.h>
 
-namespace pcl_ros
-{
+//namespace pcl_ros
+//{
   ////////////////////////////////////////////////////////////////////////////////////////////
   /** \brief BAG PointCloud file format reader.
     * \author Radu Bogdan Rusu
     */
-  class BAGReader: public nodelet::Nodelet
+  /*class BAGReader: public rclcpp::Node
   {
     public:
-      typedef sensor_msgs::PointCloud2 PointCloud;
+      typedef sensor_msgs::msg::PointCloud2 PointCloud;
       typedef PointCloud::Ptr PointCloudPtr;
       typedef PointCloud::ConstPtr PointCloudConstPtr;
-
+*/
       /** \brief Empty constructor. */
-      BAGReader () : publish_rate_ (0), output_ ()/*, cloud_received_ (false)*/ {};
+      //BAGReader () : publish_rate_ (0), output_ ()/*, cloud_received_ (false)*/ {};
 
       /** \brief Set the publishing rate in seconds.
         * \param publish_rate the publishing rate in seconds
         */
-      inline void setPublishRate (double publish_rate) { publish_rate_ = publish_rate; }
+     // inline void setPublishRate (double publish_rate) { publish_rate_ = publish_rate; }
 
       /** \brief Get the publishing rate in seconds. */
-      inline double getPublishRate () { return (publish_rate_); }
+      //inline double getPublishRate () { return (publish_rate_); }
 
       /** \brief Get the next point cloud dataset in the BAG file.
         * \return the next point cloud dataset as read from the file
         */
-      inline PointCloudConstPtr
+      /*inline PointCloudConstPtr
         getNextCloud ()
       {
         if (it_ != view_.end ())
         {
-          output_ = it_->instantiate<sensor_msgs::PointCloud2> ();
+          output_ = it_->instantiate<sensor_msgs::msg::PointCloud2> ();
           ++it_;
         }
         return (output_);
       }
-
+*/
       /** \brief Open a BAG file for reading and select a specified topic
         * \param file_name the BAG file to open
         * \param topic_name the topic that we want to read data from
         */
-      bool open (const std::string &file_name, const std::string &topic_name);
+      //bool open (const std::string &file_name, const std::string &topic_name);
 
       /** \brief Close an open BAG file. */
-      inline void 
+      /*inline void
         close ()
       {
         bag_.close ();
       }
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-    private:
+*/
+    //private:
       /** \brief The publishing interval in seconds. Set to 0 to publish once (default). */
-      double publish_rate_;
+      //double publish_rate_;
 
       /** \brief The BAG object. */
-      rosbag::Bag bag_;
+      //rosbag2::Bag bag_;
 
       /** \brief The BAG view object. */
-      rosbag::View view_;
+      //rosbag2::View view_;
 
       /** \brief The BAG view iterator object. */
-      rosbag::View::iterator it_;
+      //rosbag2::View::iterator it_;
 
       /** \brief The name of the topic that contains the PointCloud data. */
-      std::string topic_name_;
+      //std::string topic_name_;
 
       /** \brief The name of the BAG file that contains the PointCloud data. */
-      std::string file_name_;
+      //std::string file_name_;
 
       /** \brief The output point cloud dataset containing the points loaded from the file. */
-      PointCloudPtr output_;
+      //PointCloudPtr output_;
 
       /** \brief Signals that a new PointCloud2 message has been read from the file. */
       //bool cloud_received_;
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+    //public:
+      //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  //};
 
-}
+//}
 
 #endif  //#ifndef PCL_ROS_IO_BAG_IO_H_

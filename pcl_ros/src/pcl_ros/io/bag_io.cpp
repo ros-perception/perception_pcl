@@ -35,79 +35,79 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/io/bag_io.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool 
+/*bool
 pcl_ros::BAGReader::open (const std::string &file_name, const std::string &topic_name)
 {
   try
   {
-    bag_.open (file_name, rosbag::bagmode::Read);
-    view_.addQuery (bag_, rosbag::TopicQuery (topic_name));
+    bag_.open (file_name, rosbag2::bagmode::Read);
+    view_.addQuery (bag_, rosbag2::TopicQuery (topic_name));
 
     if (view_.size () == 0)
       return (false);
 
     it_ = view_.begin ();
   }
-  catch (rosbag::BagException &e)
+  catch (rosbag2::BagException &e)
   {
     return (false);
   }
   return (true);
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::BAGReader::onInit ()
+/*pcl_ros::BAGReader ("bagreader_node") : publish_rate_ (0), output_ ()
 {
-  boost::shared_ptr<ros::NodeHandle> pnh_;
-  pnh_.reset (new ros::NodeHandle (getMTPrivateNodeHandle ()));
   // ---[ Mandatory parameters
-  if (!pnh_->getParam ("file_name", file_name_))
+  if (!this->get_parameter ("file_name", file_name_))
   {
-    NODELET_ERROR ("[onInit] Need a 'file_name' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[onConstructor] Need a 'file_name' parameter to be set before continuing!");
     return;
   }
-   if (!pnh_->getParam ("topic_name", topic_name_))
+   if (!this->get_parameter ("topic_name", topic_name_))
   {
-    NODELET_ERROR ("[onInit] Need a 'topic_name' parameter to be set before continuing!"); 
+    RCLCPP_ERROR ("[onConstructor] Need a 'topic_name' parameter to be set before continuing!");
     return;
   }
   // ---[ Optional parameters
   int max_queue_size = 1;
-  pnh_->getParam ("publish_rate", publish_rate_);
-  pnh_->getParam ("max_queue_size", max_queue_size);
+  this->get_parameter ("publish_rate", publish_rate_);
+  this->get_parameter ("max_queue_size", max_queue_size);
 
-  ros::Publisher pub_output = pnh_->advertise<sensor_msgs::PointCloud2> ("output", max_queue_size);
+  auto pub_output = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", max_queue_size);
 
-  NODELET_DEBUG ("[onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - file_name    : %s\n"
                  " - topic_name   : %s",
-                 file_name_.c_str (), topic_name_.c_str ());
+                this->get_name(),
+                file_name_.c_str (),
+                topic_name_.c_str ());
 
   if (!open (file_name_, topic_name_))
     return;
   PointCloud output;
-  output_ = boost::make_shared<PointCloud> (output);
-  output_->header.stamp    = ros::Time::now ();
+  output_ = std::make_shared<PointCloud> (output);
+  output_->header.stamp    = this->now ();
 
   // Continous publishing enabled?
-  while (pnh_->ok ())
+  while (this->ok ())
   {
     PointCloudConstPtr cloud = getNextCloud ();
-    NODELET_DEBUG ("Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, pnh_->resolveName ("output").c_str (), output_->header.frame_id.c_str ());
-    output_->header.stamp = ros::Time::now ();
+    RCLCPP_DEBUG (this->get_logger(), "Publishing data (%d points) on topic %s in frame %s.", output_->width * output_->height, "output", output_->header.frame_id.c_str ());
+    output_->header.stamp = this->now ();
 
-    pub_output.publish (output_);
+    pub_output->publish (output_);
 
-    ros::Duration (publish_rate_).sleep ();
-    ros::spinOnce ();
+    rclcpp::Duration (publish_rate_).sleep ();
+    rclcpp::spinOnce ();
   }
 }
+*/
+//typedef pcl_ros::BAGReader BAGReader;
+//CLASS_LOADER_REGISTER_CLASS(BAGReader, rclcpp::Node)
 
-typedef pcl_ros::BAGReader BAGReader;
-PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet);
 

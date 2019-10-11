@@ -35,29 +35,24 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include <pcl/common/io.h>
 #include "pcl_ros/surface/convex_hull.h"
-#include <geometry_msgs/PolygonStamped.h>
+#include "pcl_ros/ptr_helper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ConvexHull2D::onInit ()
+pcl_ros::ConvexHull2D::ConvexHull2D (const rclcpp::NodeOptions& options) : PCLNode("ConvexHull2DNode", options)
 {
-  PCLNodelet::onInit ();
-
-  pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
-  pub_plane_  = advertise<geometry_msgs::PolygonStamped> (*pnh_, "output_polygon", max_queue_size_);
+  pub_output_ = this->create_publisher<PointCloud> ("output", max_queue_size_);
+  pub_plane_  = this->create_publisher<geometry_msgs::msg::PolygonStamped> ("output_polygon", max_queue_size_);
 
   // ---[ Optional parameters
-  pnh_->getParam ("use_indices", use_indices_);
+  this->get_parameter ("use_indices", use_indices_);
 
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - use_indices    : %s",
-                 getName ().c_str (),
+                 this->get_name (),
                  (use_indices_) ? "true" : "false");
 
-  onInitPostProcess();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,28 +63,30 @@ pcl_ros::ConvexHull2D::subscribe()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (*pnh_, "input", 1);
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
     // If indices are enabled, subscribe to the indices
-    sub_indices_filter_.subscribe (*pnh_, "indices", 1);
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     if (approximate_sync_)
     {
-      sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > >(max_queue_size_);
+      sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
-      sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >(max_queue_size_);
+      sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&ConvexHull2D::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloud> ("input", 1,  bind (&ConvexHull2D::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    // Type masquerading not yet supported
+    // sub_input_ = this->create_subscription<pcl::PointCloud<pcl::PointXYZ>> ("input",  1, std::bind (&ConvexHull2D::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,49 +99,54 @@ pcl_ros::ConvexHull2D::unsubscribe()
     sub_indices_filter_.unsubscribe();
   }
   else
-    sub_input_.shutdown();
+    // FIXME
+    std::cout << "shutdown" << std::endl;
+    //sub_input_.shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-  pcl_ros::ConvexHull2D::input_indices_callback (const PointCloudConstPtr &cloud, 
+  pcl_ros::ConvexHull2D::input_indices_callback (const PointCloudPtr &cloud,
                                                  const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0 && pub_plane_.getNumSubscribers () <= 0)
+  /*
+  count_subscribers not implemented yet ROS2
+  if (pub_output_->count_subscribers () <= 0 && pub_plane_->count_subscribers () <= 0)
     return;
+  */
 
   PointCloud output;
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_->publish (output);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices, "indices"))
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_->publish (output);
     return;
   }
 
   /// DEBUG
   if (indices)
-    NODELET_DEBUG ("[%s::input_indices_model_callback]\n"
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_model_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str (),
-                   indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input",
+                   indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
   else
-    NODELET_DEBUG ("[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), getMTPrivateNodeHandle ().resolveName ("input").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
 
   // Reset the indices and surface pointers
   IndicesPtr indices_ptr;
@@ -152,7 +154,7 @@ void
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (to_boost_ptr (indices_ptr));
 
   // Estimate the feature
   impl_.reconstruct (output);
@@ -160,7 +162,7 @@ void
   // If more than 3 points are present, send a PolygonStamped hull too
   if (output.points.size () >= 3)
   {
-    geometry_msgs::PolygonStamped poly;
+    geometry_msgs::msg::PolygonStamped poly;
     poly.header = fromPCL(output.header);
     poly.polygon.points.resize (output.points.size ());
     // Get three consecutive points (without copying)
@@ -191,13 +193,14 @@ void
         poly.polygon.points[i].z = output.points[i].z;
       }
     }
-    pub_plane_.publish (boost::make_shared<const geometry_msgs::PolygonStamped> (poly));
+    pub_plane_->publish (std::make_shared<const geometry_msgs::msg::PolygonStamped> (poly));
   }
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::ConvexHull2D ConvexHull2D;
-PLUGINLIB_EXPORT_CLASS(ConvexHull2D, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(ConvexHull2D)

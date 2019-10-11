@@ -38,27 +38,22 @@
 #ifndef PCL_ROS_SAC_SEGMENTATION_H_
 #define PCL_ROS_SAC_SEGMENTATION_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_node.h"
 #include <message_filters/pass_through.h>
 
 // PCL includes
 #include <pcl/segmentation/sac_segmentation.h>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include "pcl_ros/SACSegmentationConfig.h"
-#include "pcl_ros/SACSegmentationFromNormalsConfig.h"
 
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;
 
   ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in
-    * the sense that it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation.
+  /** \brief @b SACSegmentation represents the Node segmentation class for Sample Consensus methods and models, in
+    * the sense that it just creates a Node wrapper for generic-purpose SAC-based segmentation.
     * \author Radu Bogdan Rusu
     */
-  class SACSegmentation : public PCLNodelet
+  class SACSegmentation : public PCLNode
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
     typedef PointCloud::Ptr PointCloudPtr;
@@ -66,7 +61,7 @@ namespace pcl_ros
 
     public:
       /** \brief Constructor. */
-      SACSegmentation () : min_inliers_(0) {}
+      SACSegmentation (const rclcpp::NodeOptions& options);
 
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
         * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
@@ -83,23 +78,22 @@ namespace pcl_ros
       
       /** \brief Get the TF frame the PointCloud should be transformed into after processing. */
       inline std::string getOutputTFframe () { return (tf_output_frame_); }
-
+    
+      void subscribe ();
+      void unsubscribe ();
     protected:
       // The minimum number of inliers a model must have in order to be considered valid.
       int min_inliers_;
 
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The output PointIndices publisher. */
-      ros::Publisher pub_indices_;
+      rclcpp::Publisher<pcl_msgs::msg::PointIndices>::SharedPtr pub_indices_;
 
       /** \brief The output ModelCoefficients publisher. */
-      ros::Publisher pub_model_;
+      rclcpp::Publisher<pcl_msgs::msg::ModelCoefficients>::SharedPtr pub_model_;
 
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<SACSegmentationConfig> > srv_;
+      rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
 
       /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
       std::string tf_input_frame_;
@@ -112,26 +106,13 @@ namespace pcl_ros
 
       /** \brief Null passthrough filter, used for pushing empty elements in the
         * synchronizer */
-      message_filters::PassThrough<pcl_msgs::PointIndices> nf_pi_;
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (SACSegmentationConfig &config, uint32_t level);
+      message_filters::PassThrough<pcl_msgs::msg::PointIndices> nf_pi_;
 
       /** \brief Input point cloud callback. Used when \a use_indices is set.
         * \param cloud the pointer to the input point cloud
         * \param indices the pointer to the input point cloud indices
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices);
+      void input_indices_callback (const PointCloudPtr cloud, const PointIndicesPtr indices);
 
       /** \brief Pointer to a set of indices stored internally.
        * (used when \a latched_indices_ is set). 
@@ -144,7 +125,7 @@ namespace pcl_ros
       inline void
       indices_callback (const PointIndicesConstPtr &indices)
       {
-        indices_ = *indices;
+        indices_ = *indices.get();
       }
 
       /** \brief Input callback. Used when \a latched_indices_ is set.
@@ -161,21 +142,21 @@ namespace pcl_ros
 
     private:
       /** \brief Internal mutex. */
-      boost::mutex mutex_;
+      std::mutex mutex_;
 
       /** \brief The PCL implementation used. */
       pcl::SACSegmentation<pcl::PointXYZ> impl_;
 
       /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > sync_input_indices_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > sync_input_indices_a_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 
   ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b SACSegmentationFromNormals represents the PCL nodelet segmentation class for Sample Consensus methods and
+  /** \brief @b SACSegmentationFromNormals represents the PCL node segmentation class for Sample Consensus methods and
     * models that require the use of surface normals for estimation.
     */
   class SACSegmentationFromNormals: public SACSegmentation
@@ -189,6 +170,8 @@ namespace pcl_ros
     typedef PointCloudN::ConstPtr PointCloudNConstPtr;
 
     public:
+    
+      SACSegmentationFromNormals(const rclcpp::NodeOptions& options);
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
         * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
         */
@@ -206,15 +189,12 @@ namespace pcl_ros
       inline std::string getOutputTFframe () { return (tf_output_frame_); }
 
     protected:
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The normals PointCloud subscriber filter. */
       message_filters::Subscriber<PointCloudN> sub_normals_filter_;
 
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_axis_;
-
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig> > srv_;
+      rclcpp::Subscription<pcl_msgs::msg::ModelCoefficients>::SharedPtr sub_axis_;
     
       /** \brief Input point cloud callback.
         * Because we want to use the same synchronizer object, we push back
@@ -225,7 +205,7 @@ namespace pcl_ros
       {
         PointIndices indices;
         indices.header.stamp = fromPCL(cloud->header).stamp;
-        nf_.add (boost::make_shared<PointIndices> (indices));
+        nf_.add (std::make_shared<PointIndices> (indices));
       }
 
       /** \brief Null passthrough filter, used for pushing empty elements in the 
@@ -239,23 +219,10 @@ namespace pcl_ros
       /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
       std::string tf_output_frame_;
 
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
-
       /** \brief Model callback
         * \param model the sample consensus model found
         */
-      void axis_callback (const pcl_msgs::ModelCoefficientsConstPtr &model);
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (SACSegmentationFromNormalsConfig &config, uint32_t level);
+      void axis_callback (const pcl_msgs::msg::ModelCoefficients::SharedPtr model);
 
       /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
@@ -268,15 +235,18 @@ namespace pcl_ros
    
     private:
       /** \brief Internal mutex. */
-      boost::mutex mutex_;
+      std::mutex mutex_;
 
       /** \brief The PCL implementation used. */
       pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> impl_;
 
       /** \brief Synchronized input, normals, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_a_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_e_;
-
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices> > > sync_input_normals_indices_e_;
+    
+      void subscribe();
+      void unsubscribe();
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

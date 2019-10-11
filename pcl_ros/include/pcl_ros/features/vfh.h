@@ -52,19 +52,13 @@ namespace pcl_ros
     */
   class VFHEstimation : public FeatureFromNormals
   {
+    public:
+      VFHEstimation(const rclcpp::NodeOptions& options);
+
     private:
       pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> impl_;
 
       typedef pcl::PointCloud<pcl::VFHSignature308> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type. */
       void emptyPublish (const PointCloudInConstPtr &cloud);
@@ -74,6 +68,10 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    // FIXME: Temporary
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
+
+    rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

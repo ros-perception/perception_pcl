@@ -35,47 +35,10 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/normal_3d_tbb.h"
+#include "pcl_ros/ptr_helper.h"
 
 #if defined HAVE_TBB
-
-void 
-pcl_ros::NormalEstimationTBB::emptyPublish (const PointCloudInConstPtr &cloud)
-{
-  PointCloud output;
-  output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
-}
-
-void 
-pcl_ros::NormalEstimationTBB::computePublish (const PointCloudInConstPtr &cloud,
-                                              const PointCloudInConstPtr &surface,
-                                              const IndicesPtr &indices)
-{
-  // Set the parameters
-  impl_.setKSearch (k_);
-  impl_.setRadiusSearch (search_radius_);
-  // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
-  impl_.setSearchMethod (tree_);
-
-  // Set the inputs
-  impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
-  impl_.setSearchSurface (surface);
-  // Estimate the feature
-  PointCloudOut output;
-  impl_.compute (output);
-
-  // Publish a Boost shared ptr const data
-  // Enforce that the TF frame and the timestamp are copied
-  output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
-}
-
-typedef pcl_ros::NormalEstimationTBB NormalEstimationTBB;
-PLUGINLIB_EXPORT_CLASS(NormalEstimationTBB, nodelet::Nodelet)
 
 #endif // HAVE_TBB
 

@@ -35,15 +35,19 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/boundary.h"
+pcl_ros::BoundaryEstimation::BoundaryEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::FeatureFromNormals(node_name, options)
+{
+  pub_output_ = this->create_publisher<PointCloudOut> ("output", max_queue_size_);
+}
 
 void
 pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output.makeShared ());
 }
 
 void
@@ -58,7 +62,7 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
@@ -67,8 +71,10 @@ pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud,
 
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::BoundaryEstimation BoundaryEstimation;
-PLUGINLIB_EXPORT_CLASS(BoundaryEstimation, nodelet::Nodelet)
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(BoundaryEstimation)

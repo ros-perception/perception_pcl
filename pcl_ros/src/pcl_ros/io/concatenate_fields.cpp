@@ -37,65 +37,61 @@
 
 /** \author Radu Bogdan Rusu */
 
-#include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
 #include "pcl_ros/io/concatenate_fields.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSynchronizer (const rclcpp::NodeOptions& options) : rclcpp::Node ("PointCloudConcatenateFieldsSynchronizerNode", options), maximum_queue_size_ (3), maximum_seconds_ (0)
 {
-  nodelet_topic_tools::NodeletLazy::onInit ();
-
   // ---[ Mandatory parameters
-  if (!pnh_->getParam ("input_messages", input_messages_))
+  if (!this->get_parameter ("input_messages", input_messages_))
   {
-    NODELET_ERROR ("[onInit] Need a 'input_messages' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s onConstructor] Need a 'input_messages' parameter to be set before continuing!", this->get_name());
     return;
   }
   if (input_messages_ < 2)
   {
-    NODELET_ERROR ("[onInit] Invalid 'input_messages' parameter given!");
+    RCLCPP_ERROR (this->get_logger(), "[%s onConstructor] Invalid 'input_messages' parameter given!", this->get_name());
     return;
   }
   // ---[ Optional parameters
-  pnh_->getParam ("max_queue_size", maximum_queue_size_);
-  pnh_->getParam ("maximum_seconds", maximum_seconds_);
-  pub_output_ = advertise<sensor_msgs::PointCloud2> (*pnh_, "output", maximum_queue_size_);
+  this->get_parameter ("max_queue_size", maximum_queue_size_);
+  this->get_parameter ("maximum_seconds", maximum_seconds_);
+  pub_output_ = this->create_publisher<sensor_msgs::msg::PointCloud2> ("output", maximum_queue_size_);
 
-  onInitPostProcess ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = pnh_->subscribe ("input", maximum_queue_size_,  &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
+  sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
 {
-  sub_input_.shutdown ();
+  std::cout << "shutdown" << std::endl;
+  //this->shutdown ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudPtr cloud)
 {
-  NODELET_DEBUG ("[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+  RCLCPP_DEBUG (this->get_logger(), "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input");
 
   // Erase old data in the queue
   if (maximum_seconds_ > 0 && queue_.size () > 0)
   {
-    while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ) > maximum_seconds_ && queue_.size () > 0)
+    while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ) > maximum_seconds_ && queue_.size () > 0)
     {
-      NODELET_WARN ("[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
-                 (*queue_.begin ()).first.toSec (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ));
+      /*RCLCPP_WARN (this->get_logger(), "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
+                 (*queue_.begin ()).first.seconds (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).seconds () ));*/
       queue_.erase (queue_.begin ());
     }
   }
@@ -118,7 +114,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 
       if (clouds[i]->width != cloud_out.width || clouds[i]->height != cloud_out.height)
       {
-        NODELET_ERROR ("[input_callback] Width/height of pointcloud %zu (%dx%d) differs from the others (%dx%d)!", 
+        RCLCPP_ERROR (this->get_logger(), "[input_callback] Width/height of pointcloud %zu (%dx%d) differs from the others (%dx%d)!",
             i, clouds[i]->width, clouds[i]->height, cloud_out.width, cloud_out.height);
         break;
       }
@@ -152,7 +148,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
         point_offset += clouds[i]->point_step;
       }
     }
-    pub_output_.publish (boost::make_shared<const PointCloud> (cloud_out));
+    pub_output_->publish (*std::make_shared<const PointCloud> (cloud_out));
     queue_.erase (cloud->header.stamp);
   }
 
@@ -166,5 +162,5 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudConcatenateFieldsSynchronizer)

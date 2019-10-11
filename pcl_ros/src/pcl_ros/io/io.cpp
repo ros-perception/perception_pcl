@@ -35,23 +35,21 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
-#include <sensor_msgs/PointCloud2.h>
+#include "class_loader/register_macro.hpp"
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <message_filters/subscriber.h>
 //#include <pcl_ros/subscriber.h>
-#include <nodelet_topic_tools/nodelet_mux.h>
-#include <nodelet_topic_tools/nodelet_demux.h>
 
-typedef nodelet::NodeletMUX<sensor_msgs::PointCloud2, message_filters::Subscriber<sensor_msgs::PointCloud2> > NodeletMUX;
+//typedef nodelet::NodeletMUX<sensor_msgs::PointCloud2, message_filters::Subscriber<sensor_msgs::PointCloud2> > NodeletMUX;
 //typedef nodelet::NodeletDEMUX<sensor_msgs::PointCloud2, pcl_ros::Subscriber<sensor_msgs::PointCloud2> > NodeletDEMUX;
-typedef nodelet::NodeletDEMUX<sensor_msgs::PointCloud2> NodeletDEMUX;
+//typedef nodelet::NodeletDEMUX<sensor_msgs::PointCloud2> NodeletDEMUX;
 
 //#include "pcd_io.cpp"
 //#include "bag_io.cpp"
 //#include "concatenate_fields.cpp"
 //#include "concatenate_data.cpp"
 
-PLUGINLIB_EXPORT_CLASS(NodeletMUX,nodelet::Nodelet);
-PLUGINLIB_EXPORT_CLASS(NodeletDEMUX,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(NodeletMUX,nodelet::Nodelet);
+//PLUGINLIB_EXPORT_CLASS(NodeletDEMUX,nodelet::Nodelet);
 //PLUGINLIB_EXPORT_CLASS(NodeletDEMUX_ROS,nodelet::Nodelet);
 

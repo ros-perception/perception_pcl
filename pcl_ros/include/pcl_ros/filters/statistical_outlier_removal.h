@@ -41,9 +41,8 @@
 // PCL includes
 #include <pcl/filters/statistical_outlier_removal.h>
 #include "pcl_ros/filters/filter.h"
-
-// Dynamic reconfigure
-#include "pcl_ros/StatisticalOutlierRemovalConfig.h"
+#include "pcl_ros/ptr_helper.h"
+#include <mutex>
 
 namespace pcl_ros
 {
@@ -60,40 +59,32 @@ namespace pcl_ros
     */
   class StatisticalOutlierRemoval : public Filter
   {
+    public:
+      StatisticalOutlierRemoval(const rclcpp::NodeOptions& options) : Filter("StatisticalOutlierRemoval", options) {};
+    
     protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig> > srv_;
+      std::mutex mutex_;
 
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
+    
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        boost::mutex::scoped_lock lock (mutex_);
+        std::lock_guard<std::mutex> lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
+        impl_.setIndices (to_boost_ptr(indices));
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool child_init (ros::NodeHandle &nh, bool &has_service);
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t level);
 
     private:
       /** \brief The PCL filter implementation used. */

@@ -47,19 +47,13 @@ namespace pcl_ros
     */
   class SHOTEstimation : public FeatureFromNormals
   {
+    public:
+      SHOTEstimation(const rclcpp::NodeOptions& options);
+    
     private:
       pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
 
       typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type. */
       void emptyPublish (const PointCloudInConstPtr &cloud);
@@ -69,7 +63,9 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
-
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

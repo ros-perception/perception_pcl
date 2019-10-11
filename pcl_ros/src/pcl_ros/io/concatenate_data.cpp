@@ -35,7 +35,6 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/io/concatenate_data.h"
@@ -43,58 +42,53 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
+pcl_ros::PointCloudConcatenateDataSynchronizer::PointCloudConcatenateDataSynchronizer (const rclcpp::NodeOptions& options) : rclcpp::Node("PointCloudConcatenateDataSynchronizerNode", options), maximum_queue_size_ (3), approximate_sync_(false), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
 {
-  nodelet_topic_tools::NodeletLazy::onInit ();
-
   // ---[ Mandatory parameters
-  pnh_->getParam ("output_frame", output_frame_);
-  pnh_->getParam ("approximate_sync", approximate_sync_);
+  this->get_parameter ("output_frame", output_frame_);
+  this->get_parameter ("approximate_sync", approximate_sync_);
 
   if (output_frame_.empty ())
   {
-    NODELET_ERROR ("[onInit] Need an 'output_frame' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need an 'output_frame' parameter to be set before continuing!", this->get_name());
     return;
   }
 
-  if (!pnh_->getParam ("input_topics", input_topics_))
+  if (!this->get_parameter ("input_topics", input_topics_))
   {
-    NODELET_ERROR ("[onInit] Need a 'input_topics' parameter to be set before continuing!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'input_topics' parameter to be set before continuing!", this->get_name());
     return;
   }
-  if (input_topics_.getType () != XmlRpc::XmlRpcValue::TypeArray)
+  if (typeid (input_topics_) != typeid (std::vector<std::string>))
   {
-    NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Invalid 'input_topics' parameter given!", this->get_name());
     return;
   }
   if (input_topics_.size () == 1)
   {
-    NODELET_ERROR ("[onInit] Only one topic given. Need at least two topics to continue.");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Only one topic given. Need at least two topics to continue.", this->get_name());
     return;
   }
   if (input_topics_.size () > 8)
   {
-    NODELET_ERROR ("[onInit] More than 8 topics passed!");
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] More than 8 topics passed!", this->get_name());
     return;
   }
 
   // ---[ Optional parameters
-  pnh_->getParam ("max_queue_size", maximum_queue_size_);
+  this->get_parameter ("max_queue_size", maximum_queue_size_);
 
   // Output
-  pub_output_ = advertise<PointCloud2> (*pnh_, "output", maximum_queue_size_);
-
-  onInitPostProcess ();
+  pub_output_ = this->create_publisher<PointCloud2> ("output", maximum_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 {
-  ROS_INFO_STREAM ("Subscribing to " << input_topics_.size () << " user given topics as inputs:");
+  RCLCPP_INFO (this->get_logger (),"Subscribing to %d user given topics as inputs:", input_topics_.size () );
   for (int d = 0; d < input_topics_.size (); ++d)
-    ROS_INFO_STREAM (" - " << (std::string)(input_topics_[d]));
+    RCLCPP_INFO (this->get_logger ()," - %s", input_topics_[d].c_str ());
 
   // Subscribe to the filters
   filters_.resize (input_topics_.size ());
@@ -115,11 +109,11 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   for (int d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-    filters_[d]->subscribe (*pnh_, (std::string)(input_topics_[d]), maximum_queue_size_);
+    filters_[d].subscribe (this->shared_from_this (), input_topics_.arrayGetItem (d).getString().c_str ());
   }
 
   // Bogus null filter
-  filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
+  filters_[0]->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, std::placeholders::_1));
 
   switch (input_topics_.size ())
   {
@@ -181,15 +175,15 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
     }
     default:
     {
-      NODELET_FATAL ("Invalid 'input_topics' parameter given!");
+      RCLCPP_FATAL (this->get_logger(), "Invalid 'input_topics' parameter given!");
       return;
     }
   }
 
   if (approximate_sync_)
-    ts_a_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_a_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7, std::placeholders::_8));
   else
-    ts_e_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_e_->registerCallback (std::bind (&PointCloudConcatenateDataSynchronizer::input, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7, std::placeholders::_8));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,19 +201,19 @@ void
 pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2 &in1, const PointCloud2 &in2, PointCloud2 &out)
 {
   //ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
-  PointCloud2::Ptr in1_t (new PointCloud2 ());
-  PointCloud2::Ptr in2_t (new PointCloud2 ());
+  PointCloud2::SharedPtr in1_t (new PointCloud2 ());
+  PointCloud2::SharedPtr in2_t (new PointCloud2 ());
 
   // Transform the point clouds into the specified output frame
   if (output_frame_ != in1.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_);
+    pcl_ros::transformPointCloud (output_frame_, in1, *in1_t, tf_buffer_);
   else
-    in1_t = boost::make_shared<PointCloud2> (in1);
+    in1_t = std::make_shared<PointCloud2> (in1);
 
   if (output_frame_ != in2.header.frame_id)
-    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_);
+    pcl_ros::transformPointCloud (output_frame_, in2, *in2_t, tf_buffer_);
   else
-    in2_t = boost::make_shared<PointCloud2> (in2);
+    in2_t = std::make_shared<PointCloud2> (in2);
 
   // Concatenate the results
   pcl::concatenatePointCloud (*in1_t, *in2_t, out);
@@ -230,13 +224,13 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (const PointCloud2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void 
 pcl_ros::PointCloudConcatenateDataSynchronizer::input (
-    const PointCloud2::ConstPtr &in1, const PointCloud2::ConstPtr &in2, 
-    const PointCloud2::ConstPtr &in3, const PointCloud2::ConstPtr &in4, 
-    const PointCloud2::ConstPtr &in5, const PointCloud2::ConstPtr &in6, 
-    const PointCloud2::ConstPtr &in7, const PointCloud2::ConstPtr &in8)
+    const PointCloud2::ConstSharedPtr &in1, const PointCloud2::ConstSharedPtr &in2,
+    const PointCloud2::ConstSharedPtr &in3, const PointCloud2::ConstSharedPtr &in4,
+    const PointCloud2::ConstSharedPtr &in5, const PointCloud2::ConstSharedPtr &in6,
+    const PointCloud2::ConstSharedPtr &in7, const PointCloud2::ConstSharedPtr &in8)
 {
-  PointCloud2::Ptr out1 (new PointCloud2 ());
-  PointCloud2::Ptr out2 (new PointCloud2 ());
+  PointCloud2::SharedPtr out1 (new PointCloud2 ());
+  PointCloud2::SharedPtr out2 (new PointCloud2 ());
   pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*in1, *in2, *out1);
   if (in3 && in3->width * in3->height > 0)
   {
@@ -261,9 +255,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
       }
     }
   }
-  pub_output_.publish (boost::make_shared<PointCloud2> (*out1)); 
+  pub_output_->publish (*std::make_shared<PointCloud2> (*out1));
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudConcatenateDataSynchronizer)

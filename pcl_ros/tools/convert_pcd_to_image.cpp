@@ -46,9 +46,9 @@
     rosrun image_view image_view image:=/pcd/image
  **/
 
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -58,18 +58,21 @@
 int
 main (int argc, char **argv)
 {
-  ros::init (argc, argv, "image_publisher");
-  ros::NodeHandle nh;
-  ros::Publisher image_pub = nh.advertise <sensor_msgs::Image> ("output", 1);
+  rclcpp::init (argc, argv);
+  auto node = std::make_shared<rclcpp::Node>("image_publisher");
+  auto image_pub = node->create_publisher <sensor_msgs::msg::Image> ("output", 1);
+  
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node);
 
   if (argc != 2)
   {
     std::cout << "usage:\n" << argv[0] << " cloud.pcd" << std::endl;
     return 1;
   }
-
-  sensor_msgs::Image image;
-  sensor_msgs::PointCloud2 cloud;
+  
+  sensor_msgs::msg::Image image;
+  sensor_msgs::msg::PointCloud2 cloud;
   pcl::io::loadPCDFile (std::string (argv[1]), cloud);
 
   try
@@ -78,18 +81,18 @@ main (int argc, char **argv)
   }
   catch (std::runtime_error &e)
   {
-    ROS_ERROR_STREAM("Error in converting cloud to image message: "
-                            << e.what());
+    RCLCPP_ERROR(node->get_logger(), "Error in converting cloud to image message: %s" ,e.what());
     return 1; //fail!
   }
-  ros::Rate loop_rate (5);
-  while (nh.ok ())
+  rclcpp::Rate loop_rate (5);
+  while (rclcpp::ok ())
   {
-    image_pub.publish (image);
-    ros::spinOnce ();
+    image_pub->publish (image);
+    exec.spin_once();
     loop_rate.sleep ();
   }
-
+  
+  rclcpp::shutdown();
   return (0);
 }
 

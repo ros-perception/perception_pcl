@@ -110,5 +110,6 @@ pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parame
 
 
 typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet);
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(RadiusOutlierRemoval)

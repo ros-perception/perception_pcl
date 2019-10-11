@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include <pcl/io/io.h>
 #include <pcl/PointIndices.h>
 #include "pcl_ros/segmentation/extract_clusters.h"
@@ -47,51 +47,41 @@ using pcl_conversions::moveFromPCL;
 using pcl_conversions::toPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::EuclideanClusterExtraction::onInit ()
+pcl_ros::EuclideanClusterExtraction::EuclideanClusterExtraction (const rclcpp::NodeOptions& options) : PCLNode("EuclideanClusterExtraction", options), publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ())
 {
-  // Call the super onInit ()
-  PCLNodelet::onInit ();
-
   // ---[ Mandatory parameters
   double cluster_tolerance;
-  if (!pnh_->getParam ("cluster_tolerance", cluster_tolerance))
+  if (!this->get_parameter ("cluster_tolerance", cluster_tolerance))
   {
-    NODELET_ERROR ("[%s::onInit] Need a 'cluster_tolerance' parameter to be set before continuing!", getName ().c_str ()); 
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'cluster_tolerance' parameter to be set before continuing!", this->get_name ());
     return;
   }
   int spatial_locator;
-  if (!pnh_->getParam ("spatial_locator", spatial_locator))
+  if (!this->get_parameter ("spatial_locator", spatial_locator))
   {
-    NODELET_ERROR ("[%s::onInit] Need a 'spatial_locator' parameter to be set before continuing!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::onConstructor] Need a 'spatial_locator' parameter to be set before continuing!", this->get_name ());
     return;
   }
 
   //private_nh.getParam ("use_indices", use_indices_);
-  pnh_->getParam ("publish_indices", publish_indices_);
+  this->get_parameter ("publish_indices", publish_indices_);
 
   if (publish_indices_)
-    pub_output_ = advertise<PointIndices> (*pnh_, "output", max_queue_size_);
+    pub_output_ = advertise<PointIndices> ("output", max_queue_size_);
   else
-    pub_output_ = advertise<PointCloud> (*pnh_, "output", max_queue_size_);
+    pub_output_ = advertise<PointCloud> ("output", max_queue_size_);
 
-  // Enable the dynamic reconfigure service
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<EuclideanClusterExtractionConfig> > (*pnh_);
-  dynamic_reconfigure::Server<EuclideanClusterExtractionConfig>::CallbackType f =  boost::bind (&EuclideanClusterExtraction::config_callback, this, _1, _2);
-  srv_->setCallback (f);
-
-  NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
+  RCLCPP_DEBUG (this->get_logger(), "[%s::onConstructor] Node successfully created with the following parameters:\n"
                  " - max_queue_size    : %d\n"
                  " - use_indices       : %s\n"
                  " - cluster_tolerance : %f\n",
-                 getName ().c_str (),
+                 this->get_name (),
                  max_queue_size_,
                  (use_indices_) ? "true" : "false", cluster_tolerance);
 
   // Set given parameters here
   impl_.setClusterTolerance (cluster_tolerance);
 
-  onInitPostProcess ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,25 +92,27 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
   if (use_indices_)
   {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe (*pnh_, "input", max_queue_size_);
-    sub_indices_filter_.subscribe (*pnh_, "indices", max_queue_size_);
+    sub_input_filter_.subscribe (this->shared_from_this (), "input");
+    sub_indices_filter_.subscribe (this->shared_from_this (), "indices");
 
     if (approximate_sync_)
     {
-      sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
+      sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
     {
-      sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
+      sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_, bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    // Type masquerading not yet supported
+    // sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&EuclideanClusterExtraction::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr ()));
+    std::cout << "Type masquerading not supported" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,34 +125,10 @@ pcl_ros::EuclideanClusterExtraction::unsubscribe ()
     sub_indices_filter_.unsubscribe ();
   }
   else
-    sub_input_.shutdown ();
+    std::cout << "shutdown" << std::endl;
+    //sub_input_.shutdown ();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::EuclideanClusterExtraction::config_callback (EuclideanClusterExtractionConfig &config, uint32_t level)
-{
-  if (impl_.getClusterTolerance () != config.cluster_tolerance)
-  {
-    impl_.setClusterTolerance (config.cluster_tolerance);
-    NODELET_DEBUG ("[%s::config_callback] Setting new clustering tolerance to: %f.", getName ().c_str (), config.cluster_tolerance);
-  }
-  if (impl_.getMinClusterSize () != config.cluster_min_size)
-  {
-    impl_.setMinClusterSize (config.cluster_min_size);
-    NODELET_DEBUG ("[%s::config_callback] Setting the minimum cluster size to: %d.", getName ().c_str (), config.cluster_min_size);
-  }
-  if (impl_.getMaxClusterSize () != config.cluster_max_size)
-  {
-    impl_.setMaxClusterSize (config.cluster_max_size);
-    NODELET_DEBUG ("[%s::config_callback] Setting the maximum cluster size to: %d.", getName ().c_str (), config.cluster_max_size);
-  }
-  if (max_clusters_ != config.max_clusters)
-  {
-    max_clusters_ = config.max_clusters;
-    NODELET_DEBUG ("[%s::config_callback] Setting the maximum number of clusters to extract to: %d.", getName ().c_str (), config.max_clusters);
-  }
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -168,34 +136,37 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices)
 {
   // No subscribers, no work
-  if (pub_output_.getNumSubscribers () <= 0)
+  /*
+   count_subscribers not yet implemented ROS2
+  if (pub_output_.count_subscribers () <= 0)
     return;
+   */
 
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name ());
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid (indices))
   {
-    NODELET_ERROR ("[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
+    RCLCPP_ERROR (this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name ());
     return;
   }
 
   /// DEBUG
   if (indices) {
-    std_msgs::Header cloud_header = fromPCL(cloud->header);
-    std_msgs::Header indices_header = indices->header;
-    NODELET_DEBUG ("[%s::input_indices_callback]\n"
+    std_msgs::msg::Header cloud_header = fromPCL(cloud->header);
+    std_msgs::msg::Header indices_header = indices->header;
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
-                   getName ().c_str (),
-                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud_header.stamp.toSec (), cloud_header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
-                   indices->indices.size (), indices_header.stamp.toSec (), indices_header.frame_id.c_str (), pnh_->resolveName ("indices").c_str ());
+                   this->get_name (),
+                   cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud_header.stamp.sec, cloud_header.frame_id.c_str (), "input",
+                   indices->indices.size (), indices_header.stamp.sec, indices_header.frame_id.c_str (), "indices");
   } else {
-    NODELET_DEBUG ("[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", getName ().c_str (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), "input");
   }
   ///
 
@@ -204,7 +175,7 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices_ptr);
+  impl_.setIndices (indices_ptr.get());
 
   std::vector<pcl::PointIndices> clusters;
   impl_.extract (clusters);
@@ -216,13 +187,13 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       if ((int)i >= max_clusters_)
         break;
       // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
-      pcl_msgs::PointIndices ros_pi;
+      pcl_msgs::msg::PointIndices ros_pi;
       moveFromPCL(clusters[i], ros_pi);
-      ros_pi.header.stamp += ros::Duration (i * 0.001);
-      pub_output_.publish (ros_pi);
+      ros_pi.header.stamp += rclcpp::Duration (i * 0.001);
+      pub_output_->publish (ros_pi);
     }
 
-    NODELET_DEBUG ("[segmentAndPublish] Published %zu clusters (PointIndices) on topic %s", clusters.size (), pnh_->resolveName ("output").c_str ());
+    RCLCPP_DEBUG (this->get_logger(), "[segmentAndPublish] Published %zu clusters (PointIndices) on topic %s", clusters.size (), "output");
   }
   else
   {
@@ -236,17 +207,17 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       //PointCloud output_blob;     // Convert from the templated output to the PointCloud blob
       //pcl::toROSMsg (output, output_blob);
       // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
-      std_msgs::Header header = fromPCL(output.header);
-      header.stamp += ros::Duration (i * 0.001);
+      std_msgs::msg::Header header = fromPCL(output.header);
+      header.stamp += rclcpp::Duration (i * 0.001);
       toPCL(header, output.header);
-      // Publish a Boost shared ptr const data
-      pub_output_.publish (output.makeShared ());
-      NODELET_DEBUG ("[segmentAndPublish] Published cluster %zu (with %zu values and stamp %f) on topic %s",
-                     i, clusters[i].indices.size (), header.stamp.toSec (), pnh_->resolveName ("output").c_str ());
+      // Publish a shared ptr const data
+      pub_output_->publish (output.makeShared ());
+      RCLCPP_DEBUG (this->get_logger(), "[segmentAndPublish] Published cluster %zu (with %zu values and stamp %f) on topic %s",
+                     i, clusters[i].indices.size (), header.stamp.sec, "output");
     }
   }
 }
 
 typedef pcl_ros::EuclideanClusterExtraction EuclideanClusterExtraction;
-PLUGINLIB_EXPORT_CLASS(EuclideanClusterExtraction, nodelet::Nodelet)
-
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(EuclideanClusterExtraction)

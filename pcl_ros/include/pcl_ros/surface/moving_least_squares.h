@@ -38,25 +38,21 @@
 #ifndef PCL_ROS_MOVING_LEAST_SQUARES_H_
 #define PCL_ROS_MOVING_LEAST_SQUARES_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_node.h"
 
 // PCL includes
 #include <pcl/surface/mls.h>
-
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include "pcl_ros/MLSConfig.h"   
 
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b MovingLeastSquares represents a nodelet using the MovingLeastSquares implementation.
+  /** \brief @b MovingLeastSquares represents a node using the MovingLeastSquares implementation.
     * The type of the output is the same as the input, it only smooths the XYZ coordinates according to the parameters.
     * Normals are estimated at each point as well and published on a separate topic.
     * \author Radu Bogdan Rusu, Zoltan-Csaba Marton
     */
-  class MovingLeastSquares : public PCLNodelet
+  class MovingLeastSquares : public PCLNode
   {
     typedef pcl::PointXYZ PointIn;
     typedef pcl::PointNormal NormalOut;
@@ -68,7 +64,10 @@ namespace pcl_ros
 
     typedef pcl::KdTree<PointIn> KdTree;
     typedef pcl::KdTree<PointIn>::Ptr KdTreePtr; 
-
+    
+    public:
+      MovingLeastSquares(const rclcpp::NodeOptions& options);
+    
     protected:
       /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
       PointCloudInConstPtr surface_;
@@ -91,7 +90,7 @@ namespace pcl_ros
       /** \brief How 'flat' should the neighbor weighting gaussian be (the smaller, the more local the fit). */
       double gaussian_parameter_;
 
-      // ROS nodelet attributes
+      // ROS node attributes
       /** \brief The surface PointCloud subscriber filter. */
       message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
       
@@ -101,22 +100,7 @@ namespace pcl_ros
         * 2: Organized spatial dataset index
         */
       int spatial_locator_type_;
-    
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<MLSConfig> > srv_;
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object  
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (MLSConfig &config, uint32_t level); 
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
 
     private:
       /** \brief Input point cloud callback.
@@ -132,14 +116,14 @@ namespace pcl_ros
       pcl::MovingLeastSquares<PointIn, NormalOut> impl_;
       
       /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+      rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
 
       /** \brief The output PointCloud (containing the normals) publisher. */
-      ros::Publisher pub_normals_;
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_normals_;
 
       /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointIndices> > > sync_input_indices_a_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointIndices> > >       sync_input_indices_e_;
+      std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointIndices> > > sync_input_indices_a_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

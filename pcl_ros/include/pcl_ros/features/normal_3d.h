@@ -52,20 +52,14 @@ namespace pcl_ros
     */
   class NormalEstimation: public Feature
   {
+    public:
+      NormalEstimation (const rclcpp::NodeOptions& options);
+    
     private:
       /** \brief PCL implementation object. */
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
 
       typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type.
         * \param cloud the input point cloud to copy the header from.
@@ -76,6 +70,9 @@ namespace pcl_ros
       void computePublish (const PointCloudInConstPtr &cloud,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/principal_curvatures.h"
 
 void 
@@ -43,7 +43,7 @@ pcl_ros::PrincipalCurvaturesEstimation::emptyPublish (const PointCloudInConstPtr
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -58,19 +58,20 @@ pcl_ros::PrincipalCurvaturesEstimation::computePublish (const PointCloudInConstP
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (to_boost_ptr (indices));
   impl_.setSearchSurface (surface);
   impl_.setInputNormals (normals);
   // Estimate the feature
   PointCloudOut output;
   impl_.compute (output);
 
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::PrincipalCurvaturesEstimation PrincipalCurvaturesEstimation;
-PLUGINLIB_EXPORT_CLASS(PrincipalCurvaturesEstimation, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(PrincipalCurvaturesEstimation)

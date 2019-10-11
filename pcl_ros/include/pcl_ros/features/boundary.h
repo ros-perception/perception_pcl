@@ -55,19 +55,13 @@ namespace pcl_ros
     */
   class BoundaryEstimation: public FeatureFromNormals
   {
+    public:
+      BoundaryEstimation(const rclcpp::NodeOptions& options);
+
     private:
       pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> impl_;
 
       typedef pcl::PointCloud<pcl::Boundary> PointCloudOut;
-
-      /** \brief Child initialization routine. Internal method. */
-      inline bool
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
 
       /** \brief Publish an empty point cloud of the feature output type. */
       void emptyPublish (const PointCloudInConstPtr &cloud);
@@ -77,6 +71,10 @@ namespace pcl_ros
                            const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
+    
+      rclcpp::Publisher<PointCloudOut>::SharedPtr pub_output_;
+    
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

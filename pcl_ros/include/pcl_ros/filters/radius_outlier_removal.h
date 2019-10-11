@@ -41,6 +41,7 @@
 // PCL includes
 #include <pcl/filters/radius_outlier_removal.h>
 #include "pcl_ros/filters/filter.h"
+#include "pcl_ros/ptr_helper.h"
 
 namespace pcl_ros
 {
@@ -51,26 +52,23 @@ namespace pcl_ros
     */
   class RadiusOutlierRemoval : public Filter
   {
+    public:
+      RadiusOutlierRemoval(const rclcpp::NodeOptions& options) : Filter("RadiusOutlierRemovalNode", options) {};
+
     protected:
-      /** \brief Pointer to parameter client */
-      //std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_;
-
-      /** \brief Pointer to parameter subscriber */
-      //rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameters_sub_;
-
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
               PointCloud2 &output)
       {
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
+        impl_.setIndices (to_boost_ptr (indices));
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);

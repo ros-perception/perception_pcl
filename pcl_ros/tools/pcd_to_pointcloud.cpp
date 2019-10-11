@@ -48,7 +48,7 @@
 #include <thread>
 
 // ROS core
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -56,33 +56,31 @@
 
 #include "pcl_ros/publisher.h"
 
-using namespace std;
-
-class PCDGenerator
+class PCDGenerator : public rclcpp::Node
 {
-  protected:
-    string tf_frame_;
-    ros::NodeHandle nh_;
-    ros::NodeHandle private_nh_;
+  //protected:
+  //  std::string tf_frame_;
   public:
-
+    std::string tf_frame_;
+  
     // ROS messages
-    sensor_msgs::PointCloud2 cloud_;
+    sensor_msgs::msg::PointCloud2 cloud_;
 
-    string file_name_, cloud_topic_;
+    std::string file_name_, cloud_topic_;
     double wait_;
 
-    pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
+    pcl_ros::Publisher<sensor_msgs::msg::PointCloud2> pub_;
 
     ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator () : tf_frame_ ("/base_link"), private_nh_("~")
+    PCDGenerator (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node (node_name, options), tf_frame_ ("/base_link")
     {
       // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
       cloud_topic_ = "cloud_pcd";
-      pub_.advertise (nh_, cloud_topic_.c_str (), 1);
-      private_nh_.param("frame_id", tf_frame_, std::string("/base_link"));
-      ROS_INFO ("Publishing data on topic %s with frame_id %s.", nh_.resolveName (cloud_topic_).c_str (), tf_frame_.c_str());
+      pub_->create_publisher (cloud_topic_.c_str (), 1);
+      this->get_parameter ("frame_id", tf_frame_);
+      this->get_parameter_or ("frame_id", tf_frame_, std::string("/base_link"));
+      RCLCPP_INFO (this->get_logger(), "Publishing data on topic %s with frame_id %s.", cloud_topic_.c_str (), tf_frame_.c_str());
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -101,22 +99,22 @@ class PCDGenerator
     bool spin ()
     {
       int nr_points      = cloud_.width * cloud_.height;
-      string fields_list = pcl::getFieldsList (cloud_);
+      std::string fields_list = pcl::getFieldsList (cloud_);
       double interval = wait_ * 1e+6;
-      while (nh_.ok ())
+      while (rclcpp::ok ())
       {
-        ROS_DEBUG_ONCE ("Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
-        cloud_.header.stamp = ros::Time::now ();
+        RCLCPP_DEBUG (this->get_logger(), "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), cloud_topic_, cloud_.header.frame_id.c_str ());
+        cloud_.header.stamp = this->now ();
 
-        if (pub_.getNumSubscribers () > 0)
+        if (pub_.count_subscribers () > 0)
         {
-          ROS_DEBUG ("Publishing data to %d subscribers.", pub_.getNumSubscribers ());
-          pub_.publish (cloud_);
+          RCLCPP_DEBUG (this->get_logger(), "Publishing data to %d subscribers.", pub_.count_subscribers ());
+          pub_->publish (cloud_);
         }
         else
         {
 					// check once a second if there is any subscriber
-          ros::Duration (1).sleep ();
+          rclcpp::Duration (1).sleep ();
           continue;
         }
 
@@ -125,7 +123,7 @@ class PCDGenerator
         if (interval == 0)	// We only publish once if a 0 seconds interval is given
 				{
 					// Give subscribers 3 seconds until point cloud decays... a little ugly!
-		      ros::Duration (3.0).sleep ();
+		      rclcpp::Duration (3.0).sleep ();
           break;
 				}
       }
@@ -145,9 +143,9 @@ int
     return (-1);
   }
 
-  ros::init (argc, argv, "pcd_to_pointcloud");
+  rclcpp::init (argc, argv);
 
-  PCDGenerator c;
+  auto c = std::make_shared<PCDGenerator>("pcd_to_pointcloud");
   c.file_name_ = string (argv[1]);
   // check if publishing interval is given
   if (argc == 2)
@@ -161,12 +159,12 @@ int
 
   if (c.start () == -1)
   {
-    ROS_ERROR ("Could not load file %s. Exiting.", argv[1]);
+    RCLCPP_ERROR (c-get_logger(), "Could not load file %s. Exiting.", argv[1]);
     return (-1);
   }
-  ROS_INFO ("Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
-  c.spin ();
-
+  RCLCPP_INFO (c->get_logger(), "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
+  c::spin ();
+  rclcpp::shutdown();
   return (0);
 }
 /* ]--- */

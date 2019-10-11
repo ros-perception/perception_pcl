@@ -35,15 +35,14 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/moment_invariants.h"
-
+#include "pcl_ros/ptr_helper.h"
 void 
 pcl_ros::MomentInvariantsEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 void 
@@ -57,18 +56,19 @@ pcl_ros::MomentInvariantsEstimation::computePublish (const PointCloudInConstPtr 
 
   // Set the inputs
   impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
+  impl_.setIndices (to_boost_ptr(indices));
   impl_.setSearchSurface (surface);
   // Estimate the feature
   PointCloudOut output;
   impl_.compute (output);
 
-  // Publish a Boost shared ptr const data
+  // Publish a shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_->publish (output);
 }
 
 typedef pcl_ros::MomentInvariantsEstimation MomentInvariantsEstimation;
-PLUGINLIB_EXPORT_CLASS(MomentInvariantsEstimation, nodelet::Nodelet)
 
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(MomentInvariantsEstimation)
