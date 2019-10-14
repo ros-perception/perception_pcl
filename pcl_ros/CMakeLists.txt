@@ -5,7 +5,7 @@ project(pcl_ros)
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
+find_package(PCL HINTS /opt/pcl REQUIRED COMPONENTS core features filters io segmentation surface)
 
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # For debian: https://github.com/ros-perception/perception_pcl/issues/139
