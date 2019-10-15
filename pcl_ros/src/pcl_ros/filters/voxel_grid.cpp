@@ -42,11 +42,23 @@
 bool
 pcl_ros::VoxelGrid::child_init (ros::NodeHandle &nh, bool &has_service)
 {
+  // TODO: Remove?
   // Enable the dynamic reconfigure service
   has_service = true;
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+
+  rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
+  leaf_size_desc.name = "leaf_size";
+  leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  leaf_size_desc.description = "The size of a leaf (on x,y,z) used for downsampling.";
+  rcl_interfaces::msg::FloatingPointRange leaf_size_range;
+  leaf_size_range.from_value = 0;
+  leaf_size_range.to_value = 1.0;
+  leaf_size_desc.floating_point_range.push_back (leaf_size_range);
+  node_param->declare_parameter (leaf_size_desc.name, 0.01, leaf_size_desc);
+
+  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
+  //dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
+  //srv_->setCallback (f);
 
   return (true);
 }

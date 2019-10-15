@@ -42,9 +42,6 @@
 #include <pcl/filters/voxel_grid.h>
 #include "pcl_ros/filters/filter.h"
 
-// Dynamic reconfigure
-#include "pcl_ros/VoxelGridConfig.h"
-
 namespace pcl_ros
 {
   /** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
@@ -53,9 +50,6 @@ namespace pcl_ros
   class VoxelGrid : public Filter
   {
     protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > srv_;
-
       /** \brief The PCL filter implementation used. */
       pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
 
@@ -69,18 +63,18 @@ namespace pcl_ros
               PointCloud2 &output);
 
       /** \brief Child initialization routine.
-        * \param nh ROS node handle
+        * \param node_param Node parameter interface
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
       bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
+      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
+                  bool &has_service);
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
+      /** \brief Parameter callback
+        * \param params parameter values to set
         */
-      void 
-      config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level);
+      rcl_interfaces::msg::SetParameterResult
+      config_callback (const std::vector<rclcpp::Parameter> & params);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
