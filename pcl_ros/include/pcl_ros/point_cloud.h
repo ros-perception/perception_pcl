@@ -1,13 +1,13 @@
 #ifndef pcl_ROS_POINT_CLOUD_H_
 #define pcl_ROS_POINT_CLOUD_H_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_traits.h>
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
 
@@ -57,33 +57,35 @@ namespace pcl
   } // namespace pcl::detail
 } // namespace pcl
 
-namespace ros 
+namespace message_filters
 {
   // In ROS 1.3.1+, we can specialize the functor used to create PointCloud<T> objects
   // on the subscriber side. This allows us to generate the mapping between message
   // data and object fields only once and reuse it.
-#if ROS_VERSION_MINIMUM(1, 3, 1)
+//#if ROS_VERSION_MINIMUM(1, 3, 1)
   template<typename T>
   struct DefaultMessageCreator<pcl::PointCloud<T> >
   {
-    boost::shared_ptr<pcl::MsgFieldMap> mapping_;
+    std::shared_ptr<pcl::MsgFieldMap> mapping_;
 
     DefaultMessageCreator()
-      : mapping_( boost::make_shared<pcl::MsgFieldMap>() )
+      : mapping_( std::make_shared<pcl::MsgFieldMap>() )
     {
     }
     
-    boost::shared_ptr<pcl::PointCloud<T> > operator() ()
+    std::shared_ptr<pcl::PointCloud<T> > operator() ()
     {
-      boost::shared_ptr<pcl::PointCloud<T> > msg (new pcl::PointCloud<T> ());
+      std::shared_ptr<pcl::PointCloud<T> > msg (new pcl::PointCloud<T> ());
       pcl::detail::getMapping(*msg) = mapping_;
       return msg;
     }
   };
-#endif
+//#endif
 
+  // https://github.com/ros2/message_filters/commit/46e1229a1d8c0ecca68e01b9cf0d8c13f9f6f87a#diff-651c2688431bf33a7ed4f0c68f9d86d2
   namespace message_traits 
   {
+    /*
     template<typename T> struct MD5Sum<pcl::PointCloud<T> >
     {
       static const char* value() { return MD5Sum<sensor_msgs::PointCloud2>::value(); }
@@ -108,6 +110,7 @@ namespace ros
       static const char* value() { return Definition<sensor_msgs::PointCloud2>::value(); }
       static const char* value(const pcl::PointCloud<T>&) { return value(); }
     };
+    */
 
     // pcl point clouds message don't have a ROS compatible header
     // the specialized meta functions below (TimeStamp and FrameId)
@@ -122,22 +125,22 @@ namespace ros
       // pointer returned by the first functions may go out of scope, but there
       // isn't a lot I can do about that. This is a good reason to refuse to
       // returning pointers like this...
-      static ros::Time* pointer(typename pcl::PointCloud<T> &m) {
+      static rclcpp::Time* pointer(typename pcl::PointCloud<T> &m) {
         header_.reset(new std_msgs::Header());
         pcl_conversions::fromPCL(m.header, *(header_));
         return &(header_->stamp);
       }
-      static ros::Time const* pointer(const typename pcl::PointCloud<T>& m) {
+      static rclcpp::Time const* pointer(const typename pcl::PointCloud<T>& m) {
         header_const_.reset(new std_msgs::Header());
         pcl_conversions::fromPCL(m.header, *(header_const_));
         return &(header_const_->stamp);
       }
-      static ros::Time value(const typename pcl::PointCloud<T>& m) {
+      static rclcpp::Time value(const typename pcl::PointCloud<T>& m) {
         return pcl_conversions::fromPCL(m.header).stamp;
       }
     private:
-      static boost::shared_ptr<std_msgs::Header> header_;
-      static boost::shared_ptr<std_msgs::Header> header_const_;
+      static std::shared_ptr<std_msgs::Header> header_;
+      static std::shared_ptr<std_msgs::Header> header_const_;
     };
 
     template<typename T>
@@ -148,8 +151,10 @@ namespace ros
       static std::string value(const pcl::PointCloud<T>& m) { return m.header.frame_id; }
     };
 
-  } // namespace ros::message_traits
+  } // namespace message_filter::message_traits
 
+  // https://answers.ros.org/question/303992/how-to-get-the-serialized-message-sizelength-in-ros2/
+  /*
   namespace serialization 
   {
     template<typename T>
@@ -206,11 +211,11 @@ namespace ros
         stream.next(fields);
 
         // Construct field mapping if deserializing for the first time
-        boost::shared_ptr<pcl::MsgFieldMap>& mapping_ptr = pcl::detail::getMapping(m);
+        std::shared_ptr<pcl::MsgFieldMap>& mapping_ptr = pcl::detail::getMapping(m);
         if (!mapping_ptr)
         {
           // This normally should get allocated by DefaultMessageCreator, but just in case
-          mapping_ptr = boost::make_shared<pcl::MsgFieldMap>();
+          mapping_ptr = std::make_shared<pcl::MsgFieldMap>();
         }
         pcl::MsgFieldMap& mapping = *mapping_ptr;
         if (mapping.empty())
@@ -289,9 +294,10 @@ namespace ros
       }
     };
   } // namespace ros::serialization
+  */
 
   /// @todo Printer specialization in message_operations
 
-} // namespace ros
+} // namespace message_filters
 
 #endif
