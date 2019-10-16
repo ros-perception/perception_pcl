@@ -154,7 +154,12 @@ class_loader_hide_library_symbols(pcl_ros_surface)
 ## Tools
 
 add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
-target_link_libraries(pcd_to_pointcloud ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
+ament_target_dependencies(pcd_to_pointcloud
+  "pcl_conversions"
+  "rclcpp"
+  "sensor_msgs"
+)
+target_link_libraries(pcd_to_pointcloud ${boost_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 target_link_libraries(pointcloud_to_pcd ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})

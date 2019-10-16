@@ -49,12 +49,11 @@
 
 // ROS core
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/create_timer.hpp>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-
-#include "pcl_ros/publisher.h"
 
 class PCDGenerator : public rclcpp::Node
 {
@@ -62,75 +61,69 @@ class PCDGenerator : public rclcpp::Node
   //  std::string tf_frame_;
   public:
     std::string tf_frame_;
-  
+
     // ROS messages
     sensor_msgs::msg::PointCloud2 cloud_;
 
-    std::string file_name_, cloud_topic_;
-    double wait_;
+    std::string cloud_topic_;
 
-    pcl_ros::Publisher<sensor_msgs::msg::PointCloud2> pub_;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
 
     ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node (node_name, options), tf_frame_ ("/base_link")
+    PCDGenerator (std::string node_name, const rclcpp::NodeOptions& options)
+      : rclcpp::Node (node_name, options), tf_frame_ ("/base_link")
     {
       // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
       cloud_topic_ = "cloud_pcd";
-      pub_->create_publisher (cloud_topic_.c_str (), 1);
+      pub_ = rclcpp::create_publisher<sensor_msgs::msg::PointCloud2>(
+          *this, cloud_topic_, rclcpp::QoS(rclcpp::KeepLast(1)));
       this->get_parameter ("frame_id", tf_frame_);
       this->get_parameter_or ("frame_id", tf_frame_, std::string("/base_link"));
+
       RCLCPP_INFO (this->get_logger(), "Publishing data on topic %s with frame_id %s.", cloud_topic_.c_str (), tf_frame_.c_str());
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Start
-    int
-      start ()
+    int start (std::string file_name, double interval)
     {
-      if (file_name_ == "" || pcl::io::loadPCDFile (file_name_, cloud_) == -1)
-        return (-1);
-      cloud_.header.frame_id = tf_frame_;
-      return (0);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Spin (!)
-    bool spin ()
-    {
-      int nr_points      = cloud_.width * cloud_.height;
-      std::string fields_list = pcl::getFieldsList (cloud_);
-      double interval = wait_ * 1e+6;
-      while (rclcpp::ok ())
-      {
-        RCLCPP_DEBUG (this->get_logger(), "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), cloud_topic_, cloud_.header.frame_id.c_str ());
-        cloud_.header.stamp = this->now ();
-
-        if (pub_.count_subscribers () > 0)
-        {
-          RCLCPP_DEBUG (this->get_logger(), "Publishing data to %d subscribers.", pub_.count_subscribers ());
-          pub_->publish (cloud_);
-        }
-        else
-        {
-					// check once a second if there is any subscriber
-          rclcpp::Duration (1).sleep ();
-          continue;
-        }
-
-        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
-
-        if (interval == 0)	// We only publish once if a 0 seconds interval is given
-				{
-					// Give subscribers 3 seconds until point cloud decays... a little ugly!
-		      rclcpp::Duration (3.0).sleep ();
-          break;
-				}
+      if (file_name == "" || pcl::io::loadPCDFile (file_name, cloud_) == -1) {
+        return -1;
       }
-      return (true);
+      if (0.0 == interval) {
+        // We only publish once if a 0 seconds interval is given
+        do_publish();
+        // Give subscribers 3 seconds until point cloud decays... a little ugly!
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+      } else {
+        auto period = rclcpp::Duration(
+          std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(interval)));
+        timer_ = rclcpp::create_timer(
+            get_node_base_interface().get(), get_node_timers_interface().get(),
+            get_clock(), period,
+            std::bind(&PCDGenerator::do_publish, this));
+      }
+      cloud_.header.frame_id = tf_frame_;
+
+      return 0;
     }
 
+    void do_publish()
+    {
+      int nr_points = cloud_.width * cloud_.height;
+      std::string fields_list = pcl::getFieldsList (cloud_);
 
+      RCLCPP_DEBUG (this->get_logger(), "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), cloud_topic_, cloud_.header.frame_id.c_str ());
+      cloud_.header.stamp = this->now ();
+
+      size_t sub_count = pub_->get_subscription_count() > 0;
+      if (sub_count)
+      {
+        RCLCPP_DEBUG(this->get_logger(), "Publishing data to %d subscribers.", sub_count);
+        pub_->publish(cloud_);
+      }
+    }
 };
 
 /* ---[ */
@@ -145,26 +138,32 @@ int
 
   rclcpp::init (argc, argv);
 
-  auto c = std::make_shared<PCDGenerator>("pcd_to_pointcloud");
-  c.file_name_ = string (argv[1]);
-  // check if publishing interval is given
-  if (argc == 2)
-	{
-  	c.wait_ = 0;
-	}
-	else
-	{
-		c.wait_ = atof (argv[2]);
-	}
+  rclcpp::NodeOptions options;
+  auto c = std::make_shared<PCDGenerator>("pcd_to_pointcloud", options);
 
-  if (c.start () == -1)
+  // check if publishing interval is given
+  double interval;
+  if (argc == 2)
   {
-    RCLCPP_ERROR (c-get_logger(), "Could not load file %s. Exiting.", argv[1]);
-    return (-1);
+    interval = 0.0;
   }
-  RCLCPP_INFO (c->get_logger(), "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
-  c::spin ();
+  else
+  {
+    interval = atof(argv[2]);
+  }
+
+  if (c->start(argv[1], interval) != 0)
+  {
+    RCLCPP_ERROR(c->get_logger(), "Could not load file %s. Exiting.", argv[1]);
+    return -1;
+  }
+  RCLCPP_INFO (c->get_logger(),
+    "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",
+    c->cloud_.width * c->cloud_.height,
+    c->cloud_.data.size(),
+    pcl::getFieldsList(c->cloud_).c_str());
+  rclcpp::spin(c);
   rclcpp::shutdown();
-  return (0);
+  return 0;
 }
 /* ]--- */
