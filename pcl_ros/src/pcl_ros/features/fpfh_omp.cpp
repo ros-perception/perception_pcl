@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/fpfh_omp.h"
 
 pcl_ros::FPFHEstimationOMP::FPFHEstimationOMP (const rclcpp::NodeOptions& options) : FeatureFromNormals("FPFHEstimationOMPNode", options) {

@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/boundary.h"
 pcl_ros::BoundaryEstimation::BoundaryEstimation (std::string node_name, const rclcpp::NodeOptions& options) : pcl_ros::FeatureFromNormals(node_name, options)
 {

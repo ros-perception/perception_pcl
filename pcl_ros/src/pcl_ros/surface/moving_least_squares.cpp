@@ -35,7 +35,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/surface/moving_least_squares.h"
 #include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////

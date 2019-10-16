@@ -34,7 +34,6 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/features/shot_omp.h"
 #include "pcl_ros/ptr_helper.h"
 
