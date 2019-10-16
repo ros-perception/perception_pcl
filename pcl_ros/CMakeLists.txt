@@ -157,7 +157,7 @@ add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
 target_link_libraries(pcd_to_pointcloud ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-target_link_libraries(pointcloud_to_pcd ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES}${PCL_LIBRARIES})
+target_link_libraries(pointcloud_to_pcd ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
 target_link_libraries(bag_to_pcd pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
