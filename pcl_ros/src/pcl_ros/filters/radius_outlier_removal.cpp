@@ -42,35 +42,36 @@
 bool
 pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
 {
+  // TODO: remove?
   // Enable the dynamic reconfigure service
   has_service = true;
 
-  rcl_interfaces::msg::ParameterDescriptor rs_desc;
-  rs_desc.name = "radius_search",
-  rs_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-  rs_desc.description = "Radius of the sphere that will determine which points are neighbors.";
-  rcl_interfaces::msg::FloatingPointRange rs_range;
-  rs_range.from_value = 0.0;
-  rs_range.to_value = 10.0;
-  rs_desc.floating_point_range.push_back (rs_range);
-  double radius_search = node_param->declare_parameter (rs_desc.name, 0.1, rs_desc);
-  node_param->get_parameter (rs_desc.name, radius_search);
+  rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
+  radius_search_desc.name = "radius_search";
+  radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  radius_search_desc.description = "Radius of the sphere that will determine which points are neighbors.";
+  rcl_interfaces::msg::FloatingPointRange radius_search_range;
+  radius_search_range.from_value = 0.0;
+  radius_search_range.to_value = 10.0;
+  radius_search_desc.floating_point_range.push_back (radius_search_range);
+  double radius_search = node_param->declare_parameter (radius_search_desc.name, 0.1, radius_search_desc);
+  node_param->get_parameter (radius_search_desc.name, radius_search);
   impl_.setRadiusSearch (radius_search);
 
-  rcl_interfaces::msg::ParameterDescriptor mn_desc;
-  mn_desc.name = "min_neighbors";
-  mn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
-  mn_desc.description = "The number of neighbors that need to be present in order to be classified as an inlier.";
-  rcl_interfaces::msg::IntegerRange mn_range;
-  mn_range.from_value = 0;
-  mn_range.to_value = 1000;
-  mn_desc.integer_range.push_back (mn_range);
-  int min_neighbors = node_param->declare_parameter (mn_desc.name, 5, mn_desc);
-  node_param->get_parameter (mn_range.name, min_neighbors);
+  rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
+  min_neighbors_desc.name = "min_neighbors";
+  min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_neighbors_desc.description = "The number of neighbors that need to be present in order to be classified as an inlier.";
+  rcl_interfaces::msg::IntegerRange min_neighbors_range;
+  min_neighbors_range.from_value = 0;
+  min_neighbors_range.to_value = 1000;
+  min_neighbors_desc.integer_range.push_back (min_neighbors_range);
+  int min_neighbors = node_param->declare_parameter (min_neighbors_desc.name, 5, min_neighbors_desc);
+  node_param->get_parameter (min_neighbors_range.name, min_neighbors);
   impl_.setMinNeighborsInRadius (min_neighbors);
 
   // TODO
-  node_param->set_on_parameters_set_callback (boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2));
+  node_param->set_on_parameters_set_callback (boost::bind (&RadiusOutlierRemoval::config_callback, this, _1));
 
   //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
   //dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
@@ -94,6 +95,7 @@ pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parame
         impl_.setMinNeighborsInRadius (param.as_int ());
         // TODO replace NODELET_DEBUG, might need rclcpp::Node logging_interface
         // TODO replace getName, probably don't need a Nodelet in ROS 2? Not sure what's best way
+        //   Replace getName() with some wayto get rclcpp::Node name
         NODELET_DEBUG ("[%s::config_callback] Setting the number of neighbors in radius: %d.", getName ().c_str (), param.as_int ());
       }
     } 

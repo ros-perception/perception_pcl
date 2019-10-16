@@ -43,9 +43,6 @@
 #include <pcl/filters/crop_box.h>
 #include "pcl_ros/filters/filter.h"
 
-// Dynamic reconfigure
-#include "pcl_ros/CropBoxConfig.h"
-
 namespace pcl_ros
 {
   /** \brief @b CropBox is a filter that allows the user to filter all the data inside of a given box.
@@ -75,6 +72,20 @@ namespace pcl_ros
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
+
+      /** \brief Child initialization routine.
+        * \param node_param Node parameter interface
+        * \param has_service set to true if the child has a Dynamic Reconfigure service
+        */
+      bool 
+      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
+                  bool &has_service);
+      
+      /** \brief Parameter callback
+        * \param params parameter values to set
+        */
+      rcl_interfaces::msg::SetParameterResult
+      config_callback (const std::vector<rclcpp::Parameter> & params);
 
     private:
       /** \brief The PCL filter implementation used. */

@@ -66,6 +66,19 @@ namespace pcl_ros
       filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output);
 
+      /** \brief Child initialization routine.
+        * \param node_param Node parameter interface
+        * \param has_service set to true if the child has a Dynamic Reconfigure service
+        */
+      bool 
+      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
+                  bool &has_service);
+
+      /** \brief Parameter callback
+        * \param params parameter values to set
+        */
+      rcl_interfaces::msg::SetParameterResult
+      config_callback (const std::vector<rclcpp::Parameter> & params);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };

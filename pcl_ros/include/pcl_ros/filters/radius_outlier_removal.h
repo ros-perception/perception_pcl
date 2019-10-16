@@ -80,7 +80,7 @@ namespace pcl_ros
         */
       virtual inline bool
       child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
-                bool &has_service);
+                  bool &has_service);
 
       /** \brief Parameter callback
         * \param params parameter values to set
