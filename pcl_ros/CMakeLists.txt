@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(pcl_ros)
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 ## Find system dependencies
 find_package(cmake_modules REQUIRED)
