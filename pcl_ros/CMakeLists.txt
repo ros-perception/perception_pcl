@@ -179,6 +179,15 @@ target_link_libraries(pointcloud_to_pcd ${boost_LIBRARIES} ${PCL_LIBRARIES})
 #add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
 #target_link_libraries(convert_pcd_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 #
+
+add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
+ament_target_dependencies(convert_pcd_to_image
+  "pcl_conversions"
+  "rclcpp"
+  "sensor_msgs"
+)
+target_link_libraries(convert_pcd_to_image ${boost_LIBRARIES} ${PCL_LIBRARIES})
+
 #add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
 #target_link_libraries(convert_pointcloud_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 
