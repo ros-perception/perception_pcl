@@ -170,6 +170,8 @@ ament_target_dependencies(pointcloud_to_pcd
   "tf2_eigen"
   "tf2_ros"
 )
+target_link_libraries(pointcloud_to_pcd ${boost_LIBRARIES} ${PCL_LIBRARIES})
+
 # YYY
 #add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
 #target_link_libraries(bag_to_pcd pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})

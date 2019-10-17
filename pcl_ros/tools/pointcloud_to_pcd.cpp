@@ -80,10 +80,10 @@ class PointCloudToPCD : public rclcpp::Node
     ////////////////////////////////////////////////////////////////////////////////
     // Callback
     void
-      cloud_cb (const sensor_msgs::msg::PointCloud2::ConstSharedPtr & ros_cloud)
+      cloud_cb (sensor_msgs::msg::PointCloud2::ConstSharedPtr ros_cloud)
     {
       auto cloud = std::make_shared<pcl::PCLPointCloud2>();
-      pcl_conversions::toPCL(*ros_cloud, cloud);
+      pcl_conversions::toPCL(*ros_cloud, *cloud);
 
       if ((cloud->width * cloud->height) == 0)
         return;
@@ -175,7 +175,9 @@ class PointCloudToPCD : public rclcpp::Node
     }
     
     cloud_topic_ = "input";
-    sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2> (cloud_topic_,  1, std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1));
+    sub_ = rclcpp::create_subscription<sensor_msgs::msg::PointCloud2>(
+      this, cloud_topic_,  rclcpp::QoS(rclcpp::KeepLast(1)),
+      std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1));
     RCLCPP_INFO (this->get_logger(), "Listening for incoming data on topic %s",
                  cloud_topic_.c_str ());
   }
