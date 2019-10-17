@@ -35,6 +35,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 
 
@@ -162,16 +163,22 @@ ament_target_dependencies(pcd_to_pointcloud
 target_link_libraries(pcd_to_pointcloud ${boost_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-target_link_libraries(pointcloud_to_pcd ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
-target_link_libraries(bag_to_pcd pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
-target_link_libraries(convert_pcd_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
-target_link_libraries(convert_pointcloud_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
+ament_target_dependencies(pointcloud_to_pcd
+  "pcl_conversions"
+  "rclcpp"
+  "sensor_msgs"
+  "tf2_eigen"
+  "tf2_ros"
+)
+# YYY
+#add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
+#target_link_libraries(bag_to_pcd pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
+#
+#add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
+#target_link_libraries(convert_pcd_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
+#
+#add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
+#target_link_libraries(convert_pointcloud_to_image ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Downloads
 
@@ -210,9 +217,9 @@ install(
     pcl_ros_segmentation
     pcd_to_pointcloud
     pointcloud_to_pcd
-    bag_to_pcd
-    convert_pcd_to_image
-    convert_pointcloud_to_image
+    #bag_to_pcd
+    #convert_pcd_to_image
+    #convert_pointcloud_to_image
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

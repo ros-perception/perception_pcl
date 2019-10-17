@@ -53,6 +53,8 @@
 
 #include <Eigen/Geometry>
 
+#include <pcl_ros/tf_helper.hpp>
+
 /**
 \author Radu Bogdan Rusu
 
@@ -78,8 +80,11 @@ class PointCloudToPCD : public rclcpp::Node
     ////////////////////////////////////////////////////////////////////////////////
     // Callback
     void
-      cloud_cb (const pcl::PCLPointCloud2::ConstPtr& cloud)
+      cloud_cb (const sensor_msgs::msg::PointCloud2::ConstSharedPtr & ros_cloud)
     {
+      auto cloud = std::make_shared<pcl::PCLPointCloud2>();
+      pcl_conversions::toPCL(*ros_cloud, cloud);
+
       if ((cloud->width * cloud->height) == 0)
         return;
 
@@ -91,13 +96,18 @@ class PointCloudToPCD : public rclcpp::Node
       Eigen::Vector4f v = Eigen::Vector4f::Zero ();
       Eigen::Quaternionf q = Eigen::Quaternionf::Identity ();
       if (!fixed_frame_.empty ()) {
-        if (!tf_buffer_.canTransform (fixed_frame_, cloud->header.frame_id, pcl_conversions::fromPCL (cloud->header.stamp), rclcpp::Duration (3))) {
+        if (!tf_buffer_.canTransform(fixed_frame_, cloud->header.frame_id,
+                                     pcl_ros::tfFromRclcpp(pcl_conversions::fromPCL(cloud->header.stamp)),
+                                     pcl_ros::tfFromRclcpp(rclcpp::Duration(3))))
+        {
           RCLCPP_WARN(this->get_logger(), "Could not get transform!");
           return;
         }
 
         Eigen::Affine3d transform;
-        transform = tf2::transformToEigen (tf_buffer_.lookupTransform (fixed_frame_, cloud->header.frame_id,  pcl_conversions::fromPCL (cloud->header.stamp)));
+        transform = tf2::transformToEigen(
+            tf_buffer_.lookupTransform(fixed_frame_, cloud->header.frame_id,
+                                       pcl_ros::tfFromRclcpp(pcl_conversions::fromPCL(cloud->header.stamp))));
         v = Eigen::Vector4f::Zero ();
         v.head<3> () = transform.translation ().cast<float> ();
         q = transform.rotation ().cast<float> ();
@@ -127,7 +137,12 @@ class PointCloudToPCD : public rclcpp::Node
     }
 
   ////////////////////////////////////////////////////////////////////////////////
-  PointCloudToPCD (const rclcpp::NodeOptions& options) : rclcpp::Node("pointcloud_to_pcd", options), tf_buffer_(this->get_clock()), binary_(false), compressed_(false), tf_listener_(tf_buffer_)
+  PointCloudToPCD (const rclcpp::NodeOptions& options)
+    : rclcpp::Node("pointcloud_to_pcd", options),
+      binary_(false),
+      compressed_(false),
+      tf_buffer_(this->get_clock()),
+      tf_listener_(tf_buffer_)
   {
     // Check if a prefix parameter is defined for output file names.
     if (this->get_parameter ("prefix", prefix_))
