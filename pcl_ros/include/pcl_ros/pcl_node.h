@@ -93,26 +93,33 @@ namespace pcl_ros
       typedef std::shared_ptr <const std::vector<int> > IndicesConstPtr;
 
       /** \brief Empty constructor. */
-      PCLNode (std::string node_name, const rclcpp::NodeOptions& options) : rclcpp::Node(node_name, options), tf_buffer_(this->get_clock()), use_indices_ (false), latched_indices_ (false),
-                    max_queue_size_ (3), approximate_sync_ (false), tf_listener_(tf_buffer_) {
-                      // Parameters that we care about only at startup
-                      this->get_parameter ("max_queue_size", max_queue_size_);
-                      
-                      // ---[ Optional parameters
-                      this->get_parameter ("use_indices", use_indices_);
-                      this->get_parameter ("latched_indices", latched_indices_);
-                      this->get_parameter ("approximate_sync", approximate_sync_);
-                      
-                      RCLCPP_DEBUG (this->get_logger(), "[PCLNode::constructor] PCL Node successfully created with the following parameters:\n"
-                                    " - approximate_sync : %s\n"
-                                    " - use_indices      : %s\n"
-                                    " - latched_indices  : %s\n"
-                                    " - max_queue_size   : %d",
-                                    (approximate_sync_) ? "true" : "false",
-                                    (use_indices_) ? "true" : "false",
-                                    (latched_indices_) ? "true" : "false",
-                                    max_queue_size_);
-                      };
+      PCLNode (std::string node_name, const rclcpp::NodeOptions& options)
+      : rclcpp::Node(node_name, options),
+        use_indices_(false),
+        latched_indices_(false),
+        max_queue_size_(3),
+        approximate_sync_(false),
+        tf_buffer_(this->get_clock()),
+        tf_listener_(tf_buffer_)
+      {
+        // Parameters that we care about only at startup
+        this->get_parameter ("max_queue_size", max_queue_size_);
+
+        // ---[ Optional parameters
+        this->get_parameter ("use_indices", use_indices_);
+        this->get_parameter ("latched_indices", latched_indices_);
+        this->get_parameter ("approximate_sync", approximate_sync_);
+
+        RCLCPP_DEBUG (this->get_logger(), "[PCLNode::constructor] PCL Node successfully created with the following parameters:\n"
+                      " - approximate_sync : %s\n"
+                      " - use_indices      : %s\n"
+                      " - latched_indices  : %s\n"
+                      " - max_queue_size   : %d",
+                      (approximate_sync_) ? "true" : "false",
+                      (use_indices_) ? "true" : "false",
+                      (latched_indices_) ? "true" : "false",
+                      max_queue_size_);
+      }
 
     protected:
       /** \brief Set to true if point indices are used.
@@ -194,12 +201,14 @@ namespace pcl_ros
       inline bool
       isValid (const PointIndicesConstPtr &indices, const std::string &topic_name = "indices")
       {
-        /*if (indices->indices.empty ())
+        if (indices->indices.empty())
         {
-          RCLCPP_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), topic_name.c_str ());
-          return (true);
-        }*/
-        return (true);
+          RCLCPP_WARN(
+            this->get_logger(), "Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!",
+            indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), topic_name.c_str ());
+          return true;
+        }
+        return true;
       }
 
       /** \brief Test whether a given ModelCoefficients message is "valid" (i.e., has values).
@@ -209,12 +218,14 @@ namespace pcl_ros
       inline bool
       isValid (const ModelCoefficientsConstPtr &model, const std::string &topic_name = "model")
       {
-        /*if (model->values.empty ())
+        if (model->values.empty())
         {
-          RCLCPP_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", this->get_name (), model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), topic_name.c_str ());
-          return (false);
-        }*/
-        return (true);
+          RCLCPP_WARN(
+            this->get_logger(), "Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!",
+            model->values.size (), model->header.stamp.sec, model->header.frame_id.c_str (), topic_name.c_str ());
+          return false;
+        }
+        return true;
       }
 
     public:
