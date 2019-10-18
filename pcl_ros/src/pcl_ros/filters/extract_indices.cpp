@@ -35,8 +35,7 @@
  *
  */
 
-#include "class_loader/register_macro.hpp"
 #include "pcl_ros/filters/extract_indices.h"
+#include "rclcpp_components/register_node_macro.hpp"
 
-typedef pcl_ros::ExtractIndices ExtractIndices;
-CLASS_LOADER_REGISTER_CLASS(ExtractIndices, rclcpp::Node)
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::ExtractIndices)
