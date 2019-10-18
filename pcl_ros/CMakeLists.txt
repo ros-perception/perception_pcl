@@ -80,7 +80,12 @@ ament_export_include_directories(
 
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
-target_link_libraries(pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
+ament_target_dependencies(pcl_ros_tf
+  "rclcpp"
+  "sensor_msgs"
+  "tf2_ros"
+)
+target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
 
 ## Nodes
 ## Declare the pcl_ros_io library
