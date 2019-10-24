@@ -20,7 +20,6 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
-
 set(dependencies
   pcl_msgs
   rclcpp
@@ -28,17 +27,9 @@ set(dependencies
   std_msgs
 )
 
-set(includes
-  include
-  ${Eigen_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS}
-  ${PCL_COMMON_INCLUDE_DIRS}
-  ${pcl_msgs_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS}
-)
-
 include_directories(
-  ${includes}
+  include
+  ${PCL_COMMON_INCLUDE_DIRS}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -56,8 +47,6 @@ if(BUILD_TESTING)
   target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES})
 endif()
 
-ament_export_include_directories(
-  ${includes}
-)
-ament_export_dependencies()
+ament_export_include_directories(include)
+ament_export_dependencies(${dependencies})
 ament_package()
