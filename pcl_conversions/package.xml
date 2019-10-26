@@ -11,6 +11,7 @@
 
   <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
   <maintainer email="www.kentaro.wada@gmail.com">Kentaro Wada</maintainer>
+  <maintainer email="stevenmacenski@gmail.com">Steve Macenski</maintainer>
 
   <license>BSD</license>
 
@@ -20,23 +21,13 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>eigen3</build_depend>
-  <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>message_filters</build_depend>
-  <build_depend>pcl_msgs</build_depend>
-  <build_depend>rclcpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-
-  <build_export_depend>eigen3</build_export_depend>
-  <build_export_depend>libpcl-all-dev</build_export_depend>
-  <build_export_depend>message_filters</build_export_depend>
-  <build_export_depend>pcl_msgs</build_export_depend>
-  <build_export_depend>rclcpp</build_export_depend>
-  <build_export_depend>sensor_msgs</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
-
-  <exec_depend>libpcl-all-dev</exec_depend>
+  <depend>eigen</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>message_filters</depend>
+  <depend>pcl_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
 

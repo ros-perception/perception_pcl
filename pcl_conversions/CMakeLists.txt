@@ -21,6 +21,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 set(dependencies
+  message_filters
   pcl_msgs
   rclcpp
   sensor_msgs
