@@ -9,15 +9,13 @@ cache:
 
 env:
   global:
-    - ROS_DISTRO="dashing"
     - ROS_REPO=ros2
     - CCACHE_DIR=$HOME/.ccache
     # travis build will time out with no output unless we use verbose output
     - VERBOSE_OUTPUT=true
     - VERBOSE_TESTS=true
   matrix:
-    - OS_NAME=ubuntu OS_CODE_NAME=bionic
-    - OS_NAME=debian OS_CODE_NAME=stretch
+    - ROS_DISTRO=dashing OS_NAME=ubuntu OS_CODE_NAME=bionic
 
 install:
   - git clone --branch master --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
