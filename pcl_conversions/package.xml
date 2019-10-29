@@ -5,9 +5,13 @@
   <description>Provides conversions from PCL data types and ROS message types</description>
 
   <author email="william@osrfoundation.org">William Woodall</author>
+  <author email="paul@bovbel.com">Paul Bovbel</author>
+  <author email="bill@neautomation.com">Bill Morris</author>
+  <author email="ankl@kth.se">Andreas Klintberg</author>
 
   <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
   <maintainer email="www.kentaro.wada@gmail.com">Kentaro Wada</maintainer>
+  <maintainer email="stevenmacenski@gmail.com">Steve Macenski</maintainer>
 
   <license>BSD</license>
 
@@ -15,20 +19,19 @@
   <url type="repository">https://github.com/ros-perception/perception_pcl</url>
   <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_export_depend>eigen</build_export_depend>
-  <build_export_depend>libpcl-all-dev</build_export_depend>
-  <build_export_depend>pcl_msgs</build_export_depend>
-  <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>sensor_msgs</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
+  <depend>eigen</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>message_filters</depend>
+  <depend>pcl_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
 
-  <test_depend>eigen</test_depend>
-  <test_depend>libpcl-all-dev</test_depend>
-  <test_depend>pcl_msgs</test_depend>
-  <test_depend>roscpp</test_depend>
-  <test_depend>sensor_msgs</test_depend>
-  <test_depend>std_msgs</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
