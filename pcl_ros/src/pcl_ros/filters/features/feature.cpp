@@ -150,7 +150,7 @@ pcl_ros::Feature::onInit ()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Feature::config_callback (FeatureConfig &config, uint32_t level)
+pcl_ros::Feature::config_callback (FeatureConfig &config, uint32_t /*level*/)
 {
   if (k_ != config.k_search)
   {

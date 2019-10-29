@@ -37,7 +37,6 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/project_inliers.h"
-#include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -158,5 +157,5 @@ pcl_ros::ProjectInliers::input_indices_model_callback (const PointCloud2::ConstP
 }
 
 typedef pcl_ros::ProjectInliers ProjectInliers;
-PLUGINLIB_EXPORT_CLASS(ProjectInliers,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ProjectInliers,nodelet::Nodelet)
 

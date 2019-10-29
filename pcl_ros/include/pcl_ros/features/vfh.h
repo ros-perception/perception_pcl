@@ -39,7 +39,7 @@
 #define PCL_ROS_FEATURES_VFH_H_
 
 #include <pcl/features/vfh.h>
-#include "pcl_ros/features/fpfh.h"
+#include "pcl_ros/features/feature.h"
 
 namespace pcl_ros
 {

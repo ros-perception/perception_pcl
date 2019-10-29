@@ -69,7 +69,7 @@ pcl_ros::VoxelGrid::filter (const PointCloud2::ConstPtr &input,
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level)
+pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -83,7 +83,7 @@ pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t 
   }
   
   unsigned int minPointsPerVoxel = impl_.getMinimumPointsNumberPerVoxel ();
-  if (minPointsPerVoxel != config.min_points_per_voxel)
+  if (minPointsPerVoxel != ((unsigned int) config.min_points_per_voxel))
   {
     minPointsPerVoxel = config.min_points_per_voxel;
     NODELET_DEBUG ("[config_callback] Setting the minimum points per voxel to: %u.", minPointsPerVoxel);
@@ -131,5 +131,5 @@ pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t 
 }
 
 typedef pcl_ros::VoxelGrid VoxelGrid;
-PLUGINLIB_EXPORT_CLASS(VoxelGrid,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(VoxelGrid,nodelet::Nodelet)
 

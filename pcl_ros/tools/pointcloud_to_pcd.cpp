@@ -38,20 +38,14 @@
 // ROS core
 #include <ros/ros.h>
 
-#include <sensor_msgs/PointCloud2.h>
-
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 // PCL includes
-#include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 
 #include <pcl_conversions/pcl_conversions.h>
-
-#include <Eigen/Geometry>
 
 using namespace std;
 

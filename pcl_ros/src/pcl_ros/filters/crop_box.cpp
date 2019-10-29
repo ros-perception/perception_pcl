@@ -54,7 +54,7 @@ pcl_ros::CropBox::child_init (ros::NodeHandle &nh, bool &has_service)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::CropBox::config_callback (pcl_ros::CropBoxConfig &config, uint32_t level)
+pcl_ros::CropBox::config_callback (pcl_ros::CropBoxConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -111,5 +111,5 @@ pcl_ros::CropBox::config_callback (pcl_ros::CropBoxConfig &config, uint32_t leve
 }
 
 typedef pcl_ros::CropBox CropBox;
-PLUGINLIB_EXPORT_CLASS(CropBox,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(CropBox,nodelet::Nodelet)
 

@@ -37,7 +37,6 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/segmentation/sac_segmentation.h"
-#include <pcl/io/io.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -192,7 +191,7 @@ pcl_ros::SACSegmentation::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentation::config_callback (SACSegmentationConfig &config, uint32_t level)
+pcl_ros::SACSegmentation::config_callback (SACSegmentationConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -518,7 +517,7 @@ pcl_ros::SACSegmentationFromNormals::axis_callback (const pcl_msgs::ModelCoeffic
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SACSegmentationFromNormals::config_callback (SACSegmentationFromNormalsConfig &config, uint32_t level)
+pcl_ros::SACSegmentationFromNormals::config_callback (SACSegmentationFromNormalsConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 

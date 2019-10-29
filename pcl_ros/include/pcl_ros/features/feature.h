@@ -40,7 +40,6 @@
 
 // PCL includes
 #include <pcl/features/feature.h>
-#include <pcl_msgs/PointIndices.h>
 
 #include "pcl_ros/pcl_nodelet.h"
 #include <message_filters/pass_through.h>

@@ -53,7 +53,7 @@ pcl_ros::PassThrough::child_init (ros::NodeHandle &nh, bool &has_service)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PassThrough::config_callback (pcl_ros::FilterConfig &config, uint32_t level)
+pcl_ros::PassThrough::config_callback (pcl_ros::FilterConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -116,5 +116,5 @@ pcl_ros::PassThrough::config_callback (pcl_ros::FilterConfig &config, uint32_t l
 }
 
 typedef pcl_ros::PassThrough PassThrough;
-PLUGINLIB_EXPORT_CLASS(PassThrough,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PassThrough,nodelet::Nodelet)
 

@@ -36,7 +36,6 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include <pcl/io/io.h>
 #include <pcl/PointIndices.h>
 #include "pcl_ros/segmentation/extract_clusters.h"
 
@@ -138,7 +137,7 @@ pcl_ros::EuclideanClusterExtraction::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::EuclideanClusterExtraction::config_callback (EuclideanClusterExtractionConfig &config, uint32_t level)
+pcl_ros::EuclideanClusterExtraction::config_callback (EuclideanClusterExtractionConfig &config, uint32_t /*level*/)
 {
   if (impl_.getClusterTolerance () != config.cluster_tolerance)
   {

@@ -53,7 +53,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_servic
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::RadiusOutlierRemoval::config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level)
+pcl_ros::RadiusOutlierRemoval::config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -73,5 +73,5 @@ pcl_ros::RadiusOutlierRemoval::config_callback (pcl_ros::RadiusOutlierRemovalCon
 
 
 typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval,nodelet::Nodelet)
 

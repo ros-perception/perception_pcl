@@ -38,7 +38,7 @@
 #define PCL_ROS_SHOT_OMP_H_
 
 #include <pcl/features/shot_omp.h>
-#include "pcl_ros/features/shot.h"
+#include "pcl_ros/features/feature.h"
 
 namespace pcl_ros
 {

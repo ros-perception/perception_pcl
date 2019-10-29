@@ -35,7 +35,6 @@
  *
  */
 
-#include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/filters/filter.h"
 
@@ -174,7 +173,7 @@ pcl_ros::Filter::onInit ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::config_callback (pcl_ros::FilterConfig &config, uint32_t level)
+pcl_ros::Filter::config_callback (pcl_ros::FilterConfig &config, uint32_t /*level*/)
 {
   // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
   if (tf_input_frame_ != config.input_frame)

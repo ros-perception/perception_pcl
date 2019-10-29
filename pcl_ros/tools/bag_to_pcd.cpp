@@ -44,12 +44,9 @@ Cloud Data) format.
 
  **/
 
-#include <sstream>
 #include <boost/filesystem.hpp>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <pcl/io/io.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/transforms.h"
 #include <tf/transform_listener.h>
@@ -83,7 +80,7 @@ int
   {
     bag.open (argv[1], rosbag::bagmode::Read);
   } 
-  catch (rosbag::BagException) 
+  catch (const rosbag::BagException&) 
   {
     std::cerr << "Error opening file " << argv[1] << std::endl;
     return (-1);

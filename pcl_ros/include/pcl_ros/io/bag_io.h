@@ -38,7 +38,8 @@
 #ifndef PCL_ROS_IO_BAG_IO_H_
 #define PCL_ROS_IO_BAG_IO_H_
 
-#include <pcl_ros/pcl_nodelet.h>
+#include <nodelet/nodelet.h>
+#include <Eigen/Core>
 #include <sensor_msgs/PointCloud2.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
