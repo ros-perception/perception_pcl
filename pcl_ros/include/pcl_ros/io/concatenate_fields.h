@@ -40,10 +40,6 @@
 
 // ROS includes
 #include <nodelet_topic_tools/nodelet_lazy.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/sync_policies/approximate_time.h>
 
 #include <sensor_msgs/PointCloud2.h>
 

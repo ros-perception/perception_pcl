@@ -54,7 +54,7 @@ pcl_ros::ExtractIndices::child_init (ros::NodeHandle &nh, bool &has_service)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::ExtractIndices::config_callback (pcl_ros::ExtractIndicesConfig &config, uint32_t level)
+pcl_ros::ExtractIndices::config_callback (pcl_ros::ExtractIndicesConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -66,5 +66,5 @@ pcl_ros::ExtractIndices::config_callback (pcl_ros::ExtractIndicesConfig &config,
 }
 
 typedef pcl_ros::ExtractIndices ExtractIndices;
-PLUGINLIB_EXPORT_CLASS(ExtractIndices,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(ExtractIndices,nodelet::Nodelet)
 

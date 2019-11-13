@@ -38,20 +38,14 @@
 // ROS core
 #include <ros/ros.h>
 
-#include <sensor_msgs/PointCloud2.h>
-
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 // PCL includes
-#include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 
 #include <pcl_conversions/pcl_conversions.h>
-
-#include <Eigen/Geometry>
 
 using namespace std;
 
@@ -122,20 +116,20 @@ class PointCloudToPCD
 
       pcl::PCDWriter writer;
       if(binary_)
-	{
-	  if(compressed_)
-	    {
-	      writer.writeBinaryCompressed (ss.str (), *cloud, v, q);
-	    }
-	  else
-	    {
-	      writer.writeBinary (ss.str (), *cloud, v, q);
-	    }
-	}
+      {
+        if(compressed_)
+        {
+          writer.writeBinaryCompressed (ss.str (), *cloud, v, q);
+        }
+        else
+        {
+          writer.writeBinary (ss.str (), *cloud, v, q);
+        }
+      }
       else
-	{
-	  writer.writeASCII (ss.str (), *cloud, v, q, 8);
-	}
+      {
+        writer.writeASCII (ss.str (), *cloud, v, q, 8);
+      }
 
     }
 
@@ -159,20 +153,20 @@ class PointCloudToPCD
       priv_nh.getParam ("compressed", compressed_);
       priv_nh.getParam ("filename", filename_);
       if(binary_)
-	{
-	  if(compressed_)
-	    {
-	      ROS_INFO_STREAM ("Saving as binary compressed PCD");
-	    }
-	  else
-	    {
-	      ROS_INFO_STREAM ("Saving as binary PCD");
-	    }
-	}
+      {
+        if(compressed_)
+        {
+          ROS_INFO_STREAM ("Saving as binary compressed PCD");
+        }
+        else
+        {
+          ROS_INFO_STREAM ("Saving as binary uncompressed PCD");
+        }
+      }
       else
-	{
-	  ROS_INFO_STREAM ("Saving as binary PCD");
-	}
+      {
+        ROS_INFO_STREAM ("Saving as ASCII PCD");
+      }
 
       if (filename_ != "")
       {

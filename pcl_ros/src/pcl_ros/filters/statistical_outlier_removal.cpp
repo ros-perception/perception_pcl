@@ -53,7 +53,7 @@ pcl_ros::StatisticalOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_s
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::StatisticalOutlierRemoval::config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t level)
+pcl_ros::StatisticalOutlierRemoval::config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock (mutex_);
 
@@ -77,5 +77,5 @@ pcl_ros::StatisticalOutlierRemoval::config_callback (pcl_ros::StatisticalOutlier
 }
 
 typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval,nodelet::Nodelet)
 

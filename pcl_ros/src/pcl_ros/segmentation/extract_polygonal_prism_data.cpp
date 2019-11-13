@@ -38,7 +38,6 @@
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/segmentation/extract_polygonal_prism_data.h"
-#include <pcl/io/io.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -113,7 +112,7 @@ pcl_ros::ExtractPolygonalPrismData::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::ExtractPolygonalPrismData::config_callback (ExtractPolygonalPrismDataConfig &config, uint32_t level)
+pcl_ros::ExtractPolygonalPrismData::config_callback (ExtractPolygonalPrismDataConfig &config, uint32_t /*level*/)
 {
   double height_min, height_max;
   impl_.getHeightLimits (height_min, height_max);

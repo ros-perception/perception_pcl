@@ -39,7 +39,6 @@
 #define PCL_ROS_FILTER_H_
 
 // PCL includes
-#include <pcl/filters/filter.h>
 #include "pcl_ros/pcl_nodelet.h"
 
 // Dynamic reconfigure
@@ -99,7 +98,7 @@ namespace pcl_ros
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
       virtual bool 
-      child_init (ros::NodeHandle &nh, bool &has_service) 
+      child_init (ros::NodeHandle &/*nh*/, bool &has_service) 
       { 
         has_service = false; 
         return (true); 

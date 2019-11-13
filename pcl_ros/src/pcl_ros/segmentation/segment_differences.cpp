@@ -37,7 +37,6 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/segmentation/segment_differences.h"
-#include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -93,7 +92,7 @@ pcl_ros::SegmentDifferences::unsubscribe ()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::SegmentDifferences::config_callback (SegmentDifferencesConfig &config, uint32_t level)
+pcl_ros::SegmentDifferences::config_callback (SegmentDifferencesConfig &config, uint32_t /*level*/)
 {
   if (impl_.getDistanceThreshold () != config.distance_threshold)
   {

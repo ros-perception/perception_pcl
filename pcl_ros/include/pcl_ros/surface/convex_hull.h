@@ -43,9 +43,6 @@
 // PCL includes
 #include <pcl/surface/convex_hull.h>
 
-// Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-
 namespace pcl_ros
 {
   namespace sync_policies = message_filters::sync_policies;

@@ -47,9 +47,7 @@
 //#include "pfh.cpp"
 //#include "principal_curvatures.cpp"
 //#include "vfh.cpp"
-#include <pcl/io/io.h>
 #include "pcl_ros/features/feature.h"
-#include <message_filters/null_types.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -177,7 +175,7 @@ pcl_ros::Feature::unsubscribe ()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Feature::config_callback (FeatureConfig &config, uint32_t level)
+pcl_ros::Feature::config_callback (FeatureConfig &config, uint32_t /*level*/)
 {
   if (k_ != config.k_search)
   {

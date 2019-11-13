@@ -36,6 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
+#include <ros/node_handle.h>
 #include "pcl_ros/io/bag_io.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,5 +110,5 @@ pcl_ros::BAGReader::onInit ()
 }
 
 typedef pcl_ros::BAGReader BAGReader;
-PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(BAGReader,nodelet::Nodelet)
 

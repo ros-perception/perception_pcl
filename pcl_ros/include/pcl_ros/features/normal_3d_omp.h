@@ -39,7 +39,7 @@
 #define PCL_ROS_NORMAL_3D_OMP_H_
 
 #include <pcl/features/normal_3d_omp.h>
-#include "pcl_ros/features/normal_3d.h"
+#include "pcl_ros/features/feature.h"
 
 namespace pcl_ros
 {

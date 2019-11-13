@@ -38,7 +38,6 @@
 /** \author Radu Bogdan Rusu */
 
 #include <pluginlib/class_list_macros.h>
-#include <pcl/io/io.h>
 #include "pcl_ros/io/concatenate_fields.h"
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -109,9 +108,9 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
     PointCloud cloud_out = *clouds[0];
 
     // Resize the output dataset
-    int data_size = cloud_out.data.size ();
-    int nr_fields = cloud_out.fields.size ();
-    int nr_points = cloud_out.width * cloud_out.height;
+    size_t data_size = cloud_out.data.size ();
+    size_t nr_fields = cloud_out.fields.size ();
+    size_t nr_points = cloud_out.width * cloud_out.height;
     for (size_t i = 1; i < clouds.size (); ++i)
     {
       assert (clouds[i]->data.size () / (clouds[i]->width * clouds[i]->height) == clouds[i]->point_step);
@@ -143,7 +142,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 
     // Iterate over each point and perform the appropriate memcpys
     int point_offset = 0;
-    for (int cp = 0; cp < nr_points; ++cp)
+    for (size_t cp = 0; cp < nr_points; ++cp)
     {
       for (size_t i = 0; i < clouds.size (); ++i)
       {
@@ -166,5 +165,5 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointClo
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet)
 

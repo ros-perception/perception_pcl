@@ -36,7 +36,6 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include <pcl/io/io.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/io/concatenate_data.h"
 
@@ -196,7 +195,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::unsubscribe ()
 {
-  for (int d = 0; d < filters_.size (); ++d)
+  for (size_t d = 0; d < filters_.size (); ++d)
   {
     filters_[d]->unsubscribe ();
   }
@@ -272,6 +271,10 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
           {
             pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out1, *in7, *out2);
             out1 = out2;
+            if (in8 && in8->width * in8->height > 0)
+            {
+              pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds (*out2, *in8, *out1);
+            }
           } 
         }
       }
@@ -281,5 +284,5 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
 }
 
 typedef pcl_ros::PointCloudConcatenateDataSynchronizer PointCloudConcatenateDataSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateDataSynchronizer,nodelet::Nodelet)
 

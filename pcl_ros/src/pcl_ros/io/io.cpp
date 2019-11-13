@@ -51,7 +51,7 @@ typedef nodelet::NodeletDEMUX<sensor_msgs::PointCloud2> NodeletDEMUX;
 //#include "concatenate_fields.cpp"
 //#include "concatenate_data.cpp"
 
-PLUGINLIB_EXPORT_CLASS(NodeletMUX,nodelet::Nodelet);
-PLUGINLIB_EXPORT_CLASS(NodeletDEMUX,nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(NodeletMUX,nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(NodeletDEMUX,nodelet::Nodelet)
 //PLUGINLIB_EXPORT_CLASS(NodeletDEMUX_ROS,nodelet::Nodelet);
 

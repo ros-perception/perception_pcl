@@ -38,7 +38,7 @@
 #define PCL_ROS_SHOT_H_
 
 #include <pcl/features/shot.h>
-#include "pcl_ros/features/pfh.h"
+#include "pcl_ros/features/feature.h"
 
 namespace pcl_ros
 {

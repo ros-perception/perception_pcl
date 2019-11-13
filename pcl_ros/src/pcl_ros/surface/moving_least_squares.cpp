@@ -37,7 +37,6 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/surface/moving_least_squares.h"
-#include <pcl/io/io.h>
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::MovingLeastSquares::onInit ()
@@ -190,7 +189,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback (const PointCloudInConstPtr 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::MovingLeastSquares::config_callback (MLSConfig &config, uint32_t level)
+pcl_ros::MovingLeastSquares::config_callback (MLSConfig &config, uint32_t /*level*/)
 {
   // \Note Zoli, shouldn't this be implemented in MLS too?
   /*if (k_ != config.k_search)

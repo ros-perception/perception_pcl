@@ -169,7 +169,7 @@ namespace pcl_ros
         * \param topic_name an optional topic name (only used for printing, defaults to "indices")
         */
       inline bool
-      isValid (const PointIndicesConstPtr &indices, const std::string &topic_name = "indices")
+      isValid (const PointIndicesConstPtr &/*indices*/, const std::string &/*topic_name*/ = "indices")
       {
         /*if (indices->indices.empty ())
         {
@@ -184,7 +184,7 @@ namespace pcl_ros
         * \param topic_name an optional topic name (only used for printing, defaults to "model")
         */
       inline bool
-      isValid (const ModelCoefficientsConstPtr &model, const std::string &topic_name = "model")
+      isValid (const ModelCoefficientsConstPtr &/*model*/, const std::string &/*topic_name*/ = "model")
       {
         /*if (model->values.empty ())
         {
