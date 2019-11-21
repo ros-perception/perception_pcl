@@ -54,8 +54,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParamete
   radius_search_range.from_value = 0.0;
   radius_search_range.to_value = 10.0;
   radius_search_desc.floating_point_range.push_back (radius_search_range);
-  double radius_search = node_param->declare_parameter (radius_search_desc.name, 0.1, radius_search_desc);
-  node_param->get_parameter (radius_search_desc.name, radius_search);
+  double radius_search = node_param->declare_parameter (radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc).get<double>();
   impl_.setRadiusSearch (radius_search);
 
   rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
@@ -66,8 +65,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParamete
   min_neighbors_range.from_value = 0;
   min_neighbors_range.to_value = 1000;
   min_neighbors_desc.integer_range.push_back (min_neighbors_range);
-  int min_neighbors = node_param->declare_parameter (min_neighbors_desc.name, 5, min_neighbors_desc);
-  node_param->get_parameter (min_neighbors_range.name, min_neighbors);
+  int min_neighbors = node_param->declare_parameter (min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc).get<int>();
   impl_.setMinNeighborsInRadius (min_neighbors);
 
   // TODO
@@ -84,7 +82,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParamete
 rcl_interfaces::msg::SetParametersResult
 pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   for (const rclcpp::Parameter &param : params)
   {
@@ -93,10 +91,7 @@ pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parame
       if (impl_.getMinNeighborsInRadius () != param.as_int ())
       {
         impl_.setMinNeighborsInRadius (param.as_int ());
-        // TODO replace NODELET_DEBUG, might need rclcpp::Node logging_interface
-        // TODO replace getName, probably don't need a Nodelet in ROS 2? Not sure what's best way
-        //   Replace getName() with some wayto get rclcpp::Node name
-        NODELET_DEBUG ("[%s::config_callback] Setting the number of neighbors in radius: %d.", getName ().c_str (), param.as_int ());
+        RCLCPP_DEBUG(get_logger(), "Setting the number of neighbors in radius: %d.", param.as_int ());
       }
     } 
     else if (param.get_name () == "radius_search")
@@ -104,14 +99,13 @@ pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parame
       if (impl_.getRadiusSearch () != param.as_double ())
       {
         impl_.setRadiusSearch (param.as_double ());
-        NODELET_DEBUG ("[%s::config_callback] Setting the radius to search neighbors: %f.", getName ().c_str (), param.as_double ());
+        RCLCPP_DEBUG(get_logger(), "Setting the radius to search neighbors: %f.", param.as_double ());
       }
     }
   }
+  // TODO(sloretz) constraint validation
+  return rcl_interfaces::msg::SetParametersResult();
 }
 
-
-typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(RadiusOutlierRemoval)
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::RadiusOutlierRemoval)
