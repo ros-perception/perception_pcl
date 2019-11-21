@@ -42,6 +42,7 @@
 // PCL includes
 #include <pcl/filters/crop_box.h>
 #include "pcl_ros/filters/filter.h"
+#include "pcl_ros/ptr_helper.h"
 
 namespace pcl_ros
 {
@@ -53,6 +54,9 @@ namespace pcl_ros
     */
   class CropBox : public Filter
   {
+    public:
+      CropBox(const rclcpp::NodeOptions& options) : Filter("CropBoxNode", options) {};
+
     protected:
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
@@ -63,7 +67,7 @@ namespace pcl_ros
       filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        std::mutex::scoped_lock lock (mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
@@ -77,14 +81,14 @@ namespace pcl_ros
         * \param node_param Node parameter interface
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
-      bool 
+      virtual inline bool
       child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
                   bool &has_service);
       
       /** \brief Parameter callback
         * \param params parameter values to set
         */
-      rcl_interfaces::msg::SetParameterResult
+      rcl_interfaces::msg::SetParametersResult
       config_callback (const std::vector<rclcpp::Parameter> & params);
 
     private:
