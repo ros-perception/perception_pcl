@@ -38,11 +38,13 @@
 #ifndef PCL_ROS_FILTERS_EXTRACTINDICES_H_
 #define PCL_ROS_FILTERS_EXTRACTINDICES_H_
 
+#include <mutex>
+
 // PCL includes
 #include <pcl/filters/extract_indices.h>
 
 #include "pcl_ros/filters/filter.h"
-#include "pcl_ros/ExtractIndicesConfig.h"
+#include "pcl_ros/ptr_helper.h"
 
 namespace pcl_ros
 {
@@ -59,10 +61,10 @@ namespace pcl_ros
         * \param output the resultant filtered dataset
         */
       inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+      filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
               PointCloud2 &output)
       {
-        std::mutex::scoped_lock lock (mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
@@ -77,6 +79,11 @@ namespace pcl_ros
       pcl::ExtractIndices<pcl::PCLPointCloud2> impl_;
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+      ExtractIndices(const rclcpp::NodeOptions & options)
+        : Filter("filter_extract_indices", options)
+      {
+      }
   };
 }
 
