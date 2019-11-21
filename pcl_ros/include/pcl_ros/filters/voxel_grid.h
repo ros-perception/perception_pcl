@@ -77,7 +77,7 @@ namespace pcl_ros
       /** \brief Parameter callback
         * \param params parameter values to set
         */
-      rcl_interfaces::msg::SetParameterResult
+      rcl_interfaces::msg::SetParametersResult
       config_callback (const std::vector<rclcpp::Parameter> & params);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW

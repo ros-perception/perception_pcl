@@ -40,7 +40,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl_ros::VoxelGrid::child_init (ros::NodeHandle &nh, bool &has_service)
+pcl_ros::VoxelGrid::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
 {
   // TODO: Remove?
   // Enable the dynamic reconfigure service
@@ -54,7 +54,7 @@ pcl_ros::VoxelGrid::child_init (ros::NodeHandle &nh, bool &has_service)
   leaf_size_range.from_value = 0;
   leaf_size_range.to_value = 1.0;
   leaf_size_desc.floating_point_range.push_back (leaf_size_range);
-  node_param->declare_parameter (leaf_size_desc.name, 0.01, leaf_size_desc);
+  node_param->declare_parameter (leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
   //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
   //dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
@@ -80,6 +80,5 @@ pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
 }
 
 
-typedef pcl_ros::VoxelGrid VoxelGrid;
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(VoxelGrid)
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::VoxelGrid)
