@@ -43,6 +43,8 @@
 #include "pcl_ros/filters/filter.h"
 #include "pcl_ros/ptr_helper.h"
 
+#include <rcl_interfaces/msg/set_parameters_result.hpp>
+
 namespace pcl_ros
 {
   /** \brief @b PassThrough uses the base Filter class methods to pass through all data that satisfies the user given
@@ -85,7 +87,7 @@ namespace pcl_ros
       /** \brief Parameter callback
         * \param params parameter values to set
         */
-      rcl_interfaces::msg::SetParameterResult
+      rcl_interfaces::msg::SetParametersResult
       config_callback (const std::vector<rclcpp::Parameter> & params);
 
     private:
