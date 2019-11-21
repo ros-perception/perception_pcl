@@ -109,7 +109,7 @@ pcl_ros::PassThrough::child_init (rclcpp::node_interfaces::NodeParametersInterfa
 rcl_interfaces::msg::SetParametersResult
 pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock (mutex_);
 
   double filter_min, filter_max;
   impl_.getFilterLimits (filter_min, filter_max);
