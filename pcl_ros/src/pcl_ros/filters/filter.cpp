@@ -122,18 +122,29 @@ pcl_ros::Filter::subscribe()
     {
       sync_input_indices_a_ = std::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
+      auto callback = std::bind(&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2);
+      sync_input_indices_a_->registerCallback(callback);
     }
     else
     {
       sync_input_indices_e_ = std::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, pcl_msgs::msg::PointIndices> > >(max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
+      auto callback = std::bind(&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2);
+      sync_input_indices_e_->registerCallback(callback);
     }
   }
   else
+  {
+    // TODO(sloretz) what are appropriate QoS settings?
+    auto qos = rclcpp::QoS(1);
+
+    // Workaround ros2/rclcpp#766
+    std::function<void(PointCloud2::ConstSharedPtr)> callback =
+      std::bind(&Filter::input_indices_callback, this, std::placeholders::_1, nullptr);
+
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = this->create_subscription<PointCloud2> ("input", std::bind (&Filter::input_indices_callback, this, std::placeholders::_1, PointIndicesPtr));
+    sub_input_ = this->create_subscription<PointCloud2>("input", qos, callback);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +164,7 @@ pcl_ros::Filter::unsubscribe()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::input_indices_callback (const PointCloud2::SharedPtr cloud, const PointIndicesPtr indices)
+pcl_ros::Filter::input_indices_callback (const PointCloud2::ConstSharedPtr cloud, const pcl_msgs::msg::PointIndices::ConstSharedPtr indices)
 {
   // If cloud is given, check if it's valid
   if (!isValid (cloud))
@@ -170,14 +181,18 @@ pcl_ros::Filter::input_indices_callback (const PointCloud2::SharedPtr cloud, con
 
   /// DEBUG
   if (indices)
+  {
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback]\n"
                    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
                    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
                    this->get_name (),
                    cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.sec, cloud->header.frame_id.c_str (), "input",
                    indices->indices.size (), indices->header.stamp.sec, indices->header.frame_id.c_str (), "indices");
+  }
   else
+  {
     RCLCPP_DEBUG (this->get_logger(), "[%s::input_indices_callback] PointCloud with %d data points and frame %s on topic %s received.", this->get_name (), cloud->width * cloud->height, cloud->header.frame_id.c_str (), "input");
+  }
   ///
 
   // Check whether the user has given a different input TF frame

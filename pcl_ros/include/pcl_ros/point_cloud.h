@@ -63,23 +63,23 @@ namespace message_filters
   // on the subscriber side. This allows us to generate the mapping between message
   // data and object fields only once and reuse it.
 //#if ROS_VERSION_MINIMUM(1, 3, 1)
-  template<typename T>
-  struct DefaultMessageCreator<pcl::PointCloud<T> >
-  {
-    std::shared_ptr<pcl::MsgFieldMap> mapping_;
-
-    DefaultMessageCreator()
-      : mapping_( std::make_shared<pcl::MsgFieldMap>() )
-    {
-    }
-    
-    std::shared_ptr<pcl::PointCloud<T> > operator() ()
-    {
-      std::shared_ptr<pcl::PointCloud<T> > msg (new pcl::PointCloud<T> ());
-      pcl::detail::getMapping(*msg) = mapping_;
-      return msg;
-    }
-  };
+//  template<typename T>
+//  struct DefaultMessageCreator<pcl::PointCloud<T> >
+//  {
+//    std::shared_ptr<pcl::MsgFieldMap> mapping_;
+//
+//    DefaultMessageCreator()
+//      : mapping_( std::make_shared<pcl::MsgFieldMap>() )
+//    {
+//    }
+//    
+//    std::shared_ptr<pcl::PointCloud<T> > operator() ()
+//    {
+//      std::shared_ptr<pcl::PointCloud<T> > msg (new pcl::PointCloud<T> ());
+//      pcl::detail::getMapping(*msg) = mapping_;
+//      return msg;
+//    }
+//  };
 //#endif
 
   // https://github.com/ros2/message_filters/commit/46e1229a1d8c0ecca68e01b9cf0d8c13f9f6f87a#diff-651c2688431bf33a7ed4f0c68f9d86d2
@@ -114,45 +114,45 @@ namespace message_filters
     // pcl point clouds message don't have a ROS compatible header
     // the specialized meta functions below (TimeStamp and FrameId)
     // can be used to get the header data.
-    template<typename T> struct HasHeader<pcl::PointCloud<T> > : std::false_type {};
-
-    template<typename T>
-    struct TimeStamp<pcl::PointCloud<T> >
-    {
-      // This specialization could be dangerous, but it's the best I can do.
-      // If this TimeStamp struct is destroyed before they are done with the
-      // pointer returned by the first functions may go out of scope, but there
-      // isn't a lot I can do about that. This is a good reason to refuse to
-      // returning pointers like this...
-      static rclcpp::Time* pointer(typename pcl::PointCloud<T> &m) {
-        header_.reset(new std_msgs::msg::Header());
-        pcl_conversions::fromPCL(m.header, *(header_));
-        stamp_.reset(new rclcpp::Time(header_->stamp));
-        return &(*stamp_);
-      }
-      static rclcpp::Time const* pointer(const typename pcl::PointCloud<T>& m) {
-        header_const_.reset(new std_msgs::msg::Header());
-        pcl_conversions::fromPCL(m.header, *(header_const_));
-        stamp_const_.reset(new rclcpp::Time(header_const_->stamp));
-        return &(*stamp_const_);
-      }
-      static rclcpp::Time value(const typename pcl::PointCloud<T>& m) {
-        return pcl_conversions::fromPCL(m.header).stamp;
-      }
-    private:
-      static std::shared_ptr<std_msgs::msg::Header> header_;
-      static std::shared_ptr<std_msgs::msg::Header> header_const_;
-      static std::shared_ptr<rclcpp::Time> stamp_;
-      static std::shared_ptr<rclcpp::Time> stamp_const_;
-    };
-
-    template<typename T>
-    struct FrameId<pcl::PointCloud<T> >
-    {
-      static std::string* pointer(pcl::PointCloud<T>& m) { return &m.header.frame_id; }
-      static std::string const* pointer(const pcl::PointCloud<T>& m) { return &m.header.frame_id; }
-      static std::string value(const pcl::PointCloud<T>& m) { return m.header.frame_id; }
-    };
+//    template<typename T> struct HasHeader<pcl::PointCloud<T> > : std::false_type {};
+//
+//    template<typename T>
+//    struct TimeStamp<pcl::PointCloud<T> >
+//    {
+//      // This specialization could be dangerous, but it's the best I can do.
+//      // If this TimeStamp struct is destroyed before they are done with the
+//      // pointer returned by the first functions may go out of scope, but there
+//      // isn't a lot I can do about that. This is a good reason to refuse to
+//      // returning pointers like this...
+//      static rclcpp::Time* pointer(typename pcl::PointCloud<T> &m) {
+//        header_.reset(new std_msgs::msg::Header());
+//        pcl_conversions::fromPCL(m.header, *(header_));
+//        stamp_.reset(new rclcpp::Time(header_->stamp));
+//        return &(*stamp_);
+//      }
+//      static rclcpp::Time const* pointer(const typename pcl::PointCloud<T>& m) {
+//        header_const_.reset(new std_msgs::msg::Header());
+//        pcl_conversions::fromPCL(m.header, *(header_const_));
+//        stamp_const_.reset(new rclcpp::Time(header_const_->stamp));
+//        return &(*stamp_const_);
+//      }
+//      static rclcpp::Time value(const typename pcl::PointCloud<T>& m) {
+//        return pcl_conversions::fromPCL(m.header).stamp;
+//      }
+//    private:
+//      static std::shared_ptr<std_msgs::msg::Header> header_;
+//      static std::shared_ptr<std_msgs::msg::Header> header_const_;
+//      static std::shared_ptr<rclcpp::Time> stamp_;
+//      static std::shared_ptr<rclcpp::Time> stamp_const_;
+//    };
+//
+//    template<typename T>
+//    struct FrameId<pcl::PointCloud<T> >
+//    {
+//      static std::string* pointer(pcl::PointCloud<T>& m) { return &m.header.frame_id; }
+//      static std::string const* pointer(const pcl::PointCloud<T>& m) { return &m.header.frame_id; }
+//      static std::string value(const pcl::PointCloud<T>& m) { return m.header.frame_id; }
+//    };
 
   /// @todo Printer specialization in message_operations
   } // namespace message_filter::message_traits

@@ -121,8 +121,8 @@ namespace pcl_ros
 
       /** \brief PointCloud2 + Indices data callback. */
       void 
-      input_indices_callback (const PointCloud2::SharedPtr cloud,
-                              const PointIndicesPtr indices);
+      input_indices_callback (const PointCloud2::ConstSharedPtr cloud,
+                              const pcl_msgs::msg::PointIndices::ConstSharedPtr indices);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
