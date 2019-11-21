@@ -124,7 +124,8 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       {
         // Set the filter field if different
         impl_.setFilterFieldName (param.as_string ());
-        NODELET_DEBUG ("[%s::config_callback] Setting the filter field name to: %s.", getName ().c_str (), param.as_string ().c_str ());
+        // TODO(sloretz) add "config_callback" specific logger
+        RCLCPP_DEBUG (get_logger(), "Setting the filter field name to: %s.", param.as_string ().c_str ());
       }
     }
     if (param.get_name () == "filter_limit_min")
@@ -133,7 +134,7 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       if (filter_min != param.as_double ())
       {
         filter_min = param.as_double ();
-        NODELET_DEBUG ("[%s::config_callback] Setting the minimum filtering value a point will be considered from to: %f.", getName ().c_str (), filter_min);
+        RCLCPP_DEBUG (get_logger(), "Setting the minimum filtering value a point will be considered from to: %f.", filter_min);
         // Set the filter min-max if different
         impl_.setFilterLimits (filter_min, filter_max);
       }
@@ -144,7 +145,7 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       if (filter_max != param.as_double ())
       {
         filter_max = param.as_double ();
-        NODELET_DEBUG ("[%s::config_callback] Setting the maximum filtering value a point will be considered from to: %f.", getName ().c_str (), filter_max);
+        RCLCPP_DEBUG (get_logger(), "Setting the maximum filtering value a point will be considered from to: %f.", filter_max);
         // Set the filter min-max if different
         impl_.setFilterLimits (filter_min, filter_max);
       }
@@ -154,7 +155,7 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       // Check the current value for the negative flag
       if (impl_.getFilterLimitsNegative () != param.as_bool ())
       {
-        NODELET_DEBUG ("[%s::config_callback] Setting the filter negative flag to: %s.", getName ().c_str (), param.as_bool () ? "true" : "false");
+        RCLCPP_DEBUG (get_logger(), "Setting the filter negative flag to: %s.", param.as_bool () ? "true" : "false");
         // Call the virtual method in the child
         impl_.setFilterLimitsNegative (param.as_bool ());
       }
@@ -164,7 +165,7 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       // Check the current value for keep_organized
       if (impl_.getKeepOrganized () != param.as_bool ())
       {
-        NODELET_DEBUG ("[%s::config_callback] Setting the filter keep_organized value to: %s.", getName ().c_str (), param.as_bool () ? "true" : "false");
+        RCLCPP_DEBUG (get_logger(), "Setting the filter keep_organized value to: %s.", param.as_bool () ? "true" : "false");
         // Call the virtual method in the child
         impl_.setKeepOrganized (param.as_bool ());
       }
@@ -176,7 +177,7 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       if (tf_input_frame_ != param.as_string ())
       {
         tf_input_frame_ = param.as_string ();
-        NODELET_DEBUG ("[%s::config_callback] Setting the input TF frame to: %s.", getName ().c_str (), tf_input_frame_.c_str ());
+        RCLCPP_DEBUG (get_logger(), "Setting the input TF frame to: %s.", tf_input_frame_.c_str ());
       }
     }
     if (param.get_name () == "output_frame")
@@ -184,13 +185,11 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       if (tf_output_frame_ != param.as_string ())
       {
         tf_output_frame_ = param.as_string ();
-        NODELET_DEBUG ("[%s::config_callback] Setting the output TF frame to: %s.", getName ().c_str (), tf_output_frame_.c_str ());
+        RCLCPP_DEBUG (get_logger(), "Setting the output TF frame to: %s.", tf_output_frame_.c_str ());
       }
     }
   }
 }
 
-typedef pcl_ros::PassThrough PassThrough;
-
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(PassThrough)
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PassThrough)
