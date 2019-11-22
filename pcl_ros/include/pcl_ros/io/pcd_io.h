@@ -50,9 +50,6 @@ namespace pcl_ros
   class PCDReader : public PCLNode
   {
     public:
-      typedef sensor_msgs::msg::PointCloud2 PointCloud2;
-      typedef PointCloud2::Ptr PointCloud2Ptr;
-      typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
 
       /** \brief Empty constructor. */
       PCDReader (const rclcpp::NodeOptions& options);
@@ -84,11 +81,23 @@ namespace pcl_ros
       std::string file_name_;
 
       /** \brief The output point cloud dataset containing the points loaded from the file. */
-      PointCloud2Ptr output_;
+      sensor_msgs::msg::PointCloud2::SharedPtr output_;
+
+      /** \brief Timer used to schedule publishing */
+      rclcpp::TimerBase::SharedPtr publish_timer_;
+
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
 
     private:
+      /** \brief Publish callback */
+      void on_publish_timer();
+
+      /** \brief Parameters were set callback */
+      rcl_interfaces::msg::SetParametersResult on_parameters_set(const std::vector<rclcpp::Parameter> & params);
+
       /** \brief The PCL implementation used. */
       pcl::PCDReader impl_;
+
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
@@ -100,13 +109,9 @@ namespace pcl_ros
   class PCDWriter : public PCLNode
   {
     public:
-      PCDWriter (const rclcpp::NodeOptions& options)
+      PCDWriter (const rclcpp::NodeOptions& options);
 
-      typedef sensor_msgs::msg::PointCloud2 PointCloud2;
-      typedef PointCloud2::Ptr PointCloud2Ptr;
-      typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
-
-      void input_callback (const PointCloud2ConstPtr &cloud);
+      void input_callback (sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud);
 
       /** \brief The input PointCloud subscriber. */
       rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_input_;
