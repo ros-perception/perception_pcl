@@ -67,7 +67,11 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::PointCloudConcatenateFieldsSyn
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
 {
-  sub_input_ = this->create_subscription<PointCloud> ("input", std::bind (&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1));
+  // workaround ros2/rclcpp#766
+  std::function<void(PointCloudPtr)> callback = std::bind(&PointCloudConcatenateFieldsSynchronizer::input_callback, this, std::placeholders::_1);
+  // TODO(sloretz) what's the right QoS?
+  rclcpp::QoS qos(1);
+  sub_input_ = this->create_subscription<PointCloud> ("input", qos, callback);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
