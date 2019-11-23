@@ -87,7 +87,7 @@ void
 pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 {
   RCLCPP_INFO (this->get_logger (),"Subscribing to %d user given topics as inputs:", input_topics_.size () );
-  for (int d = 0; d < input_topics_.size (); ++d)
+  for (size_t d = 0; d < input_topics_.size (); ++d)
     RCLCPP_INFO (this->get_logger ()," - %s", input_topics_[d].c_str ());
 
   // Subscribe to the filters
@@ -106,7 +106,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
                                                   > (maximum_queue_size_));
 
   // First input_topics_.size () filters are valid
-  for (int d = 0; d < input_topics_.size (); ++d)
+  for (size_t d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
     filters_[d].subscribe (this->shared_from_this (), input_topics_.arrayGetItem (d).getString().c_str ());
@@ -190,7 +190,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::unsubscribe ()
 {
-  for (int d = 0; d < filters_.size (); ++d)
+  for (size_t d = 0; d < filters_.size (); ++d)
   {
     filters_[d]->unsubscribe ();
   }
@@ -227,7 +227,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::input (
     const PointCloud2::ConstSharedPtr &in1, const PointCloud2::ConstSharedPtr &in2,
     const PointCloud2::ConstSharedPtr &in3, const PointCloud2::ConstSharedPtr &in4,
     const PointCloud2::ConstSharedPtr &in5, const PointCloud2::ConstSharedPtr &in6,
-    const PointCloud2::ConstSharedPtr &in7, const PointCloud2::ConstSharedPtr &in8)
+    const PointCloud2::ConstSharedPtr &in7, const PointCloud2::ConstSharedPtr & /*in8*/)
 {
   PointCloud2::SharedPtr out1 (new PointCloud2 ());
   PointCloud2::SharedPtr out2 (new PointCloud2 ());
