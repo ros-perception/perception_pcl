@@ -109,7 +109,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   for (size_t d = 0; d < input_topics_.size (); ++d)
   {
     filters_[d].reset (new message_filters::Subscriber<PointCloud2> ());
-    filters_[d].subscribe (this->shared_from_this (), input_topics_.arrayGetItem (d).getString().c_str ());
+    filters_[d]->subscribe (this->shared_from_this (), input_topics_.at(d).c_str ());
   }
 
   // Bogus null filter
