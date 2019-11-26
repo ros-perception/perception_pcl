@@ -261,9 +261,8 @@ transformPointCloud (const std::string &target_frame,
 
   transformPointCloud (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
-  std_msgs::Header header;
-  header.stamp = target_time;
-  cloud_out.header = toPCL(header);
+  cloud_out.header.seq = cloud_in.header.seq;
+  cloud_out.header.stamp = toPCL(target_time);
   return (true);
 }
 
@@ -294,9 +293,8 @@ transformPointCloud (const std::string &target_frame,
 
   transformPointCloud (cloud_in, cloud_out, transform.transform);
   cloud_out.header.frame_id = target_frame;
-  std_msgs::Header header;
-  header.stamp = target_time;
-  cloud_out.header = toPCL(header);
+  cloud_out.header.seq = cloud_in.header.seq;
+  cloud_out.header.stamp = toPCL(target_time);
   return (true);
 }
 
@@ -322,9 +320,8 @@ transformPointCloudWithNormals (const std::string &target_frame,
 
   transformPointCloudWithNormals (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
-  std_msgs::Header header;
-  header.stamp = target_time;
-  cloud_out.header = toPCL(header);
+  cloud_out.header.seq = cloud_in.header.seq;
+  cloud_out.header.stamp = toPCL(target_time);
   return (true);
 }
 
@@ -355,9 +352,8 @@ transformPointCloudWithNormals (const std::string &target_frame,
 
   transformPointCloudWithNormals (cloud_in, cloud_out, transform.transform);
   cloud_out.header.frame_id = target_frame;
-  std_msgs::Header header;
-  header.stamp = target_time;
-  cloud_out.header = toPCL(header);
+  cloud_out.header.seq = cloud_in.header.seq;
+  cloud_out.header.stamp = toPCL(target_time);
   return (true);
 }
 

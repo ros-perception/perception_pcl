@@ -47,7 +47,7 @@ namespace pcl_ros
 {
   /** \brief Transform a point cloud and rotate its normals using an Eigen transform.
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param transform a rigid transformation from tf
     * \note calls the Eigen version
     */
@@ -58,7 +58,7 @@ namespace pcl_ros
 
    /** \brief Transform a point cloud and rotate its normals using an Eigen transform.
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param transform a rigid transformation from tf
     * \note calls the Eigen version
     */
@@ -70,7 +70,7 @@ namespace pcl_ros
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_listener a TF listener object
     */
   template <typename PointT> bool 
@@ -82,7 +82,7 @@ namespace pcl_ros
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_buffer a TF2 buffer object
     */
   template <typename PointT> bool
@@ -96,7 +96,7 @@ namespace pcl_ros
     * \param target_time the target timestamp
     * \param cloud_in the input point cloud
     * \param fixed_frame fixed TF frame
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_listener a TF listener object
     */
    template <typename PointT> bool 
@@ -112,7 +112,7 @@ namespace pcl_ros
     * \param target_time the target timestamp
     * \param cloud_in the input point cloud
     * \param fixed_frame fixed TF frame
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_buffer a TF2 buffer object
     */
    template <typename PointT> bool
@@ -125,7 +125,7 @@ namespace pcl_ros
 
   /** \brief Apply a rigid transform defined by a 3D offset and a quaternion
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param transform a rigid transformation from tf
     * \note calls the Eigen version
     */
@@ -136,7 +136,7 @@ namespace pcl_ros
 
   /** \brief Apply a rigid transform defined by a 3D offset and a quaternion
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param transform a rigid transformation from tf
     * \note calls the Eigen version
     */
@@ -148,7 +148,7 @@ namespace pcl_ros
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_listener a TF listener object
     */
   template <typename PointT> bool 
@@ -160,7 +160,7 @@ namespace pcl_ros
   /** \brief Transforms a point cloud in a given target TF frame using a TransformListener
     * \param target_frame the target TF frame the point cloud should be transformed to
     * \param cloud_in the input point cloud
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_buffer a TF2 buffer object
     */
   template <typename PointT> bool
@@ -174,7 +174,7 @@ namespace pcl_ros
     * \param target_time the target timestamp
     * \param cloud_in the input point cloud
     * \param fixed_frame fixed TF frame
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_listener a TF listener object
     */
   template <typename PointT> bool 
@@ -189,7 +189,7 @@ namespace pcl_ros
     * \param target_time the target timestamp
     * \param cloud_in the input point cloud
     * \param fixed_frame fixed TF frame
-    * \param cloud_out the input point cloud
+    * \param cloud_out the output point cloud
     * \param tf_buffer a TF2 buffer object
     */
   template <typename PointT> bool
