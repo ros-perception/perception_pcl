@@ -15,7 +15,7 @@ env:
     - VERBOSE_OUTPUT=true
     - VERBOSE_TESTS=true
   matrix:
-    - ROS_DISTRO=dashing OS_NAME=ubuntu OS_CODE_NAME=bionic
+    - ROS_DISTRO=eloquent OS_NAME=ubuntu OS_CODE_NAME=bionic
 
 install:
   - git clone --branch master --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
