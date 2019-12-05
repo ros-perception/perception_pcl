@@ -38,14 +38,9 @@
 #include "pcl_ros/filters/voxel_grid.h"
 #include "pcl_ros/ptr_helper.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::VoxelGrid::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
+pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions& options)
+: Filter("VoxelGridNode", options)
 {
-  // TODO: Remove?
-  // Enable the dynamic reconfigure service
-  has_service = true;
-
   rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
   leaf_size_desc.name = "leaf_size";
   leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -54,22 +49,24 @@ pcl_ros::VoxelGrid::child_init (rclcpp::node_interfaces::NodeParametersInterface
   leaf_size_range.from_value = 0;
   leaf_size_range.to_value = 1.0;
   leaf_size_desc.floating_point_range.push_back (leaf_size_range);
-  node_param->declare_parameter (leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
+  declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
-  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
-  //dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
-  //srv_->setCallback (f);
-
-  return (true);
+  std::vector<std::string> param_names{
+    leaf_size_desc.name,
+  };
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
-                            const IndicesPtr &indices, 
+pcl_ros::VoxelGrid::filter(const PointCloud2::ConstSharedPtr &input,
+                            const IndicesPtr &indices,
                             PointCloud2 &output)
 {
-  //std::mutex::scoped_lock lock (mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
   pcl_conversions::toPCL (*(input), *(pcl_input));
   impl_.setInputCloud (pcl_input);
@@ -77,6 +74,31 @@ pcl_ros::VoxelGrid::filter (const PointCloud2::ConstSharedPtr &input,
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter (pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & params)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  for (const rclcpp::Parameter &param : params)
+  {
+    if (param.get_name () == "leaf_size")
+    {
+      const double current_size = impl_.getLeafSize()[0];
+      const double new_size = param.as_double();
+      if (current_size != new_size)
+      {
+        impl_.setLeafSize(new_size, new_size, new_size);
+        RCLCPP_DEBUG(get_logger(), "Setting the leaf size to: %d.", new_size);
+      }
+    }
+  }
+  // TODO(sloretz) constraint validation
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 

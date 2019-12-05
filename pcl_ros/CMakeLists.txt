@@ -171,6 +171,22 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+# Create component for voxel grid filter
+add_library(filter_voxel_grid SHARED
+  src/pcl_ros/filters/voxel_grid.cpp
+)
+target_link_libraries(filter_voxel_grid pcl_ros_filters)
+rclcpp_components_register_node(filter_voxel_grid PLUGIN
+  PLUGIN "pcl_ros::VoxelGrid"
+  EXECUTABLE filter_voxel_grid_node
+)
+install(TARGETS
+  filter_voxel_grid
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 
 # ## Declare the pcl_ros_segmentation library
 # add_library (pcl_ros_segmentation

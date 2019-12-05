@@ -51,7 +51,7 @@ namespace pcl_ros
   {
     public:
     /** \brief Empty constructor */
-    VoxelGrid(const rclcpp::NodeOptions& options) : Filter("VoxelGridNode", options) {};
+    VoxelGrid(const rclcpp::NodeOptions& options);
     
     protected:
       /** \brief The PCL filter implementation used. */
@@ -62,17 +62,9 @@ namespace pcl_ros
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
-      virtual void
+      void
       filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices, 
-              PointCloud2 &output);
-
-      /** \brief Child initialization routine.
-        * \param node_param Node parameter interface
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
-                  bool &has_service);
+              PointCloud2 &output) override;
 
       /** \brief Parameter callback
         * \param params parameter values to set
