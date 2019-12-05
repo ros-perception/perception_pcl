@@ -37,19 +37,14 @@
 
 #include "pcl_ros/filters/passthrough.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::PassThrough::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
+pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions& options)
+: Filter("PassThroughNode", options)
 {
-  // TODO: remove?
-  // Enable the dynamic reconfigure service
-  has_service = true;
-
   rcl_interfaces::msg::ParameterDescriptor ffn_desc;
   ffn_desc.name = "filter_field_name";
   ffn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
   ffn_desc.description = "The field name used for filtering";
-  node_param->declare_parameter (ffn_desc.name, rclcpp::ParameterValue("z"), ffn_desc);
+  declare_parameter (ffn_desc.name, rclcpp::ParameterValue("z"), ffn_desc);
 
   rcl_interfaces::msg::ParameterDescriptor flmin_desc;
   flmin_desc.name = "filter_limit_min";
@@ -59,7 +54,7 @@ pcl_ros::PassThrough::child_init (rclcpp::node_interfaces::NodeParametersInterfa
   flmin_range.from_value = -100000.0;
   flmin_range.to_value = 100000.0;
   flmin_desc.floating_point_range.push_back (flmin_range);
-  node_param->declare_parameter (flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
+  declare_parameter (flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
 
   rcl_interfaces::msg::ParameterDescriptor flmax_desc;
   flmax_desc.name = "filter_limit_max";
@@ -69,40 +64,46 @@ pcl_ros::PassThrough::child_init (rclcpp::node_interfaces::NodeParametersInterfa
   flmax_range.from_value = -100000.0;
   flmax_range.to_value = 100000.0;
   flmax_desc.floating_point_range.push_back (flmax_range);
-  node_param->declare_parameter (flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
+  declare_parameter (flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
 
   rcl_interfaces::msg::ParameterDescriptor flneg_desc;
   flneg_desc.name = "filter_limit_negative";
   flneg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   flneg_desc.description = "Set to true if we want to return the data outside [filter_limit_min; filter_limit_max].";
-  node_param->declare_parameter (flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
+  declare_parameter (flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
 
   rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
   keep_organized_desc.name = "keep_organized";
   keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   keep_organized_desc.description = "Set whether the filtered points should be kept and set to NaN, or removed from the PointCloud, thus potentially breaking its organized structure.";
-  node_param->declare_parameter (keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+  declare_parameter (keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
 
   rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
   input_frame_desc.name = "input_frame";
   input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
   input_frame_desc.description = "The input TF frame the data should be transformed into before processing, if input.header.frame_id is different.";
-  node_param->declare_parameter (input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
+  declare_parameter (input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
 
   rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
   output_frame_desc.name = "output_frame";
   output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
   output_frame_desc.description = "The output TF frame the data should be transformed into after processing, if input.header.frame_id is different.";
-  node_param->declare_parameter (output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
+  declare_parameter (output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
 
-  // TODO
-  node_param->set_on_parameters_set_callback (boost::bind (&PassThrough::config_callback, this, _1));
-
-  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > (nh);
-  //dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f = boost::bind (&PassThrough::config_callback, this, _1, _2);
-  //srv_->setCallback (f);
-
-  return (true);
+  set_on_parameters_set_callback (boost::bind (&PassThrough::config_callback, this, _1));
+  std::vector<std::string> param_names{
+    ffn_desc.name,
+    flmin_desc.name,
+    flmax_desc.name,
+    flneg_desc.name,
+    keep_organized_desc.name,
+    input_frame_desc.name,
+    output_frame_desc.name
+  };
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +125,6 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       {
         // Set the filter field if different
         impl_.setFilterFieldName (param.as_string ());
-        // TODO(sloretz) add "config_callback" specific logger
         RCLCPP_DEBUG (get_logger(), "Setting the filter field name to: %s.", param.as_string ().c_str ());
       }
     }
@@ -189,8 +189,10 @@ pcl_ros::PassThrough::config_callback (const std::vector<rclcpp::Parameter> & pa
       }
     }
   }
-  // TODO(sloretz) parameter validation
-  return rcl_interfaces::msg::SetParametersResult();
+  // TODO(sloretz) constraint validation
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 #include "rclcpp_components/register_node_macro.hpp"

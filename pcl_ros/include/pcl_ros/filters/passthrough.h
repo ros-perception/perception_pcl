@@ -54,7 +54,7 @@ namespace pcl_ros
   class PassThrough : public Filter
   {
     public:
-      PassThrough(const rclcpp::NodeOptions& options) : Filter("PassThroughNode", options) {};
+      PassThrough(const rclcpp::NodeOptions& options);
     
     protected:
       /** \brief Call the actual filter. 
@@ -62,9 +62,9 @@ namespace pcl_ros
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
-      inline void
+      void
       filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
-              PointCloud2 &output)
+              PointCloud2 &output) override
       {
         //std::scoped_lock lock (Filter::mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
@@ -75,14 +75,6 @@ namespace pcl_ros
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
-
-      /** \brief Child initialization routine.
-        * \param node_param Node parameter interface
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
-                  bool &has_service);
       
       /** \brief Parameter callback
         * \param params parameter values to set

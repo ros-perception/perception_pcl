@@ -81,6 +81,9 @@ add_library(pcl_ros_io
 )
 target_link_libraries(pcl_ros_io pcl_ros_tf ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${PCL_LIBRARIES})
 ament_export_libraries(pcl_ros_io)
+ament_target_dependencies(pcl_ros_io
+  "rclcpp_components"
+)
 
 # ## Declare the pcl_ros_features library
 # add_library(pcl_ros_features
@@ -114,6 +117,7 @@ add_library(pcl_ros_filters
 )
 ament_target_dependencies(pcl_ros_filters
   "rclcpp"
+  "rclcpp_components"
   "rmw_implementation"
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf)
@@ -130,6 +134,22 @@ rclcpp_components_register_node(filter_crop_box PLUGIN
 )
 install(TARGETS
   filter_crop_box
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+# Create component for passthrough filter
+add_library(filter_passthrough SHARED
+  src/pcl_ros/filters/passthrough.cpp
+)
+target_link_libraries(filter_passthrough pcl_ros_filters)
+rclcpp_components_register_node(filter_passthrough PLUGIN
+  PLUGIN "pcl_ros::PassThrough"
+  EXECUTABLE filter_passthrough_node
+)
+install(TARGETS
+  filter_passthrough
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
