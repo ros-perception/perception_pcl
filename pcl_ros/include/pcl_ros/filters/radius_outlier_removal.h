@@ -53,7 +53,7 @@ namespace pcl_ros
   class RadiusOutlierRemoval : public Filter
   {
     public:
-      RadiusOutlierRemoval(const rclcpp::NodeOptions& options) : Filter("RadiusOutlierRemovalNode", options) {};
+      RadiusOutlierRemoval(const rclcpp::NodeOptions& options);
 
     protected:
       /** \brief Call the actual filter. 
@@ -61,9 +61,9 @@ namespace pcl_ros
         * \param indices the input set of indices to use from \a input
         * \param output the resultant filtered dataset
         */
-      inline void
+      void
       filter (const PointCloud2::ConstSharedPtr &input, const IndicesPtr &indices,
-              PointCloud2 &output)
+              PointCloud2 &output) override
       {
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
         pcl_conversions::toPCL (*(input), *(pcl_input));
@@ -73,14 +73,6 @@ namespace pcl_ros
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
-
-      /** \brief Child initialization routine.
-        * \param node_param Node parameter interface
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      virtual inline bool
-      child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param,
-                  bool &has_service);
 
       /** \brief Parameter callback
         * \param params parameter values to set

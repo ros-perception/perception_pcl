@@ -35,17 +35,11 @@
  *
  */
 
-#include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
+pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions& options)
+: Filter("RadiusOutlierRemovalNode", options)
 {
-  // TODO: remove?
-  // Enable the dynamic reconfigure service
-  has_service = true;
-
   rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
   radius_search_desc.name = "radius_search";
   radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -54,8 +48,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParamete
   radius_search_range.from_value = 0.0;
   radius_search_range.to_value = 10.0;
   radius_search_desc.floating_point_range.push_back (radius_search_range);
-  double radius_search = node_param->declare_parameter (radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc).get<double>();
-  impl_.setRadiusSearch (radius_search);
+  declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc).get<double>();
 
   rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
   min_neighbors_desc.name = "min_neighbors";
@@ -65,17 +58,18 @@ pcl_ros::RadiusOutlierRemoval::child_init (rclcpp::node_interfaces::NodeParamete
   min_neighbors_range.from_value = 0;
   min_neighbors_range.to_value = 1000;
   min_neighbors_desc.integer_range.push_back (min_neighbors_range);
-  int min_neighbors = node_param->declare_parameter (min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc).get<int>();
-  impl_.setMinNeighborsInRadius (min_neighbors);
+  declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc).get<int>();
 
-  // TODO
-  node_param->set_on_parameters_set_callback (boost::bind (&RadiusOutlierRemoval::config_callback, this, _1));
+  set_on_parameters_set_callback (boost::bind (&RadiusOutlierRemoval::config_callback, this, _1));
 
-  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
-  //dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
-  //srv_->setCallback (f);
-
-  return (true);
+  std::vector<std::string> param_names{
+    radius_search_desc.name,
+    min_neighbors_desc.name,
+  };
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +98,9 @@ pcl_ros::RadiusOutlierRemoval::config_callback (const std::vector<rclcpp::Parame
     }
   }
   // TODO(sloretz) constraint validation
-  return rcl_interfaces::msg::SetParametersResult();
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 #include "rclcpp_components/register_node_macro.hpp"

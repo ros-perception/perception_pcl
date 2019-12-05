@@ -155,6 +155,22 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+# Create component for radius outlier filter
+add_library(filter_radius_outlier_removal SHARED
+  src/pcl_ros/filters/radius_outlier_removal.cpp
+)
+target_link_libraries(filter_radius_outlier_removal pcl_ros_filters)
+rclcpp_components_register_node(filter_radius_outlier_removal PLUGIN
+  PLUGIN "pcl_ros::RadiusOutlierRemoval"
+  EXECUTABLE filter_radius_outlier_removal_node
+)
+install(TARGETS
+  filter_radius_outlier_removal
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 
 # ## Declare the pcl_ros_segmentation library
 # add_library (pcl_ros_segmentation
