@@ -38,14 +38,9 @@
 
 #include "pcl_ros/filters/crop_box.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_param, bool &has_service)
+pcl_ros::CropBox::CropBox(const rclcpp::NodeOptions & options)
+: Filter("CropBoxNode", options)
 {
-  // TODO: Remove?
-  // Enable the dynamic reconfigure service
-  has_service = true;
-
   rcl_interfaces::msg::ParameterDescriptor min_x_desc;
   min_x_desc.name = "min_x";
   min_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -54,9 +49,7 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   min_x_range.from_value = -1000;
   min_x_range.to_value = 1000;
   min_x_desc.floating_point_range.push_back (min_x_range);
-  //double min_x = 
-  node_param->declare_parameter (min_x_desc.name, rclcpp::ParameterValue(-1.0), min_x_desc);
-  //node_param->get_parameter (min_x_desc.name, min_x);
+  declare_parameter (min_x_desc.name, rclcpp::ParameterValue(-1.0), min_x_desc);
 
   rcl_interfaces::msg::ParameterDescriptor max_x_desc;
   max_x_desc.name = "max_x";
@@ -66,9 +59,7 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   max_x_range.from_value = -1000;
   max_x_range.to_value = 1000;
   max_x_desc.floating_point_range.push_back (max_x_range);
-  //double max_x = 
-  node_param->declare_parameter (max_x_desc.name, rclcpp::ParameterValue(1.0), max_x_desc);
-  //node_param->get_parameter (max_x_desc.name, max_x);
+  declare_parameter (max_x_desc.name, rclcpp::ParameterValue(1.0), max_x_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_y_desc;
   min_y_desc.name = "min_y";
@@ -78,9 +69,7 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   min_y_range.from_value = -1000;
   min_y_range.to_value = 1000;
   min_y_desc.floating_point_range.push_back (min_y_range);
-  //double min_y = 
-  node_param->declare_parameter (min_y_desc.name, rclcpp::ParameterValue(-1.0), min_y_desc);
-  //node_param->get_parameter (min_y_desc.name, min_y);
+  declare_parameter (min_y_desc.name, rclcpp::ParameterValue(-1.0), min_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor max_y_desc;
   max_y_desc.name = "max_y";
@@ -90,9 +79,7 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   max_y_range.from_value = -1000;
   max_y_range.to_value = 1000;
   max_y_desc.floating_point_range.push_back (max_y_range);
-  //double max_y = 
-  node_param->declare_parameter (max_y_desc.name, rclcpp::ParameterValue(1.0), max_y_desc);
-  //node_param->get_parameter (max_y_desc.name, max_y);
+  declare_parameter (max_y_desc.name, rclcpp::ParameterValue(1.0), max_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_z_desc;
   min_z_desc.name = "min_z";
@@ -102,9 +89,7 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   min_z_range.from_value = -1000;
   min_z_range.to_value = 1000;
   min_z_desc.floating_point_range.push_back (min_z_range);
-  //double min_z = 
-  node_param->declare_parameter (min_z_desc.name, rclcpp::ParameterValue(-1.0), min_z_desc);
-  //node_param->get_parameter (min_z_desc.name, min_z);
+  declare_parameter (min_z_desc.name, rclcpp::ParameterValue(-1.0), min_z_desc);
 
   rcl_interfaces::msg::ParameterDescriptor max_z_desc;
   max_z_desc.name = "max_z";
@@ -114,50 +99,50 @@ pcl_ros::CropBox::child_init (rclcpp::node_interfaces::NodeParametersInterface::
   max_z_range.from_value = -1000;
   max_z_range.to_value = 1000;
   max_z_desc.floating_point_range.push_back (max_z_range);
-  //double max_z = 
-  node_param->declare_parameter (max_z_desc.name, rclcpp::ParameterValue(1.0), max_z_desc);
-  //node_param->get_parameter (max_z_desc.name, max_z);
+  declare_parameter (max_z_desc.name, rclcpp::ParameterValue(1.0), max_z_desc);
 
   rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
   keep_organized_desc.name = "keep_organized";
   keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   keep_organized_desc.description = "Set whether the filtered points should be kept and set to NaN, or removed from the PointCloud, thus potentially breaking its organized structure.";
-  //bool keep_organized =
-  node_param->declare_parameter (keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
-  //node_param->get_parameter (keep_organized_desc.name, keep_organized);
+  declare_parameter (keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
 
   rcl_interfaces::msg::ParameterDescriptor neg_desc;
   neg_desc.name = "negative";
   neg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   neg_desc.description = "If True the box will be empty Else the remaining points will be the ones in the box";
-  //double neg = 
-  node_param->declare_parameter (neg_desc.name, rclcpp::ParameterValue(false), neg_desc);
-  //node_param->get_parameter (neg_desc.name, neg);
+  declare_parameter (neg_desc.name, rclcpp::ParameterValue(false), neg_desc);
 
   rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
   input_frame_desc.name = "input_frame";
   input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
   input_frame_desc.description = "The input TF frame the data should be transformed into before processing, if input.header.frame_id is different.";
-  //std::string input_frame = 
-  node_param->declare_parameter (input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
-  //node_param->get_parameter (input_frame_desc.name, input_frame);
+  declare_parameter (input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
 
   rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
   output_frame_desc.name = "output_frame";
   output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
   output_frame_desc.description = "The output TF frame the data should be transformed into after processing, if input.header.frame_id is different.";
-  //std::string output_frame = 
-  node_param->declare_parameter (output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
-  //node_param->get_parameter (output_frame_desc.name, output_frame);
+  declare_parameter (output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
 
-  // TODO
-  node_param->set_on_parameters_set_callback (boost::bind (&CropBox::config_callback, this, _1));
-
-  //srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::CropBoxConfig> > (nh);
-  //dynamic_reconfigure::Server<pcl_ros::CropBoxConfig>::CallbackType f = boost::bind (&CropBox::config_callback, this, _1, _2);
-  //srv_->setCallback (f);
-
-  return (true);
+  // Validate initial values using same callback
+  set_on_parameters_set_callback (boost::bind (&CropBox::config_callback, this, _1));
+  std::vector<std::string> param_names{
+    min_x_desc.name,
+    min_y_desc.name,
+    min_z_desc.name,
+    max_x_desc.name,
+    max_y_desc.name,
+    max_z_desc.name,
+    keep_organized_desc.name,
+    neg_desc.name,
+    input_frame_desc.name,
+    output_frame_desc.name
+  };
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +151,7 @@ pcl_ros::CropBox::config_callback (const std::vector<rclcpp::Parameter> & params
 {
   std::lock_guard<std::mutex> lock(mutex_);
 
-  Eigen::Vector4f min_point,max_point; 
+  Eigen::Vector4f min_point,max_point;
   min_point = impl_.getMin();
   max_point = impl_.getMax();
 
@@ -262,7 +247,9 @@ pcl_ros::CropBox::config_callback (const std::vector<rclcpp::Parameter> & params
   }
 
   // TODO(sloretz) constraint validation
-  return rcl_interfaces::msg::SetParametersResult();
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 #include "rclcpp_components/register_node_macro.hpp"

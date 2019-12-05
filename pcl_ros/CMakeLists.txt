@@ -103,14 +103,14 @@ ament_export_libraries(pcl_ros_io)
 
 ## Declare the pcl_ros_filters library
 add_library(pcl_ros_filters
-  src/pcl_ros/filters/extract_indices.cpp
+#  src/pcl_ros/filters/extract_indices.cpp
   src/pcl_ros/filters/filter.cpp
-  src/pcl_ros/filters/passthrough.cpp
-  src/pcl_ros/filters/project_inliers.cpp
-  src/pcl_ros/filters/radius_outlier_removal.cpp
-  src/pcl_ros/filters/statistical_outlier_removal.cpp
-  src/pcl_ros/filters/voxel_grid.cpp
-  src/pcl_ros/filters/crop_box.cpp
+#  src/pcl_ros/filters/passthrough.cpp
+#  src/pcl_ros/filters/project_inliers.cpp
+#  src/pcl_ros/filters/radius_outlier_removal.cpp
+#  src/pcl_ros/filters/statistical_outlier_removal.cpp
+#  src/pcl_ros/filters/voxel_grid.cpp
+#  src/pcl_ros/filters/crop_box.cpp
 )
 ament_target_dependencies(pcl_ros_filters
   "rclcpp"
@@ -118,6 +118,22 @@ ament_target_dependencies(pcl_ros_filters
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf)
 ament_export_libraries(pcl_ros_filters)
+
+# Create component for crop box filter
+add_library(filter_crop_box SHARED
+  src/pcl_ros/filters/crop_box.cpp
+)
+target_link_libraries(filter_crop_box pcl_ros_filters)
+rclcpp_components_register_node(filter_crop_box PLUGIN
+  PLUGIN "pcl_ros::CropBox"
+  EXECUTABLE filter_crop_box_node
+)
+install(TARGETS
+  filter_crop_box
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 
 # ## Declare the pcl_ros_segmentation library

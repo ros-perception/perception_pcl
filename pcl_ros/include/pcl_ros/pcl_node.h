@@ -95,22 +95,46 @@ namespace pcl_ros
       /** \brief Empty constructor. */
       PCLNode (std::string node_name, const rclcpp::NodeOptions& options)
       : rclcpp::Node(node_name, options),
-        use_indices_(false),
-        latched_indices_(false),
-        max_queue_size_(3),
-        approximate_sync_(false),
         tf_buffer_(this->get_clock()),
         tf_listener_(tf_buffer_)
       {
-        // Parameters that we care about only at startup
-        this->get_parameter ("max_queue_size", max_queue_size_);
+        {
+          rcl_interfaces::msg::ParameterDescriptor desc;
+          desc.name = "max_queue_size";
+          desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+          desc.description = "QoS History depth";
+          desc.read_only = true;
+          max_queue_size_ = declare_parameter(desc.name, max_queue_size_, desc);
+        }
 
-        // ---[ Optional parameters
-        this->get_parameter ("use_indices", use_indices_);
-        this->get_parameter ("latched_indices", latched_indices_);
-        this->get_parameter ("approximate_sync", approximate_sync_);
+        {
+          rcl_interfaces::msg::ParameterDescriptor desc;
+          desc.name = "use_indices";
+          desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+          desc.description = "Only process a subset of the point cloud from an indices topic";
+          desc.read_only = true;
+          use_indices_ = declare_parameter(desc.name, use_indices_, desc);
+        }
 
-        RCLCPP_DEBUG (this->get_logger(), "[PCLNode::constructor] PCL Node successfully created with the following parameters:\n"
+        {
+          rcl_interfaces::msg::ParameterDescriptor desc;
+          desc.name = "latched_indices";
+          desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+          desc.description = "Does indices topic use transient local documentation";
+          desc.read_only = true;
+          latched_indices_ = declare_parameter(desc.name, latched_indices_, desc);
+        }
+
+        {
+          rcl_interfaces::msg::ParameterDescriptor desc;
+          desc.name = "approximate_sync";
+          desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+          desc.description = "Match indices and point cloud messages if time stamps are approximatly the same.";
+          desc.read_only = true;
+          approximate_sync_ = declare_parameter(desc.name, approximate_sync_, desc);
+        }
+
+        RCLCPP_DEBUG (this->get_logger(), "PCL Node successfully created with the following parameters:\n"
                       " - approximate_sync : %s\n"
                       " - use_indices      : %s\n"
                       " - latched_indices  : %s\n"
@@ -132,15 +156,15 @@ namespace pcl_ros
        * ~indices topics must be synchronised in time, either exact or within a
        * specified jitter. See also @ref latched_indices_ and approximate_sync.
        **/
-      bool use_indices_;
-      /** \brief Set to true if the indices topic is latched.
+      bool use_indices_ = false;
+      /** \brief Set to true if the indices topic has transient_local durability.
        *
        * If use_indices_ is true, the ~input and ~indices topics generally must
        * be synchronised in time. By setting this flag to true, the most recent
        * value from ~indices can be used instead of requiring a synchronised
        * message.
        **/
-      bool latched_indices_;
+      bool latched_indices_ = false;
 
       /** \brief The message filter subscriber for PointCloud2. */
       message_filters::Subscriber<PointCloud> sub_input_filter_;
@@ -151,12 +175,11 @@ namespace pcl_ros
       /** \brief The output PointCloud publisher. */
       rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_output_;
 
-
       /** \brief The maximum queue size (default: 3). */
-      int max_queue_size_;
+      int max_queue_size_ = 3;
 
       /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
-      bool approximate_sync_;
+      bool approximate_sync_ = false;
 
       /** \brief TF listener object. */
       tf2_ros::Buffer tf_buffer_;
@@ -171,7 +194,7 @@ namespace pcl_ros
       {
         if (cloud->width * cloud->height * cloud->point_step != cloud->data.size ())
         {
-          RCLCPP_WARN(this->get_logger(), "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!", this->get_name (), cloud->data.size (), cloud->width, cloud->height, cloud->point_step, cloud->header.stamp.sec , cloud->header.frame_id.c_str (), topic_name.c_str ());
+          RCLCPP_WARN(this->get_logger(), "Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!", cloud->data.size (), cloud->width, cloud->height, cloud->point_step, cloud->header.stamp.sec , cloud->header.frame_id.c_str (), topic_name.c_str ());
 
           return (false);
         }
@@ -187,7 +210,7 @@ namespace pcl_ros
       {
         if (cloud->width * cloud->height != cloud->points.size ())
         {
-          RCLCPP_WARN (this->get_logger(), "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", this->get_name (), cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), topic_name.c_str ());
+          RCLCPP_WARN (this->get_logger(), "Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.sec, cloud->header.frame_id.c_str (), topic_name.c_str ());
 
           return (false);
         }
@@ -226,6 +249,25 @@ namespace pcl_ros
           return false;
         }
         return true;
+      }
+
+      /* \brief Return QoS settings for indices topic */
+      rclcpp::QoS
+      indicesQoS() const
+      {
+        rclcpp::QoS qos(max_queue_size_);
+        if (latched_indices_) {
+          qos.transient_local();
+        }
+        return qos;
+      }
+
+      /* \brief Return QoS settings for point cloud topic */
+      rclcpp::QoS
+      cloudQoS() const
+      {
+        rclcpp::QoS qos(max_queue_size_);
+        return qos;
       }
 
     public:
