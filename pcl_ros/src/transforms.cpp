@@ -40,6 +40,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/impl/transforms.hpp"
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 namespace pcl_ros
 {
@@ -79,7 +80,7 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::msg::Po
 
   // Convert the TF transform to Eigen format
   Eigen::Matrix4f eigen_transform;
-  tf2::fromMsg(transform_msg, transform);
+  tf2::fromMsg(transform_msg.transform, transform);
   transformAsMatrix (transform, eigen_transform);
 
   transformPointCloud (eigen_transform, in, out);

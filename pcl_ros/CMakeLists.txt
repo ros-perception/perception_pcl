@@ -35,6 +35,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 
@@ -49,6 +50,7 @@ ament_export_dependencies(
   rclcpp_components
   std_msgs
   tf2
+  tf2_geometry_msgs
   EIGEN3
   PCL
   BOOST
@@ -64,6 +66,7 @@ ament_target_dependencies(pcl_ros_tf
   "pcl_conversions"
   "rclcpp"
   "sensor_msgs"
+  "tf2_geometry_msgs"
   "tf2_ros"
 )
 target_include_directories(pcl_ros_tf PUBLIC include ${PCL_INCLUDE_DIRS})
