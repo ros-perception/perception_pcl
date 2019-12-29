@@ -206,15 +206,13 @@ namespace ros
         stream.next(fields);
 
         // Construct field mapping if deserializing for the first time
-        boost::shared_ptr<pcl::MsgFieldMap>& mapping_ptr = pcl::detail::getMapping(m);
-        if (!mapping_ptr)
-        {
-          // This normally should get allocated by DefaultMessageCreator, but just in case
-          mapping_ptr = boost::make_shared<pcl::MsgFieldMap>();
-        }
-        pcl::MsgFieldMap& mapping = *mapping_ptr;
+        static pcl::MsgFieldMap mapping;
+        static boost::mutex mutex;
         if (mapping.empty())
-          pcl::createMapping<T> (fields, mapping);
+        {
+          boost::mutex::scoped_lock lock(mutex);
+          pcl::createMapping<T>(fields, mapping);
+        }
 
         uint8_t is_bigendian;
         stream.next(is_bigendian); // ignoring...
