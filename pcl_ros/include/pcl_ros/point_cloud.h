@@ -59,29 +59,6 @@ namespace pcl
 
 namespace ros 
 {
-  // In ROS 1.3.1+, we can specialize the functor used to create PointCloud<T> objects
-  // on the subscriber side. This allows us to generate the mapping between message
-  // data and object fields only once and reuse it.
-#if ROS_VERSION_MINIMUM(1, 3, 1)
-  template<typename T>
-  struct DefaultMessageCreator<pcl::PointCloud<T> >
-  {
-    boost::shared_ptr<pcl::MsgFieldMap> mapping_;
-
-    DefaultMessageCreator()
-      : mapping_( boost::make_shared<pcl::MsgFieldMap>() )
-    {
-    }
-    
-    boost::shared_ptr<pcl::PointCloud<T> > operator() ()
-    {
-      boost::shared_ptr<pcl::PointCloud<T> > msg (new pcl::PointCloud<T> ());
-      pcl::detail::getMapping(*msg) = mapping_;
-      return msg;
-    }
-  };
-#endif
-
   namespace message_traits 
   {
     template<typename T> struct MD5Sum<pcl::PointCloud<T> >
