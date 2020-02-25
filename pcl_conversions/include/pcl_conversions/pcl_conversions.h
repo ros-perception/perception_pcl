@@ -79,19 +79,19 @@ namespace pcl_conversions {
   /** PCLHeader <=> Header **/
 
   inline
-  void fromPCL(const pcl::uint64_t &pcl_stamp, rclcpp::Time &stamp)
+  void fromPCL(const std::uint64_t &pcl_stamp, rclcpp::Time &stamp)
   {
     stamp = rclcpp::Time(pcl_stamp * 1000ull); // Convert from us to ns
   }
 
   inline
-  void toPCL(const rclcpp::Time &stamp, pcl::uint64_t &pcl_stamp)
+  void toPCL(const rclcpp::Time &stamp, std::uint64_t &pcl_stamp)
   {
     pcl_stamp = stamp.nanoseconds() / 1000ull;  // Convert from ns to us
   }
 
   inline
-  rclcpp::Time fromPCL(const pcl::uint64_t &pcl_stamp)
+  rclcpp::Time fromPCL(const std::uint64_t &pcl_stamp)
   {
     rclcpp::Time stamp;
     fromPCL(pcl_stamp, stamp);
@@ -99,9 +99,9 @@ namespace pcl_conversions {
   }
 
   inline
-  pcl::uint64_t toPCL(const rclcpp::Time &stamp)
+  std::uint64_t toPCL(const rclcpp::Time &stamp)
   {
-    pcl::uint64_t pcl_stamp;
+    std::uint64_t pcl_stamp;
     toPCL(stamp, pcl_stamp);
     return pcl_stamp;
   }
@@ -526,14 +526,14 @@ namespace pcl {
 
     // sensor_msgs::image_encodings::BGR8;
     msg.encoding = "bgr8";
-    msg.step = msg.width * sizeof (uint8_t) * 3;
+    msg.step = msg.width * sizeof (std::uint8_t) * 3;
     msg.data.resize (msg.step * msg.height);
     for (size_t y = 0; y < cloud.height; y++)
     {
       for (size_t x = 0; x < cloud.width; x++)
       {
-        uint8_t * pixel = &(msg.data[y * msg.step + x * 3]);
-        memcpy (pixel, &cloud (x, y).rgb, 3 * sizeof(uint8_t));
+        std::uint8_t * pixel = &(msg.data[y * msg.step + x * 3]);
+        memcpy (pixel, &cloud (x, y).rgb, 3 * sizeof(std::uint8_t));
       }
     }
   }
@@ -832,7 +832,7 @@ namespace ros
         length += 4; // point_step
         length += 4; // row_step
         length += 4; // data's size
-        length += m.data.size() * sizeof(pcl::uint8_t);
+        length += m.data.size() * sizeof(std::uint8_t);
         length += 1; // is_dense
 
         return length;
