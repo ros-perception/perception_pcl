@@ -58,7 +58,7 @@ typedef pcl::PointCloud<pcl::PointXYZRGBNormal> PCDType;
 /// Sets pcl_stamp from stamp, BUT alters stamp
 /// a little to round it to millisecond. This is because converting back
 /// and forth from pcd to ros time induces some rounding errors.
-void setStamp(ros::Time &stamp, pcl::uint64_t &pcl_stamp)
+void setStamp(ros::Time &stamp, std::uint64_t &pcl_stamp)
 {
   // round to millisecond
   static const uint32_t mult = 1e6;
@@ -187,7 +187,7 @@ TEST(MessageFilter, queueSize)
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
   ros::Time stamp = ros::Time::now();
-  pcl::uint64_t pcl_stamp;
+  std::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
 
   for (int i = 0; i < 20; ++i)
@@ -281,7 +281,7 @@ TEST(MessageFilter, tolerance)
   filter.setTolerance(offset);
 
   ros::Time stamp = ros::Time::now();
-  pcl::uint64_t pcl_stamp;
+  std::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
   tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);

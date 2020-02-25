@@ -23,18 +23,18 @@ namespace pcl
       template<typename U> void operator() ()
       {
         const char* name = traits::name<PointT, U>::value;
-        uint32_t name_length = strlen(name);
+        std::uint32_t name_length = strlen(name);
         stream_.next(name_length);
         if (name_length > 0)
           memcpy(stream_.advance(name_length), name, name_length);
 
-        uint32_t offset = traits::offset<PointT, U>::value;
+        std::uint32_t offset = traits::offset<PointT, U>::value;
         stream_.next(offset);
 
-        uint8_t datatype = traits::datatype<PointT, U>::value;
+        std::uint8_t datatype = traits::datatype<PointT, U>::value;
         stream_.next(datatype);
 
-        uint32_t count = traits::datatype<PointT, U>::size;
+        std::uint32_t count = traits::datatype<PointT, U>::size;
         stream_.next(count);
       }
 
@@ -48,11 +48,11 @@ namespace pcl
 
       template<typename U> void operator() ()
       {
-        uint32_t name_length = strlen(traits::name<PointT, U>::value);
+        std::uint32_t name_length = strlen(traits::name<PointT, U>::value);
         length += name_length + 13;
       }
 
-      uint32_t length;
+      std::uint32_t length;
     };
   } // namespace pcl::detail
 } // namespace pcl

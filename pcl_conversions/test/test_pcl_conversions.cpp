@@ -109,7 +109,7 @@ struct StampTestData
   explicit StampTestData(const ros::Time &stamp)
     : stamp_(stamp)
   {
-    pcl::uint64_t pcl_stamp;
+    std::uint64_t pcl_stamp;
     pcl_conversions::toPCL(stamp_, pcl_stamp);
     pcl_conversions::fromPCL(pcl_stamp, stamp2_);
   }
