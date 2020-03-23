@@ -10,6 +10,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace pcl 
 {
