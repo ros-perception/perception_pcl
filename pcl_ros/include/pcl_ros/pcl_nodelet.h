@@ -76,8 +76,8 @@ namespace pcl_ros
       typedef sensor_msgs::PointCloud2 PointCloud2;
 
       typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-      typedef PointCloud::Ptr PointCloudPtr;
-      typedef PointCloud::ConstPtr PointCloudConstPtr;
+      typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+      typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
       typedef pcl_msgs::PointIndices PointIndices;
       typedef PointIndices::Ptr PointIndicesPtr;

@@ -69,8 +69,8 @@ namespace pcl_ros
       typedef pcl::KdTree<pcl::PointXYZ>::Ptr KdTreePtr;
 
       typedef pcl::PointCloud<pcl::PointXYZ> PointCloudIn;
-      typedef PointCloudIn::Ptr PointCloudInPtr;
-      typedef PointCloudIn::ConstPtr PointCloudInConstPtr;
+      typedef boost::shared_ptr<PointCloudIn> PointCloudInPtr;
+      typedef boost::shared_ptr<const PointCloudIn> PointCloudInConstPtr;
 
       typedef pcl::IndicesPtr IndicesPtr;
       typedef pcl::IndicesConstPtr IndicesConstPtr;
@@ -190,8 +190,8 @@ namespace pcl_ros
       typedef sensor_msgs::PointCloud2 PointCloud2;
 
       typedef pcl::PointCloud<pcl::Normal> PointCloudN;
-      typedef PointCloudN::Ptr PointCloudNPtr;
-      typedef PointCloudN::ConstPtr PointCloudNConstPtr;
+      typedef boost::shared_ptr<PointCloudN> PointCloudNPtr;
+      typedef boost::shared_ptr<const PointCloudN> PointCloudNConstPtr;
 
       FeatureFromNormals () : normals_() {};
 
