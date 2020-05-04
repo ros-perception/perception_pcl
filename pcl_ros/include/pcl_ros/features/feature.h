@@ -72,8 +72,8 @@ namespace pcl_ros
       typedef PointCloudIn::Ptr PointCloudInPtr;
       typedef PointCloudIn::ConstPtr PointCloudInConstPtr;
 
-      typedef boost::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef boost::shared_ptr <const std::vector<int> > IndicesConstPtr;
+      typedef pcl::IndicesPtr IndicesPtr;
+      typedef pcl::IndicesConstPtr IndicesConstPtr;
 
       /** \brief Empty constructor. */
       Feature () : /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),

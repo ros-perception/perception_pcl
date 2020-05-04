@@ -48,6 +48,7 @@
 // PCL includes
 #include <pcl_msgs/PointIndices.h>
 #include <pcl_msgs/ModelCoefficients.h>
+#include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/point_cloud.h"
@@ -86,8 +87,8 @@ namespace pcl_ros
       typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
       typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
 
-      typedef boost::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef boost::shared_ptr <const std::vector<int> > IndicesConstPtr;
+      typedef pcl::IndicesPtr IndicesPtr;
+      typedef pcl::IndicesConstPtr IndicesConstPtr;
 
       /** \brief Empty constructor. */
       PCLNodelet () : use_indices_ (false), latched_indices_ (false),
