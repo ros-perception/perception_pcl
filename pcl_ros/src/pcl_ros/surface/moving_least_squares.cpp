@@ -208,12 +208,6 @@ pcl_ros::MovingLeastSquares::config_callback (MLSConfig &config, uint32_t /*leve
     spatial_locator_type_ = config.spatial_locator;
     NODELET_DEBUG ("[config_callback] Setting the spatial locator to type: %d.", spatial_locator_type_);
   }
-  if (use_polynomial_fit_ != config.use_polynomial_fit)
-  {
-    use_polynomial_fit_ = config.use_polynomial_fit;
-    NODELET_DEBUG ("[config_callback] Setting the use_polynomial_fit flag to: %d.", use_polynomial_fit_);
-    impl_.setPolynomialFit (use_polynomial_fit_);
-  }
   if (polynomial_order_ != config.polynomial_order)
   {
     polynomial_order_ = config.polynomial_order;
