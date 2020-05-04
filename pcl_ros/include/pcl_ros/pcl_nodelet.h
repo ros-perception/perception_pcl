@@ -37,6 +37,8 @@
 
 /**
 
+// verify that deprecation is not a result of my code
+
 \author Radu Bogdan Rusu
 
 **/
