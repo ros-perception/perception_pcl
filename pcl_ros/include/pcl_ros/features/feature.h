@@ -152,7 +152,7 @@ namespace pcl_ros
         indices.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
         PointCloudIn cloud;
         cloud.header.stamp = input->header.stamp;
-        nf_pc_.add (cloud.makeShared ());
+        nf_pc_.add (ros_ptr(cloud.makeShared ()));
         nf_pi_.add (boost::make_shared<PointIndices> (indices));
       }
 
