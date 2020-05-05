@@ -203,7 +203,7 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setInputCloud (cloud);
+  impl_.setInputCloud (pcl_ptr(cloud));
   impl_.setIndices (indices_ptr);
 
   std::vector<pcl::PointIndices> clusters;
@@ -240,7 +240,7 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback (
       header.stamp += ros::Duration (i * 0.001);
       toPCL(header, output.header);
       // Publish a Boost shared ptr const data
-      pub_output_.publish (output.makeShared ());
+      pub_output_.publish (ros_ptr(output.makeShared ()));
       NODELET_DEBUG ("[segmentAndPublish] Published cluster %zu (with %zu values and stamp %f) on topic %s",
                      i, clusters[i].indices.size (), header.stamp.toSec (), pnh_->resolveName ("output").c_str ());
     }

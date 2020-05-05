@@ -83,7 +83,7 @@ class PointCloudToPCD
     ////////////////////////////////////////////////////////////////////////////////
     // Callback
     void
-      cloud_cb (const pcl::PCLPointCloud2::ConstPtr& cloud)
+      cloud_cb (const boost::shared_ptr<const pcl::PCLPointCloud2>& cloud)
     {
       if ((cloud->width * cloud->height) == 0)
         return;

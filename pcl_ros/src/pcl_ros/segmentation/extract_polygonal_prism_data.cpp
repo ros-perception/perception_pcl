@@ -190,16 +190,16 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback (
       pub_output_.publish (inliers);
       return;
     }
-    impl_.setInputPlanarHull (planar_hull.makeShared ());
+    impl_.setInputPlanarHull (pcl_ptr(planar_hull.makeShared ()));
   }
   else
-    impl_.setInputPlanarHull (hull);
+    impl_.setInputPlanarHull (pcl_ptr(hull));
 
   IndicesPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setInputCloud (cloud);
+  impl_.setInputCloud (pcl_ptr(cloud));
   impl_.setIndices (indices_ptr);
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
