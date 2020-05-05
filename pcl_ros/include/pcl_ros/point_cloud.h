@@ -270,4 +270,125 @@ namespace ros
 
 } // namespace ros
 
+// test if testing machinery can be implemented
+#if defined(__cpp_rvalue_references) && defined(__cpp_constexpr)
+#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 1
+#else
+#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 0
+#endif
+
+#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
+#include <type_traits>  // for std::is_same
+#include <memory>       // for std::shared_ptr
+
+#include <pcl/pcl_config.h>
+#if PCL_VERSION_COMPARE(>=, 1, 11, 0)
+#include <pcl/memory.h>
+#elif PCL_VERSION_COMPARE(>=, 1, 10, 0)
+#include <pcl/make_shared.h>
+#endif
+#endif
+
+namespace pcl
+{
+  namespace detail
+  {
+#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
+#if PCL_VERSION_COMPARE(>=, 1, 10, 0)
+    template <class T>
+    constexpr static bool pcl_uses_boost = std::is_same<boost::shared_ptr<T>,
+                                                        pcl::shared_ptr<T>>::value;
+#else
+    template <class T>
+    constexpr static bool pcl_uses_boost = true;
+#endif
+
+    template<class SharedPointer> struct Holder
+    {
+      SharedPointer p;
+
+      Holder(const SharedPointer &p) : p(p) {}
+      Holder(const Holder &other) : p(other.p) {}
+      Holder(Holder &&other) : p(std::move(other.p)) {}
+
+      void operator () (...) { p.reset(); }
+    };
+
+    template<class T>
+    inline std::shared_ptr<T> to_std_ptr(const boost::shared_ptr<T> &p)
+    {
+        typedef Holder<std::shared_ptr<T>> H;
+        if(H *h = boost::get_deleter<H>(p))
+        {
+            return h->p;
+        }
+        else
+        {
+            return std::shared_ptr<T>(p.get(), Holder<boost::shared_ptr<T>>(p));
+        }
+    }
+
+    template<class T>
+    inline boost::shared_ptr<T> to_boost_ptr(const std::shared_ptr<T> &p)
+    {
+        typedef Holder<boost::shared_ptr<T>> H;
+        if(H * h = std::get_deleter<H>(p))
+        {
+            return h->p;
+        }
+        else
+        {
+            return boost::shared_ptr<T>(p.get(), Holder<std::shared_ptr<T>>(p));
+        }
+    }
+#endif
+  } // namespace pcl::detail
+
+// add functions to convert to smart pointer used by ROS
+  template <class T>
+  inline boost::shared_ptr<T> ros_ptr(const boost::shared_ptr<T> &p)
+  {
+      return p;
+  }
+
+#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
+  template <class T>
+  inline boost::shared_ptr<T> ros_ptr(const std::shared_ptr<T> &p)
+  {
+      return detail::to_boost_ptr(p);
+  }
+
+// add functions to convert to smart pointer used by PCL, based on PCL's own pointer
+  template <class T, class = typename std::enable_if<!detail::pcl_uses_boost<T>>::type>
+  inline std::shared_ptr<T> pcl_ptr(const std::shared_ptr<T> &p)
+  {
+      return p;
+  }
+
+  template <class T, class = typename std::enable_if<!detail::pcl_uses_boost<T>>::type>
+  inline std::shared_ptr<T> pcl_ptr(const boost::shared_ptr<T> &p)
+  {
+      return detail::to_std_ptr(p);
+  }
+
+  template <class T, class = typename std::enable_if<detail::pcl_uses_boost<T>>::type>
+  inline boost::shared_ptr<T> pcl_ptr(const std::shared_ptr<T> &p)
+  {
+      return detail::to_boost_ptr(p);
+  }
+
+  template <class T, class = typename std::enable_if<detail::pcl_uses_boost<T>>::type>
+  inline boost::shared_ptr<T> pcl_ptr(const boost::shared_ptr<T> &p)
+  {
+      return p;
+  }
+#else
+  template <class T>
+  inline boost::shared_ptr<T> pcl_ptr(const boost::shared_ptr<T> &p)
+  {
+      return p;
+  }
+#endif
+} // namespace pcl
+
 #endif
