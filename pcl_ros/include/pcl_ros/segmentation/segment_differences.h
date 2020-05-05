@@ -60,8 +60,8 @@ namespace pcl_ros
   class SegmentDifferences : public PCLNodelet
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef PointCloud::Ptr PointCloudPtr;
-    typedef PointCloud::ConstPtr PointCloudConstPtr;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
     public:
       /** \brief Empty constructor. */

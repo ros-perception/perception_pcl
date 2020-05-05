@@ -116,7 +116,7 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
     NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
     PointCloud output;
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_.publish (ros_ptr(output.makeShared ()));
     return;
   }
 
@@ -127,13 +127,13 @@ pcl_ros::SegmentDifferences::input_target_callback (const PointCloudConstPtr &cl
                  cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str (),
                  cloud_target->width * cloud_target->height, pcl::getFieldsList (*cloud_target).c_str (), fromPCL(cloud_target->header).stamp.toSec (), cloud_target->header.frame_id.c_str (), pnh_->resolveName ("target").c_str ());
 
-  impl_.setInputCloud (cloud);
-  impl_.setTargetCloud (cloud_target);
+  impl_.setInputCloud (pcl_ptr(cloud));
+  impl_.setTargetCloud (pcl_ptr(cloud_target));
 
   PointCloud output;
   impl_.segment (output);
 
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish (ros_ptr(output.makeShared ()));
   NODELET_DEBUG ("[%s::segmentAndPublish] Published PointCloud2 with %zu points and stamp %f on topic %s", getName ().c_str (),
                      output.points.size (), fromPCL(output.header).stamp.toSec (), pnh_->resolveName ("output").c_str ());
 }

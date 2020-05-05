@@ -56,8 +56,8 @@ namespace pcl_ros
   class ConvexHull2D : public PCLNodelet
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef PointCloud::Ptr PointCloudPtr;
-    typedef PointCloud::ConstPtr PointCloudConstPtr;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
     private:
       /** \brief Nodelet initialization routine. */

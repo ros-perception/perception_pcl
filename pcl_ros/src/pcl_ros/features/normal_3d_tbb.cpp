@@ -45,7 +45,7 @@ pcl_ros::NormalEstimationTBB::emptyPublish (const PointCloudInConstPtr &cloud)
 {
   PointCloud output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish (ros_ptr(output.makeShared ()));
 }
 
 void 
@@ -71,7 +71,7 @@ pcl_ros::NormalEstimationTBB::computePublish (const PointCloudInConstPtr &cloud,
   // Publish a Boost shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish (ros_ptr(output.makeShared ()));
 }
 
 typedef pcl_ros::NormalEstimationTBB NormalEstimationTBB;

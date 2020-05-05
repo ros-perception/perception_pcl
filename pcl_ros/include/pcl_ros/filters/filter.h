@@ -59,8 +59,8 @@ namespace pcl_ros
     public:
       typedef sensor_msgs::PointCloud2 PointCloud2;
 
-      typedef boost::shared_ptr <std::vector<int> > IndicesPtr;
-      typedef boost::shared_ptr <const std::vector<int> > IndicesConstPtr;
+      typedef pcl::IndicesPtr IndicesPtr;
+      typedef pcl::IndicesConstPtr IndicesConstPtr;
 
       Filter () {}
 
