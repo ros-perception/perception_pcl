@@ -325,7 +325,7 @@ pcl_ros::SACSegmentation::input_indices_callback (const PointCloudConstPtr &clou
   if (indices && !indices->header.frame_id.empty ())
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setInputCloud (cloud_tf);
+  impl_.setInputCloud (pcl_ptr(cloud_tf));
   impl_.setIndices (indices_ptr);
 
   // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
@@ -652,8 +652,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback (
     return;
   }
 
-  impl_.setInputCloud (cloud);
-  impl_.setInputNormals (cloud_normals);
+  impl_.setInputCloud (pcl_ptr(cloud));
+  impl_.setInputNormals (pcl_ptr(cloud_normals));
 
   IndicesPtr indices_ptr;
   if (indices && !indices->header.frame_id.empty ())

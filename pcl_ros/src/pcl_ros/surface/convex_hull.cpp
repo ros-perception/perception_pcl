@@ -122,7 +122,7 @@ void
     NODELET_ERROR ("[%s::input_indices_callback] Invalid input!", getName ().c_str ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_.publish (ros_ptr(output.makeShared ()));
     return;
   }
   // If indices are given, check if they are valid
@@ -131,7 +131,7 @@ void
     NODELET_ERROR ("[%s::input_indices_callback] Invalid indices!", getName ().c_str ());
     // Publish an empty message
     output.header = cloud->header;
-    pub_output_.publish (output.makeShared ());
+    pub_output_.publish (ros_ptr(output.makeShared ()));
     return;
   }
 
@@ -151,7 +151,7 @@ void
   if (indices)
     indices_ptr.reset (new std::vector<int> (indices->indices));
 
-  impl_.setInputCloud (cloud);
+  impl_.setInputCloud (pcl_ptr(cloud));
   impl_.setIndices (indices_ptr);
 
   // Estimate the feature
@@ -195,7 +195,7 @@ void
   }
   // Publish a Boost shared ptr const data
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish (ros_ptr(output.makeShared ()));
 }
 
 typedef pcl_ros::ConvexHull2D ConvexHull2D;

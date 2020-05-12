@@ -64,8 +64,8 @@ namespace pcl_ros
   class ExtractPolygonalPrismData : public PCLNodelet
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef PointCloud::Ptr PointCloudPtr;
-    typedef PointCloud::ConstPtr PointCloudConstPtr;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
     protected:
        /** \brief The output PointIndices publisher. */

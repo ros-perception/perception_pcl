@@ -61,8 +61,8 @@ namespace pcl_ros
   class SACSegmentation : public PCLNodelet
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef PointCloud::Ptr PointCloudPtr;
-    typedef PointCloud::ConstPtr PointCloudConstPtr;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
     public:
       /** \brief Constructor. */
@@ -181,12 +181,12 @@ namespace pcl_ros
   class SACSegmentationFromNormals: public SACSegmentation
   {
     typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef PointCloud::Ptr PointCloudPtr;
-    typedef PointCloud::ConstPtr PointCloudConstPtr;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
     typedef pcl::PointCloud<pcl::Normal> PointCloudN;
-    typedef PointCloudN::Ptr PointCloudNPtr;
-    typedef PointCloudN::ConstPtr PointCloudNConstPtr;
+    typedef boost::shared_ptr<PointCloudN> PointCloudNPtr;
+    typedef boost::shared_ptr<const PointCloudN> PointCloudNConstPtr;
 
     public:
       /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
