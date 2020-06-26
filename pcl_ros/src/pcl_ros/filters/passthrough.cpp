@@ -95,11 +95,19 @@ pcl_ros::PassThrough::config_callback (pcl_ros::FilterConfig &config, uint32_t /
   }
 
   // Check the current value for the negative flag
+#if PCL_VERSION_COMPARE(<, 1, 10, 0)
   if (impl_.getFilterLimitsNegative () != config.filter_limit_negative)
+#else
+  if (impl_.getNegative () != config.filter_limit_negative)
+#endif
   {
     NODELET_DEBUG ("[%s::config_callback] Setting the filter negative flag to: %s.", getName ().c_str (), config.filter_limit_negative ? "true" : "false");
     // Call the virtual method in the child
+#if PCL_VERSION_COMPARE(<, 1, 10, 0)
     impl_.setFilterLimitsNegative (config.filter_limit_negative);
+#else
+    impl_.setNegative (config.filter_limit_negative);
+#endif
   }
 
   // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
