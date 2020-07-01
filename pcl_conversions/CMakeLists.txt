@@ -45,7 +45,7 @@ if(BUILD_TESTING)
   ament_target_dependencies(${PROJECT_NAME}-test
     ${dependencies}
   )
-  target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES} ${PCL_LIBRARIES})
 endif()
 
 ament_export_include_directories(include)
