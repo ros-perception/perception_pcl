@@ -36,7 +36,6 @@
 
 #include <tf/message_filter.h>
 #include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
 
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -85,12 +84,12 @@ public:
   {
   }
 
-  void notify(const PCDType::ConstPtr& message)
+  void notify(const MessageFilter<PCDType>::MConstPtr& /*message*/)
   {
     ++count_;
   }
 
-  void failure(const PCDType::ConstPtr& message, FilterFailureReason reason)
+  void failure(const MessageFilter<PCDType>::MConstPtr& /*message*/, FilterFailureReason /*reason*/)
   {
     ++failure_count_;
   }
@@ -107,7 +106,7 @@ TEST(MessageFilter, noTransforms)
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   ros::Time stamp = ros::Time::now();
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
@@ -123,7 +122,7 @@ TEST(MessageFilter, noTransformsSameFrame)
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   ros::Time stamp = ros::Time::now();
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame1";
@@ -139,7 +138,7 @@ TEST(MessageFilter, preexistingTransforms)
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
 
   ros::Time stamp = ros::Time::now();
   setStamp(stamp, msg->header.stamp);
@@ -161,7 +160,7 @@ TEST(MessageFilter, postTransforms)
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   ros::Time stamp = ros::Time::now();
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
 
@@ -192,7 +191,7 @@ TEST(MessageFilter, queueSize)
 
   for (int i = 0; i < 20; ++i)
   {
-    PCDType::Ptr msg(new PCDType);
+    boost::shared_ptr<PCDType> msg(new PCDType);
     msg->header.stamp = pcl_stamp;
     msg->header.frame_id = "frame2";
 
@@ -220,7 +219,7 @@ TEST(MessageFilter, setTargetFrame)
   filter.setTargetFrame("frame1000");
 
   ros::Time stamp = ros::Time::now();
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
 
@@ -246,7 +245,7 @@ TEST(MessageFilter, multipleTargetFrames)
   filter.setTargetFrames(target_frames);
 
   ros::Time stamp = ros::Time::now();
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
   tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame3");
@@ -286,7 +285,7 @@ TEST(MessageFilter, tolerance)
   tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
   tf_client.setTransform(transform);
 
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   msg->header.frame_id = "frame2";
   msg->header.stamp = pcl_stamp;
   filter.add(msg);
@@ -320,7 +319,7 @@ TEST(MessageFilter, outTheBackFailure)
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
   ros::Time stamp = ros::Time::now();
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
   tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
@@ -342,7 +341,7 @@ TEST(MessageFilter, emptyFrameIDFailure)
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
-  PCDType::Ptr msg(new PCDType);
+  boost::shared_ptr<PCDType> msg(new PCDType);
   msg->header.frame_id = "";
   filter.add(msg);
 
