@@ -4,7 +4,7 @@ project(pcl_ros)
 add_compile_options(-std=c++14)
 
 ## Find system dependencies
-find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
+find_package(PCL 1.8 REQUIRED COMPONENTS core features filters io segmentation surface)
 find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)

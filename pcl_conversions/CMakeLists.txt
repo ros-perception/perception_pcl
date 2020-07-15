@@ -3,7 +3,7 @@ project(pcl_conversions)
 
 find_package(catkin REQUIRED COMPONENTS)
 
-find_package(PCL REQUIRED COMPONENTS common io)
+find_package(PCL 1.8 REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
 
 # There is a bug in the Ubuntu Artful (17.10) version of the VTK package,
