@@ -34,22 +34,34 @@
  *
  */
 
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl/common/io.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <limits>
-#include <string>
 #include "pcl_ros/transforms.hpp"
 #include "pcl_ros/impl/transforms.hpp"
+#include <pcl/common/transforms.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <tf2/convert.h>
+#include <tf2/exceptions.h>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
+#include <Eigen/Dense>
+#include <cmath>
+#include <limits>
+#include <string>
 
 namespace pcl_ros
 {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool
 transformPointCloud(
-  const std::string & target_frame, const sensor_msgs::PointCloud2 & in,
-  sensor_msgs::PointCloud2 & out, const tf::TransformListener & tf_listener)
+  const std::string & target_frame, const sensor_msgs::msg::PointCloud2 & in,
+  sensor_msgs::msg::PointCloud2 & out, const tf2_ros::Buffer & tf_buffer)
 {
   if (in.header.frame_id == target_frame) {
     out = in;
@@ -57,14 +69,17 @@ transformPointCloud(
   }
 
   // Get the TF transform
-  tf::StampedTransform transform;
+  geometry_msgs::msg::TransformStamped transform;
   try {
-    tf_listener.lookupTransform(target_frame, in.header.frame_id, in.header.stamp, transform);
-  } catch (tf::LookupException & e) {
-    ROS_ERROR("%s", e.what());
+    transform =
+      tf_buffer.lookupTransform(
+      target_frame, in.header.frame_id, tf2_ros::fromMsg(
+        in.header.stamp));
+  } catch (tf2::LookupException & e) {
+    RCLCPP_ERROR(rclcpp::get_logger("pcl_ros"), "%s", e.what());
     return false;
-  } catch (tf::ExtrapolationException & e) {
-    ROS_ERROR("%s", e.what());
+  } catch (tf2::ExtrapolationException & e) {
+    RCLCPP_ERROR(rclcpp::get_logger("pcl_ros"), "%s", e.what());
     return false;
   }
 
@@ -81,8 +96,8 @@ transformPointCloud(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 transformPointCloud(
-  const std::string & target_frame, const tf::Transform & net_transform,
-  const sensor_msgs::PointCloud2 & in, sensor_msgs::PointCloud2 & out)
+  const std::string & target_frame, const tf2::Transform & net_transform,
+  const sensor_msgs::msg::PointCloud2 & in, sensor_msgs::msg::PointCloud2 & out)
 {
   if (in.header.frame_id == target_frame) {
     out = in;
@@ -98,11 +113,21 @@ transformPointCloud(
   out.header.frame_id = target_frame;
 }
 
+void
+transformPointCloud(
+  const std::string & target_frame, const geometry_msgs::msg::TransformStamped & net_transform,
+  const sensor_msgs::msg::PointCloud2 & in, sensor_msgs::msg::PointCloud2 & out)
+{
+  tf2::Transform transform;
+  tf2::convert(net_transform.transform, transform);
+  transformPointCloud(target_frame, transform, in, out);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 transformPointCloud(
-  const Eigen::Matrix4f & transform, const sensor_msgs::PointCloud2 & in,
-  sensor_msgs::PointCloud2 & out)
+  const Eigen::Matrix4f & transform, const sensor_msgs::msg::PointCloud2 & in,
+  sensor_msgs::msg::PointCloud2 & out)
 {
   // Get X-Y-Z indices
   int x_idx = pcl::getFieldIndex(in, "x");
@@ -110,15 +135,19 @@ transformPointCloud(
   int z_idx = pcl::getFieldIndex(in, "z");
 
   if (x_idx == -1 || y_idx == -1 || z_idx == -1) {
-    ROS_ERROR("Input dataset has no X-Y-Z coordinates! Cannot convert to Eigen format.");
+    RCLCPP_ERROR(
+      rclcpp::get_logger("pcl_ros"),
+      "Input dataset has no X-Y-Z coordinates! Cannot convert to Eigen format.");
     return;
   }
 
-  if (in.fields[x_idx].datatype != sensor_msgs::PointField::FLOAT32 ||
-    in.fields[y_idx].datatype != sensor_msgs::PointField::FLOAT32 ||
-    in.fields[z_idx].datatype != sensor_msgs::PointField::FLOAT32)
+  if (in.fields[x_idx].datatype != sensor_msgs::msg::PointField::FLOAT32 ||
+    in.fields[y_idx].datatype != sensor_msgs::msg::PointField::FLOAT32 ||
+    in.fields[z_idx].datatype != sensor_msgs::msg::PointField::FLOAT32)
   {
-    ROS_ERROR("X-Y-Z coordinates not floats. Currently only floats are supported.");
+    RCLCPP_ERROR(
+      rclcpp::get_logger("pcl_ros"),
+      "X-Y-Z coordinates not floats. Currently only floats are supported.");
     return;
   }
 
@@ -144,15 +173,15 @@ transformPointCloud(
     in.fields[z_idx].offset, 0);
 
   for (size_t i = 0; i < in.width * in.height; ++i) {
-    Eigen::Vector4f pt(*reinterpret_cast<float *>(&in.data[xyz_offset[0]]),
-      *reinterpret_cast<float *>(&in.data[xyz_offset[1]]),
-      *reinterpret_cast<float *>(&in.data[xyz_offset[2]], 1));
+    Eigen::Vector4f pt(*reinterpret_cast<const float *>(&in.data[xyz_offset[0]]),
+      *reinterpret_cast<const float *>(&in.data[xyz_offset[1]]),
+      *reinterpret_cast<const float *>(&in.data[xyz_offset[2]]), 1);
     Eigen::Vector4f pt_out;
 
     bool max_range_point = false;
     int distance_ptr_offset = i * in.point_step + in.fields[dist_idx].offset;
-    float * distance_ptr =
-      (dist_idx < 0 ? NULL : reinterpret_cast<float *>(&in.data[distance_ptr_offset]));
+    const float * distance_ptr = (dist_idx < 0 ?
+      NULL : reinterpret_cast<const float *>(&in.data[distance_ptr_offset]));
     if (!std::isfinite(pt[0]) || !std::isfinite(pt[1]) || !std::isfinite(pt[2])) {
       if (distance_ptr == NULL || !std::isfinite(*distance_ptr)) {  // Invalid point
         pt_out = pt;
@@ -160,8 +189,6 @@ transformPointCloud(
         pt[0] = *distance_ptr;  // Replace x with the x value saved in distance
         pt_out = transform * pt;
         max_range_point = true;
-        // std::cout << pt[0]<<","<<pt[1]<<","<<pt[2]<<" => "<<pt_out[0]<<",
-        // "<<pt_out[1]<<","<<pt_out[2]<<"\n";
       }
     } else {
       pt_out = transform * pt;
@@ -201,12 +228,12 @@ transformPointCloud(
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-transformAsMatrix(const tf::Transform & bt, Eigen::Matrix4f & out_mat)
+transformAsMatrix(const tf2::Transform & bt, Eigen::Matrix4f & out_mat)
 {
   double mv[12];
   bt.getBasis().getOpenGLSubMatrix(mv);
 
-  tf::Vector3 origin = bt.getOrigin();
+  tf2::Vector3 origin = bt.getOrigin();
 
   out_mat(0, 0) = mv[0]; out_mat(0, 1) = mv[4]; out_mat(0, 2) = mv[8];
   out_mat(1, 0) = mv[1]; out_mat(1, 1) = mv[5]; out_mat(1, 2) = mv[9];
@@ -218,176 +245,231 @@ transformAsMatrix(const tf::Transform & bt, Eigen::Matrix4f & out_mat)
   out_mat(2, 3) = origin.z();
 }
 
+void
+transformAsMatrix(const geometry_msgs::msg::TransformStamped & bt, Eigen::Matrix4f & out_mat)
+{
+  tf2::Transform transform;
+  tf2::convert(bt.transform, transform);
+  transformAsMatrix(transform, out_mat);
+}
 }  // namespace pcl_ros
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointNormal>(
   const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal>(
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal>(
   const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointNormal>(
+  const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal>(
+  const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal>(
+  const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
+  const geometry_msgs::msg::TransformStamped &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointNormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointNormal>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointNormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointNormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointNormal> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZRGBNormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZRGBNormal> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZINormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZINormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZINormal> &, const tf2_ros::Buffer &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template void pcl_ros::transformPointCloud<pcl::PointXYZ>(
   const pcl::PointCloud<pcl::PointXYZ> &,
   pcl::PointCloud<pcl::PointXYZ> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointXYZI>(
   const pcl::PointCloud<pcl::PointXYZI> &,
   pcl::PointCloud<pcl::PointXYZI> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointXYZRGBA>(
   const pcl::PointCloud<pcl::PointXYZRGBA> &, pcl::PointCloud<pcl::PointXYZRGBA> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointXYZRGB>(
   const pcl::PointCloud<pcl::PointXYZRGB> &, pcl::PointCloud<pcl::PointXYZRGB> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::InterestPoint>(
   const pcl::PointCloud<pcl::InterestPoint> &, pcl::PointCloud<pcl::InterestPoint> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointNormal>(
   const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal>(
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointXYZINormal>(
   const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointWithRange>(
   const pcl::PointCloud<pcl::PointWithRange> &, pcl::PointCloud<pcl::PointWithRange> &,
-  const tf::Transform &);
+  const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointWithViewpoint>(
   const pcl::PointCloud<pcl::PointWithViewpoint> &, pcl::PointCloud<pcl::PointWithViewpoint> &,
-  const tf::Transform &);
+  const tf2::Transform &);
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template void pcl_ros::transformPointCloud<pcl::PointXYZ>(
+  const pcl::PointCloud<pcl::PointXYZ> &,
+  pcl::PointCloud<pcl::PointXYZ> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZI>(
+  const pcl::PointCloud<pcl::PointXYZI> &,
+  pcl::PointCloud<pcl::PointXYZI> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGBA>(
+  const pcl::PointCloud<pcl::PointXYZRGBA> &, pcl::PointCloud<pcl::PointXYZRGBA> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGB>(
+  const pcl::PointCloud<pcl::PointXYZRGB> &, pcl::PointCloud<pcl::PointXYZRGB> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::InterestPoint>(
+  const pcl::PointCloud<pcl::InterestPoint> &, pcl::PointCloud<pcl::InterestPoint> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointNormal>(
+  const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal>(
+  const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZINormal>(
+  const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointWithRange>(
+  const pcl::PointCloud<pcl::PointWithRange> &, pcl::PointCloud<pcl::PointWithRange> &,
+  const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointWithViewpoint>(
+  const pcl::PointCloud<pcl::PointWithViewpoint> &, pcl::PointCloud<pcl::PointWithViewpoint> &,
+  const geometry_msgs::msg::TransformStamped &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloud<pcl::PointXYZ>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZ> &,
   pcl::PointCloud<pcl::PointXYZ> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZI>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZI> &,
   pcl::PointCloud<pcl::PointXYZI> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGBA>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZRGBA> &, pcl::PointCloud<pcl::PointXYZRGBA> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGB>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZRGB> &, pcl::PointCloud<pcl::PointXYZRGB> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::InterestPoint>(
   const std::string &,
   const pcl::PointCloud<pcl::InterestPoint> &, pcl::PointCloud<pcl::InterestPoint> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointNormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, pcl::PointCloud<pcl::PointXYZRGBNormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZINormal>(
   const std::string &,
   const pcl::PointCloud<pcl::PointXYZINormal> &, pcl::PointCloud<pcl::PointXYZINormal> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointWithRange>(
   const std::string &,
   const pcl::PointCloud<pcl::PointWithRange> &, pcl::PointCloud<pcl::PointWithRange> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointWithViewpoint>(
   const std::string &,
   const pcl::PointCloud<pcl::PointWithViewpoint> &, pcl::PointCloud<pcl::PointWithViewpoint> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloud<pcl::PointXYZ>(
-  const std::string &, const ros::Time &,
+  const std::string &, const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZ> &,
   const std::string &,
   pcl::PointCloud<pcl::PointXYZ> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZI>(
-  const std::string &, const ros::Time &,
+  const std::string &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZI> &,
   const std::string &,
   pcl::PointCloud<pcl::PointXYZI> &,
-  const tf::TransformListener &);
+  const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGBA>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZRGBA> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZRGBA> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZRGBA> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGB>(
-  const std::string &, const ros::Time &,
+  const std::string &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZRGB> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZRGB> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZRGB> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::InterestPoint>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::InterestPoint> &, const std::string &,
-  pcl::PointCloud<pcl::InterestPoint> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::InterestPoint> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointNormal>(
-  const std::string &, const ros::Time &,
+  const std::string &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointNormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointNormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointNormal> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZRGBNormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZRGBNormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZRGBNormal> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointXYZINormal>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointXYZINormal> &, const std::string &,
-  pcl::PointCloud<pcl::PointXYZINormal> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointXYZINormal> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointWithRange>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointWithRange> &, const std::string &,
-  pcl::PointCloud<pcl::PointWithRange> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointWithRange> &, const tf2_ros::Buffer &);
 template bool pcl_ros::transformPointCloud<pcl::PointWithViewpoint>(
   const std::string &,
-  const ros::Time &,
+  const rclcpp::Time &,
   const pcl::PointCloud<pcl::PointWithViewpoint> &, const std::string &,
-  pcl::PointCloud<pcl::PointWithViewpoint> &, const tf::TransformListener &);
+  pcl::PointCloud<pcl::PointWithViewpoint> &, const tf2_ros::Buffer &);

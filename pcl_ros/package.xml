@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>pcl_ros</name>
   <version>2.2.0</version>
   <description>
@@ -10,10 +11,8 @@
 
   </description>
 
-  <author>Open Perception</author>
-  <author email="julius@kammerl.de">Julius Kammerl</author>
-  <author email="william@osrfoundation.org">William Woodall</author>
-
+  <maintainer email="julius@kammerl.de">Julius Kammerl</maintainer>
+  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
   <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
   <maintainer email="stevenmacenski@gmail.com">Steve Macenski</maintainer>
   <maintainer email="www.kentaro.wada@gmail.com">Kentaro Wada</maintainer>
@@ -24,35 +23,23 @@
   <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
   <url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>cmake_modules</build_depend>
-  <build_depend>rosconsole</build_depend>
-  <build_depend>roslib</build_depend>
-
-  <depend>dynamic_reconfigure</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>eigen</depend>
-  <depend>message_filters</depend>
-  <depend>nodelet</depend>
-  <depend>nodelet_topic_tools</depend>
   <depend>libpcl-all-dev</depend>
   <depend>pcl_conversions</depend>
-  <depend>pcl_msgs</depend>
-  <depend>pluginlib</depend>
-  <depend>rosbag</depend>
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
-  <depend>tf</depend>
-  <depend>tf2_eigen</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
 
-  <test_depend>rostest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
-    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_features.xml"/>
-    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_filters.xml"/>
-    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_io.xml"/>
-    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_segmentation.xml"/>
-    <nodelet plugin="${prefix}/plugins/nodelet/libpcl_ros_surface.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>
