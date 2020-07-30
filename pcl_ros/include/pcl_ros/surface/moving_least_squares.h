@@ -42,6 +42,7 @@
 
 // PCL includes
 #include <pcl/surface/mls.h>
+#include <pcl/kdtree/kdtree.h> // for KdTree
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
