@@ -82,6 +82,16 @@ transformPointCloudWithNormals (const pcl::PointCloud <PointT> &cloud_in,
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
+transformPointCloudWithNormals (const pcl::PointCloud <PointT> &cloud_in,
+                                pcl::PointCloud <PointT> &cloud_out, const geometry_msgs::msg::TransformStamped &transform)
+{
+  tf2::Transform tf;
+  tf2::convert (transform.transform, tf);
+  transformPointCloudWithNormals (cloud_in, cloud_out, tf);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
 transformPointCloud (const pcl::PointCloud <PointT> &cloud_in,
                      pcl::PointCloud <PointT> &cloud_out, const tf2::Transform &transform)
 {
@@ -102,6 +112,16 @@ transformPointCloud (const pcl::PointCloud <PointT> &cloud_in,
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+transformPointCloud (const pcl::PointCloud <PointT> &cloud_in,
+                     pcl::PointCloud <PointT> &cloud_out, const geometry_msgs::msg::TransformStamped &transform)
+{
+  tf2::Transform tf;
+  tf2::convert (transform.transform, tf);
+  transformPointCloud (cloud_in, cloud_out, tf);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
 transformPointCloudWithNormals (const std::string &target_frame,
                                 const pcl::PointCloud <PointT> &cloud_in,
@@ -114,10 +134,10 @@ transformPointCloudWithNormals (const std::string &target_frame,
     return (true);
   }
 
-  geometry_msgs::msg::TransformStamped transform_msg;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
-    transform_msg = tf_buffer.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp));
+    transform = tf_buffer.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp));
   }
   catch (tf2::LookupException &e)
   {
@@ -129,9 +149,6 @@ transformPointCloudWithNormals (const std::string &target_frame,
     RCLCPP_ERROR (rclcpp::get_logger("pcl_ros"), "%s", e.what ());
     return (false);
   }
-
-  tf2::Transform transform;
-  tf2::convert (transform_msg.transform, transform);
 
   transformPointCloudWithNormals (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
@@ -151,10 +168,10 @@ transformPointCloud (const std::string &target_frame,
     return (true);
   }
 
-  geometry_msgs::msg::TransformStamped transform_msg;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
-    transform_msg = tf_buffer.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp));
+    transform = tf_buffer.lookupTransform (target_frame, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp));
   }
   catch (tf2::LookupException &e)
   {
@@ -166,9 +183,6 @@ transformPointCloud (const std::string &target_frame,
     RCLCPP_ERROR (rclcpp::get_logger("pcl_ros"), "%s", e.what ());
     return (false);
   }
-
-  tf2::Transform transform;
-  tf2::convert (transform_msg.transform, transform);
 
   transformPointCloud (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
@@ -184,10 +198,10 @@ transformPointCloud (const std::string &target_frame,
                      pcl::PointCloud <PointT> &cloud_out, 
                      const tf2_ros::Buffer &tf_buffer)
 {
-  geometry_msgs::msg::TransformStamped transform_msg;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
-    transform_msg = tf_buffer.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp), fixed_frame);
+    transform = tf_buffer.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp), fixed_frame);
   }
   catch (tf2::LookupException &e)
   {
@@ -199,9 +213,6 @@ transformPointCloud (const std::string &target_frame,
     RCLCPP_ERROR (rclcpp::get_logger("pcl_ros"), "%s", e.what ());
     return (false);
   }
-
-  tf2::Transform transform;
-  tf2::convert (transform_msg.transform, transform);
 
   transformPointCloud (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;
@@ -220,10 +231,10 @@ transformPointCloudWithNormals (const std::string &target_frame,
                                 pcl::PointCloud <PointT> &cloud_out, 
                                 const tf2_ros::Buffer &tf_buffer)
 {
-  geometry_msgs::msg::TransformStamped transform_msg;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
-    transform_msg = tf_buffer.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp), fixed_frame);
+    transform = tf_buffer.lookupTransform (target_frame, target_time, cloud_in.header.frame_id, fromPCL(cloud_in.header.stamp), fixed_frame);
   }
   catch (tf2::LookupException &e)
   {
@@ -235,9 +246,6 @@ transformPointCloudWithNormals (const std::string &target_frame,
     RCLCPP_ERROR (rclcpp::get_logger("pcl_ros"), "%s", e.what ());
     return (false);
   }
-
-  tf2::Transform transform;
-  tf2::convert (transform_msg.transform, transform);
 
   transformPointCloudWithNormals (cloud_in, cloud_out, transform);
   cloud_out.header.frame_id = target_frame;

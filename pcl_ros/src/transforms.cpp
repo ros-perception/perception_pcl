@@ -69,10 +69,10 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::msg::Po
   }
 
   // Get the TF transform
-  geometry_msgs::msg::TransformStamped transform_msg;
+  geometry_msgs::msg::TransformStamped transform;
   try
   {
-    transform_msg = tf_buffer.lookupTransform (target_frame, in.header.frame_id, tf2_ros::fromMsg(in.header.stamp));
+    transform = tf_buffer.lookupTransform (target_frame, in.header.frame_id, tf2_ros::fromMsg(in.header.stamp));
   }
   catch (tf2::LookupException &e)
   {
@@ -84,9 +84,6 @@ transformPointCloud (const std::string &target_frame, const sensor_msgs::msg::Po
     RCLCPP_ERROR (rclcpp::get_logger("pcl_ros"), "%s", e.what ());
     return (false);
   }
-
-  tf2::Transform transform;
-  tf2::convert (transform_msg.transform, transform);
 
   // Convert the TF transform to Eigen format
   Eigen::Matrix4f eigen_transform;
@@ -116,6 +113,15 @@ transformPointCloud (const std::string &target_frame, const tf2::Transform &net_
   transformPointCloud (transform, in, out);
 
   out.header.frame_id = target_frame;
+}
+
+void
+transformPointCloud (const std::string &target_frame, const geometry_msgs::msg::TransformStamped &net_transform,
+                     const sensor_msgs::msg::PointCloud2 &in, sensor_msgs::msg::PointCloud2 &out)
+{
+  tf2::Transform transform;
+  tf2::convert (net_transform.transform, transform);
+  transformPointCloud(target_frame, transform, in, out);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,12 +249,25 @@ transformAsMatrix (const tf2::Transform& bt, Eigen::Matrix4f &out_mat)
   out_mat (2, 3) = origin.z ();
 }
 
+void
+transformAsMatrix (const geometry_msgs::msg::TransformStamped& bt, Eigen::Matrix4f &out_mat)
+{
+  tf2::Transform transform;
+  tf2::convert (bt.transform, transform);
+  transformAsMatrix(transform, out_mat);
+}
+
 } // namespace pcl_ros
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointNormal> (const pcl::PointCloud <pcl::PointNormal> &, pcl::PointCloud <pcl::PointNormal> &, const tf2::Transform &);
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal> (const pcl::PointCloud <pcl::PointXYZRGBNormal> &, pcl::PointCloud <pcl::PointXYZRGBNormal> &, const tf2::Transform &);
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal> (const pcl::PointCloud <pcl::PointXYZINormal> &, pcl::PointCloud <pcl::PointXYZINormal> &, const tf2::Transform &);
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointNormal> (const pcl::PointCloud <pcl::PointNormal> &, pcl::PointCloud <pcl::PointNormal> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZRGBNormal> (const pcl::PointCloud <pcl::PointXYZRGBNormal> &, pcl::PointCloud <pcl::PointXYZRGBNormal> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloudWithNormals<pcl::PointXYZINormal> (const pcl::PointCloud <pcl::PointXYZINormal> &, pcl::PointCloud <pcl::PointXYZINormal> &, const geometry_msgs::msg::TransformStamped &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloudWithNormals<pcl::PointNormal> (const std::string &, const pcl::PointCloud<pcl::PointNormal> &, pcl::PointCloud<pcl::PointNormal> &, const tf2_ros::Buffer &);
@@ -271,6 +290,18 @@ template void pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal> (const pcl::P
 template void pcl_ros::transformPointCloud<pcl::PointXYZINormal> (const pcl::PointCloud <pcl::PointXYZINormal> &, pcl::PointCloud <pcl::PointXYZINormal> &, const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointWithRange> (const pcl::PointCloud <pcl::PointWithRange> &, pcl::PointCloud <pcl::PointWithRange> &, const tf2::Transform &);
 template void pcl_ros::transformPointCloud<pcl::PointWithViewpoint> (const pcl::PointCloud <pcl::PointWithViewpoint> &, pcl::PointCloud <pcl::PointWithViewpoint> &, const tf2::Transform &);
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template void pcl_ros::transformPointCloud<pcl::PointXYZ> (const pcl::PointCloud <pcl::PointXYZ> &, pcl::PointCloud <pcl::PointXYZ> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZI> (const pcl::PointCloud <pcl::PointXYZI> &, pcl::PointCloud <pcl::PointXYZI> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGBA> (const pcl::PointCloud <pcl::PointXYZRGBA> &, pcl::PointCloud <pcl::PointXYZRGBA> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGB> (const pcl::PointCloud <pcl::PointXYZRGB> &, pcl::PointCloud <pcl::PointXYZRGB> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::InterestPoint> (const pcl::PointCloud <pcl::InterestPoint> &, pcl::PointCloud <pcl::InterestPoint> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointNormal> (const pcl::PointCloud <pcl::PointNormal> &, pcl::PointCloud <pcl::PointNormal> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZRGBNormal> (const pcl::PointCloud <pcl::PointXYZRGBNormal> &, pcl::PointCloud <pcl::PointXYZRGBNormal> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointXYZINormal> (const pcl::PointCloud <pcl::PointXYZINormal> &, pcl::PointCloud <pcl::PointXYZINormal> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointWithRange> (const pcl::PointCloud <pcl::PointWithRange> &, pcl::PointCloud <pcl::PointWithRange> &, const geometry_msgs::msg::TransformStamped &);
+template void pcl_ros::transformPointCloud<pcl::PointWithViewpoint> (const pcl::PointCloud <pcl::PointWithViewpoint> &, pcl::PointCloud <pcl::PointWithViewpoint> &, const geometry_msgs::msg::TransformStamped &);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template bool pcl_ros::transformPointCloud<pcl::PointXYZ> (const std::string &, const pcl::PointCloud <pcl::PointXYZ> &, pcl::PointCloud <pcl::PointXYZ> &, const tf2_ros::Buffer &);
