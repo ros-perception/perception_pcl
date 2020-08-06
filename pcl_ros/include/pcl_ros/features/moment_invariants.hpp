@@ -39,7 +39,7 @@
 #define PCL_ROS_MOMENT_INVARIANTS_H_
 
 #include <pcl/features/moment_invariants.h>
-#include "pcl_ros/features/feature.h"
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {

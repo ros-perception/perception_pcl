@@ -38,11 +38,11 @@
 #ifndef PCL_ROS_NORMAL_3D_TBB_H_
 #define PCL_ROS_NORMAL_3D_TBB_H_
 
-//#include "pcl_ros/pcl_ros_config.h"
+//#include "pcl_ros/pcl_ros_config.hpp"
 //#if defined(HAVE_TBB)
 
 #include <pcl/features/normal_3d_tbb.h>
-#include "pcl_ros/features/normal_3d.h"
+#include "pcl_ros/features/normal_3d.hpp"
 
 namespace pcl_ros
 {

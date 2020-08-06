@@ -39,11 +39,11 @@
 #define PCL_ROS_SEGMENT_DIFFERENCES_H_
 
 #include <pcl/segmentation/segment_differences.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/SegmentDifferencesConfig.h"
+#include "pcl_ros/SegmentDifferencesConfig.hpp"
 
 
 namespace pcl_ros

@@ -40,10 +40,10 @@
 
 // PCL includes
 #include <pcl/filters/radius_outlier_removal.h>
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/filters/filter.hpp"
 
 // Dynamic reconfigure
-#include "pcl_ros/RadiusOutlierRemovalConfig.h"
+#include "pcl_ros/RadiusOutlierRemovalConfig.hpp"
 
 namespace pcl_ros
 {

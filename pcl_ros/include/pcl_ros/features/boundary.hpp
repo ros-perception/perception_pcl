@@ -41,7 +41,7 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
 
 #include <pcl/features/boundary.h>
-#include "pcl_ros/features/feature.h"
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {

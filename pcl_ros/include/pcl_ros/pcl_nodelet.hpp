@@ -51,7 +51,7 @@
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "pcl_ros/point_cloud.h"
+#include "pcl_ros/point_cloud.hpp"
 // ROS Nodelet includes
 #include <nodelet_topic_tools/nodelet_lazy.h>
 #include <message_filters/subscriber.h>

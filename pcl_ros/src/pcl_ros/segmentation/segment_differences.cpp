@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/segmentation/segment_differences.h"
+#include "pcl_ros/segmentation/segment_differences.hpp"
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -40,10 +40,10 @@
 
 // PCL includes
 #include <pcl/filters/statistical_outlier_removal.h>
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/filters/filter.hpp"
 
 // Dynamic reconfigure
-#include "pcl_ros/StatisticalOutlierRemovalConfig.h"
+#include "pcl_ros/StatisticalOutlierRemovalConfig.hpp"
 
 namespace pcl_ros
 {

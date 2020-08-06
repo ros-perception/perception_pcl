@@ -41,8 +41,8 @@
 // PCL includes
 #include <pcl/filters/extract_indices.h>
 
-#include "pcl_ros/filters/filter.h"
-#include "pcl_ros/ExtractIndicesConfig.h"
+#include "pcl_ros/filters/filter.hpp"
+#include "pcl_ros/ExtractIndicesConfig.hpp"
 
 namespace pcl_ros
 {

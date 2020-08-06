@@ -38,7 +38,7 @@
 #ifndef PCL_ROS_SAC_SEGMENTATION_H_
 #define PCL_ROS_SAC_SEGMENTATION_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/pass_through.h>
 
 // PCL includes
@@ -46,8 +46,8 @@
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/SACSegmentationConfig.h"
-#include "pcl_ros/SACSegmentationFromNormalsConfig.h"
+#include "pcl_ros/SACSegmentationConfig.hpp"
+#include "pcl_ros/SACSegmentationFromNormalsConfig.hpp"
 
 namespace pcl_ros
 {

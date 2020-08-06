@@ -42,12 +42,12 @@
 #include <pcl/features/feature.h>
 #include <pcl_msgs/PointIndices.h>
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/pass_through.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/FeatureConfig.h"
+#include "pcl_ros/FeatureConfig.hpp"
 
 // PCL conversions
 #include <pcl_conversions/pcl_conversions.h>

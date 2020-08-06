@@ -35,7 +35,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/features/shot.h"
+#include "pcl_ros/features/shot.hpp"
 
 void 
 pcl_ros::SHOTEstimation::emptyPublish (const PointCloudInConstPtr &cloud)

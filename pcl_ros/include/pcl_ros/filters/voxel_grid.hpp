@@ -40,10 +40,10 @@
 
 // PCL includes
 #include <pcl/filters/voxel_grid.h>
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/filters/filter.hpp"
 
 // Dynamic reconfigure
-#include "pcl_ros/VoxelGridConfig.h"
+#include "pcl_ros/VoxelGridConfig.hpp"
 
 namespace pcl_ros
 {

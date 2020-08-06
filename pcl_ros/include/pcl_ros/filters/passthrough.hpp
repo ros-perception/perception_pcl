@@ -40,7 +40,7 @@
 
 // PCL includes
 #include <pcl/filters/passthrough.h>
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/filters/filter.hpp"
 
 namespace pcl_ros
 {

@@ -39,11 +39,11 @@
 #define PCL_ROS_EXTRACT_CLUSTERS_H_
 
 #include <pcl/segmentation/extract_clusters.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/EuclideanClusterExtractionConfig.h"
+#include "pcl_ros/EuclideanClusterExtractionConfig.hpp"
 
 namespace pcl_ros
 {
