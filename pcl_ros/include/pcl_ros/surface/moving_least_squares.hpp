@@ -38,7 +38,7 @@
 #ifndef PCL_ROS_MOVING_LEAST_SQUARES_H_
 #define PCL_ROS_MOVING_LEAST_SQUARES_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 // PCL includes
 #include <pcl/surface/mls.h>

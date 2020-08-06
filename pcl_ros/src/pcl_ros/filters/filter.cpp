@@ -36,8 +36,8 @@
  */
 
 #include <pcl/io/io.h>
-#include "pcl_ros/transforms.h"
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/transforms.hpp"
+#include "pcl_ros/filters/filter.hpp"
 
 /*//#include <pcl/filters/pixel_grid.h>
 //#include <pcl/filters/filter_dimension.h>

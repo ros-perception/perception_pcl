@@ -31,29 +31,30 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: normal_3d_tbb.h 35661 2011-02-01 06:04:14Z rusu $
+ * $Id: normal_3d.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_NORMAL_3D_TBB_H_
-#define PCL_ROS_NORMAL_3D_TBB_H_
+#ifndef PCL_ROS_NORMAL_3D_H_
+#define PCL_ROS_NORMAL_3D_H_
 
-//#include "pcl_ros/pcl_ros_config.h"
-//#if defined(HAVE_TBB)
-
-#include <pcl/features/normal_3d_tbb.h>
-#include "pcl_ros/features/normal_3d.h"
+#include <pcl/features/normal_3d.h>
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and
-    * curvatures, in parallel, using Intel's Threading Building Blocks library.
+  /** \brief @b NormalEstimation estimates local surface properties at each 3D point, such as surface normals and
+    * curvatures.
+    *
+    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
+    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for parallel implementations.
     * \author Radu Bogdan Rusu
     */
-  class NormalEstimationTBB: public Feature
+  class NormalEstimation: public Feature
   {
     private:
-      pcl::NormalEstimationTBB<pcl::PointXYZ, pcl::Normal> impl_;
+      /** \brief PCL implementation object. */
+      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
 
       typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
 
@@ -62,11 +63,13 @@ namespace pcl_ros
       childInit (ros::NodeHandle &nh)
       {
         // Create the output publisher
-        pub_output_ = advertise<PointCloud> (nh, "output", max_queue_size_);
+        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
         return (true);
       }
 
-      /** \brief Publish an empty point cloud of the feature output type. */
+      /** \brief Publish an empty point cloud of the feature output type.
+        * \param cloud the input point cloud to copy the header from.
+        */ 
       void emptyPublish (const PointCloudInConstPtr &cloud);
 
       /** \brief Compute the feature and publish it. */
@@ -79,8 +82,5 @@ namespace pcl_ros
   };
 }
 
-//#endif  // HAVE_TBB
-
-#endif  //#ifndef PCL_ROS_NORMAL_3D_TBB_H_
-
+#endif  //#ifndef PCL_ROS_NORMAL_3D_H_
 

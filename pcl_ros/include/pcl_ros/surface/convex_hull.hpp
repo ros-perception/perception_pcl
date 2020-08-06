@@ -38,7 +38,7 @@
 #ifndef PCL_ROS_CONVEX_HULL_2D_H_
 #define PCL_ROS_CONVEX_HULL_2D_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 // PCL includes
 #include <pcl/surface/convex_hull.h>

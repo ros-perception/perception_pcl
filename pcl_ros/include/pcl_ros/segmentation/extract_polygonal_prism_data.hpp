@@ -38,7 +38,7 @@
 #ifndef PCL_ROS_EXTRACT_POLYGONAL_PRISM_DATA_H_
 #define PCL_ROS_EXTRACT_POLYGONAL_PRISM_DATA_H_
 
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/pass_through.h>
@@ -48,7 +48,7 @@
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/ExtractPolygonalPrismDataConfig.h"
+#include "pcl_ros/ExtractPolygonalPrismDataConfig.hpp"
 
 namespace pcl_ros
 {

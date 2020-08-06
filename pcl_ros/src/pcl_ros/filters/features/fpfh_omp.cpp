@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/features/fpfh_omp.h"
+#include "pcl_ros/features/fpfh_omp.hpp"
 
 void 
 pcl_ros::FPFHEstimationOMP::emptyPublish (const PointCloudInConstPtr &cloud)

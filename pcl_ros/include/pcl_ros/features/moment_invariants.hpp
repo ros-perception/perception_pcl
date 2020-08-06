@@ -31,46 +31,30 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: pfh.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: moment_invariants.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_PFH_H_
-#define PCL_ROS_PFH_H_
+#ifndef PCL_ROS_MOMENT_INVARIANTS_H_
+#define PCL_ROS_MOMENT_INVARIANTS_H_
 
-#include <pcl/features/pfh.h>
-#include "pcl_ros/features/feature.h"
+#include <pcl/features/moment_invariants.h>
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b PFHEstimation estimates the Point Feature Histogram (PFH) descriptor for a given point cloud dataset
-    * containing points and normals.
-    *
-    * @note If you use this code in any academic work, please cite:
-    *
-    * <ul>
-    * <li> R.B. Rusu, N. Blodow, Z.C. Marton, M. Beetz.
-    *      Aligning Point Cloud Views using Persistent Feature Histograms.
-    *      In Proceedings of the 21st IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
-    *      Nice, France, September 22-26 2008.
-    * </li>
-    * <li> R.B. Rusu, Z.C. Marton, N. Blodow, M. Beetz.
-    *      Learning Informative Point Classes for the Acquisition of Object Model Maps.
-    *      In Proceedings of the 10th International Conference on Control, Automation, Robotics and Vision (ICARCV),
-    *      Hanoi, Vietnam, December 17-20 2008.
-    * </li>
-    * </ul>
+  /** \brief MomentInvariantsEstimation estimates the 3 moment invariants (j1, j2, j3) at each 3D point.
     *
     * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
+    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
     * \author Radu Bogdan Rusu
     */
-  class PFHEstimation : public FeatureFromNormals
+  class MomentInvariantsEstimation: public Feature
   {
     private:
-      pcl::PFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::PFHSignature125> impl_;
+      pcl::MomentInvariantsEstimation<pcl::PointXYZ, pcl::MomentInvariants> impl_;
 
-      typedef pcl::PointCloud<pcl::PFHSignature125> PointCloudOut;
+      typedef pcl::PointCloud<pcl::MomentInvariants> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
@@ -86,7 +70,6 @@ namespace pcl_ros
 
       /** \brief Compute the feature and publish it. */
       void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
 
@@ -95,6 +78,6 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_PFH_H_
+#endif  //#ifndef PCL_ROS_MOMENT_INVARIANTS_H_
 
 

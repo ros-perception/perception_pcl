@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/features/vfh.h"
+#include "pcl_ros/features/vfh.hpp"
 
 void 
 pcl_ros::VFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)

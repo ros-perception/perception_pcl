@@ -31,28 +31,38 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: passthrough.h 35876 2011-02-09 01:04:36Z rusu $
+ * $Id: statistical_outlier_removal.h 35876 2011-02-09 01:04:36Z rusu $
  *
  */
 
-#ifndef PCL_ROS_FILTERS_PASSTHROUGH_H_
-#define PCL_ROS_FILTERS_PASSTHROUGH_H_
+#ifndef PCL_ROS_FILTERS_STATISTICALOUTLIERREMOVAL_H_
+#define PCL_ROS_FILTERS_STATISTICALOUTLIERREMOVAL_H_
 
 // PCL includes
-#include <pcl/filters/passthrough.h>
-#include "pcl_ros/filters/filter.h"
+#include <pcl/filters/statistical_outlier_removal.h>
+#include "pcl_ros/filters/filter.hpp"
+
+// Dynamic reconfigure
+#include "pcl_ros/StatisticalOutlierRemovalConfig.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b PassThrough uses the base Filter class methods to pass through all data that satisfies the user given
-    * constraints.
+  /** \brief @b StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data. For more
+    * information check:
+    * <ul>
+    * <li> R. B. Rusu, Z. C. Marton, N. Blodow, M. Dolha, and M. Beetz.
+    *      Towards 3D Point Cloud Based Object Maps for Household Environments
+    *      Robotics and Autonomous Systems Journal (Special Issue on Semantic Knowledge), 2008.
+    * </ul>
+    *
+    * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
     * \author Radu Bogdan Rusu
     */
-  class PassThrough : public Filter
+  class StatisticalOutlierRemoval : public Filter
   {
     protected:
       /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::FilterConfig> > srv_;
+      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig> > srv_;
 
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
@@ -65,7 +75,7 @@ namespace pcl_ros
       {
         boost::mutex::scoped_lock lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-        pcl_conversions::toPCL (*(input), *(pcl_input));
+        pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
         pcl::PCLPointCloud2 pcl_output;
@@ -77,22 +87,20 @@ namespace pcl_ros
         * \param nh ROS node handle
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
-      bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
-      
-      /** \brief Dynamic reconfigure service callback.
-        * \param config the dynamic reconfigure FilterConfig object
+      bool child_init (ros::NodeHandle &nh, bool &has_service);
+
+      /** \brief Dynamic reconfigure callback
+        * \param config the config object
         * \param level the dynamic reconfigure level
         */
-      void 
-      config_callback (pcl_ros::FilterConfig &config, uint32_t level);
+      void config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t level);
 
     private:
       /** \brief The PCL filter implementation used. */
-      pcl::PassThrough<pcl::PCLPointCloud2> impl_;
+      pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> impl_;
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
-#endif  //#ifndef PCL_ROS_FILTERS_PASSTHROUGH_H_
+#endif  //#ifndef PCL_FILTERS_STATISTICALOUTLIERREMOVAL_H_

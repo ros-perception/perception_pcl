@@ -31,35 +31,37 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: principal_curvatures.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: boundary.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_
-#define PCL_ROS_PRINCIPAL_CURVATURES_H_
+#ifndef PCL_ROS_BOUNDARY_H_
+#define PCL_ROS_BOUNDARY_H_
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
-#include <pcl/features/principal_curvatures.h>
-#include "pcl_ros/features/feature.h"
+
+#include <pcl/features/boundary.h>
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of
-    * principal surface curvatures for a given point cloud dataset containing points and normals.
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /** \brief @b BoundaryEstimation estimates whether a set of points is lying on surface boundaries using an angle
+    * criterion. The code makes use of the estimated surface normals at each point in the input dataset.
     *
     * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
     * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
-    * \author Radu Bogdan Rusu, Jared Glover
+    * \author Radu Bogdan Rusu
     */
-  class PrincipalCurvaturesEstimation : public FeatureFromNormals
+  class BoundaryEstimation: public FeatureFromNormals
   {
     private:
-      pcl::PrincipalCurvaturesEstimation<pcl::PointXYZ, pcl::Normal, pcl::PrincipalCurvatures> impl_;
+      pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> impl_;
 
-      typedef pcl::PointCloud<pcl::PrincipalCurvatures> PointCloudOut;
+      typedef pcl::PointCloud<pcl::Boundary> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
-      inline bool 
+      inline bool
       childInit (ros::NodeHandle &nh)
       {
         // Create the output publisher
@@ -81,4 +83,6 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_
+#endif  //#ifndef PCL_ROS_BOUNDARY_H_
+
+

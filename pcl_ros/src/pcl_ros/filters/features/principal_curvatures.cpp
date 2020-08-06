@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/features/principal_curvatures.h"
+#include "pcl_ros/features/principal_curvatures.hpp"
 
 void 
 pcl_ros::PrincipalCurvaturesEstimation::emptyPublish (const PointCloudInConstPtr &cloud)

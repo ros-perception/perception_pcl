@@ -38,7 +38,7 @@
 #define pcl_ros_IMPL_TRANSFORMS_H_
 
 #include <pcl_conversions/pcl_conversions.h>
-#include "pcl_ros/transforms.h"
+#include "pcl_ros/transforms.hpp"
 
 using pcl_conversions::fromPCL;
 using pcl_conversions::toPCL;

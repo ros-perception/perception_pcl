@@ -31,30 +31,43 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: moment_invariants.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: fpfh_omp.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_MOMENT_INVARIANTS_H_
-#define PCL_ROS_MOMENT_INVARIANTS_H_
+#ifndef PCL_ROS_FPFH_OMP_H_
+#define PCL_ROS_FPFH_OMP_H_
 
-#include <pcl/features/moment_invariants.h>
-#include "pcl_ros/features/feature.h"
+#include <pcl/features/fpfh_omp.h>
+#include "pcl_ros/features/fpfh.hpp"
 
 namespace pcl_ros
 {
-  /** \brief MomentInvariantsEstimation estimates the 3 moment invariants (j1, j2, j3) at each 3D point.
+  /** \brief @b FPFHEstimationOMP estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud
+    * dataset containing points and normals, in parallel, using the OpenMP standard.
     *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
+    * @note If you use this code in any academic work, please cite:
+    *
+    * <ul>
+    * <li> R.B. Rusu, N. Blodow, M. Beetz.
+    *      Fast Point Feature Histograms (FPFH) for 3D Registration.
+    *      In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA),
+    *      Kobe, Japan, May 12-17 2009.
+    * </li>
+    * <li> R.B. Rusu, A. Holzbach, N. Blodow, M. Beetz.
+    *      Fast Geometric Point Labeling using Conditional Random Fields.
+    *      In Proceedings of the 22nd IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
+    *      St. Louis, MO, USA, October 11-15 2009.
+    * </li>
+    * </ul>
     * \author Radu Bogdan Rusu
     */
-  class MomentInvariantsEstimation: public Feature
+  class FPFHEstimationOMP : public FeatureFromNormals
   {
     private:
-      pcl::MomentInvariantsEstimation<pcl::PointXYZ, pcl::MomentInvariants> impl_;
+      pcl::FPFHEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
 
-      typedef pcl::PointCloud<pcl::MomentInvariants> PointCloudOut;
+      typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
@@ -70,6 +83,7 @@ namespace pcl_ros
 
       /** \brief Compute the feature and publish it. */
       void computePublish (const PointCloudInConstPtr &cloud,
+                           const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
 
@@ -78,6 +92,5 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_MOMENT_INVARIANTS_H_
-
+#endif  //#ifndef PCL_ROS_FPFH_OMP_H_
 

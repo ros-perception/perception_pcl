@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/filters/project_inliers.h"
+#include "pcl_ros/filters/project_inliers.hpp"
 #include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 /*
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2010, Willow Garage, Inc.
+ *  Copyright (c) 2009, Willow Garage, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -31,32 +31,30 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: radius_outlier_removal.h 35876 2011-02-09 01:04:36Z rusu $
+ * $Id: extract_indices.h 35876 2011-02-09 01:04:36Z rusu $
  *
  */
 
-#ifndef PCL_ROS_FILTERS_RADIUSOUTLIERREMOVAL_H_
-#define PCL_ROS_FILTERS_RADIUSOUTLIERREMOVAL_H_
+#ifndef PCL_ROS_FILTERS_EXTRACTINDICES_H_
+#define PCL_ROS_FILTERS_EXTRACTINDICES_H_
 
 // PCL includes
-#include <pcl/filters/radius_outlier_removal.h>
-#include "pcl_ros/filters/filter.h"
+#include <pcl/filters/extract_indices.h>
 
-// Dynamic reconfigure
-#include "pcl_ros/RadiusOutlierRemovalConfig.h"
+#include "pcl_ros/filters/filter.hpp"
+#include "pcl_ros/ExtractIndicesConfig.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b RadiusOutlierRemoval is a simple filter that removes outliers if the number of neighbors in a certain
-    * search radius is smaller than a given K.
+  /** \brief @b ExtractIndices extracts a set of indices from a PointCloud as a separate PointCloud.
     * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
     * \author Radu Bogdan Rusu
     */
-  class RadiusOutlierRemoval : public Filter
+  class ExtractIndices : public Filter
   {
     protected:
       /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > srv_;
+      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig> > srv_;
 
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
@@ -67,8 +65,9 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
+        boost::mutex::scoped_lock lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-        pcl_conversions::toPCL (*(input), *(pcl_input));
+        pcl_conversions::toPCL(*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
         pcl::PCLPointCloud2 pcl_output;
@@ -80,21 +79,20 @@ namespace pcl_ros
         * \param nh ROS node handle
         * \param has_service set to true if the child has a Dynamic Reconfigure service
         */
-    virtual inline bool child_init (ros::NodeHandle &nh, bool &has_service);
+      virtual bool 
+      child_init (ros::NodeHandle &nh, bool &has_service);
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (pcl_ros::RadiusOutlierRemovalConfig &config, uint32_t level);
+      /** \brief Dynamic reconfigure service callback. */
+      void 
+      config_callback (pcl_ros::ExtractIndicesConfig &config, uint32_t level);
 
-    
     private:
       /** \brief The PCL filter implementation used. */
-      pcl::RadiusOutlierRemoval<pcl::PCLPointCloud2> impl_;
+      pcl::ExtractIndices<pcl::PCLPointCloud2> impl_;
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
-#endif  //#ifndef PCL_FILTERS_RADIUSOUTLIERREMOVAL_H_
+#endif  //#ifndef PCL_ROS_FILTERS_EXTRACTINDICES_H_
+

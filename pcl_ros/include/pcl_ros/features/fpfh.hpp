@@ -31,37 +31,49 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: boundary.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: fpfh.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_BOUNDARY_H_
-#define PCL_ROS_BOUNDARY_H_
+#ifndef PCL_ROS_FPFH_H_
+#define PCL_ROS_FPFH_H_
 
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
-
-#include <pcl/features/boundary.h>
-#include "pcl_ros/features/feature.h"
+#include <pcl/features/fpfh.h>
+#include "pcl_ros/features/pfh.hpp"
 
 namespace pcl_ros
 {
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b BoundaryEstimation estimates whether a set of points is lying on surface boundaries using an angle
-    * criterion. The code makes use of the estimated surface normals at each point in the input dataset.
+  /** \brief @b FPFHEstimation estimates the <b>Fast Point Feature Histogram (FPFH)</b> descriptor for a given point cloud
+    * dataset containing points and normals.
+    *
+    * @note If you use this code in any academic work, please cite:
+    *
+    * <ul>
+    * <li> R.B. Rusu, N. Blodow, M. Beetz.
+    *      Fast Point Feature Histograms (FPFH) for 3D Registration.
+    *      In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA),
+    *      Kobe, Japan, May 12-17 2009.
+    * </li>
+    * <li> R.B. Rusu, A. Holzbach, N. Blodow, M. Beetz.
+    *      Fast Geometric Point Labeling using Conditional Random Fields.
+    *      In Proceedings of the 22nd IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
+    *      St. Louis, MO, USA, October 11-15 2009.
+    * </li>
+    * </ul>
     *
     * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
+    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
     * \author Radu Bogdan Rusu
     */
-  class BoundaryEstimation: public FeatureFromNormals
+  class FPFHEstimation : public FeatureFromNormals
   {
     private:
-      pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> impl_;
+      pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
 
-      typedef pcl::PointCloud<pcl::Boundary> PointCloudOut;
+      typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
-      inline bool
+      inline bool 
       childInit (ros::NodeHandle &nh)
       {
         // Create the output publisher
@@ -83,6 +95,6 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_BOUNDARY_H_
+#endif  //#ifndef PCL_FPFH_H_
 
 

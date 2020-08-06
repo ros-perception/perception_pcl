@@ -31,19 +31,20 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: extract_clusters.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: segment_differences.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_EXTRACT_CLUSTERS_H_
-#define PCL_ROS_EXTRACT_CLUSTERS_H_
+#ifndef PCL_ROS_SEGMENT_DIFFERENCES_H_
+#define PCL_ROS_SEGMENT_DIFFERENCES_H_
 
-#include <pcl/segmentation/extract_clusters.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include <pcl/segmentation/segment_differences.h>
+#include "pcl_ros/pcl_nodelet.hpp"
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/EuclideanClusterExtractionConfig.h"
+#include "pcl_ros/SegmentDifferencesConfig.hpp"
+
 
 namespace pcl_ros
 {
@@ -51,25 +52,31 @@ namespace pcl_ros
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b EuclideanClusterExtraction represents a segmentation class for cluster extraction in an Euclidean sense.
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  /** \brief @b SegmentDifferences obtains the difference between two spatially aligned point clouds and returns the
+    * difference between them for a maximum given distance threshold.
     * \author Radu Bogdan Rusu
     */
-  class EuclideanClusterExtraction : public PCLNodelet
+  class SegmentDifferences : public PCLNodelet
   {
+    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
     public:
       /** \brief Empty constructor. */
-      EuclideanClusterExtraction () : publish_indices_ (false), max_clusters_ (std::numeric_limits<int>::max ()) {};
+      SegmentDifferences () {};
                                       
     protected:
-      // ROS nodelet attributes
-      /** \brief Publish indices or convert to PointCloud clusters. Default: false */
-      bool publish_indices_;
+      /** \brief The message filter subscriber for PointCloud2. */
+      message_filters::Subscriber<PointCloud> sub_target_filter_;
 
-      /** \brief Maximum number of clusters to publish. */
-      int max_clusters_;
+      /** \brief Synchronized input, and planar hull.*/
+      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > sync_input_target_e_;
+      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > sync_input_target_a_;
 
       /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<EuclideanClusterExtractionConfig> > srv_;
+      boost::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig> > srv_;
 
       /** \brief Nodelet initialization routine. */
       void onInit ();
@@ -82,28 +89,22 @@ namespace pcl_ros
         * \param config the config object
         * \param level the dynamic reconfigure level
         */
-      void config_callback (EuclideanClusterExtractionConfig &config, uint32_t level);
+      void config_callback (SegmentDifferencesConfig &config, uint32_t level);
 
-      /** \brief Input point cloud callback. 
+      /** \brief Input point cloud callback.
         * \param cloud the pointer to the input point cloud
-        * \param indices the pointer to the input point cloud indices
+        * \param cloud_target the pointcloud that we want to segment \a cloud from
         */
-      void input_indices_callback (const PointCloudConstPtr &cloud, const PointIndicesConstPtr &indices);
+      void input_target_callback (const PointCloudConstPtr &cloud, 
+                                  const PointCloudConstPtr &cloud_target);
 
     private:
       /** \brief The PCL implementation used. */
-      pcl::EuclideanClusterExtraction<pcl::PointXYZ> impl_;
-
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
-
-      /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > sync_input_indices_a_;
+      pcl::SegmentDifferences<pcl::PointXYZ> impl_;
 
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
-#endif  //#ifndef PCL_ROS_EXTRACT_CLUSTERS_H_
+#endif  //#ifndef PCL_ROS_SEGMENT_DIFFERENCES_H_

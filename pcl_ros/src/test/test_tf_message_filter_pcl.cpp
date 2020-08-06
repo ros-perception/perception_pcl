@@ -41,7 +41,7 @@
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/point_cloud.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <ros/ros.h>

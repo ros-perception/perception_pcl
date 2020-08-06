@@ -36,8 +36,8 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/transforms.h"
-#include "pcl_ros/segmentation/extract_polygonal_prism_data.h"
+#include "pcl_ros/transforms.hpp"
+#include "pcl_ros/segmentation/extract_polygonal_prism_data.hpp"
 #include <pcl/io/io.h>
 
 #include <pcl_conversions/pcl_conversions.h>

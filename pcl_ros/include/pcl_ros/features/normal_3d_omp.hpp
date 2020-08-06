@@ -1,7 +1,7 @@
 /*
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, Ryohei Ueda, JSK Lab
+ *  Copyright (c) 2009, Willow Garage, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of JSK Lab. nor the names of its
+ *   * Neither the name of Willow Garage, Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -31,25 +31,28 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
+ * $Id: normal_3d_omp.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_SHOT_OMP_H_
-#define PCL_ROS_SHOT_OMP_H_
+#ifndef PCL_ROS_NORMAL_3D_OMP_H_
+#define PCL_ROS_NORMAL_3D_OMP_H_
 
-#include <pcl/features/shot_omp.h>
-#include "pcl_ros/features/shot.h"
+#include <pcl/features/normal_3d_omp.h>
+#include "pcl_ros/features/normal_3d.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b SHOTEstimation estimates SHOT descriptor using OpenMP.
+  /** \brief @b NormalEstimationOMP estimates local surface properties at each 3D point, such as surface normals and
+    * curvatures, in parallel, using the OpenMP standard.
+    * \author Radu Bogdan Rusu
     */
-  class SHOTEstimationOMP : public FeatureFromNormals
+  class NormalEstimationOMP: public Feature
   {
     private:
-      pcl::SHOTEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
+      pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> impl_;
 
-      typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;
+      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
@@ -65,7 +68,6 @@ namespace pcl_ros
 
       /** \brief Compute the feature and publish it. */
       void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
 
@@ -74,5 +76,4 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_SHOT_OMP_H_
-
+#endif  //#ifndef PCL_ROS_NORMAL_3D_OMP_H_

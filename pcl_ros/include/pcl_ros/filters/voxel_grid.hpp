@@ -31,56 +31,59 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: normal_3d.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: voxel_grid.h 35876 2011-02-09 01:04:36Z rusu $
  *
  */
 
-#ifndef PCL_ROS_NORMAL_3D_H_
-#define PCL_ROS_NORMAL_3D_H_
+#ifndef PCL_ROS_FILTERS_VOXEL_H_
+#define PCL_ROS_FILTERS_VOXEL_H_
 
-#include <pcl/features/normal_3d.h>
-#include "pcl_ros/features/feature.h"
+// PCL includes
+#include <pcl/filters/voxel_grid.h>
+#include "pcl_ros/filters/filter.hpp"
+
+// Dynamic reconfigure
+#include "pcl_ros/VoxelGridConfig.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b NormalEstimation estimates local surface properties at each 3D point, such as surface normals and
-    * curvatures.
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for parallel implementations.
+  /** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
     * \author Radu Bogdan Rusu
     */
-  class NormalEstimation: public Feature
+  class VoxelGrid : public Filter
   {
-    private:
-      /** \brief PCL implementation object. */
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
+    protected:
+      /** \brief Pointer to a dynamic reconfigure service. */
+      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > srv_;
 
-      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
+      /** \brief The PCL filter implementation used. */
+      pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+      /** \brief Call the actual filter. 
+        * \param input the input point cloud dataset
+        * \param indices the input set of indices to use from \a input
+        * \param output the resultant filtered dataset
+        */
+      virtual void
+      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
+              PointCloud2 &output);
 
-      /** \brief Publish an empty point cloud of the feature output type.
-        * \param cloud the input point cloud to copy the header from.
-        */ 
-      void emptyPublish (const PointCloudInConstPtr &cloud);
+      /** \brief Child initialization routine.
+        * \param nh ROS node handle
+        * \param has_service set to true if the child has a Dynamic Reconfigure service
+        */
+      bool 
+      child_init (ros::NodeHandle &nh, bool &has_service);
 
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
+      /** \brief Dynamic reconfigure callback
+        * \param config the config object
+        * \param level the dynamic reconfigure level
+        */
+      void 
+      config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
-#endif  //#ifndef PCL_ROS_NORMAL_3D_H_
-
+#endif  //#ifndef PCL_ROS_FILTERS_VOXEL_H_

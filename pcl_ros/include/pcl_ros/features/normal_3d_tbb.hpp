@@ -31,38 +31,38 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: vfh.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: normal_3d_tbb.h 35661 2011-02-01 06:04:14Z rusu $
  *
  */
 
-#ifndef PCL_ROS_FEATURES_VFH_H_
-#define PCL_ROS_FEATURES_VFH_H_
+#ifndef PCL_ROS_NORMAL_3D_TBB_H_
+#define PCL_ROS_NORMAL_3D_TBB_H_
 
-#include <pcl/features/vfh.h>
-#include "pcl_ros/features/fpfh.h"
+//#include "pcl_ros/pcl_ros_config.hpp"
+//#if defined(HAVE_TBB)
+
+#include <pcl/features/normal_3d_tbb.h>
+#include "pcl_ros/features/normal_3d.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b VFHEstimation estimates the <b>Viewpoint Feature Histogram (VFH)</b> descriptor for a given point cloud
-    * dataset containing points and normals.
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
+  /** \brief @b NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and
+    * curvatures, in parallel, using Intel's Threading Building Blocks library.
     * \author Radu Bogdan Rusu
     */
-  class VFHEstimation : public FeatureFromNormals
+  class NormalEstimationTBB: public Feature
   {
     private:
-      pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> impl_;
+      pcl::NormalEstimationTBB<pcl::PointXYZ, pcl::Normal> impl_;
 
-      typedef pcl::PointCloud<pcl::VFHSignature308> PointCloudOut;
+      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
       childInit (ros::NodeHandle &nh)
       {
         // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
+        pub_output_ = advertise<PointCloud> (nh, "output", max_queue_size_);
         return (true);
       }
 
@@ -71,7 +71,6 @@ namespace pcl_ros
 
       /** \brief Compute the feature and publish it. */
       void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
                            const PointCloudInConstPtr &surface,
                            const IndicesPtr &indices);
 
@@ -80,4 +79,8 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_ROS_FEATURES_VFH_H_
+//#endif  // HAVE_TBB
+
+#endif  //#ifndef PCL_ROS_NORMAL_3D_TBB_H_
+
+

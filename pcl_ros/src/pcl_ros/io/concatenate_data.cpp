@@ -37,8 +37,8 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
-#include "pcl_ros/transforms.h"
-#include "pcl_ros/io/concatenate_data.h"
+#include "pcl_ros/transforms.hpp"
+#include "pcl_ros/io/concatenate_data.hpp"
 
 #include <pcl_conversions/pcl_conversions.h>
 

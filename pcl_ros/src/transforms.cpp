@@ -38,7 +38,7 @@
 #include <pcl/common/io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "pcl_ros/transforms.h"
+#include "pcl_ros/transforms.hpp"
 #include "pcl_ros/impl/transforms.hpp"
 
 namespace pcl_ros

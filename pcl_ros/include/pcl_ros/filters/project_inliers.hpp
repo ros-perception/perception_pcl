@@ -31,39 +31,34 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: statistical_outlier_removal.h 35876 2011-02-09 01:04:36Z rusu $
+ * $Id: project_inliers.h 35876 2011-02-09 01:04:36Z rusu $
  *
  */
 
-#ifndef PCL_ROS_FILTERS_STATISTICALOUTLIERREMOVAL_H_
-#define PCL_ROS_FILTERS_STATISTICALOUTLIERREMOVAL_H_
+#ifndef PCL_ROS_FILTERS_PROJECT_INLIERS_H_
+#define PCL_ROS_FILTERS_PROJECT_INLIERS_H_
 
 // PCL includes
-#include <pcl/filters/statistical_outlier_removal.h>
-#include "pcl_ros/filters/filter.h"
+#include <pcl/filters/project_inliers.h>
+#include "pcl_ros/filters/filter.hpp"
 
-// Dynamic reconfigure
-#include "pcl_ros/StatisticalOutlierRemovalConfig.h"
+#include <message_filters/subscriber.h>
 
 namespace pcl_ros
 {
-  /** \brief @b StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data. For more
-    * information check:
-    * <ul>
-    * <li> R. B. Rusu, Z. C. Marton, N. Blodow, M. Dolha, and M. Beetz.
-    *      Towards 3D Point Cloud Based Object Maps for Household Environments
-    *      Robotics and Autonomous Systems Journal (Special Issue on Semantic Knowledge), 2008.
-    * </ul>
-    *
+  namespace sync_policies = message_filters::sync_policies;
+
+  /** \brief @b ProjectInliers uses a model and a set of inlier indices from a PointCloud to project them into a
+    * separate PointCloud.
     * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
     * \author Radu Bogdan Rusu
     */
-  class StatisticalOutlierRemoval : public Filter
+  class ProjectInliers : public Filter
   {
-    protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig> > srv_;
+    public:
+      ProjectInliers () : model_ () {}
 
+    protected:
       /** \brief Call the actual filter. 
         * \param input the input point cloud dataset
         * \param indices the input set of indices to use from \a input
@@ -73,34 +68,47 @@ namespace pcl_ros
       filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
               PointCloud2 &output)
       {
-        boost::mutex::scoped_lock lock (mutex_);
         pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-        pcl_conversions::toPCL(*(input), *(pcl_input));
+        pcl_conversions::toPCL (*(input), *(pcl_input));
         impl_.setInputCloud (pcl_input);
         impl_.setIndices (indices);
+        pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
+        pcl_conversions::toPCL(*(model_), *(pcl_model));
+        impl_.setModelCoefficients (pcl_model);
         pcl::PCLPointCloud2 pcl_output;
         impl_.filter (pcl_output);
         pcl_conversions::moveFromPCL(pcl_output, output);
       }
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool child_init (ros::NodeHandle &nh, bool &has_service);
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t level);
-
     private:
+      /** \brief A pointer to the vector of model coefficients. */
+      ModelCoefficientsConstPtr model_;
+
+      /** \brief The message filter subscriber for model coefficients. */
+      message_filters::Subscriber<ModelCoefficients> sub_model_;
+
+      /** \brief Synchronized input, indices, and model coefficients.*/
+      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_e_;
+      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
       /** \brief The PCL filter implementation used. */
-      pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> impl_;
+      pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
+
+      /** \brief Nodelet initialization routine. */
+      virtual void 
+      onInit ();
+
+      /** \brief NodeletLazy connection routine. */
+      void subscribe ();
+      void unsubscribe ();
+
+      /** \brief PointCloud2 + Indices + Model data callback. */
+      void 
+      input_indices_model_callback (const PointCloud2::ConstPtr &cloud, 
+                                    const PointIndicesConstPtr &indices, 
+                                    const ModelCoefficientsConstPtr &model);
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
-#endif  //#ifndef PCL_FILTERS_STATISTICALOUTLIERREMOVAL_H_
+#endif  //#ifndef PCL_FILTERS_PROJECT_INLIERS_H_

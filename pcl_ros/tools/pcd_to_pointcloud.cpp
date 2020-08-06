@@ -54,7 +54,7 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include "pcl_ros/publisher.h"
+#include "pcl_ros/publisher.hpp"
 
 using namespace std;
 

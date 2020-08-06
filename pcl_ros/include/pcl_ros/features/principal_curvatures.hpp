@@ -31,46 +31,32 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: fpfh.h 35361 2011-01-20 04:34:49Z rusu $
+ * $Id: principal_curvatures.h 35361 2011-01-20 04:34:49Z rusu $
  *
  */
 
-#ifndef PCL_ROS_FPFH_H_
-#define PCL_ROS_FPFH_H_
+#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_
+#define PCL_ROS_PRINCIPAL_CURVATURES_H_
 
-#include <pcl/features/fpfh.h>
-#include "pcl_ros/features/pfh.h"
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
+#include <pcl/features/principal_curvatures.h>
+#include "pcl_ros/features/feature.hpp"
 
 namespace pcl_ros
 {
-  /** \brief @b FPFHEstimation estimates the <b>Fast Point Feature Histogram (FPFH)</b> descriptor for a given point cloud
-    * dataset containing points and normals.
-    *
-    * @note If you use this code in any academic work, please cite:
-    *
-    * <ul>
-    * <li> R.B. Rusu, N. Blodow, M. Beetz.
-    *      Fast Point Feature Histograms (FPFH) for 3D Registration.
-    *      In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA),
-    *      Kobe, Japan, May 12-17 2009.
-    * </li>
-    * <li> R.B. Rusu, A. Holzbach, N. Blodow, M. Beetz.
-    *      Fast Geometric Point Labeling using Conditional Random Fields.
-    *      In Proceedings of the 22nd IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
-    *      St. Louis, MO, USA, October 11-15 2009.
-    * </li>
-    * </ul>
+  /** \brief @b PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of
+    * principal surface curvatures for a given point cloud dataset containing points and normals.
     *
     * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
-    * \author Radu Bogdan Rusu
+    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
+    * \author Radu Bogdan Rusu, Jared Glover
     */
-  class FPFHEstimation : public FeatureFromNormals
+  class PrincipalCurvaturesEstimation : public FeatureFromNormals
   {
     private:
-      pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
+      pcl::PrincipalCurvaturesEstimation<pcl::PointXYZ, pcl::Normal, pcl::PrincipalCurvatures> impl_;
 
-      typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
+      typedef pcl::PointCloud<pcl::PrincipalCurvatures> PointCloudOut;
 
       /** \brief Child initialization routine. Internal method. */
       inline bool 
@@ -95,6 +81,4 @@ namespace pcl_ros
   };
 }
 
-#endif  //#ifndef PCL_FPFH_H_
-
-
+#endif  //#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_

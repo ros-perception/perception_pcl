@@ -41,10 +41,10 @@
 
 // PCL includes
 #include <pcl/filters/crop_box.h>
-#include "pcl_ros/filters/filter.h"
+#include "pcl_ros/filters/filter.hpp"
 
 // Dynamic reconfigure
-#include "pcl_ros/CropBoxConfig.h"
+#include "pcl_ros/CropBoxConfig.hpp"
 
 namespace pcl_ros
 {

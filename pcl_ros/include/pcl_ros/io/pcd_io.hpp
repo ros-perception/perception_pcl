@@ -39,7 +39,7 @@
 #define PCL_ROS_IO_PCD_IO_H_
 
 #include <pcl/io/pcd_io.h>
-#include "pcl_ros/pcl_nodelet.h"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 namespace pcl_ros
 {
