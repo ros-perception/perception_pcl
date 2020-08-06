@@ -46,69 +46,75 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b ProjectInliers uses a model and a set of inlier indices from a PointCloud to project them into a
-    * separate PointCloud.
-    * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
-    * \author Radu Bogdan Rusu
+/** \brief @b ProjectInliers uses a model and a set of inlier indices from a PointCloud to project them into a
+  * separate PointCloud.
+  * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
+  * \author Radu Bogdan Rusu
+  */
+class ProjectInliers : public Filter
+{
+public:
+  ProjectInliers()
+  : model_() {}
+
+protected:
+  /** \brief Call the actual filter.
+    * \param input the input point cloud dataset
+    * \param indices the input set of indices to use from \a input
+    * \param output the resultant filtered dataset
     */
-  class ProjectInliers : public Filter
+  inline void
+  filter(
+    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output)
   {
-    public:
-      ProjectInliers () : model_ () {}
+    pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(*(input), *(pcl_input));
+    impl_.setInputCloud(pcl_input);
+    impl_.setIndices(indices);
+    pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
+    pcl_conversions::toPCL(*(model_), *(pcl_model));
+    impl_.setModelCoefficients(pcl_model);
+    pcl::PCLPointCloud2 pcl_output;
+    impl_.filter(pcl_output);
+    pcl_conversions::moveFromPCL(pcl_output, output);
+  }
 
-    protected:
-      /** \brief Call the actual filter. 
-        * \param input the input point cloud dataset
-        * \param indices the input set of indices to use from \a input
-        * \param output the resultant filtered dataset
-        */
-      inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
-              PointCloud2 &output)
-      {
-        pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-        pcl_conversions::toPCL (*(input), *(pcl_input));
-        impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
-        pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
-        pcl_conversions::toPCL(*(model_), *(pcl_model));
-        impl_.setModelCoefficients (pcl_model);
-        pcl::PCLPointCloud2 pcl_output;
-        impl_.filter (pcl_output);
-        pcl_conversions::moveFromPCL(pcl_output, output);
-      }
+private:
+  /** \brief A pointer to the vector of model coefficients. */
+  ModelCoefficientsConstPtr model_;
 
-    private:
-      /** \brief A pointer to the vector of model coefficients. */
-      ModelCoefficientsConstPtr model_;
+  /** \brief The message filter subscriber for model coefficients. */
+  message_filters::Subscriber<ModelCoefficients> sub_model_;
 
-      /** \brief The message filter subscriber for model coefficients. */
-      message_filters::Subscriber<ModelCoefficients> sub_model_;
+  /** \brief Synchronized input, indices, and model coefficients.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
+    PointIndices, ModelCoefficients>>> sync_input_indices_model_e_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
+    PointIndices, ModelCoefficients>>> sync_input_indices_model_a_;
+  /** \brief The PCL filter implementation used. */
+  pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
 
-      /** \brief Synchronized input, indices, and model coefficients.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > sync_input_indices_model_a_;
-      /** \brief The PCL filter implementation used. */
-      pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
+  /** \brief Nodelet initialization routine. */
+  virtual void
+  onInit();
 
-      /** \brief Nodelet initialization routine. */
-      virtual void 
-      onInit ();
+  /** \brief NodeletLazy connection routine. */
+  void subscribe();
+  void unsubscribe();
 
-      /** \brief NodeletLazy connection routine. */
-      void subscribe ();
-      void unsubscribe ();
+  /** \brief PointCloud2 + Indices + Model data callback. */
+  void
+  input_indices_model_callback(
+    const PointCloud2::ConstPtr & cloud,
+    const PointIndicesConstPtr & indices,
+    const ModelCoefficientsConstPtr & model);
 
-      /** \brief PointCloud2 + Indices + Model data callback. */
-      void 
-      input_indices_model_callback (const PointCloud2::ConstPtr &cloud, 
-                                    const PointIndicesConstPtr &indices, 
-                                    const ModelCoefficientsConstPtr &model);
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_FILTERS_PROJECT_INLIERS_H_

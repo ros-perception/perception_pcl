@@ -45,126 +45,129 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit ()
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit()
 {
-  nodelet_topic_tools::NodeletLazy::onInit ();
+  nodelet_topic_tools::NodeletLazy::onInit();
 
   // ---[ Mandatory parameters
-  if (!pnh_->getParam ("input_messages", input_messages_))
-  {
-    NODELET_ERROR ("[onInit] Need a 'input_messages' parameter to be set before continuing!");
+  if (!pnh_->getParam("input_messages", input_messages_)) {
+    NODELET_ERROR("[onInit] Need a 'input_messages' parameter to be set before continuing!");
     return;
   }
-  if (input_messages_ < 2)
-  {
-    NODELET_ERROR ("[onInit] Invalid 'input_messages' parameter given!");
+  if (input_messages_ < 2) {
+    NODELET_ERROR("[onInit] Invalid 'input_messages' parameter given!");
     return;
   }
   // ---[ Optional parameters
-  pnh_->getParam ("max_queue_size", maximum_queue_size_);
-  pnh_->getParam ("maximum_seconds", maximum_seconds_);
-  pub_output_ = advertise<sensor_msgs::PointCloud2> (*pnh_, "output", maximum_queue_size_);
+  pnh_->getParam("max_queue_size", maximum_queue_size_);
+  pnh_->getParam("maximum_seconds", maximum_seconds_);
+  pub_output_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", maximum_queue_size_);
 
-  onInitPostProcess ();
+  onInitPostProcess();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe ()
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe()
 {
-  sub_input_ = pnh_->subscribe ("input", maximum_queue_size_,  &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
+  sub_input_ = pnh_->subscribe(
+    "input", maximum_queue_size_,
+    &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe ()
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe()
 {
-  sub_input_.shutdown ();
+  sub_input_.shutdown();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback (const PointCloudConstPtr &cloud)
+pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointCloudConstPtr & cloud)
 {
-  NODELET_DEBUG ("[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
-                 cloud->width * cloud->height, pcl::getFieldsList (*cloud).c_str (), cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName ("input").c_str ());
+  NODELET_DEBUG(
+    "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+    cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
+    cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(),
+    pnh_->resolveName("input").c_str());
 
   // Erase old data in the queue
-  if (maximum_seconds_ > 0 && queue_.size () > 0)
-  {
-    while (fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ) > maximum_seconds_ && queue_.size () > 0)
+  if (maximum_seconds_ > 0 && queue_.size() > 0) {
+    while (fabs( ( (*queue_.begin()).first - cloud->header.stamp).toSec() ) > maximum_seconds_ &&
+      queue_.size() > 0)
     {
-      NODELET_WARN ("[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
-                 (*queue_.begin ()).first.toSec (), fabs ( ( (*queue_.begin ()).first - cloud->header.stamp).toSec () ));
-      queue_.erase (queue_.begin ());
+      NODELET_WARN(
+        "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
+        (*queue_.begin()).first.toSec(),
+        fabs( ( (*queue_.begin()).first - cloud->header.stamp).toSec() ));
+      queue_.erase(queue_.begin());
     }
   }
 
   // Push back new data
-  queue_[cloud->header.stamp].push_back (cloud);
-  if ((int)queue_[cloud->header.stamp].size () >= input_messages_)
-  {
+  queue_[cloud->header.stamp].push_back(cloud);
+  if ((int)queue_[cloud->header.stamp].size() >= input_messages_) {
     // Concatenate together and publish
-    std::vector<PointCloudConstPtr> &clouds = queue_[cloud->header.stamp];
+    std::vector<PointCloudConstPtr> & clouds = queue_[cloud->header.stamp];
     PointCloud cloud_out = *clouds[0];
 
     // Resize the output dataset
-    int data_size = cloud_out.data.size ();
-    int nr_fields = cloud_out.fields.size ();
+    int data_size = cloud_out.data.size();
+    int nr_fields = cloud_out.fields.size();
     int nr_points = cloud_out.width * cloud_out.height;
-    for (size_t i = 1; i < clouds.size (); ++i)
-    {
-      assert (clouds[i]->data.size () / (clouds[i]->width * clouds[i]->height) == clouds[i]->point_step);
+    for (size_t i = 1; i < clouds.size(); ++i) {
+      assert(
+        clouds[i]->data.size() / (clouds[i]->width * clouds[i]->height) == clouds[i]->point_step);
 
-      if (clouds[i]->width != cloud_out.width || clouds[i]->height != cloud_out.height)
-      {
-        NODELET_ERROR ("[input_callback] Width/height of pointcloud %zu (%dx%d) differs from the others (%dx%d)!", 
-            i, clouds[i]->width, clouds[i]->height, cloud_out.width, cloud_out.height);
+      if (clouds[i]->width != cloud_out.width || clouds[i]->height != cloud_out.height) {
+        NODELET_ERROR(
+          "[input_callback] Width/height of pointcloud %zu (%dx%d) differs from the others (%dx%d)!",
+          i, clouds[i]->width, clouds[i]->height, cloud_out.width, cloud_out.height);
         break;
       }
       // Point step must increase with the length of each new field
       cloud_out.point_step += clouds[i]->point_step;
       // Resize data to hold all clouds
-      data_size += clouds[i]->data.size ();
+      data_size += clouds[i]->data.size();
 
       // Concatenate fields
-      cloud_out.fields.resize (nr_fields + clouds[i]->fields.size ());
-      int delta_offset = cloud_out.fields[nr_fields - 1].offset + pcl::getFieldSize (cloud_out.fields[nr_fields - 1].datatype);
-      for (size_t d = 0; d < clouds[i]->fields.size (); ++d)
-      {
+      cloud_out.fields.resize(nr_fields + clouds[i]->fields.size());
+      int delta_offset = cloud_out.fields[nr_fields - 1].offset + pcl::getFieldSize(
+        cloud_out.fields[nr_fields - 1].datatype);
+      for (size_t d = 0; d < clouds[i]->fields.size(); ++d) {
         cloud_out.fields[nr_fields + d] = clouds[i]->fields[d];
         cloud_out.fields[nr_fields + d].offset += delta_offset;
       }
-      nr_fields += clouds[i]->fields.size ();
+      nr_fields += clouds[i]->fields.size();
     }
     // Recalculate row_step
     cloud_out.row_step = cloud_out.point_step * cloud_out.width;
-    cloud_out.data.resize (data_size);
+    cloud_out.data.resize(data_size);
 
     // Iterate over each point and perform the appropriate memcpys
     int point_offset = 0;
-    for (int cp = 0; cp < nr_points; ++cp)
-    {
-      for (size_t i = 0; i < clouds.size (); ++i)
-      {
+    for (int cp = 0; cp < nr_points; ++cp) {
+      for (size_t i = 0; i < clouds.size(); ++i) {
         // Copy each individual point
-        memcpy (&cloud_out.data[point_offset], &clouds[i]->data[cp * clouds[i]->point_step], clouds[i]->point_step);
+        memcpy(
+          &cloud_out.data[point_offset], &clouds[i]->data[cp * clouds[i]->point_step],
+          clouds[i]->point_step);
         point_offset += clouds[i]->point_step;
       }
     }
-    pub_output_.publish (boost::make_shared<const PointCloud> (cloud_out));
-    queue_.erase (cloud->header.stamp);
+    pub_output_.publish(boost::make_shared<const PointCloud>(cloud_out));
+    queue_.erase(cloud->header.stamp);
   }
 
   // Clean the queue to avoid overflowing
-  if (maximum_queue_size_ > 0)
-  {
-    while ((int)queue_.size () > maximum_queue_size_)
-      queue_.erase (queue_.begin ());
+  if (maximum_queue_size_ > 0) {
+    while ((int)queue_.size() > maximum_queue_size_) {
+      queue_.erase(queue_.begin());
+    }
   }
 
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;
-PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer,nodelet::Nodelet);
-
+PLUGINLIB_EXPORT_CLASS(PointCloudConcatenateFieldsSynchronizer, nodelet::Nodelet);

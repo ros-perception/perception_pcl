@@ -40,5 +40,3 @@
 //#include "extract_polygonal_prism_data.cpp"
 //#include "sac_segmentation.cpp"
 //#include "segment_differences.cpp"
-
-

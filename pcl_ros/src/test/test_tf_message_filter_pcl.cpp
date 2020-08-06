@@ -58,7 +58,7 @@ typedef pcl::PointCloud<pcl::PointXYZRGBNormal> PCDType;
 /// Sets pcl_stamp from stamp, BUT alters stamp
 /// a little to round it to millisecond. This is because converting back
 /// and forth from pcd to ros time induces some rounding errors.
-void setStamp(ros::Time &stamp, std::uint64_t &pcl_stamp)
+void setStamp(ros::Time & stamp, std::uint64_t & pcl_stamp)
 {
   // round to millisecond
   static const uint32_t mult = 1e6;
@@ -71,7 +71,7 @@ void setStamp(ros::Time &stamp, std::uint64_t &pcl_stamp)
   {
     ros::Time t;
     pcl_conversions::fromPCL(pcl_stamp, t);
-    ROS_ASSERT_MSG(t==stamp, "%d/%d vs %d/%d", t.sec, t.nsec, stamp.sec, stamp.nsec);
+    ROS_ASSERT_MSG(t == stamp, "%d/%d vs %d/%d", t.sec, t.nsec, stamp.sec, stamp.nsec);
   }
 }
 
@@ -79,18 +79,18 @@ class Notification
 {
 public:
   Notification(int expected_count)
-  : count_(0)
-  , expected_count_(expected_count)
-  , failure_count_(0)
+  : count_(0),
+    expected_count_(expected_count),
+    failure_count_(0)
   {
   }
 
-  void notify(const PCDType::ConstPtr& message)
+  void notify(const PCDType::ConstPtr & message)
   {
     ++count_;
   }
 
-  void failure(const PCDType::ConstPtr& message, FilterFailureReason reason)
+  void failure(const PCDType::ConstPtr & message, FilterFailureReason reason)
   {
     ++failure_count_;
   }
@@ -144,7 +144,11 @@ TEST(MessageFilter, preexistingTransforms)
   ros::Time stamp = ros::Time::now();
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame2");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame2";
@@ -169,7 +173,11 @@ TEST(MessageFilter, postTransforms)
 
   EXPECT_EQ(0, n.count_);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame2");
   tf_client.setTransform(transform);
 
   ros::WallDuration(0.1).sleep();
@@ -190,8 +198,7 @@ TEST(MessageFilter, queueSize)
   std::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
 
-  for (int i = 0; i < 20; ++i)
-  {
+  for (int i = 0; i < 20; ++i) {
     PCDType::Ptr msg(new PCDType);
     msg->header.stamp = pcl_stamp;
     msg->header.frame_id = "frame2";
@@ -202,7 +209,11 @@ TEST(MessageFilter, queueSize)
   EXPECT_EQ(0, n.count_);
   EXPECT_EQ(10, n.failure_count_);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame2");
   tf_client.setTransform(transform);
 
   ros::WallDuration(0.1).sleep();
@@ -224,7 +235,11 @@ TEST(MessageFilter, setTargetFrame)
   setStamp(stamp, msg->header.stamp);
   msg->header.frame_id = "frame2";
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1000", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1000",
+    "frame2");
   tf_client.setTransform(transform);
 
   filter.add(msg);
@@ -249,7 +264,11 @@ TEST(MessageFilter, multipleTargetFrames)
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame3");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame3");
   tf_client.setTransform(transform);
 
   msg->header.frame_id = "frame3";
@@ -283,7 +302,11 @@ TEST(MessageFilter, tolerance)
   ros::Time stamp = ros::Time::now();
   std::uint64_t pcl_stamp;
   setStamp(stamp, pcl_stamp);
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame2");
   tf_client.setTransform(transform);
 
   PCDType::Ptr msg(new PCDType);
@@ -295,7 +318,7 @@ TEST(MessageFilter, tolerance)
 
   //ros::Time::setNow(ros::Time::now() + ros::Duration(0.1));
 
-  transform.stamp_ += offset*1.1;
+  transform.stamp_ += offset * 1.1;
   tf_client.setTransform(transform);
 
   ros::WallDuration(0.1).sleep();
@@ -323,7 +346,11 @@ TEST(MessageFilter, outTheBackFailure)
   PCDType::Ptr msg(new PCDType);
   setStamp(stamp, msg->header.stamp);
 
-  tf::StampedTransform transform(tf::Transform(tf::Quaternion(0,0,0,1), tf::Vector3(1,2,3)), stamp, "frame1", "frame2");
+  tf::StampedTransform transform(tf::Transform(
+      tf::Quaternion(0, 0, 0, 1), tf::Vector3(
+        1, 2,
+        3)), stamp, "frame1",
+    "frame2");
   tf_client.setTransform(transform);
 
   transform.stamp_ = stamp + ros::Duration(10000);
@@ -359,16 +386,17 @@ TEST(MessageFilter, removeCallback)
 
   // TF filters; no data needs to be published
   boost::scoped_ptr<tf::TransformListener> tf_listener;
-  boost::scoped_ptr<tf::MessageFilter<PCDType> > tf_filter;
+  boost::scoped_ptr<tf::MessageFilter<PCDType>> tf_filter;
 
   spinner.start();
   for (int i = 0; i < 3; ++i) {
     tf_listener.reset(new tf::TransformListener());
     // Have callback fire at high rate to increase chances of race condition
     tf_filter.reset(
-      new tf::MessageFilter<PCDType>(*tf_listener,
-                                     "map", 5, threaded_nh,
-                                     ros::Duration(0.000001)));
+      new tf::MessageFilter<PCDType>(
+        *tf_listener,
+        "map", 5, threaded_nh,
+        ros::Duration(0.000001)));
 
     // Sleep and reset; sleeping increases chances of race condition
     ros::Duration(0.001).sleep();
@@ -378,7 +406,7 @@ TEST(MessageFilter, removeCallback)
   spinner.stop();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
 

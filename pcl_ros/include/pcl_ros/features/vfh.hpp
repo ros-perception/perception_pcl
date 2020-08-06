@@ -43,41 +43,42 @@
 
 namespace pcl_ros
 {
-  /** \brief @b VFHEstimation estimates the <b>Viewpoint Feature Histogram (VFH)</b> descriptor for a given point cloud
-    * dataset containing points and normals.
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
-    * \author Radu Bogdan Rusu
-    */
-  class VFHEstimation : public FeatureFromNormals
+/** \brief @b VFHEstimation estimates the <b>Viewpoint Feature Histogram (VFH)</b> descriptor for a given point cloud
+  * dataset containing points and normals.
+  *
+  * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
+  * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
+  * \author Radu Bogdan Rusu
+  */
+class VFHEstimation : public FeatureFromNormals
+{
+private:
+  pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> impl_;
+
+  typedef pcl::PointCloud<pcl::VFHSignature308> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::VFHSignature308> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FEATURES_VFH_H_

@@ -38,7 +38,7 @@
 
 \author Patrick Mihelich
 
-@b Publisher represents a ROS publisher for the templated PointCloud implementation. 
+@b Publisher represents a ROS publisher for the templated PointCloud implementation.
 
 **/
 
@@ -51,99 +51,99 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
-namespace pcl_ros 
+namespace pcl_ros
 {
-  class BasePublisher
+class BasePublisher
+{
+public:
+  void
+  advertise(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
   {
-    public:
-      void 
-        advertise (ros::NodeHandle& nh, const std::string& topic, uint32_t queue_size)
-      {
-        pub_ = nh.advertise<sensor_msgs::PointCloud2>(topic, queue_size);
-      }
+    pub_ = nh.advertise<sensor_msgs::PointCloud2>(topic, queue_size);
+  }
 
-      std::string 
-        getTopic ()
-      {
-        return (pub_.getTopic ());
-      }
-
-      uint32_t 
-        getNumSubscribers () const
-      {
-        return (pub_.getNumSubscribers ());
-      }
-
-      void 
-        shutdown ()
-      {
-        pub_.shutdown ();
-      }
-
-      operator void*() const
-      {
-        return (pub_) ? (void*)1 : (void*)0; 
-      }
-
-    protected:
-      ros::Publisher pub_;
-  };
-
-  template <typename PointT>
-  class Publisher : public BasePublisher
+  std::string
+  getTopic()
   {
-    public:
-      Publisher () {}
+    return pub_.getTopic();
+  }
 
-      Publisher (ros::NodeHandle& nh, const std::string& topic, uint32_t queue_size)
-      {
-        advertise (nh, topic, queue_size);
-      }
-
-      ~Publisher () {}
-
-      inline void 
-        publish (const boost::shared_ptr<const pcl::PointCloud<PointT> > &point_cloud) const
-      {
-        publish (*point_cloud);
-      }
-
-      inline void 
-        publish (const pcl::PointCloud<PointT>& point_cloud) const
-      {
-        // Fill point cloud binary data
-        sensor_msgs::PointCloud2 msg;
-        pcl::toROSMsg (point_cloud, msg);
-        pub_.publish (boost::make_shared<const sensor_msgs::PointCloud2> (msg));
-      }
-  };
-
-  template <>
-  class Publisher<sensor_msgs::PointCloud2> : public BasePublisher
+  uint32_t
+  getNumSubscribers() const
   {
-    public:
-      Publisher () {}
+    return pub_.getNumSubscribers();
+  }
 
-      Publisher (ros::NodeHandle& nh, const std::string& topic, uint32_t queue_size)
-      {
-        advertise (nh, topic, queue_size);
-      }
+  void
+  shutdown()
+  {
+    pub_.shutdown();
+  }
 
-      ~Publisher () {}
+  operator void *() const
+  {
+    return (pub_) ? (void *)1 : (void *)0;
+  }
 
-      void 
-        publish (const sensor_msgs::PointCloud2Ptr& point_cloud) const
-      {
-        pub_.publish (point_cloud);
-        //pub_.publish (*point_cloud);
-      }
+protected:
+  ros::Publisher pub_;
+};
 
-      void 
-        publish (const sensor_msgs::PointCloud2& point_cloud) const
-      {
-        pub_.publish (boost::make_shared<const sensor_msgs::PointCloud2> (point_cloud));
-        //pub_.publish (point_cloud);
-      }
-  };
+template<typename PointT>
+class Publisher : public BasePublisher
+{
+public:
+  Publisher() {}
+
+  Publisher(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
+  {
+    advertise(nh, topic, queue_size);
+  }
+
+  ~Publisher() {}
+
+  inline void
+  publish(const boost::shared_ptr<const pcl::PointCloud<PointT>> & point_cloud) const
+  {
+    publish(*point_cloud);
+  }
+
+  inline void
+  publish(const pcl::PointCloud<PointT> & point_cloud) const
+  {
+    // Fill point cloud binary data
+    sensor_msgs::PointCloud2 msg;
+    pcl::toROSMsg(point_cloud, msg);
+    pub_.publish(boost::make_shared<const sensor_msgs::PointCloud2>(msg));
+  }
+};
+
+template<>
+class Publisher<sensor_msgs::PointCloud2>: public BasePublisher
+{
+public:
+  Publisher() {}
+
+  Publisher(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
+  {
+    advertise(nh, topic, queue_size);
+  }
+
+  ~Publisher() {}
+
+  void
+  publish(const sensor_msgs::PointCloud2Ptr & point_cloud) const
+  {
+    pub_.publish(point_cloud);
+    //pub_.publish (*point_cloud);
+  }
+
+  void
+  publish(const sensor_msgs::PointCloud2 & point_cloud) const
+  {
+    pub_.publish(boost::make_shared<const sensor_msgs::PointCloud2>(point_cloud));
+    //pub_.publish (point_cloud);
+  }
+};
 }
 #endif  //#ifndef PCL_ROS_PUBLISHER_H_

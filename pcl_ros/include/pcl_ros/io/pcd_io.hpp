@@ -43,90 +43,94 @@
 
 namespace pcl_ros
 {
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief Point Cloud Data (PCD) file format reader.
-    * \author Radu Bogdan Rusu
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/** \brief Point Cloud Data (PCD) file format reader.
+  * \author Radu Bogdan Rusu
+  */
+class PCDReader : public PCLNodelet
+{
+public:
+  typedef sensor_msgs::PointCloud2 PointCloud2;
+  typedef PointCloud2::Ptr PointCloud2Ptr;
+  typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
+
+  /** \brief Empty constructor. */
+  PCDReader()
+  : publish_rate_(0), tf_frame_("/base_link") {}
+
+  virtual void onInit();
+
+  /** \brief Set the publishing rate in seconds.
+    * \param publish_rate the publishing rate in seconds
     */
-  class PCDReader : public PCLNodelet
-  {
-    public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
-      typedef PointCloud2::Ptr PointCloud2Ptr;
-      typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
+  inline void setPublishRate(double publish_rate) {publish_rate_ = publish_rate;}
 
-      /** \brief Empty constructor. */
-      PCDReader () : publish_rate_ (0), tf_frame_ ("/base_link") {};
+  /** \brief Get the publishing rate in seconds. */
+  inline double getPublishRate() {return publish_rate_;}
 
-      virtual void onInit ();
-
-      /** \brief Set the publishing rate in seconds.
-        * \param publish_rate the publishing rate in seconds
-        */
-      inline void setPublishRate (double publish_rate) { publish_rate_ = publish_rate; }
-
-      /** \brief Get the publishing rate in seconds. */
-      inline double getPublishRate () { return (publish_rate_); }
-
-      /** \brief Set the TF frame the PointCloud will be published in.
-        * \param tf_frame the TF frame the PointCloud will be published in
-        */
-      inline void setTFframe (std::string tf_frame) { tf_frame_ = tf_frame; }
-
-      /** \brief Get the TF frame the PointCloud is published in. */
-      inline std::string getTFframe () { return (tf_frame_); }
-
-    protected:
-      /** \brief The publishing interval in seconds. Set to 0 to only publish once (default). */
-      double publish_rate_;
-
-      /** \brief The TF frame the data should be published in ("/base_link" by default). */
-      std::string tf_frame_;
-
-      /** \brief The name of the file that contains the PointCloud data. */
-      std::string file_name_;
-
-      /** \brief The output point cloud dataset containing the points loaded from the file. */
-      PointCloud2Ptr output_;
-
-    private:
-      /** \brief The PCL implementation used. */
-      pcl::PCDReader impl_;
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief Point Cloud Data (PCD) file format writer.
-    * \author Radu Bogdan Rusu
+  /** \brief Set the TF frame the PointCloud will be published in.
+    * \param tf_frame the TF frame the PointCloud will be published in
     */
-  class PCDWriter : public PCLNodelet
-  {
-    public:
-      PCDWriter () : file_name_ (""), binary_mode_ (true) {}
+  inline void setTFframe(std::string tf_frame) {tf_frame_ = tf_frame;}
 
-      typedef sensor_msgs::PointCloud2 PointCloud2;
-      typedef PointCloud2::Ptr PointCloud2Ptr;
-      typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
+  /** \brief Get the TF frame the PointCloud is published in. */
+  inline std::string getTFframe() {return tf_frame_;}
 
-      virtual void onInit ();
-      void input_callback (const PointCloud2ConstPtr &cloud);
+protected:
+  /** \brief The publishing interval in seconds. Set to 0 to only publish once (default). */
+  double publish_rate_;
 
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+  /** \brief The TF frame the data should be published in ("/base_link" by default). */
+  std::string tf_frame_;
 
-    protected:
-      /** \brief The name of the file that contains the PointCloud data. */
-      std::string file_name_;
+  /** \brief The name of the file that contains the PointCloud data. */
+  std::string file_name_;
 
-      /** \brief Set to true if the output files should be saved in binary mode (true). */
-      bool binary_mode_;
+  /** \brief The output point cloud dataset containing the points loaded from the file. */
+  PointCloud2Ptr output_;
 
-    private:
-      /** \brief The PCL implementation used. */
-      pcl::PCDWriter impl_;
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+private:
+  /** \brief The PCL implementation used. */
+  pcl::PCDReader impl_;
+
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/** \brief Point Cloud Data (PCD) file format writer.
+  * \author Radu Bogdan Rusu
+  */
+class PCDWriter : public PCLNodelet
+{
+public:
+  PCDWriter()
+  : file_name_(""), binary_mode_(true) {}
+
+  typedef sensor_msgs::PointCloud2 PointCloud2;
+  typedef PointCloud2::Ptr PointCloud2Ptr;
+  typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
+
+  virtual void onInit();
+  void input_callback(const PointCloud2ConstPtr & cloud);
+
+  /** \brief The input PointCloud subscriber. */
+  ros::Subscriber sub_input_;
+
+protected:
+  /** \brief The name of the file that contains the PointCloud data. */
+  std::string file_name_;
+
+  /** \brief Set to true if the output files should be saved in binary mode (true). */
+  bool binary_mode_;
+
+private:
+  /** \brief The PCL implementation used. */
+  pcl::PCDWriter impl_;
+
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_IO_PCD_IO_H_

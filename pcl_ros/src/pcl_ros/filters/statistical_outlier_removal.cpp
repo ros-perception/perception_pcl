@@ -40,42 +40,47 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl_ros::StatisticalOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_service)
+pcl_ros::StatisticalOutlierRemoval::child_init(ros::NodeHandle & nh, bool & has_service)
 {
   // Enable the dynamic reconfigure service
   has_service = true;
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>::CallbackType f = boost::bind (&StatisticalOutlierRemoval::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>>(
+    nh);
+  dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>::CallbackType f =
+    boost::bind(&StatisticalOutlierRemoval::config_callback, this, _1, _2);
+  srv_->setCallback(f);
 
-  return (true);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::StatisticalOutlierRemoval::config_callback (pcl_ros::StatisticalOutlierRemovalConfig &config, uint32_t level)
+pcl_ros::StatisticalOutlierRemoval::config_callback(
+  pcl_ros::StatisticalOutlierRemovalConfig & config, uint32_t level)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  boost::mutex::scoped_lock lock(mutex_);
 
-  if (impl_.getMeanK () != config.mean_k)
-  {
-    impl_.setMeanK (config.mean_k);
-    NODELET_DEBUG ("[%s::config_callback] Setting the number of points (k) to use for mean distance estimation to: %d.", getName ().c_str (), config.mean_k);
-  }
-  
-  if (impl_.getStddevMulThresh () != config.stddev)
-  {
-    impl_.setStddevMulThresh (config.stddev);
-    NODELET_DEBUG ("[%s::config_callback] Setting the standard deviation multiplier threshold to: %f.", getName ().c_str (), config.stddev);
+  if (impl_.getMeanK() != config.mean_k) {
+    impl_.setMeanK(config.mean_k);
+    NODELET_DEBUG(
+      "[%s::config_callback] Setting the number of points (k) to use for mean distance estimation to: %d.",
+      getName().c_str(), config.mean_k);
   }
 
-  if (impl_.getNegative () != config.negative)
-  {
-    impl_.setNegative (config.negative);
-    NODELET_DEBUG ("[%s::config_callback] Returning only inliers: %s.", getName ().c_str (), config.negative ? "false" : "true");
+  if (impl_.getStddevMulThresh() != config.stddev) {
+    impl_.setStddevMulThresh(config.stddev);
+    NODELET_DEBUG(
+      "[%s::config_callback] Setting the standard deviation multiplier threshold to: %f.",
+      getName().c_str(), config.stddev);
+  }
+
+  if (impl_.getNegative() != config.negative) {
+    impl_.setNegative(config.negative);
+    NODELET_DEBUG(
+      "[%s::config_callback] Returning only inliers: %s.",
+      getName().c_str(), config.negative ? "false" : "true");
   }
 }
 
 typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval,nodelet::Nodelet);
-
+PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval, nodelet::Nodelet);

@@ -66,168 +66,177 @@ using pcl_conversions::fromPCL;
 
 namespace pcl_ros
 {
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b PCLNodelet represents the base PCL Nodelet class. All PCL nodelets should inherit from this class. */
-  class PCLNodelet : public nodelet_topic_tools::NodeletLazy
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+/** \brief @b PCLNodelet represents the base PCL Nodelet class. All PCL nodelets should inherit from this class. */
+class PCLNodelet : public nodelet_topic_tools::NodeletLazy
+{
+public:
+  typedef sensor_msgs::PointCloud2 PointCloud2;
+
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+  typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+  typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
+  typedef pcl_msgs::PointIndices PointIndices;
+  typedef PointIndices::Ptr PointIndicesPtr;
+  typedef PointIndices::ConstPtr PointIndicesConstPtr;
+
+  typedef pcl_msgs::ModelCoefficients ModelCoefficients;
+  typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
+  typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
+
+  typedef pcl::IndicesPtr IndicesPtr;
+  typedef pcl::IndicesConstPtr IndicesConstPtr;
+
+  /** \brief Empty constructor. */
+  PCLNodelet()
+  : use_indices_(false), latched_indices_(false),
+    max_queue_size_(3), approximate_sync_(false) {}
+
+protected:
+  /** \brief Set to true if point indices are used.
+   *
+   * When receiving a point cloud, if use_indices_ is false, the entire
+   * point cloud is processed for the given operation. If use_indices_ is
+   * true, then the ~indices topic is read to get the vector of point
+   * indices specifying the subset of the point cloud that will be used for
+   * the operation. In the case where use_indices_ is true, the ~input and
+   * ~indices topics must be synchronised in time, either exact or within a
+   * specified jitter. See also @ref latched_indices_ and approximate_sync.
+   **/
+  bool use_indices_;
+  /** \brief Set to true if the indices topic is latched.
+   *
+   * If use_indices_ is true, the ~input and ~indices topics generally must
+   * be synchronised in time. By setting this flag to true, the most recent
+   * value from ~indices can be used instead of requiring a synchronised
+   * message.
+   **/
+  bool latched_indices_;
+
+  /** \brief The message filter subscriber for PointCloud2. */
+  message_filters::Subscriber<PointCloud> sub_input_filter_;
+
+  /** \brief The message filter subscriber for PointIndices. */
+  message_filters::Subscriber<PointIndices> sub_indices_filter_;
+
+  /** \brief The output PointCloud publisher. */
+  ros::Publisher pub_output_;
+
+  /** \brief The maximum queue size (default: 3). */
+  int max_queue_size_;
+
+  /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
+  bool approximate_sync_;
+
+  /** \brief TF listener object. */
+  tf::TransformListener tf_listener_;
+
+  /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
+    * \param cloud the point cloud to test
+    * \param topic_name an optional topic name (only used for printing, defaults to "input")
+    */
+  inline bool
+  isValid(const PointCloud2::ConstPtr & cloud, const std::string & topic_name = "input")
   {
-    public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
+    if (cloud->width * cloud->height * cloud->point_step != cloud->data.size()) {
+      NODELET_WARN(
+        "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!",
+        getName().c_str(),
+        cloud->data.size(), cloud->width, cloud->height, cloud->point_step,
+        cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
+          topic_name).c_str());
 
-      typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-      typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-      typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+      return false;
+    }
+    return true;
+  }
 
-      typedef pcl_msgs::PointIndices PointIndices;
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+  /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
+    * \param cloud the point cloud to test
+    * \param topic_name an optional topic name (only used for printing, defaults to "input")
+    */
+  inline bool
+  isValid(const PointCloudConstPtr & cloud, const std::string & topic_name = "input")
+  {
+    if (cloud->width * cloud->height != cloud->points.size()) {
+      NODELET_WARN(
+        "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!",
+        getName().c_str(), cloud->points.size(), cloud->width, cloud->height,
+        fromPCL(cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
+        pnh_->resolveName(topic_name).c_str());
 
-      typedef pcl_msgs::ModelCoefficients ModelCoefficients;
-      typedef ModelCoefficients::Ptr ModelCoefficientsPtr;
-      typedef ModelCoefficients::ConstPtr ModelCoefficientsConstPtr;
+      return false;
+    }
+    return true;
+  }
 
-      typedef pcl::IndicesPtr IndicesPtr;
-      typedef pcl::IndicesConstPtr IndicesConstPtr;
+  /** \brief Test whether a given PointIndices message is "valid" (i.e., has values).
+    * \param indices the point indices message to test
+    * \param topic_name an optional topic name (only used for printing, defaults to "indices")
+    */
+  inline bool
+  isValid(const PointIndicesConstPtr & indices, const std::string & topic_name = "indices")
+  {
+    /*if (indices->indices.empty ())
+    {
+      NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
+      return (true);
+    }*/
+    return true;
+  }
 
-      /** \brief Empty constructor. */
-      PCLNodelet () : use_indices_ (false), latched_indices_ (false),
-                      max_queue_size_ (3), approximate_sync_ (false) {};
+  /** \brief Test whether a given ModelCoefficients message is "valid" (i.e., has values).
+    * \param model the model coefficients to test
+    * \param topic_name an optional topic name (only used for printing, defaults to "model")
+    */
+  inline bool
+  isValid(const ModelCoefficientsConstPtr & model, const std::string & topic_name = "model")
+  {
+    /*if (model->values.empty ())
+    {
+      NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), model->values.size (), model->header.stamp.toSec (), model->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
+      return (false);
+    }*/
+    return true;
+  }
 
-    protected:
-      /** \brief Set to true if point indices are used.
-       *
-       * When receiving a point cloud, if use_indices_ is false, the entire
-       * point cloud is processed for the given operation. If use_indices_ is
-       * true, then the ~indices topic is read to get the vector of point
-       * indices specifying the subset of the point cloud that will be used for
-       * the operation. In the case where use_indices_ is true, the ~input and
-       * ~indices topics must be synchronised in time, either exact or within a
-       * specified jitter. See also @ref latched_indices_ and approximate_sync.
-       **/
-      bool use_indices_;
-      /** \brief Set to true if the indices topic is latched.
-       *
-       * If use_indices_ is true, the ~input and ~indices topics generally must
-       * be synchronised in time. By setting this flag to true, the most recent
-       * value from ~indices can be used instead of requiring a synchronised
-       * message.
-       **/
-      bool latched_indices_;
+  /** \brief Lazy transport subscribe/unsubscribe routine. It is optional for backward compatibility. */
+  virtual void subscribe() {}
+  virtual void unsubscribe() {}
 
-      /** \brief The message filter subscriber for PointCloud2. */
-      message_filters::Subscriber<PointCloud> sub_input_filter_;
+  /** \brief Nodelet initialization routine. Reads in global parameters used by all nodelets. */
+  virtual void
+  onInit()
+  {
+    nodelet_topic_tools::NodeletLazy::onInit();
 
-      /** \brief The message filter subscriber for PointIndices. */
-      message_filters::Subscriber<PointIndices> sub_indices_filter_;
+    // Parameters that we care about only at startup
+    pnh_->getParam("max_queue_size", max_queue_size_);
 
-      /** \brief The output PointCloud publisher. */
-      ros::Publisher pub_output_;
+    // ---[ Optional parameters
+    pnh_->getParam("use_indices", use_indices_);
+    pnh_->getParam("latched_indices", latched_indices_);
+    pnh_->getParam("approximate_sync", approximate_sync_);
 
-      /** \brief The maximum queue size (default: 3). */
-      int max_queue_size_;
+    NODELET_DEBUG(
+      "[%s::onInit] PCL Nodelet successfully created with the following parameters:\n"
+      " - approximate_sync : %s\n"
+      " - use_indices      : %s\n"
+      " - latched_indices  : %s\n"
+      " - max_queue_size   : %d",
+      getName().c_str(),
+      (approximate_sync_) ? "true" : "false",
+      (use_indices_) ? "true" : "false",
+      (latched_indices_) ? "true" : "false",
+      max_queue_size_);
+  }
 
-      /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
-      bool approximate_sync_;
-
-      /** \brief TF listener object. */
-      tf::TransformListener tf_listener_;
-
-      /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
-        * \param cloud the point cloud to test
-        * \param topic_name an optional topic name (only used for printing, defaults to "input")
-        */
-      inline bool
-      isValid (const PointCloud2::ConstPtr &cloud, const std::string &topic_name = "input")
-      {
-        if (cloud->width * cloud->height * cloud->point_step != cloud->data.size ())
-        {
-          NODELET_WARN ("[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->data.size (), cloud->width, cloud->height, cloud->point_step, cloud->header.stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
-
-          return (false);
-        }
-        return (true);
-      }
-
-      /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
-        * \param cloud the point cloud to test
-        * \param topic_name an optional topic name (only used for printing, defaults to "input")
-        */
-      inline bool
-      isValid (const PointCloudConstPtr &cloud, const std::string &topic_name = "input")
-      {
-        if (cloud->width * cloud->height != cloud->points.size ())
-        {
-          NODELET_WARN ("[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), cloud->points.size (), cloud->width, cloud->height, fromPCL(cloud->header).stamp.toSec (), cloud->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
-
-          return (false);
-        }
-        return (true);
-      }
-
-      /** \brief Test whether a given PointIndices message is "valid" (i.e., has values).
-        * \param indices the point indices message to test
-        * \param topic_name an optional topic name (only used for printing, defaults to "indices")
-        */
-      inline bool
-      isValid (const PointIndicesConstPtr &indices, const std::string &topic_name = "indices")
-      {
-        /*if (indices->indices.empty ())
-        {
-          NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
-          return (true);
-        }*/
-        return (true);
-      }
-
-      /** \brief Test whether a given ModelCoefficients message is "valid" (i.e., has values).
-        * \param model the model coefficients to test
-        * \param topic_name an optional topic name (only used for printing, defaults to "model")
-        */
-      inline bool
-      isValid (const ModelCoefficientsConstPtr &model, const std::string &topic_name = "model")
-      {
-        /*if (model->values.empty ())
-        {
-          NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), model->values.size (), model->header.stamp.toSec (), model->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
-          return (false);
-        }*/
-        return (true);
-      }
-
-      /** \brief Lazy transport subscribe/unsubscribe routine. It is optional for backward compatibility. */
-      virtual void subscribe () {}
-      virtual void unsubscribe () {}
-
-      /** \brief Nodelet initialization routine. Reads in global parameters used by all nodelets. */
-      virtual void
-      onInit ()
-      {
-        nodelet_topic_tools::NodeletLazy::onInit();
-
-        // Parameters that we care about only at startup
-        pnh_->getParam ("max_queue_size", max_queue_size_);
-        
-        // ---[ Optional parameters
-        pnh_->getParam ("use_indices", use_indices_);
-        pnh_->getParam ("latched_indices", latched_indices_);
-        pnh_->getParam ("approximate_sync", approximate_sync_);
-
-        NODELET_DEBUG ("[%s::onInit] PCL Nodelet successfully created with the following parameters:\n"
-            " - approximate_sync : %s\n"
-            " - use_indices      : %s\n"
-            " - latched_indices  : %s\n"
-            " - max_queue_size   : %d",
-            getName ().c_str (), 
-            (approximate_sync_) ? "true" : "false",
-            (use_indices_) ? "true" : "false", 
-            (latched_indices_) ? "true" : "false", 
-            max_queue_size_);
-      }
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_NODELET_H_

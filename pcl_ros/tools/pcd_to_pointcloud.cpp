@@ -60,113 +60,112 @@ using namespace std;
 
 class PCDGenerator
 {
-  protected:
-    string tf_frame_;
-    ros::NodeHandle nh_;
-    ros::NodeHandle private_nh_;
-  public:
+protected:
+  string tf_frame_;
+  ros::NodeHandle nh_;
+  ros::NodeHandle private_nh_;
 
-    // ROS messages
-    sensor_msgs::PointCloud2 cloud_;
+public:
+  // ROS messages
+  sensor_msgs::PointCloud2 cloud_;
 
-    string file_name_, cloud_topic_;
-    double wait_;
+  string file_name_, cloud_topic_;
+  double wait_;
 
-    pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
+  pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
 
-    ////////////////////////////////////////////////////////////////////////////////
-    PCDGenerator () : tf_frame_ ("/base_link"), private_nh_("~")
-    {
-      // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
+  ////////////////////////////////////////////////////////////////////////////////
+  PCDGenerator()
+  : tf_frame_("/base_link"), private_nh_("~")
+  {
+    // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
-      cloud_topic_ = "cloud_pcd";
-      pub_.advertise (nh_, cloud_topic_.c_str (), 1);
-      private_nh_.param("frame_id", tf_frame_, std::string("/base_link"));
-      ROS_INFO ("Publishing data on topic %s with frame_id %s.", nh_.resolveName (cloud_topic_).c_str (), tf_frame_.c_str());
+    cloud_topic_ = "cloud_pcd";
+    pub_.advertise(nh_, cloud_topic_.c_str(), 1);
+    private_nh_.param("frame_id", tf_frame_, std::string("/base_link"));
+    ROS_INFO(
+      "Publishing data on topic %s with frame_id %s.", nh_.resolveName(
+        cloud_topic_).c_str(), tf_frame_.c_str());
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Start
+  int
+  start()
+  {
+    if (file_name_ == "" || pcl::io::loadPCDFile(file_name_, cloud_) == -1) {
+      return -1;
     }
+    cloud_.header.frame_id = tf_frame_;
+    return 0;
+  }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Start
-    int
-      start ()
-    {
-      if (file_name_ == "" || pcl::io::loadPCDFile (file_name_, cloud_) == -1)
-        return (-1);
-      cloud_.header.frame_id = tf_frame_;
-      return (0);
-    }
+  ////////////////////////////////////////////////////////////////////////////////
+  // Spin (!)
+  bool spin()
+  {
+    int nr_points = cloud_.width * cloud_.height;
+    string fields_list = pcl::getFieldsList(cloud_);
+    double interval = wait_ * 1e+6;
+    while (nh_.ok()) {
+      ROS_DEBUG_ONCE(
+        "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points,
+        fields_list.c_str(), nh_.resolveName(cloud_topic_).c_str(), cloud_.header.frame_id.c_str());
+      cloud_.header.stamp = ros::Time::now();
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Spin (!)
-    bool spin ()
-    {
-      int nr_points      = cloud_.width * cloud_.height;
-      string fields_list = pcl::getFieldsList (cloud_);
-      double interval = wait_ * 1e+6;
-      while (nh_.ok ())
-      {
-        ROS_DEBUG_ONCE ("Publishing data with %d points (%s) on topic %s in frame %s.", nr_points, fields_list.c_str (), nh_.resolveName (cloud_topic_).c_str (), cloud_.header.frame_id.c_str ());
-        cloud_.header.stamp = ros::Time::now ();
-
-        if (pub_.getNumSubscribers () > 0)
-        {
-          ROS_DEBUG ("Publishing data to %d subscribers.", pub_.getNumSubscribers ());
-          pub_.publish (cloud_);
-        }
-        else
-        {
-					// check once a second if there is any subscriber
-          ros::Duration (1).sleep ();
-          continue;
-        }
-
-        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
-
-        if (interval == 0)	// We only publish once if a 0 seconds interval is given
-				{
-					// Give subscribers 3 seconds until point cloud decays... a little ugly!
-		      ros::Duration (3.0).sleep ();
-          break;
-				}
+      if (pub_.getNumSubscribers() > 0) {
+        ROS_DEBUG("Publishing data to %d subscribers.", pub_.getNumSubscribers());
+        pub_.publish(cloud_);
+      } else {
+        // check once a second if there is any subscriber
+        ros::Duration(1).sleep();
+        continue;
       }
-      return (true);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
+
+      if (interval == 0) {      // We only publish once if a 0 seconds interval is given
+        // Give subscribers 3 seconds until point cloud decays... a little ugly!
+        ros::Duration(3.0).sleep();
+        break;
+      }
     }
+    return true;
+  }
 
 
 };
 
 /* ---[ */
 int
-  main (int argc, char** argv)
+main(int argc, char ** argv)
 {
-  if (argc < 2)
-  {
-    std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" << std::endl;
-    return (-1);
+  if (argc < 2) {
+    std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" <<
+      std::endl;
+    return -1;
   }
 
-  ros::init (argc, argv, "pcd_to_pointcloud");
+  ros::init(argc, argv, "pcd_to_pointcloud");
 
   PCDGenerator c;
-  c.file_name_ = string (argv[1]);
+  c.file_name_ = string(argv[1]);
   // check if publishing interval is given
-  if (argc == 2)
-	{
-  	c.wait_ = 0;
-	}
-	else
-	{
-		c.wait_ = atof (argv[2]);
-	}
-
-  if (c.start () == -1)
-  {
-    ROS_ERROR ("Could not load file %s. Exiting.", argv[1]);
-    return (-1);
+  if (argc == 2) {
+    c.wait_ = 0;
+  } else {
+    c.wait_ = atof(argv[2]);
   }
-  ROS_INFO ("Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",  c.cloud_.width * c.cloud_.height, c.cloud_.data.size (), pcl::getFieldsList (c.cloud_).c_str ());
-  c.spin ();
 
-  return (0);
+  if (c.start() == -1) {
+    ROS_ERROR("Could not load file %s. Exiting.", argv[1]);
+    return -1;
+  }
+  ROS_INFO(
+    "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",
+    c.cloud_.width * c.cloud_.height, c.cloud_.data.size(), pcl::getFieldsList(c.cloud_).c_str());
+  c.spin();
+
+  return 0;
 }
 /* ]--- */

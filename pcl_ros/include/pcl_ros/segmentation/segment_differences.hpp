@@ -48,63 +48,66 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b SegmentDifferences obtains the difference between two spatially aligned point clouds and returns the
-    * difference between them for a maximum given distance threshold.
-    * \author Radu Bogdan Rusu
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+/** \brief @b SegmentDifferences obtains the difference between two spatially aligned point clouds and returns the
+  * difference between them for a maximum given distance threshold.
+  * \author Radu Bogdan Rusu
+  */
+class SegmentDifferences : public PCLNodelet
+{
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+  typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+  typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
+public:
+  /** \brief Empty constructor. */
+  SegmentDifferences() {}
+
+protected:
+  /** \brief The message filter subscriber for PointCloud2. */
+  message_filters::Subscriber<PointCloud> sub_target_filter_;
+
+  /** \brief Synchronized input, and planar hull.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
+    PointCloud>>> sync_input_target_e_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
+    PointCloud>>> sync_input_target_a_;
+
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig>> srv_;
+
+  /** \brief Nodelet initialization routine. */
+  void onInit();
+
+  /** \brief LazyNodelet connection routine. */
+  void subscribe();
+  void unsubscribe();
+
+  /** \brief Dynamic reconfigure callback
+    * \param config the config object
+    * \param level the dynamic reconfigure level
     */
-  class SegmentDifferences : public PCLNodelet
-  {
-    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+  void config_callback(SegmentDifferencesConfig & config, uint32_t level);
 
-    public:
-      /** \brief Empty constructor. */
-      SegmentDifferences () {};
-                                      
-    protected:
-      /** \brief The message filter subscriber for PointCloud2. */
-      message_filters::Subscriber<PointCloud> sub_target_filter_;
+  /** \brief Input point cloud callback.
+    * \param cloud the pointer to the input point cloud
+    * \param cloud_target the pointcloud that we want to segment \a cloud from
+    */
+  void input_target_callback(
+    const PointCloudConstPtr & cloud,
+    const PointCloudConstPtr & cloud_target);
 
-      /** \brief Synchronized input, and planar hull.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > sync_input_target_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > sync_input_target_a_;
+private:
+  /** \brief The PCL implementation used. */
+  pcl::SegmentDifferences<pcl::PointXYZ> impl_;
 
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig> > srv_;
-
-      /** \brief Nodelet initialization routine. */
-      void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      void subscribe ();
-      void unsubscribe ();
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (SegmentDifferencesConfig &config, uint32_t level);
-
-      /** \brief Input point cloud callback.
-        * \param cloud the pointer to the input point cloud
-        * \param cloud_target the pointcloud that we want to segment \a cloud from
-        */
-      void input_target_callback (const PointCloudConstPtr &cloud, 
-                                  const PointCloudConstPtr &cloud_target);
-
-    private:
-      /** \brief The PCL implementation used. */
-      pcl::SegmentDifferences<pcl::PointXYZ> impl_;
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_SEGMENT_DIFFERENCES_H_

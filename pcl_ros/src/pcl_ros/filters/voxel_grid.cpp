@@ -40,88 +40,92 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl_ros::VoxelGrid::child_init (ros::NodeHandle &nh, bool &has_service)
+pcl_ros::VoxelGrid::child_init(ros::NodeHandle & nh, bool & has_service)
 {
   // Enable the dynamic reconfigure service
   has_service = true;
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>>(nh);
+  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind(
+    &VoxelGrid::config_callback, this, _1, _2);
+  srv_->setCallback(f);
 
-  return (true);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::VoxelGrid::filter (const PointCloud2::ConstPtr &input, 
-                            const IndicesPtr &indices, 
-                            PointCloud2 &output)
+pcl_ros::VoxelGrid::filter(
+  const PointCloud2::ConstPtr & input,
+  const IndicesPtr & indices,
+  PointCloud2 & output)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  boost::mutex::scoped_lock lock(mutex_);
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL (*(input), *(pcl_input));
-  impl_.setInputCloud (pcl_input);
-  impl_.setIndices (indices);
+  pcl_conversions::toPCL(*(input), *(pcl_input));
+  impl_.setInputCloud(pcl_input);
+  impl_.setIndices(indices);
   pcl::PCLPointCloud2 pcl_output;
-  impl_.filter (pcl_output);
+  impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level)
+pcl_ros::VoxelGrid::config_callback(pcl_ros::VoxelGridConfig & config, uint32_t level)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  boost::mutex::scoped_lock lock(mutex_);
 
-  Eigen::Vector3f leaf_size = impl_.getLeafSize ();
+  Eigen::Vector3f leaf_size = impl_.getLeafSize();
 
-  if (leaf_size[0] != config.leaf_size)
-  {
-    leaf_size.setConstant (config.leaf_size);
-    NODELET_DEBUG ("[config_callback] Setting the downsampling leaf size to: %f.", leaf_size[0]);
-    impl_.setLeafSize (leaf_size[0], leaf_size[1], leaf_size[2]);
+  if (leaf_size[0] != config.leaf_size) {
+    leaf_size.setConstant(config.leaf_size);
+    NODELET_DEBUG("[config_callback] Setting the downsampling leaf size to: %f.", leaf_size[0]);
+    impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
   }
 
   double filter_min, filter_max;
-  impl_.getFilterLimits (filter_min, filter_max);
-  if (filter_min != config.filter_limit_min)
-  {
+  impl_.getFilterLimits(filter_min, filter_max);
+  if (filter_min != config.filter_limit_min) {
     filter_min = config.filter_limit_min;
-    NODELET_DEBUG ("[config_callback] Setting the minimum filtering value a point will be considered from to: %f.", filter_min);
+    NODELET_DEBUG(
+      "[config_callback] Setting the minimum filtering value a point will be considered from to: %f.",
+      filter_min);
   }
-  if (filter_max != config.filter_limit_max)
-  {
+  if (filter_max != config.filter_limit_max) {
     filter_max = config.filter_limit_max;
-    NODELET_DEBUG ("[config_callback] Setting the maximum filtering value a point will be considered from to: %f.", filter_max);
+    NODELET_DEBUG(
+      "[config_callback] Setting the maximum filtering value a point will be considered from to: %f.",
+      filter_max);
   }
-  impl_.setFilterLimits (filter_min, filter_max);
+  impl_.setFilterLimits(filter_min, filter_max);
 
-  if (impl_.getFilterLimitsNegative () != config.filter_limit_negative)
-  {
-    impl_.setFilterLimitsNegative (config.filter_limit_negative);
-    NODELET_DEBUG ("[%s::config_callback] Setting the filter negative flag to: %s.", getName ().c_str (), config.filter_limit_negative ? "true" : "false");
+  if (impl_.getFilterLimitsNegative() != config.filter_limit_negative) {
+    impl_.setFilterLimitsNegative(config.filter_limit_negative);
+    NODELET_DEBUG(
+      "[%s::config_callback] Setting the filter negative flag to: %s.",
+      getName().c_str(), config.filter_limit_negative ? "true" : "false");
   }
 
-  if (impl_.getFilterFieldName () != config.filter_field_name)
-  {
-    impl_.setFilterFieldName (config.filter_field_name);
-    NODELET_DEBUG ("[config_callback] Setting the filter field name to: %s.", config.filter_field_name.c_str ());
+  if (impl_.getFilterFieldName() != config.filter_field_name) {
+    impl_.setFilterFieldName(config.filter_field_name);
+    NODELET_DEBUG(
+      "[config_callback] Setting the filter field name to: %s.",
+      config.filter_field_name.c_str());
   }
 
   // ---[ These really shouldn't be here, and as soon as dynamic_reconfigure improves, we'll remove them and inherit from Filter
-  if (tf_input_frame_ != config.input_frame)
-  {
+  if (tf_input_frame_ != config.input_frame) {
     tf_input_frame_ = config.input_frame;
-    NODELET_DEBUG ("[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str ());
+    NODELET_DEBUG("[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str());
   }
-  if (tf_output_frame_ != config.output_frame)
-  {
+  if (tf_output_frame_ != config.output_frame) {
     tf_output_frame_ = config.output_frame;
-    NODELET_DEBUG ("[config_callback] Setting the output TF frame to: %s.", tf_output_frame_.c_str ());
+    NODELET_DEBUG(
+      "[config_callback] Setting the output TF frame to: %s.",
+      tf_output_frame_.c_str());
   }
   // ]---
 }
 
 typedef pcl_ros::VoxelGrid VoxelGrid;
-PLUGINLIB_EXPORT_CLASS(VoxelGrid,nodelet::Nodelet);
-
+PLUGINLIB_EXPORT_CLASS(VoxelGrid, nodelet::Nodelet);

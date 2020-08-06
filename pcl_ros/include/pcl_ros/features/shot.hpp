@@ -42,39 +42,38 @@
 
 namespace pcl_ros
 {
-  /** \brief @b SHOTEstimation estimates SHOT descriptor.
-    *
-    */
-  class SHOTEstimation : public FeatureFromNormals
+/** \brief @b SHOTEstimation estimates SHOT descriptor.
+  *
+  */
+class SHOTEstimation : public FeatureFromNormals
+{
+private:
+  pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
+
+  typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::SHOT352> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_SHOT_H_
-
-

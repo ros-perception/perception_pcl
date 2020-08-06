@@ -43,58 +43,57 @@
 
 namespace pcl_ros
 {
-  /** \brief @b PFHEstimation estimates the Point Feature Histogram (PFH) descriptor for a given point cloud dataset
-    * containing points and normals.
-    *
-    * @note If you use this code in any academic work, please cite:
-    *
-    * <ul>
-    * <li> R.B. Rusu, N. Blodow, Z.C. Marton, M. Beetz.
-    *      Aligning Point Cloud Views using Persistent Feature Histograms.
-    *      In Proceedings of the 21st IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
-    *      Nice, France, September 22-26 2008.
-    * </li>
-    * <li> R.B. Rusu, Z.C. Marton, N. Blodow, M. Beetz.
-    *      Learning Informative Point Classes for the Acquisition of Object Model Maps.
-    *      In Proceedings of the 10th International Conference on Control, Automation, Robotics and Vision (ICARCV),
-    *      Hanoi, Vietnam, December 17-20 2008.
-    * </li>
-    * </ul>
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
-    * \author Radu Bogdan Rusu
-    */
-  class PFHEstimation : public FeatureFromNormals
+/** \brief @b PFHEstimation estimates the Point Feature Histogram (PFH) descriptor for a given point cloud dataset
+  * containing points and normals.
+  *
+  * @note If you use this code in any academic work, please cite:
+  *
+  * <ul>
+  * <li> R.B. Rusu, N. Blodow, Z.C. Marton, M. Beetz.
+  *      Aligning Point Cloud Views using Persistent Feature Histograms.
+  *      In Proceedings of the 21st IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
+  *      Nice, France, September 22-26 2008.
+  * </li>
+  * <li> R.B. Rusu, Z.C. Marton, N. Blodow, M. Beetz.
+  *      Learning Informative Point Classes for the Acquisition of Object Model Maps.
+  *      In Proceedings of the 10th International Conference on Control, Automation, Robotics and Vision (ICARCV),
+  *      Hanoi, Vietnam, December 17-20 2008.
+  * </li>
+  * </ul>
+  *
+  * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
+  * \a FPFHEstimationOpenMP for examples on parallel implementations of the FPFH (Fast Point Feature Histogram).
+  * \author Radu Bogdan Rusu
+  */
+class PFHEstimation : public FeatureFromNormals
+{
+private:
+  pcl::PFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::PFHSignature125> impl_;
+
+  typedef pcl::PointCloud<pcl::PFHSignature125> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::PFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::PFHSignature125> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::PFHSignature125> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_PFH_H_
-
-

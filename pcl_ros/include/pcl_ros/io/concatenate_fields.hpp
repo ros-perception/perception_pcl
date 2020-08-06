@@ -49,53 +49,55 @@
 
 namespace pcl_ros
 {
-  /** \brief @b PointCloudConcatenateFieldsSynchronizer is a special form of data synchronizer: it listens for a set of 
-    * input PointCloud messages on the same topic, checks their timestamps, and concatenates their fields together into 
-    * a single PointCloud output message.
-    * \author Radu Bogdan Rusu
+/** \brief @b PointCloudConcatenateFieldsSynchronizer is a special form of data synchronizer: it listens for a set of
+  * input PointCloud messages on the same topic, checks their timestamps, and concatenates their fields together into
+  * a single PointCloud output message.
+  * \author Radu Bogdan Rusu
+  */
+class PointCloudConcatenateFieldsSynchronizer : public nodelet_topic_tools::NodeletLazy
+{
+public:
+  typedef sensor_msgs::PointCloud2 PointCloud;
+  typedef PointCloud::Ptr PointCloudPtr;
+  typedef PointCloud::ConstPtr PointCloudConstPtr;
+
+  /** \brief Empty constructor. */
+  PointCloudConcatenateFieldsSynchronizer()
+  : maximum_queue_size_(3), maximum_seconds_(0) {}
+
+  /** \brief Empty constructor.
+    * \param queue_size the maximum queue size
     */
-  class PointCloudConcatenateFieldsSynchronizer: public nodelet_topic_tools::NodeletLazy
-  {
-    public:
-      typedef sensor_msgs::PointCloud2 PointCloud;
-      typedef PointCloud::Ptr PointCloudPtr;
-      typedef PointCloud::ConstPtr PointCloudConstPtr;
+  PointCloudConcatenateFieldsSynchronizer(int queue_size)
+  : maximum_queue_size_(queue_size), maximum_seconds_(0) {}
 
-      /** \brief Empty constructor. */
-      PointCloudConcatenateFieldsSynchronizer () : maximum_queue_size_ (3), maximum_seconds_ (0) {};
+  /** \brief Empty destructor. */
+  virtual ~PointCloudConcatenateFieldsSynchronizer() {}
 
-      /** \brief Empty constructor.
-        * \param queue_size the maximum queue size
-        */
-      PointCloudConcatenateFieldsSynchronizer (int queue_size) : maximum_queue_size_ (queue_size), maximum_seconds_ (0) {};
+  void onInit();
+  void subscribe();
+  void unsubscribe();
+  void input_callback(const PointCloudConstPtr & cloud);
 
-      /** \brief Empty destructor. */
-      virtual ~PointCloudConcatenateFieldsSynchronizer () {};
+private:
+  /** \brief The input PointCloud subscriber. */
+  ros::Subscriber sub_input_;
 
-      void onInit ();
-      void subscribe ();
-      void unsubscribe ();
-      void input_callback (const PointCloudConstPtr &cloud);
+  /** \brief The output PointCloud publisher. */
+  ros::Publisher pub_output_;
 
-    private:
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+  /** \brief The number of input messages that we expect on the input topic. */
+  int input_messages_;
 
-      /** \brief The output PointCloud publisher. */
-      ros::Publisher pub_output_;
+  /** \brief The maximum number of messages that we can store in the queue. */
+  int maximum_queue_size_;
 
-      /** \brief The number of input messages that we expect on the input topic. */
-      int input_messages_;
+  /** \brief The maximum number of seconds to wait until we drop the synchronization. */
+  double maximum_seconds_;
 
-      /** \brief The maximum number of messages that we can store in the queue. */
-      int maximum_queue_size_;
-
-      /** \brief The maximum number of seconds to wait until we drop the synchronization. */
-      double maximum_seconds_;
-
-      /** \brief A queue for messages. */
-      std::map<ros::Time, std::vector<PointCloudConstPtr> > queue_;
-  };
+  /** \brief A queue for messages. */
+  std::map<ros::Time, std::vector<PointCloudConstPtr>> queue_;
+};
 }
 
 #endif  //#ifndef PCL_IO_CONCATENATE_H_

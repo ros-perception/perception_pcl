@@ -44,5 +44,3 @@
 // Include the implementations here instead of compiling them separately to speed up compile time
 //#include "convex_hull.cpp"
 //#include "moving_least_squares.cpp"
-
-

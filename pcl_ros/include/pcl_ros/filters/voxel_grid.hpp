@@ -47,43 +47,45 @@
 
 namespace pcl_ros
 {
-  /** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
-    * \author Radu Bogdan Rusu
+/** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
+  * \author Radu Bogdan Rusu
+  */
+class VoxelGrid : public Filter
+{
+protected:
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>> srv_;
+
+  /** \brief The PCL filter implementation used. */
+  pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
+
+  /** \brief Call the actual filter.
+    * \param input the input point cloud dataset
+    * \param indices the input set of indices to use from \a input
+    * \param output the resultant filtered dataset
     */
-  class VoxelGrid : public Filter
-  {
-    protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > srv_;
+  virtual void
+  filter(
+    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output);
 
-      /** \brief The PCL filter implementation used. */
-      pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
+  /** \brief Child initialization routine.
+    * \param nh ROS node handle
+    * \param has_service set to true if the child has a Dynamic Reconfigure service
+    */
+  bool
+  child_init(ros::NodeHandle & nh, bool & has_service);
 
-      /** \brief Call the actual filter. 
-        * \param input the input point cloud dataset
-        * \param indices the input set of indices to use from \a input
-        * \param output the resultant filtered dataset
-        */
-      virtual void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
-              PointCloud2 &output);
+  /** \brief Dynamic reconfigure callback
+    * \param config the config object
+    * \param level the dynamic reconfigure level
+    */
+  void
+  config_callback(pcl_ros::VoxelGridConfig & config, uint32_t level);
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void 
-      config_callback (pcl_ros::VoxelGridConfig &config, uint32_t level);
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FILTERS_VOXEL_H_

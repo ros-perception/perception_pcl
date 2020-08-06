@@ -52,79 +52,83 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b ExtractPolygonalPrismData uses a set of point indices that represent a planar model, and together with
-    * a given height, generates a 3D polygonal prism. The polygonal prism is then used to segment all points lying
-    * inside it.
-    *
-    * An example of its usage is to extract the data lying within a set of 3D boundaries (e.g., objects supported by a plane).
-    * \author Radu Bogdan Rusu
+/** \brief @b ExtractPolygonalPrismData uses a set of point indices that represent a planar model, and together with
+  * a given height, generates a 3D polygonal prism. The polygonal prism is then used to segment all points lying
+  * inside it.
+  *
+  * An example of its usage is to extract the data lying within a set of 3D boundaries (e.g., objects supported by a plane).
+  * \author Radu Bogdan Rusu
+  */
+class ExtractPolygonalPrismData : public PCLNodelet
+{
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+  typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+  typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
+protected:
+  /** \brief The output PointIndices publisher. */
+  ros::Publisher pub_output_;
+
+  /** \brief The message filter subscriber for PointCloud2. */
+  message_filters::Subscriber<PointCloud> sub_hull_filter_;
+
+  /** \brief Synchronized input, planar hull, and indices.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud,
+    PointIndices>>> sync_input_hull_indices_e_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
+    PointCloud, PointIndices>>> sync_input_hull_indices_a_;
+
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig>> srv_;
+
+  /** \brief Null passthrough filter, used for pushing empty elements in the
+    * synchronizer */
+  message_filters::PassThrough<PointIndices> nf_;
+
+  /** \brief Input point cloud callback.
+    * Because we want to use the same synchronizer object, we push back
+    * empty elements with the same timestamp.
     */
-  class ExtractPolygonalPrismData : public PCLNodelet
+  inline void
+  input_callback(const PointCloudConstPtr & input)
   {
-    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+    PointIndices cloud;
+    cloud.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
+    nf_.add(boost::make_shared<PointIndices>(cloud));
+  }
 
-    protected:
-       /** \brief The output PointIndices publisher. */
-      ros::Publisher pub_output_;
+  /** \brief Nodelet initialization routine. */
+  void onInit();
 
-      /** \brief The message filter subscriber for PointCloud2. */
-      message_filters::Subscriber<PointCloud> sub_hull_filter_;
+  /** \brief LazyNodelet connection routine. */
+  void subscribe();
+  void unsubscribe();
 
-      /** \brief Synchronized input, planar hull, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud, PointIndices> > > sync_input_hull_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud, PointIndices> > > sync_input_hull_indices_a_;
+  /** \brief Dynamic reconfigure callback
+    * \param config the config object
+    * \param level the dynamic reconfigure level
+    */
+  void config_callback(ExtractPolygonalPrismDataConfig & config, uint32_t level);
 
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig> > srv_;
+  /** \brief Input point cloud callback. Used when \a use_indices is set.
+    * \param cloud the pointer to the input point cloud
+    * \param hull the pointer to the planar hull point cloud
+    * \param indices the pointer to the input point cloud indices
+    */
+  void input_hull_indices_callback(
+    const PointCloudConstPtr & cloud,
+    const PointCloudConstPtr & hull,
+    const PointIndicesConstPtr & indices);
 
-      /** \brief Null passthrough filter, used for pushing empty elements in the 
-        * synchronizer */
-      message_filters::PassThrough<PointIndices> nf_;
+private:
+  /** \brief The PCL implementation used. */
+  pcl::ExtractPolygonalPrismData<pcl::PointXYZ> impl_;
 
-      /** \brief Input point cloud callback.
-        * Because we want to use the same synchronizer object, we push back
-        * empty elements with the same timestamp.
-        */
-      inline void
-      input_callback (const PointCloudConstPtr &input)
-      {
-        PointIndices cloud;
-        cloud.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
-        nf_.add (boost::make_shared<PointIndices> (cloud));
-      }
-
-      /** \brief Nodelet initialization routine. */
-      void onInit ();
-
-      /** \brief LazyNodelet connection routine. */
-      void subscribe ();
-      void unsubscribe ();
-
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (ExtractPolygonalPrismDataConfig &config, uint32_t level);
-
-      /** \brief Input point cloud callback. Used when \a use_indices is set.
-        * \param cloud the pointer to the input point cloud
-        * \param hull the pointer to the planar hull point cloud
-        * \param indices the pointer to the input point cloud indices
-        */
-      void input_hull_indices_callback (const PointCloudConstPtr &cloud, 
-                                        const PointCloudConstPtr &hull, 
-                                        const PointIndicesConstPtr &indices);
-
-    private:
-      /** \brief The PCL implementation used. */
-      pcl::ExtractPolygonalPrismData<pcl::PointXYZ> impl_;
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_EXTRACT_POLYGONAL_PRISM_DATA_H_
