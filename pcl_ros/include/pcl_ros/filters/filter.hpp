@@ -48,110 +48,115 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b Filter represents the base filter class. Some generic 3D operations that are applicable to all filters
-    * are defined here as static methods.
-    * \author Radu Bogdan Rusu
+/** \brief @b Filter represents the base filter class. Some generic 3D operations that are applicable to all filters
+  * are defined here as static methods.
+  * \author Radu Bogdan Rusu
+  */
+class Filter : public PCLNodelet
+{
+public:
+  typedef sensor_msgs::PointCloud2 PointCloud2;
+
+  typedef pcl::IndicesPtr IndicesPtr;
+  typedef pcl::IndicesConstPtr IndicesConstPtr;
+
+  Filter() {}
+
+protected:
+  /** \brief The input PointCloud subscriber. */
+  ros::Subscriber sub_input_;
+
+  message_filters::Subscriber<PointCloud2> sub_input_filter_;
+
+  /** \brief The desired user filter field name. */
+  std::string filter_field_name_;
+
+  /** \brief The minimum allowed filter value a point will be considered from. */
+  double filter_limit_min_;
+
+  /** \brief The maximum allowed filter value a point will be considered from. */
+  double filter_limit_max_;
+
+  /** \brief Set to true if we want to return the data outside (\a filter_limit_min_;\a filter_limit_max_). Default: false. */
+  bool filter_limit_negative_;
+
+  /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
+  std::string tf_input_frame_;
+
+  /** \brief The original data input TF frame. */
+  std::string tf_input_orig_frame_;
+
+  /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
+  std::string tf_output_frame_;
+
+  /** \brief Internal mutex. */
+  boost::mutex mutex_;
+
+  /** \brief Child initialization routine.
+    * \param nh ROS node handle
+    * \param has_service set to true if the child has a Dynamic Reconfigure service
     */
-  class Filter : public PCLNodelet
+  virtual bool
+  child_init(ros::NodeHandle & nh, bool & has_service)
   {
-    public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
+    has_service = false;
+    return true;
+  }
 
-      typedef pcl::IndicesPtr IndicesPtr;
-      typedef pcl::IndicesConstPtr IndicesConstPtr;
+  /** \brief Virtual abstract filter method. To be implemented by every child.
+    * \param input the input point cloud dataset.
+    * \param indices a pointer to the vector of point indices to use.
+    * \param output the resultant filtered PointCloud2
+    */
+  virtual void
+  filter(
+    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output) = 0;
 
-      Filter () {}
+  /** \brief Lazy transport subscribe routine. */
+  virtual void
+  subscribe();
 
-    protected:
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+  /** \brief Lazy transport unsubscribe routine. */
+  virtual void
+  unsubscribe();
 
-      message_filters::Subscriber<PointCloud2> sub_input_filter_;
+  /** \brief Nodelet initialization routine. */
+  virtual void
+  onInit();
 
-      /** \brief The desired user filter field name. */
-      std::string filter_field_name_;
+  /** \brief Call the child filter () method, optionally transform the result, and publish it.
+    * \param input the input point cloud dataset.
+    * \param indices a pointer to the vector of point indices to use.
+    */
+  void
+  computePublish(const PointCloud2::ConstPtr & input, const IndicesPtr & indices);
 
-      /** \brief The minimum allowed filter value a point will be considered from. */
-      double filter_limit_min_;
+private:
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::FilterConfig>> srv_;
 
-      /** \brief The maximum allowed filter value a point will be considered from. */
-      double filter_limit_max_;
+  /** \brief Synchronized input, and indices.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
+    PointIndices>>> sync_input_indices_e_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
+    PointIndices>>> sync_input_indices_a_;
 
-      /** \brief Set to true if we want to return the data outside (\a filter_limit_min_;\a filter_limit_max_). Default: false. */
-      bool filter_limit_negative_;
+  /** \brief Dynamic reconfigure service callback. */
+  virtual void
+  config_callback(pcl_ros::FilterConfig & config, uint32_t level);
 
-      /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
-      std::string tf_input_frame_;
+  /** \brief PointCloud2 + Indices data callback. */
+  void
+  input_indices_callback(
+    const PointCloud2::ConstPtr & cloud,
+    const PointIndicesConstPtr & indices);
 
-      /** \brief The original data input TF frame. */
-      std::string tf_input_orig_frame_;
-
-      /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
-      std::string tf_output_frame_;
-
-      /** \brief Internal mutex. */
-      boost::mutex mutex_;
-
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      virtual bool 
-      child_init (ros::NodeHandle &nh, bool &has_service) 
-      { 
-        has_service = false; 
-        return (true); 
-      }
-
-      /** \brief Virtual abstract filter method. To be implemented by every child. 
-        * \param input the input point cloud dataset.
-        * \param indices a pointer to the vector of point indices to use.   
-        * \param output the resultant filtered PointCloud2
-        */ 
-      virtual void 
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
-              PointCloud2 &output) = 0;
-
-      /** \brief Lazy transport subscribe routine. */
-      virtual void
-      subscribe();
-
-      /** \brief Lazy transport unsubscribe routine. */
-      virtual void
-      unsubscribe();
-
-      /** \brief Nodelet initialization routine. */
-      virtual void 
-      onInit ();
-
-      /** \brief Call the child filter () method, optionally transform the result, and publish it.
-        * \param input the input point cloud dataset.
-        * \param indices a pointer to the vector of point indices to use.   
-        */
-      void 
-      computePublish (const PointCloud2::ConstPtr &input, const IndicesPtr &indices);
-
-    private:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::FilterConfig> > srv_;
-
-      /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2, PointIndices> > > sync_input_indices_a_;
-
-      /** \brief Dynamic reconfigure service callback. */
-      virtual void 
-      config_callback (pcl_ros::FilterConfig &config, uint32_t level);
-
-      /** \brief PointCloud2 + Indices data callback. */
-      void 
-      input_indices_callback (const PointCloud2::ConstPtr &cloud, 
-                              const PointIndicesConstPtr &indices);
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FILTER_H_

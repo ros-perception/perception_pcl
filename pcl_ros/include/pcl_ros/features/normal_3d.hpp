@@ -43,44 +43,44 @@
 
 namespace pcl_ros
 {
-  /** \brief @b NormalEstimation estimates local surface properties at each 3D point, such as surface normals and
-    * curvatures.
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for parallel implementations.
-    * \author Radu Bogdan Rusu
-    */
-  class NormalEstimation: public Feature
+/** \brief @b NormalEstimation estimates local surface properties at each 3D point, such as surface normals and
+  * curvatures.
+  *
+  * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
+  * \a NormalEstimationOpenMP and \a NormalEstimationTBB for parallel implementations.
+  * \author Radu Bogdan Rusu
+  */
+class NormalEstimation : public Feature
+{
+private:
+  /** \brief PCL implementation object. */
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
+
+  typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      /** \brief PCL implementation object. */
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type.
+    * \param cloud the input point cloud to copy the header from.
+    */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type.
-        * \param cloud the input point cloud to copy the header from.
-        */ 
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_NORMAL_3D_H_
-

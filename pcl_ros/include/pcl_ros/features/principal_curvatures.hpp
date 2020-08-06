@@ -44,41 +44,42 @@
 
 namespace pcl_ros
 {
-  /** \brief @b PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of
-    * principal surface curvatures for a given point cloud dataset containing points and normals.
-    *
-    * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
-    * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
-    * \author Radu Bogdan Rusu, Jared Glover
-    */
-  class PrincipalCurvaturesEstimation : public FeatureFromNormals
+/** \brief @b PrincipalCurvaturesEstimation estimates the directions (eigenvectors) and magnitudes (eigenvalues) of
+  * principal surface curvatures for a given point cloud dataset containing points and normals.
+  *
+  * @note The code is stateful as we do not expect this class to be multicore parallelized. Please look at
+  * \a NormalEstimationOpenMP and \a NormalEstimationTBB for examples on how to extend this to parallel implementations.
+  * \author Radu Bogdan Rusu, Jared Glover
+  */
+class PrincipalCurvaturesEstimation : public FeatureFromNormals
+{
+private:
+  pcl::PrincipalCurvaturesEstimation<pcl::PointXYZ, pcl::Normal, pcl::PrincipalCurvatures> impl_;
+
+  typedef pcl::PointCloud<pcl::PrincipalCurvatures> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::PrincipalCurvaturesEstimation<pcl::PointXYZ, pcl::Normal, pcl::PrincipalCurvatures> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::PrincipalCurvatures> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_

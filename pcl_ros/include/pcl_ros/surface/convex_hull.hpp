@@ -48,49 +48,52 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  /** \brief @b ConvexHull2D represents a 2D ConvexHull implementation.
-    * \author Radu Bogdan Rusu
+/** \brief @b ConvexHull2D represents a 2D ConvexHull implementation.
+  * \author Radu Bogdan Rusu
+  */
+class ConvexHull2D : public PCLNodelet
+{
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+  typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+  typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
+private:
+  /** \brief Nodelet initialization routine. */
+  virtual void onInit();
+
+  /** \brief LazyNodelet connection routine. */
+  virtual void subscribe();
+  virtual void unsubscribe();
+
+  /** \brief Input point cloud callback.
+    * \param cloud the pointer to the input point cloud
+    * \param indices the pointer to the input point cloud indices
     */
-  class ConvexHull2D : public PCLNodelet
-  {
-    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-    typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-    typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+  void input_indices_callback(
+    const PointCloudConstPtr & cloud,
+    const PointIndicesConstPtr & indices);
 
-    private:
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
+private:
+  /** \brief The PCL implementation used. */
+  pcl::ConvexHull<pcl::PointXYZ> impl_;
 
-      /** \brief LazyNodelet connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
+  /** \brief The input PointCloud subscriber. */
+  ros::Subscriber sub_input_;
 
-      /** \brief Input point cloud callback.
-        * \param cloud the pointer to the input point cloud
-        * \param indices the pointer to the input point cloud indices
-        */
-      void input_indices_callback (const PointCloudConstPtr &cloud, 
-                                   const PointIndicesConstPtr &indices);
+  /** \brief Publisher for PolygonStamped. */
+  ros::Publisher pub_plane_;
 
-    private:
-      /** \brief The PCL implementation used. */
-      pcl::ConvexHull<pcl::PointXYZ> impl_;
+  /** \brief Synchronized input, and indices.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
+    PointIndices>>> sync_input_indices_e_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
+    PointIndices>>> sync_input_indices_a_;
 
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
-
-      /** \brief Publisher for PolygonStamped. */
-      ros::Publisher pub_plane_;
-
-      /** \brief Synchronized input, and indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > >       sync_input_indices_e_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > sync_input_indices_a_;
-
-  public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_CONVEX_HULL_2D_H_

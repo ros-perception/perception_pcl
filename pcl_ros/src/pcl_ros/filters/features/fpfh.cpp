@@ -38,42 +38,42 @@
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/fpfh.hpp"
 
-void 
-pcl_ros::FPFHEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
+void
+pcl_ros::FPFHEstimation::emptyPublish(const PointCloudInConstPtr & cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish(output.makeShared());
 }
 
-void 
-pcl_ros::FPFHEstimation::computePublish (const PointCloudInConstPtr &cloud,
-                                         const PointCloudNConstPtr &normals,
-                                         const PointCloudInConstPtr &surface,
-                                         const IndicesPtr &indices)
+void
+pcl_ros::FPFHEstimation::computePublish(
+  const PointCloudInConstPtr & cloud,
+  const PointCloudNConstPtr & normals,
+  const PointCloudInConstPtr & surface,
+  const IndicesPtr & indices)
 {
   // Set the parameters
-  impl_.setKSearch (k_);
-  impl_.setRadiusSearch (search_radius_);
+  impl_.setKSearch(k_);
+  impl_.setRadiusSearch(search_radius_);
   // Initialize the spatial locator
-  initTree (spatial_locator_type_, tree_, k_);
-  impl_.setSearchMethod (tree_);
+  initTree(spatial_locator_type_, tree_, k_);
+  impl_.setSearchMethod(tree_);
 
   // Set the inputs
-  impl_.setInputCloud (cloud);
-  impl_.setIndices (indices);
-  impl_.setSearchSurface (surface);
-  impl_.setInputNormals (normals);
+  impl_.setInputCloud(cloud);
+  impl_.setIndices(indices);
+  impl_.setSearchSurface(surface);
+  impl_.setInputNormals(normals);
   // Estimate the feature
   PointCloudOut output;
-  impl_.compute (output);
+  impl_.compute(output);
 
   // Publish a Boost shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (output.makeShared ());
+  pub_output_.publish(output.makeShared());
 }
 
 typedef pcl_ros::FPFHEstimation FPFHEstimation;
-PLUGINLIB_EXPORT_CLASS(FPFHEstimation,nodelet::Nodelet);
-
+PLUGINLIB_EXPORT_CLASS(FPFHEstimation, nodelet::Nodelet);

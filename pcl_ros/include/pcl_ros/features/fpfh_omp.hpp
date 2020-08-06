@@ -43,54 +43,54 @@
 
 namespace pcl_ros
 {
-  /** \brief @b FPFHEstimationOMP estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud
-    * dataset containing points and normals, in parallel, using the OpenMP standard.
-    *
-    * @note If you use this code in any academic work, please cite:
-    *
-    * <ul>
-    * <li> R.B. Rusu, N. Blodow, M. Beetz.
-    *      Fast Point Feature Histograms (FPFH) for 3D Registration.
-    *      In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA),
-    *      Kobe, Japan, May 12-17 2009.
-    * </li>
-    * <li> R.B. Rusu, A. Holzbach, N. Blodow, M. Beetz.
-    *      Fast Geometric Point Labeling using Conditional Random Fields.
-    *      In Proceedings of the 22nd IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
-    *      St. Louis, MO, USA, October 11-15 2009.
-    * </li>
-    * </ul>
-    * \author Radu Bogdan Rusu
-    */
-  class FPFHEstimationOMP : public FeatureFromNormals
+/** \brief @b FPFHEstimationOMP estimates the Fast Point Feature Histogram (FPFH) descriptor for a given point cloud
+  * dataset containing points and normals, in parallel, using the OpenMP standard.
+  *
+  * @note If you use this code in any academic work, please cite:
+  *
+  * <ul>
+  * <li> R.B. Rusu, N. Blodow, M. Beetz.
+  *      Fast Point Feature Histograms (FPFH) for 3D Registration.
+  *      In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA),
+  *      Kobe, Japan, May 12-17 2009.
+  * </li>
+  * <li> R.B. Rusu, A. Holzbach, N. Blodow, M. Beetz.
+  *      Fast Geometric Point Labeling using Conditional Random Fields.
+  *      In Proceedings of the 22nd IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS),
+  *      St. Louis, MO, USA, October 11-15 2009.
+  * </li>
+  * </ul>
+  * \author Radu Bogdan Rusu
+  */
+class FPFHEstimationOMP : public FeatureFromNormals
+{
+private:
+  pcl::FPFHEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
+
+  typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::FPFHEstimationOMP<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloudOut>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::FPFHSignature33> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloudOut> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudNConstPtr &normals,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FPFH_OMP_H_
-

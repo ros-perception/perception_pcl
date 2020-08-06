@@ -56,41 +56,37 @@
 
 /* ---[ */
 int
-main (int argc, char **argv)
+main(int argc, char ** argv)
 {
-  ros::init (argc, argv, "image_publisher");
+  ros::init(argc, argv, "image_publisher");
   ros::NodeHandle nh;
-  ros::Publisher image_pub = nh.advertise <sensor_msgs::Image> ("output", 1);
+  ros::Publisher image_pub = nh.advertise<sensor_msgs::Image>("output", 1);
 
-  if (argc != 2)
-  {
+  if (argc != 2) {
     std::cout << "usage:\n" << argv[0] << " cloud.pcd" << std::endl;
     return 1;
   }
 
   sensor_msgs::Image image;
   sensor_msgs::PointCloud2 cloud;
-  pcl::io::loadPCDFile (std::string (argv[1]), cloud);
+  pcl::io::loadPCDFile(std::string(argv[1]), cloud);
 
-  try
-  {
-    pcl::toROSMsg (cloud, image); //convert the cloud
-  }
-  catch (std::runtime_error &e)
-  {
-    ROS_ERROR_STREAM("Error in converting cloud to image message: "
-                            << e.what());
+  try {
+    pcl::toROSMsg(cloud, image);  //convert the cloud
+  } catch (std::runtime_error & e) {
+    ROS_ERROR_STREAM(
+      "Error in converting cloud to image message: " <<
+        e.what());
     return 1; //fail!
   }
-  ros::Rate loop_rate (5);
-  while (nh.ok ())
-  {
-    image_pub.publish (image);
-    ros::spinOnce ();
-    loop_rate.sleep ();
+  ros::Rate loop_rate(5);
+  while (nh.ok()) {
+    image_pub.publish(image);
+    ros::spinOnce();
+    loop_rate.sleep();
   }
 
-  return (0);
+  return 0;
 }
 
 /* ]--- */

@@ -38,39 +38,39 @@
 #include <pluginlib/class_list_macros.h>
 #include "pcl_ros/features/principal_curvatures.hpp"
 
-void 
-pcl_ros::PrincipalCurvaturesEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
+void
+pcl_ros::PrincipalCurvaturesEstimation::emptyPublish(const PointCloudInConstPtr & cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (ros_ptr(output.makeShared ()));
+  pub_output_.publish(ros_ptr(output.makeShared()));
 }
 
-void 
-pcl_ros::PrincipalCurvaturesEstimation::computePublish (const PointCloudInConstPtr &cloud,
-                                                        const PointCloudNConstPtr &normals,
-                                                        const PointCloudInConstPtr &surface,
-                                                        const IndicesPtr &indices)
+void
+pcl_ros::PrincipalCurvaturesEstimation::computePublish(
+  const PointCloudInConstPtr & cloud,
+  const PointCloudNConstPtr & normals,
+  const PointCloudInConstPtr & surface,
+  const IndicesPtr & indices)
 {
   // Set the parameters
-  impl_.setKSearch (k_);
-  impl_.setRadiusSearch (search_radius_);
+  impl_.setKSearch(k_);
+  impl_.setRadiusSearch(search_radius_);
 
   // Set the inputs
-  impl_.setInputCloud (pcl_ptr(cloud));
-  impl_.setIndices (indices);
-  impl_.setSearchSurface (pcl_ptr(surface));
-  impl_.setInputNormals (pcl_ptr(normals));
+  impl_.setInputCloud(pcl_ptr(cloud));
+  impl_.setIndices(indices);
+  impl_.setSearchSurface(pcl_ptr(surface));
+  impl_.setInputNormals(pcl_ptr(normals));
   // Estimate the feature
   PointCloudOut output;
-  impl_.compute (output);
+  impl_.compute(output);
 
   // Publish a Boost shared ptr const data
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (ros_ptr(output.makeShared ()));
+  pub_output_.publish(ros_ptr(output.makeShared()));
 }
 
 typedef pcl_ros::PrincipalCurvaturesEstimation PrincipalCurvaturesEstimation;
 PLUGINLIB_EXPORT_CLASS(PrincipalCurvaturesEstimation, nodelet::Nodelet)
-

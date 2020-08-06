@@ -39,32 +39,33 @@
 #include "pcl_ros/filters/extract_indices.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool 
-pcl_ros::ExtractIndices::child_init (ros::NodeHandle &nh, bool &has_service)
+bool
+pcl_ros::ExtractIndices::child_init(ros::NodeHandle & nh, bool & has_service)
 {
   has_service = true;
 
-  srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>::CallbackType f =  boost::bind (&ExtractIndices::config_callback, this, _1, _2);
-  srv_->setCallback (f);
+  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>>(nh);
+  dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>::CallbackType f = boost::bind(
+    &ExtractIndices::config_callback, this, _1, _2);
+  srv_->setCallback(f);
 
   use_indices_ = true;
-  return (true);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::ExtractIndices::config_callback (pcl_ros::ExtractIndicesConfig &config, uint32_t level)
+pcl_ros::ExtractIndices::config_callback(pcl_ros::ExtractIndicesConfig & config, uint32_t level)
 {
-  boost::mutex::scoped_lock lock (mutex_);
+  boost::mutex::scoped_lock lock(mutex_);
 
-  if (impl_.getNegative () != config.negative)
-  {
-    impl_.setNegative (config.negative);
-    NODELET_DEBUG ("[%s::config_callback] Setting the extraction to: %s.", getName ().c_str (), (config.negative ? "indices" : "everything but the indices"));
+  if (impl_.getNegative() != config.negative) {
+    impl_.setNegative(config.negative);
+    NODELET_DEBUG(
+      "[%s::config_callback] Setting the extraction to: %s.", getName().c_str(),
+      (config.negative ? "indices" : "everything but the indices"));
   }
 }
 
 typedef pcl_ros::ExtractIndices ExtractIndices;
-PLUGINLIB_EXPORT_CLASS(ExtractIndices,nodelet::Nodelet);
-
+PLUGINLIB_EXPORT_CLASS(ExtractIndices, nodelet::Nodelet);

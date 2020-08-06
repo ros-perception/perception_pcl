@@ -1,5 +1,5 @@
 /*
- * 
+ *
  *  Software License Agreement (BSD License)
  *
  *  Copyright (c) 2010, Willow Garage, Inc.
@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id: cropbox.cpp 
+ *  $Id: cropbox.cpp
  *
  */
 
@@ -48,57 +48,59 @@
 
 namespace pcl_ros
 {
-  /** \brief @b CropBox is a filter that allows the user to filter all the data inside of a given box.
-    *
-    * \author Radu Bogdan Rusu
-    * \author Justin Rosen
-    * \author Marti Morta Garriga
+/** \brief @b CropBox is a filter that allows the user to filter all the data inside of a given box.
+  *
+  * \author Radu Bogdan Rusu
+  * \author Justin Rosen
+  * \author Marti Morta Garriga
+  */
+class CropBox : public Filter
+{
+protected:
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::CropBoxConfig>> srv_;       // TODO
+
+  /** \brief Call the actual filter.
+    * \param input the input point cloud dataset
+    * \param indices the input set of indices to use from \a input
+    * \param output the resultant filtered dataset
     */
-  class CropBox : public Filter
+  inline void
+  filter(
+    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output)
   {
-    protected:
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<pcl_ros::CropBoxConfig> > srv_; // TODO
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(*(input), *(pcl_input));
+    impl_.setInputCloud(pcl_input);
+    impl_.setIndices(indices);
+    pcl::PCLPointCloud2 pcl_output;
+    impl_.filter(pcl_output);
+    pcl_conversions::moveFromPCL(pcl_output, output);
+  }
 
-      /** \brief Call the actual filter. 
-        * \param input the input point cloud dataset
-        * \param indices the input set of indices to use from \a input
-        * \param output the resultant filtered dataset
-        */
-      inline void
-      filter (const PointCloud2::ConstPtr &input, const IndicesPtr &indices, 
-              PointCloud2 &output)
-      {
-        boost::mutex::scoped_lock lock (mutex_);
-        pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-        pcl_conversions::toPCL (*(input), *(pcl_input));
-        impl_.setInputCloud (pcl_input);
-        impl_.setIndices (indices);
-        pcl::PCLPointCloud2 pcl_output;
-        impl_.filter (pcl_output);
-        pcl_conversions::moveFromPCL(pcl_output, output);
-      }
+  /** \brief Child initialization routine.
+    * \param nh ROS node handle
+    * \param has_service set to true if the child has a Dynamic Reconfigure service
+    */
+  bool
+  child_init(ros::NodeHandle & nh, bool & has_service);
 
-      /** \brief Child initialization routine.
-        * \param nh ROS node handle
-        * \param has_service set to true if the child has a Dynamic Reconfigure service
-        */
-      bool 
-      child_init (ros::NodeHandle &nh, bool &has_service);
-      
-      /** \brief Dynamic reconfigure service callback.
-        * \param config the dynamic reconfigure CropBoxConfig object
-        * \param level the dynamic reconfigure level
-        */
-      void 
-      config_callback (pcl_ros::CropBoxConfig &config, uint32_t level);
+  /** \brief Dynamic reconfigure service callback.
+    * \param config the dynamic reconfigure CropBoxConfig object
+    * \param level the dynamic reconfigure level
+    */
+  void
+  config_callback(pcl_ros::CropBoxConfig & config, uint32_t level);
 
-    private:
-      /** \brief The PCL filter implementation used. */
-      pcl::CropBox<pcl::PCLPointCloud2> impl_;
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+private:
+  /** \brief The PCL filter implementation used. */
+  pcl::CropBox<pcl::PCLPointCloud2> impl_;
+
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FILTERS_CROPBOX_H_

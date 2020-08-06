@@ -46,41 +46,40 @@
 
 namespace pcl_ros
 {
-  /** \brief @b NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and
-    * curvatures, in parallel, using Intel's Threading Building Blocks library.
-    * \author Radu Bogdan Rusu
-    */
-  class NormalEstimationTBB: public Feature
+/** \brief @b NormalEstimationTBB estimates local surface properties at each 3D point, such as surface normals and
+  * curvatures, in parallel, using Intel's Threading Building Blocks library.
+  * \author Radu Bogdan Rusu
+  */
+class NormalEstimationTBB : public Feature
+{
+private:
+  pcl::NormalEstimationTBB<pcl::PointXYZ, pcl::Normal> impl_;
+
+  typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
+
+  /** \brief Child initialization routine. Internal method. */
+  inline bool
+  childInit(ros::NodeHandle & nh)
   {
-    private:
-      pcl::NormalEstimationTBB<pcl::PointXYZ, pcl::Normal> impl_;
+    // Create the output publisher
+    pub_output_ = advertise<PointCloud>(nh, "output", max_queue_size_);
+    return true;
+  }
 
-      typedef pcl::PointCloud<pcl::Normal> PointCloudOut;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  void emptyPublish(const PointCloudInConstPtr & cloud);
 
-      /** \brief Child initialization routine. Internal method. */
-      inline bool 
-      childInit (ros::NodeHandle &nh)
-      {
-        // Create the output publisher
-        pub_output_ = advertise<PointCloud> (nh, "output", max_queue_size_);
-        return (true);
-      }
+  /** \brief Compute the feature and publish it. */
+  void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices);
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      void emptyPublish (const PointCloudInConstPtr &cloud);
-
-      /** \brief Compute the feature and publish it. */
-      void computePublish (const PointCloudInConstPtr &cloud,
-                           const PointCloudInConstPtr &surface,
-                           const IndicesPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 //#endif  // HAVE_TBB
 
 #endif  //#ifndef PCL_ROS_NORMAL_3D_TBB_H_
-
-

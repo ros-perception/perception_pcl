@@ -39,35 +39,36 @@
 #include "pcl_ros/features/boundary.hpp"
 
 void
-pcl_ros::BoundaryEstimation::emptyPublish (const PointCloudInConstPtr &cloud)
+pcl_ros::BoundaryEstimation::emptyPublish(const PointCloudInConstPtr & cloud)
 {
   PointCloudOut output;
   output.header = cloud->header;
-  pub_output_.publish (ros_ptr(output.makeShared ()));
+  pub_output_.publish(ros_ptr(output.makeShared()));
 }
 
 void
-pcl_ros::BoundaryEstimation::computePublish (const PointCloudInConstPtr &cloud, 
-                                             const PointCloudNConstPtr &normals,
-                                             const PointCloudInConstPtr &surface,
-                                             const IndicesPtr &indices)
+pcl_ros::BoundaryEstimation::computePublish(
+  const PointCloudInConstPtr & cloud,
+  const PointCloudNConstPtr & normals,
+  const PointCloudInConstPtr & surface,
+  const IndicesPtr & indices)
 {
   // Set the parameters
-  impl_.setKSearch (k_);
-  impl_.setRadiusSearch (search_radius_);
+  impl_.setKSearch(k_);
+  impl_.setRadiusSearch(search_radius_);
 
   // Set the inputs
-  impl_.setInputCloud (pcl_ptr(cloud));
-  impl_.setIndices (indices);
-  impl_.setSearchSurface (pcl_ptr(surface));
-  impl_.setInputNormals (pcl_ptr(normals));
+  impl_.setInputCloud(pcl_ptr(cloud));
+  impl_.setIndices(indices);
+  impl_.setSearchSurface(pcl_ptr(surface));
+  impl_.setInputNormals(pcl_ptr(normals));
   // Estimate the feature
   PointCloudOut output;
-  impl_.compute (output);
+  impl_.compute(output);
 
   // Enforce that the TF frame and the timestamp are copied
   output.header = cloud->header;
-  pub_output_.publish (ros_ptr(output.makeShared ()));
+  pub_output_.publish(ros_ptr(output.makeShared()));
 }
 
 typedef pcl_ros::BoundaryEstimation BoundaryEstimation;

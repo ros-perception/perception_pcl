@@ -54,198 +54,209 @@
 
 namespace pcl_ros
 {
-  namespace sync_policies = message_filters::sync_policies;
+namespace sync_policies = message_filters::sync_policies;
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  /** \brief @b Feature represents the base feature class. Some generic 3D operations that 
-    * are applicable to all features are defined here as static methods.
-    * \author Radu Bogdan Rusu
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+/** \brief @b Feature represents the base feature class. Some generic 3D operations that
+  * are applicable to all features are defined here as static methods.
+  * \author Radu Bogdan Rusu
+  */
+class Feature : public PCLNodelet
+{
+public:
+  typedef pcl::KdTree<pcl::PointXYZ> KdTree;
+  typedef pcl::KdTree<pcl::PointXYZ>::Ptr KdTreePtr;
+
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloudIn;
+  typedef boost::shared_ptr<PointCloudIn> PointCloudInPtr;
+  typedef boost::shared_ptr<const PointCloudIn> PointCloudInConstPtr;
+
+  typedef pcl::IndicesPtr IndicesPtr;
+  typedef pcl::IndicesConstPtr IndicesConstPtr;
+
+  /** \brief Empty constructor. */
+  Feature()
+  : /*input_(), indices_(), surface_(), */ tree_(), k_(0), search_radius_(0),
+    use_surface_(false), spatial_locator_type_(-1)
+  {}
+
+protected:
+  /** \brief The input point cloud dataset. */
+  //PointCloudInConstPtr input_;
+
+  /** \brief A pointer to the vector of point indices to use. */
+  //IndicesConstPtr indices_;
+
+  /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
+  //PointCloudInConstPtr surface_;
+
+  /** \brief A pointer to the spatial search object. */
+  KdTreePtr tree_;
+
+  /** \brief The number of K nearest neighbors to use for each point. */
+  int k_;
+
+  /** \brief The nearest neighbors search radius for each point. */
+  double search_radius_;
+
+  // ROS nodelet attributes
+  /** \brief The surface PointCloud subscriber filter. */
+  message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
+
+  /** \brief The input PointCloud subscriber. */
+  ros::Subscriber sub_input_;
+
+  /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */
+  bool use_surface_;
+
+  /** \brief Parameter for the spatial locator tree. By convention, the values represent:
+    * 0: ANN (Approximate Nearest Neigbor library) kd-tree
+    * 1: FLANN (Fast Library for Approximate Nearest Neighbors) kd-tree
+    * 2: Organized spatial dataset index
     */
-  class Feature : public PCLNodelet
+  int spatial_locator_type_;
+
+  /** \brief Pointer to a dynamic reconfigure service. */
+  boost::shared_ptr<dynamic_reconfigure::Server<FeatureConfig>> srv_;
+
+  /** \brief Child initialization routine. Internal method. */
+  virtual bool childInit(ros::NodeHandle & nh) = 0;
+
+  /** \brief Publish an empty point cloud of the feature output type. */
+  virtual void emptyPublish(const PointCloudInConstPtr & cloud) = 0;
+
+  /** \brief Compute the feature and publish it. Internal method. */
+  virtual void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices) = 0;
+
+  /** \brief Dynamic reconfigure callback
+    * \param config the config object
+    * \param level the dynamic reconfigure level
+    */
+  void config_callback(FeatureConfig & config, uint32_t level);
+
+  /** \brief Null passthrough filter, used for pushing empty elements in the
+    * synchronizer */
+  message_filters::PassThrough<PointIndices> nf_pi_;
+  message_filters::PassThrough<PointCloudIn> nf_pc_;
+
+  /** \brief Input point cloud callback.
+    * Because we want to use the same synchronizer object, we push back
+    * empty elements with the same timestamp.
+    */
+  inline void
+  input_callback(const PointCloudInConstPtr & input)
   {
-    public:
-      typedef pcl::KdTree<pcl::PointXYZ> KdTree;
-      typedef pcl::KdTree<pcl::PointXYZ>::Ptr KdTreePtr;
+    PointIndices indices;
+    indices.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
+    PointCloudIn cloud;
+    cloud.header.stamp = input->header.stamp;
+    nf_pc_.add(ros_ptr(cloud.makeShared()));
+    nf_pi_.add(boost::make_shared<PointIndices>(indices));
+  }
 
-      typedef pcl::PointCloud<pcl::PointXYZ> PointCloudIn;
-      typedef boost::shared_ptr<PointCloudIn> PointCloudInPtr;
-      typedef boost::shared_ptr<const PointCloudIn> PointCloudInConstPtr;
+private:
+  /** \brief Synchronized input, surface, and point indices.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn,
+    PointCloudIn, PointIndices>>> sync_input_surface_indices_a_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn,
+    PointCloudIn, PointIndices>>> sync_input_surface_indices_e_;
 
-      typedef pcl::IndicesPtr IndicesPtr;
-      typedef pcl::IndicesConstPtr IndicesConstPtr;
+  /** \brief Nodelet initialization routine. */
+  virtual void onInit();
 
-      /** \brief Empty constructor. */
-      Feature () : /*input_(), indices_(), surface_(), */tree_(), k_(0), search_radius_(0),
-                   use_surface_(false), spatial_locator_type_(-1) 
-      {};
+  /** \brief NodeletLazy connection routine. */
+  virtual void subscribe();
+  virtual void unsubscribe();
 
-    protected:
-      /** \brief The input point cloud dataset. */
-      //PointCloudInConstPtr input_;
+  /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
+    * \param cloud the pointer to the input point cloud
+    * \param cloud_surface the pointer to the surface point cloud
+    * \param indices the pointer to the input point cloud indices
+    */
+  void input_surface_indices_callback(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudInConstPtr & cloud_surface,
+    const PointIndicesConstPtr & indices);
 
-      /** \brief A pointer to the vector of point indices to use. */
-      //IndicesConstPtr indices_;
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 
-      /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
-      //PointCloudInConstPtr surface_;
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+class FeatureFromNormals : public Feature
+{
+public:
+  typedef sensor_msgs::PointCloud2 PointCloud2;
 
-      /** \brief A pointer to the spatial search object. */
-      KdTreePtr tree_;
+  typedef pcl::PointCloud<pcl::Normal> PointCloudN;
+  typedef boost::shared_ptr<PointCloudN> PointCloudNPtr;
+  typedef boost::shared_ptr<const PointCloudN> PointCloudNConstPtr;
 
-      /** \brief The number of K nearest neighbors to use for each point. */
-      int k_;
+  FeatureFromNormals()
+  : normals_() {}
 
-      /** \brief The nearest neighbors search radius for each point. */
-      double search_radius_;
+protected:
+  /** \brief A pointer to the input dataset that contains the point normals of the XYZ dataset. */
+  PointCloudNConstPtr normals_;
 
-      // ROS nodelet attributes
-      /** \brief The surface PointCloud subscriber filter. */
-      message_filters::Subscriber<PointCloudIn> sub_surface_filter_;
-      
-      /** \brief The input PointCloud subscriber. */
-      ros::Subscriber sub_input_;
+  /** \brief Child initialization routine. Internal method. */
+  virtual bool childInit(ros::NodeHandle & nh) = 0;
 
-      /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */
-      bool use_surface_;
+  /** \brief Publish an empty point cloud of the feature output type. */
+  virtual void emptyPublish(const PointCloudInConstPtr & cloud) = 0;
 
-      /** \brief Parameter for the spatial locator tree. By convention, the values represent:
-        * 0: ANN (Approximate Nearest Neigbor library) kd-tree
-        * 1: FLANN (Fast Library for Approximate Nearest Neighbors) kd-tree
-        * 2: Organized spatial dataset index
-        */
-      int spatial_locator_type_;
+  /** \brief Compute the feature and publish it. */
+  virtual void computePublish(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & normals,
+    const PointCloudInConstPtr & surface,
+    const IndicesPtr & indices) = 0;
 
-      /** \brief Pointer to a dynamic reconfigure service. */
-      boost::shared_ptr <dynamic_reconfigure::Server<FeatureConfig> > srv_;
+private:
+  /** \brief The normals PointCloud subscriber filter. */
+  message_filters::Subscriber<PointCloudN> sub_normals_filter_;
 
-      /** \brief Child initialization routine. Internal method. */
-      virtual bool childInit (ros::NodeHandle &nh) = 0;
+  /** \brief Synchronized input, normals, surface, and point indices.*/
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn,
+    PointCloudN, PointCloudIn, PointIndices>>> sync_input_normals_surface_indices_a_;
+  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn,
+    PointCloudN, PointCloudIn, PointIndices>>> sync_input_normals_surface_indices_e_;
 
-      /** \brief Publish an empty point cloud of the feature output type. */
-      virtual void emptyPublish (const PointCloudInConstPtr &cloud) = 0;
+  /** \brief Internal method. */
+  void computePublish(
+    const PointCloudInConstPtr &,
+    const PointCloudInConstPtr &,
+    const IndicesPtr &) {}                        // This should never be called
 
-      /** \brief Compute the feature and publish it. Internal method. */
-      virtual void computePublish (const PointCloudInConstPtr &cloud, 
-                                   const PointCloudInConstPtr &surface,
-                                   const IndicesPtr &indices) = 0;
+  /** \brief Nodelet initialization routine. */
+  virtual void onInit();
 
-      /** \brief Dynamic reconfigure callback
-        * \param config the config object
-        * \param level the dynamic reconfigure level
-        */
-      void config_callback (FeatureConfig &config, uint32_t level);
+  /** \brief NodeletLazy connection routine. */
+  virtual void subscribe();
+  virtual void unsubscribe();
 
-      /** \brief Null passthrough filter, used for pushing empty elements in the 
-        * synchronizer */
-      message_filters::PassThrough<PointIndices> nf_pi_;
-      message_filters::PassThrough<PointCloudIn> nf_pc_;
+  /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
+    * \param cloud the pointer to the input point cloud
+    * \param cloud_normals the pointer to the input point cloud normals
+    * \param cloud_surface the pointer to the surface point cloud
+    * \param indices the pointer to the input point cloud indices
+    */
+  void input_normals_surface_indices_callback(
+    const PointCloudInConstPtr & cloud,
+    const PointCloudNConstPtr & cloud_normals,
+    const PointCloudInConstPtr & cloud_surface,
+    const PointIndicesConstPtr & indices);
 
-      /** \brief Input point cloud callback.
-        * Because we want to use the same synchronizer object, we push back
-        * empty elements with the same timestamp.
-        */
-      inline void
-      input_callback (const PointCloudInConstPtr &input)
-      {
-        PointIndices indices;
-        indices.header.stamp = pcl_conversions::fromPCL(input->header).stamp;
-        PointCloudIn cloud;
-        cloud.header.stamp = input->header.stamp;
-        nf_pc_.add (ros_ptr(cloud.makeShared ()));
-        nf_pi_.add (boost::make_shared<PointIndices> (indices));
-      }
-
-    private:
-      /** \brief Synchronized input, surface, and point indices.*/
-      boost::shared_ptr <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointCloudIn, PointIndices> > > sync_input_surface_indices_a_;
-      boost::shared_ptr <message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices> > > sync_input_surface_indices_e_;
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief NodeletLazy connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
-
-      /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
-        * \param cloud the pointer to the input point cloud
-        * \param cloud_surface the pointer to the surface point cloud
-        * \param indices the pointer to the input point cloud indices
-        */
-      void input_surface_indices_callback (const PointCloudInConstPtr &cloud, 
-                                           const PointCloudInConstPtr &cloud_surface, 
-                                           const PointIndicesConstPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////
-  class FeatureFromNormals : public Feature
-  {
-    public:
-      typedef sensor_msgs::PointCloud2 PointCloud2;
-
-      typedef pcl::PointCloud<pcl::Normal> PointCloudN;
-      typedef boost::shared_ptr<PointCloudN> PointCloudNPtr;
-      typedef boost::shared_ptr<const PointCloudN> PointCloudNConstPtr;
-
-      FeatureFromNormals () : normals_() {};
-
-    protected:
-      /** \brief A pointer to the input dataset that contains the point normals of the XYZ dataset. */
-      PointCloudNConstPtr normals_;
-
-      /** \brief Child initialization routine. Internal method. */
-      virtual bool childInit (ros::NodeHandle &nh) = 0;
-
-      /** \brief Publish an empty point cloud of the feature output type. */
-      virtual void emptyPublish (const PointCloudInConstPtr &cloud) = 0;
-
-      /** \brief Compute the feature and publish it. */
-      virtual void computePublish (const PointCloudInConstPtr &cloud, 
-                                   const PointCloudNConstPtr &normals,
-                                   const PointCloudInConstPtr &surface,
-                                   const IndicesPtr &indices) = 0;
-
-    private:
-      /** \brief The normals PointCloud subscriber filter. */
-      message_filters::Subscriber<PointCloudN> sub_normals_filter_;
-
-      /** \brief Synchronized input, normals, surface, and point indices.*/
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn, PointCloudN, PointCloudIn, PointIndices> > > sync_input_normals_surface_indices_a_;
-      boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn, PointCloudN, PointCloudIn, PointIndices> > > sync_input_normals_surface_indices_e_;
-
-      /** \brief Internal method. */
-      void computePublish (const PointCloudInConstPtr &, 
-                           const PointCloudInConstPtr &,
-                           const IndicesPtr &) {} // This should never be called
-
-      /** \brief Nodelet initialization routine. */
-      virtual void onInit ();
-
-      /** \brief NodeletLazy connection routine. */
-      virtual void subscribe ();
-      virtual void unsubscribe ();
-
-      /** \brief Input point cloud callback. Used when \a use_indices and \a use_surface are set.
-        * \param cloud the pointer to the input point cloud
-        * \param cloud_normals the pointer to the input point cloud normals
-        * \param cloud_surface the pointer to the surface point cloud
-        * \param indices the pointer to the input point cloud indices
-        */
-      void input_normals_surface_indices_callback (const PointCloudInConstPtr &cloud, 
-                                                   const PointCloudNConstPtr &cloud_normals, 
-                                                   const PointCloudInConstPtr &cloud_surface, 
-                                                   const PointIndicesConstPtr &indices);
-
-    public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  };
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
 }
 
 #endif  //#ifndef PCL_ROS_FEATURE_H_
