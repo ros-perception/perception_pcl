@@ -38,9 +38,10 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
 #include <pcl/PointIndices.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <vector>
 #include "pcl_ros/segmentation/extract_clusters.hpp"
 
-#include <pcl_conversions/pcl_conversions.h>
 
 using pcl_conversions::fromPCL;
 using pcl_conversions::moveFromPCL;
@@ -69,7 +70,7 @@ pcl_ros::EuclideanClusterExtraction::onInit()
     return;
   }
 
-  //private_nh.getParam ("use_indices", use_indices_);
+  // private_nh.getParam ("use_indices", use_indices_);
   pnh_->getParam("publish_indices", publish_indices_);
 
   if (publish_indices_) {
@@ -110,16 +111,19 @@ pcl_ros::EuclideanClusterExtraction::subscribe()
     sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
 
     if (approximate_sync_) {
-      sync_input_indices_a_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_a_ =
+        boost::make_shared<message_filters::Synchronizer<
+            message_filters::sync_policies::ApproximateTime<
+              PointCloud, PointIndices>>>(max_queue_size_);
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback(
         bind(
           &EuclideanClusterExtraction::
           input_indices_callback, this, _1, _2));
     } else {
-      sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<
+            message_filters::sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback(
         bind(
@@ -206,8 +210,10 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback(
     std_msgs::Header indices_header = indices->header;
     NODELET_DEBUG(
       "[%s::input_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
       cloud_header.stamp.toSec(), cloud_header.frame_id.c_str(), pnh_->resolveName("input").c_str(),
@@ -215,7 +221,8 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback(
       indices_header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.",
+      "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on "
+      "topic %s received.",
       getName().c_str(), cloud->width * cloud->height, fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
         "input").c_str());
@@ -235,10 +242,11 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback(
 
   if (publish_indices_) {
     for (size_t i = 0; i < clusters.size(); ++i) {
-      if ((int)i >= max_clusters_) {
+      if (static_cast<int>(i) >= max_clusters_) {
         break;
       }
-      // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
+      // TODO(xxx): HACK!!! We need to change the PointCloud2 message to add for an incremental
+      // sequence ID number.
       pcl_msgs::PointIndices ros_pi;
       moveFromPCL(clusters[i], ros_pi);
       ros_pi.header.stamp += ros::Duration(i * 0.001);
@@ -250,15 +258,16 @@ pcl_ros::EuclideanClusterExtraction::input_indices_callback(
       clusters.size(), pnh_->resolveName("output").c_str());
   } else {
     for (size_t i = 0; i < clusters.size(); ++i) {
-      if ((int)i >= max_clusters_) {
+      if (static_cast<int>(i) >= max_clusters_) {
         break;
       }
       PointCloud output;
       copyPointCloud(*cloud, clusters[i].indices, output);
 
-      //PointCloud output_blob;     // Convert from the templated output to the PointCloud blob
-      //pcl::toROSMsg (output, output_blob);
-      // TODO: HACK!!! We need to change the PointCloud2 message to add for an incremental sequence ID number.
+      // PointCloud output_blob;     // Convert from the templated output to the PointCloud blob
+      // pcl::toROSMsg (output, output_blob);
+      // TODO(xxx): HACK!!! We need to change the PointCloud2 message to add for an incremental
+      // sequence ID number.
       std_msgs::Header header = fromPCL(output.header);
       header.stamp += ros::Duration(i * 0.001);
       toPCL(header, output.header);

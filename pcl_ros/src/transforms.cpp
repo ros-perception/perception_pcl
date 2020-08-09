@@ -38,6 +38,8 @@
 #include <pcl/common/io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <limits>
+#include <string>
 #include "pcl_ros/transforms.hpp"
 #include "pcl_ros/impl/transforms.hpp"
 
@@ -142,21 +144,24 @@ transformPointCloud(
     in.fields[z_idx].offset, 0);
 
   for (size_t i = 0; i < in.width * in.height; ++i) {
-    Eigen::Vector4f pt(*(float *)&in.data[xyz_offset[0]], *(float *)&in.data[xyz_offset[1]],
-      *(float *)&in.data[xyz_offset[2]], 1);
+    Eigen::Vector4f pt(*reinterpret_cast<float *>(&in.data[xyz_offset[0]]),
+      *reinterpret_cast<float *>(&in.data[xyz_offset[1]]),
+      *reinterpret_cast<float *>(&in.data[xyz_offset[2]], 1));
     Eigen::Vector4f pt_out;
 
     bool max_range_point = false;
     int distance_ptr_offset = i * in.point_step + in.fields[dist_idx].offset;
-    float * distance_ptr = (dist_idx < 0 ? NULL : (float *)(&in.data[distance_ptr_offset]));
+    float * distance_ptr =
+      (dist_idx < 0 ? NULL : reinterpret_cast<float *>(&in.data[distance_ptr_offset]));
     if (!std::isfinite(pt[0]) || !std::isfinite(pt[1]) || !std::isfinite(pt[2])) {
-      if (distance_ptr == NULL || !std::isfinite(*distance_ptr)) { // Invalid point
+      if (distance_ptr == NULL || !std::isfinite(*distance_ptr)) {  // Invalid point
         pt_out = pt;
-      } else { // max range point
+      } else {  // max range point
         pt[0] = *distance_ptr;  // Replace x with the x value saved in distance
         pt_out = transform * pt;
         max_range_point = true;
-        //std::cout << pt[0]<<","<<pt[1]<<","<<pt[2]<<" => "<<pt_out[0]<<","<<pt_out[1]<<","<<pt_out[2]<<"\n";
+        // std::cout << pt[0]<<","<<pt[1]<<","<<pt[2]<<" => "<<pt_out[0]<<",
+        // "<<pt_out[1]<<","<<pt_out[2]<<"\n";
       }
     } else {
       pt_out = transform * pt;
@@ -164,7 +169,7 @@ transformPointCloud(
 
     if (max_range_point) {
       // Save x value in distance again
-      *(float *)(&out.data[distance_ptr_offset]) = pt_out[0];
+      *reinterpret_cast<float *>(&out.data[distance_ptr_offset]) = pt_out[0];
       pt_out[0] = std::numeric_limits<float>::quiet_NaN();
     }
 
@@ -181,7 +186,8 @@ transformPointCloud(
   if (vp_idx != -1) {
     // Transform the viewpoint info too
     for (size_t i = 0; i < out.width * out.height; ++i) {
-      float * pstep = (float *)&out.data[i * out.point_step + out.fields[vp_idx].offset];
+      float * pstep =
+        reinterpret_cast<float *>(&out.data[i * out.point_step + out.fields[vp_idx].offset]);
       // Assume vp_x, vp_y, vp_z are consecutive
       Eigen::Vector4f vp_in(pstep[0], pstep[1], pstep[2], 1);
       Eigen::Vector4f vp_out = transform * vp_in;
@@ -212,7 +218,7 @@ transformAsMatrix(const tf::Transform & bt, Eigen::Matrix4f & out_mat)
   out_mat(2, 3) = origin.z();
 }
 
-} // namespace pcl_ros
+}  // namespace pcl_ros
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template void pcl_ros::transformPointCloudWithNormals<pcl::PointNormal>(

@@ -36,8 +36,8 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_CROPBOX_H_
-#define PCL_ROS_FILTERS_CROPBOX_H_
+#ifndef PCL_ROS__FILTERS__CROP_BOX_HPP_
+#define PCL_ROS__FILTERS__CROP_BOX_HPP_
 
 // PCL includes
 #include <pcl/filters/crop_box.h>
@@ -58,7 +58,7 @@ class CropBox : public Filter
 {
 protected:
   /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::CropBoxConfig>> srv_;       // TODO
+  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::CropBoxConfig>> srv_;  // TODO(xxx)
 
   /** \brief Call the actual filter.
     * \param input the input point cloud dataset
@@ -101,6 +101,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FILTERS_CROPBOX_H_
+#endif  // PCL_ROS__FILTERS__CROP_BOX_HPP_

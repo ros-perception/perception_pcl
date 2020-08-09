@@ -35,9 +35,10 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/project_inliers.hpp"
+#include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
+#include <vector>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -99,16 +100,20 @@ pcl_ros::ProjectInliers::subscribe()
   sub_model_.subscribe(*pnh_, "model", max_queue_size_);
 
   if (approximate_sync_) {
-    sync_input_indices_model_a_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud2,
-        PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_a_ =
+      boost::make_shared<message_filters::Synchronizer<
+          message_filters::sync_policies::ApproximateTime<
+            PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_a_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_a_->registerCallback(
       bind(
         &ProjectInliers::input_indices_model_callback,
         this, _1, _2, _3));
   } else {
-    sync_input_indices_model_e_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud2,
-        PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_e_ =
+      boost::make_shared<message_filters::Synchronizer<
+          message_filters::sync_policies::ExactTime<
+            PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_e_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_e_->registerCallback(
       bind(
@@ -148,9 +153,12 @@ pcl_ros::ProjectInliers::input_indices_model_callback(
 
   NODELET_DEBUG(
     "[%s::input_indices_model_callback]\n"
-    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-    "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.\n"
-    "                                 - ModelCoefficients with %zu values, stamp %f, and frame %s on topic %s received.",
+    "                                 - PointCloud with %d data points (%s), stamp %f, and "
+    "frame %s on topic %s received.\n"
+    "                                 - PointIndices with %zu values, stamp %f, and "
+    "frame %s on topic %s received.\n"
+    "                                 - ModelCoefficients with %zu values, stamp %f, and "
+    "frame %s on topic %s received.",
     getName().c_str(),
     cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
     cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName("input").c_str(),

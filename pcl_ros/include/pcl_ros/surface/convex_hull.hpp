@@ -35,16 +35,12 @@
  *
  */
 
-#ifndef PCL_ROS_CONVEX_HULL_2D_H_
-#define PCL_ROS_CONVEX_HULL_2D_H_
+#ifndef PCL_ROS__SURFACE__CONVEX_HULL_HPP_
+#define PCL_ROS__SURFACE__CONVEX_HULL_HPP_
 
-#include "pcl_ros/pcl_nodelet.hpp"
-
-// PCL includes
 #include <pcl/surface/convex_hull.h>
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include "pcl_ros/pcl_nodelet.hpp"
 
 namespace pcl_ros
 {
@@ -94,6 +90,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_CONVEX_HULL_2D_H_
+#endif  // PCL_ROS__SURFACE__CONVEX_HULL_HPP_

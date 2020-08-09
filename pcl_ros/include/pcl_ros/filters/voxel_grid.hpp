@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_VOXEL_H_
-#define PCL_ROS_FILTERS_VOXEL_H_
+#ifndef PCL_ROS__FILTERS__VOXEL_GRID_HPP_
+#define PCL_ROS__FILTERS__VOXEL_GRID_HPP_
 
 // PCL includes
 #include <pcl/filters/voxel_grid.h>
@@ -86,6 +86,6 @@ protected:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FILTERS_VOXEL_H_
+#endif  // PCL_ROS__FILTERS__VOXEL_GRID_HPP_

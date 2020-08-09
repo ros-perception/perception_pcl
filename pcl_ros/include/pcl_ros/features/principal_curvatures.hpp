@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_
-#define PCL_ROS_PRINCIPAL_CURVATURES_H_
+#ifndef PCL_ROS__FEATURES__PRINCIPAL_CURVATURES_HPP_
+#define PCL_ROS__FEATURES__PRINCIPAL_CURVATURES_HPP_
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
 #include <pcl/features/principal_curvatures.h>
@@ -80,6 +80,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_PRINCIPAL_CURVATURES_H_
+#endif  // PCL_ROS__FEATURES__PRINCIPAL_CURVATURES_HPP_

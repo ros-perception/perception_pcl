@@ -36,8 +36,8 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/crop_box.hpp"
+#include <pluginlib/class_list_macros.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
@@ -102,7 +102,8 @@ pcl_ros::CropBox::config_callback(pcl_ros::CropBoxConfig & config, uint32_t leve
     impl_.setNegative(config.negative);
   }
 
-  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
+  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters
+  // as they are inexistent in PCL
   if (tf_input_frame_ != config.input_frame) {
     tf_input_frame_ = config.input_frame;
     NODELET_DEBUG(

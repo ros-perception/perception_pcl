@@ -35,23 +35,21 @@
  *
  */
 
-#ifndef PCL_ROS_FILTER_H_
-#define PCL_ROS_FILTER_H_
+#ifndef PCL_ROS__FILTERS__FILTER_HPP_
+#define PCL_ROS__FILTERS__FILTER_HPP_
 
-// PCL includes
 #include <pcl/filters/filter.h>
-#include "pcl_ros/pcl_nodelet.hpp"
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include <string>
+#include "pcl_ros/pcl_nodelet.hpp"
 #include "pcl_ros/FilterConfig.hpp"
 
 namespace pcl_ros
 {
 namespace sync_policies = message_filters::sync_policies;
 
-/** \brief @b Filter represents the base filter class. Some generic 3D operations that are applicable to all filters
-  * are defined here as static methods.
+/** \brief @b Filter represents the base filter class. Some generic 3D operations that are
+  * applicable to all filters are defined here as static methods.
   * \author Radu Bogdan Rusu
   */
 class Filter : public PCLNodelet
@@ -79,16 +77,22 @@ protected:
   /** \brief The maximum allowed filter value a point will be considered from. */
   double filter_limit_max_;
 
-  /** \brief Set to true if we want to return the data outside (\a filter_limit_min_;\a filter_limit_max_). Default: false. */
+  /** \brief Set to true if we want to return the data outside
+    * (\a filter_limit_min_;\a filter_limit_max_). Default: false.
+    */
   bool filter_limit_negative_;
 
-  /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The input TF frame the data should be transformed into,
+    * if input.header.frame_id is different.
+    */
   std::string tf_input_frame_;
 
   /** \brief The original data input TF frame. */
   std::string tf_input_orig_frame_;
 
-  /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The output TF frame the data should be transformed into,
+    * if input.header.frame_id is different.
+    */
   std::string tf_output_frame_;
 
   /** \brief Internal mutex. */
@@ -157,6 +161,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FILTER_H_
+#endif  // PCL_ROS__FILTERS__FILTER_HPP_

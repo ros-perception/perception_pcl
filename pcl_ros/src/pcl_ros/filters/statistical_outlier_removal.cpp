@@ -63,7 +63,8 @@ pcl_ros::StatisticalOutlierRemoval::config_callback(
   if (impl_.getMeanK() != config.mean_k) {
     impl_.setMeanK(config.mean_k);
     NODELET_DEBUG(
-      "[%s::config_callback] Setting the number of points (k) to use for mean distance estimation to: %d.",
+      "[%s::config_callback] Setting the number of points (k) to use for mean "
+      "distance estimation to: %d.",
       getName().c_str(), config.mean_k);
   }
 

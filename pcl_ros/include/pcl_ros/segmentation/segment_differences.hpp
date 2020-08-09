@@ -35,15 +35,13 @@
  *
  */
 
-#ifndef PCL_ROS_SEGMENT_DIFFERENCES_H_
-#define PCL_ROS_SEGMENT_DIFFERENCES_H_
+#ifndef PCL_ROS__SEGMENTATION__SEGMENT_DIFFERENCES_HPP_
+#define PCL_ROS__SEGMENTATION__SEGMENT_DIFFERENCES_HPP_
 
 #include <pcl/segmentation/segment_differences.h>
-#include "pcl_ros/pcl_nodelet.hpp"
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include "pcl_ros/SegmentDifferencesConfig.hpp"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 
 namespace pcl_ros
@@ -108,6 +106,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_SEGMENT_DIFFERENCES_H_
+#endif  // PCL_ROS__SEGMENTATION__SEGMENT_DIFFERENCES_HPP_

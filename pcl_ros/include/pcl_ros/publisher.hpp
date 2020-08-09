@@ -42,14 +42,16 @@
 
 **/
 
-#ifndef PCL_ROS_PUBLISHER_H_
-#define PCL_ROS_PUBLISHER_H_
+#ifndef PCL_ROS__PUBLISHER_HPP_
+#define PCL_ROS__PUBLISHER_HPP_
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/conversions.h>
 
 #include <pcl_conversions/pcl_conversions.h>
+
+#include <string>
 
 namespace pcl_ros
 {
@@ -82,7 +84,7 @@ public:
 
   operator void *() const
   {
-    return (pub_) ? (void *)1 : (void *)0;
+    return (pub_) ? reinterpret_cast<void *>(1) : reinterpret_cast<void *>(0);
   }
 
 protected:
@@ -135,15 +137,15 @@ public:
   publish(const sensor_msgs::PointCloud2Ptr & point_cloud) const
   {
     pub_.publish(point_cloud);
-    //pub_.publish (*point_cloud);
+    // pub_.publish (*point_cloud);
   }
 
   void
   publish(const sensor_msgs::PointCloud2 & point_cloud) const
   {
     pub_.publish(boost::make_shared<const sensor_msgs::PointCloud2>(point_cloud));
-    //pub_.publish (point_cloud);
+    // pub_.publish (point_cloud);
   }
 };
-}
-#endif  //#ifndef PCL_ROS_PUBLISHER_H_
+}  // namespace pcl_ros
+#endif  // PCL_ROS__PUBLISHER_HPP_

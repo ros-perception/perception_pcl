@@ -36,7 +36,7 @@
  */
 
 // Include the implementations here instead of compiling them separately to speed up compile time
-//#include "extract_clusters.cpp"
-//#include "extract_polygonal_prism_data.cpp"
-//#include "sac_segmentation.cpp"
-//#include "segment_differences.cpp"
+// #include "extract_clusters.cpp"
+// #include "extract_polygonal_prism_data.cpp"
+// #include "sac_segmentation.cpp"
+// #include "segment_differences.cpp"

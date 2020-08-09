@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_BOUNDARY_H_
-#define PCL_ROS_BOUNDARY_H_
+#ifndef PCL_ROS__FEATURES__BOUNDARY_HPP_
+#define PCL_ROS__FEATURES__BOUNDARY_HPP_
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET true
 
@@ -82,6 +82,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_BOUNDARY_H_
+#endif  // PCL_ROS__FEATURES__BOUNDARY_HPP_

@@ -41,8 +41,8 @@
 
 **/
 
-#ifndef PCL_NODELET_H_
-#define PCL_NODELET_H_
+#ifndef PCL_ROS__PCL_NODELET_HPP_
+#define PCL_ROS__PCL_NODELET_HPP_
 
 #include <sensor_msgs/PointCloud2.h>
 // PCL includes
@@ -51,7 +51,6 @@
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "pcl_ros/point_cloud.hpp"
 // ROS Nodelet includes
 #include <nodelet_topic_tools/nodelet_lazy.h>
 #include <message_filters/subscriber.h>
@@ -62,6 +61,11 @@
 // Include TF
 #include <tf/transform_listener.h>
 
+// STL
+#include <string>
+
+#include "pcl_ros/point_cloud.hpp"
+
 using pcl_conversions::fromPCL;
 
 namespace pcl_ros
@@ -69,7 +73,9 @@ namespace pcl_ros
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-/** \brief @b PCLNodelet represents the base PCL Nodelet class. All PCL nodelets should inherit from this class. */
+/** \brief @b PCLNodelet represents the base PCL Nodelet class. All PCL nodelets should
+  * inherit from this class.
+  **/
 class PCLNodelet : public nodelet_topic_tools::NodeletLazy
 {
 public:
@@ -128,7 +134,9 @@ protected:
   /** \brief The maximum queue size (default: 3). */
   int max_queue_size_;
 
-  /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
+  /** \brief True if we use an approximate time synchronizer
+    * versus an exact one (false by default).
+    **/
   bool approximate_sync_;
 
   /** \brief TF listener object. */
@@ -143,7 +151,8 @@ protected:
   {
     if (cloud->width * cloud->height * cloud->point_step != cloud->data.size()) {
       NODELET_WARN(
-        "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) with stamp %f, and frame %s on topic %s received!",
+        "[%s] Invalid PointCloud (data = %zu, width = %d, height = %d, step = %d) "
+        "with stamp %f, and frame %s on topic %s received!",
         getName().c_str(),
         cloud->data.size(), cloud->width, cloud->height, cloud->point_step,
         cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -163,7 +172,8 @@ protected:
   {
     if (cloud->width * cloud->height != cloud->points.size()) {
       NODELET_WARN(
-        "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) with stamp %f, and frame %s on topic %s received!",
+        "[%s] Invalid PointCloud (points = %zu, width = %d, height = %d) "
+        "with stamp %f, and frame %s on topic %s received!",
         getName().c_str(), cloud->points.size(), cloud->width, cloud->height,
         fromPCL(cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
         pnh_->resolveName(topic_name).c_str());
@@ -182,7 +192,10 @@ protected:
   {
     /*if (indices->indices.empty ())
     {
-      NODELET_WARN ("[%s] Empty indices (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), indices->indices.size (), indices->header.stamp.toSec (), indices->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
+      NODELET_WARN ("[%s] Empty indices (values = %zu) "
+      "with stamp %f, and frame %s on topic %s received!",
+      getName ().c_str (), indices->indices.size (), indices->header.stamp.toSec (),
+      indices->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
       return (true);
     }*/
     return true;
@@ -197,13 +210,18 @@ protected:
   {
     /*if (model->values.empty ())
     {
-      NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, and frame %s on topic %s received!", getName ().c_str (), model->values.size (), model->header.stamp.toSec (), model->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
+      NODELET_WARN ("[%s] Empty model (values = %zu) with stamp %f, "
+      "and frame %s on topic %s received!",
+      getName ().c_str (), model->values.size (), model->header.stamp.toSec (),
+      model->header.frame_id.c_str (), pnh_->resolveName (topic_name).c_str ());
       return (false);
     }*/
     return true;
   }
 
-  /** \brief Lazy transport subscribe/unsubscribe routine. It is optional for backward compatibility. */
+  /** \brief Lazy transport subscribe/unsubscribe routine.
+    * It is optional for backward compatibility.
+    **/
   virtual void subscribe() {}
   virtual void unsubscribe() {}
 
@@ -237,6 +255,6 @@ protected:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_NODELET_H_
+#endif  // PCL_ROS__PCL_NODELET_HPP_

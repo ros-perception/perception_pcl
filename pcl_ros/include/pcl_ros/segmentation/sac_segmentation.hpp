@@ -35,17 +35,14 @@
  *
  */
 
-#ifndef PCL_ROS_SAC_SEGMENTATION_H_
-#define PCL_ROS_SAC_SEGMENTATION_H_
+#ifndef PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
+#define PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
 
-#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/pass_through.h>
-
-// PCL includes
 #include <pcl/segmentation/sac_segmentation.h>
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include <string>
+#include "pcl_ros/pcl_nodelet.hpp"
 #include "pcl_ros/SACSegmentationConfig.hpp"
 #include "pcl_ros/SACSegmentationFromNormalsConfig.hpp"
 
@@ -54,8 +51,9 @@ namespace pcl_ros
 namespace sync_policies = message_filters::sync_policies;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-/** \brief @b SACSegmentation represents the Nodelet segmentation class for Sample Consensus methods and models, in
-  * the sense that it just creates a Nodelet wrapper for generic-purpose SAC-based segmentation.
+/** \brief @b SACSegmentation represents the Nodelet segmentation class for Sample Consensus
+  * methods and models, in the sense that it just creates a Nodelet wrapper for generic-purpose
+  * SAC-based segmentation.
   * \author Radu Bogdan Rusu
   */
 class SACSegmentation : public PCLNodelet
@@ -69,7 +67,8 @@ public:
   SACSegmentation()
   : min_inliers_(0) {}
 
-  /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
+  /** \brief Set the input TF frame the data should be transformed into before processing,
+    * if input.header.frame_id is different.
     * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
     */
   inline void setInputTFframe(std::string tf_frame) {tf_input_frame_ = tf_frame;}
@@ -102,13 +101,17 @@ protected:
   /** \brief Pointer to a dynamic reconfigure service. */
   boost::shared_ptr<dynamic_reconfigure::Server<SACSegmentationConfig>> srv_;
 
-  /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The input TF frame the data should be transformed into,
+    * if input.header.frame_id is different.
+    */
   std::string tf_input_frame_;
 
   /** \brief The original data input TF frame. */
   std::string tf_input_orig_frame_;
 
-  /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The output TF frame the data should be transformed into,
+    * if input.header.frame_id is different.
+    */
   std::string tf_output_frame_;
 
   /** \brief Null passthrough filter, used for pushing empty elements in the
@@ -180,8 +183,8 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-/** \brief @b SACSegmentationFromNormals represents the PCL nodelet segmentation class for Sample Consensus methods and
-  * models that require the use of surface normals for estimation.
+/** \brief @b SACSegmentationFromNormals represents the PCL nodelet segmentation class for
+  * Sample Consensus methods and models that require the use of surface normals for estimation.
   */
 class SACSegmentationFromNormals : public SACSegmentation
 {
@@ -194,7 +197,8 @@ class SACSegmentationFromNormals : public SACSegmentation
   typedef boost::shared_ptr<const PointCloudN> PointCloudNConstPtr;
 
 public:
-  /** \brief Set the input TF frame the data should be transformed into before processing, if input.header.frame_id is different.
+  /** \brief Set the input TF frame the data should be transformed into before processing,
+    * if input.header.frame_id is different.
     * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
     */
   inline void setInputTFframe(std::string tf_frame) {tf_input_frame_ = tf_frame;}
@@ -237,11 +241,15 @@ protected:
     * synchronizer */
   message_filters::PassThrough<PointIndices> nf_;
 
-  /** \brief The input TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The input TF frame the data should be transformed into,
+   * if input.header.frame_id is different.
+   */
   std::string tf_input_frame_;
   /** \brief The original data input TF frame. */
   std::string tf_input_orig_frame_;
-  /** \brief The output TF frame the data should be transformed into, if input.header.frame_id is different. */
+  /** \brief The output TF frame the data should be transformed into,
+    * if input.header.frame_id is different.
+    */
   std::string tf_output_frame_;
 
   /** \brief Nodelet initialization routine. */
@@ -288,6 +296,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_SAC_SEGMENTATION_H_
+#endif  // PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_

@@ -35,22 +35,23 @@
  *
  */
 
-#ifndef PCL_ROS_FEATURE_H_
-#define PCL_ROS_FEATURE_H_
+#ifndef PCL_ROS__FEATURES__FEATURE_HPP_
+#define PCL_ROS__FEATURES__FEATURE_HPP_
 
 // PCL includes
 #include <pcl/features/feature.h>
 #include <pcl_msgs/PointIndices.h>
 
-#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/pass_through.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/FeatureConfig.hpp"
 
 // PCL conversions
 #include <pcl_conversions/pcl_conversions.h>
+
+#include "pcl_ros/pcl_nodelet.hpp"
+#include "pcl_ros/FeatureConfig.hpp"
 
 namespace pcl_ros
 {
@@ -84,13 +85,15 @@ public:
 
 protected:
   /** \brief The input point cloud dataset. */
-  //PointCloudInConstPtr input_;
+  // PointCloudInConstPtr input_;
 
   /** \brief A pointer to the vector of point indices to use. */
-  //IndicesConstPtr indices_;
+  // IndicesConstPtr indices_;
 
-  /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
-  //PointCloudInConstPtr surface_;
+  /** \brief An input point cloud describing the surface that is to be used
+    * for nearest neighbors estimation.
+    */
+  // PointCloudInConstPtr surface_;
 
   /** \brief A pointer to the spatial search object. */
   KdTreePtr tree_;
@@ -108,7 +111,9 @@ protected:
   /** \brief The input PointCloud subscriber. */
   ros::Subscriber sub_input_;
 
-  /** \brief Set to true if the nodelet needs to listen for incoming point clouds representing the search surface. */
+  /** \brief Set to true if the nodelet needs to listen for incoming point
+   * clouds representing the search surface.
+   */
   bool use_surface_;
 
   /** \brief Parameter for the spatial locator tree. By convention, the values represent:
@@ -257,6 +262,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FEATURE_H_
+#endif  // PCL_ROS__FEATURES__FEATURE_HPP_

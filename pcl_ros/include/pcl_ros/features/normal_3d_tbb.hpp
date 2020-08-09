@@ -35,11 +35,11 @@
  *
  */
 
-#ifndef PCL_ROS_NORMAL_3D_TBB_H_
-#define PCL_ROS_NORMAL_3D_TBB_H_
+#ifndef PCL_ROS__FEATURES__NORMAL_3D_TBB_HPP_
+#define PCL_ROS__FEATURES__NORMAL_3D_TBB_HPP_
 
-//#include "pcl_ros/pcl_ros_config.hpp"
-//#if defined(HAVE_TBB)
+// #include "pcl_ros/pcl_ros_config.hpp"
+// #if defined(HAVE_TBB)
 
 #include <pcl/features/normal_3d_tbb.h>
 #include "pcl_ros/features/normal_3d.hpp"
@@ -78,8 +78,8 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-//#endif  // HAVE_TBB
+// #endif  // HAVE_TBB
 
-#endif  //#ifndef PCL_ROS_NORMAL_3D_TBB_H_
+#endif  // PCL_ROS__FEATURES__NORMAL_3D_TBB_HPP_

@@ -35,21 +35,22 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+// #include <pluginlib/class_list_macros.h>
 // Include the implementations here instead of compiling them separately to speed up compile time
-//#include "normal_3d.cpp"
-//#include "boundary.cpp"
-//#include "fpfh.cpp"
-//#include "fpfh_omp.cpp"
-//#include "moment_invariants.cpp"
-//#include "normal_3d_omp.cpp"
-//#include "normal_3d_tbb.cpp"
-//#include "pfh.cpp"
-//#include "principal_curvatures.cpp"
-//#include "vfh.cpp"
+// #include "normal_3d.cpp"
+// #include "boundary.cpp"
+// #include "fpfh.cpp"
+// #include "fpfh_omp.cpp"
+// #include "moment_invariants.cpp"
+// #include "normal_3d_omp.cpp"
+// #include "normal_3d_tbb.cpp"
+// #include "pfh.cpp"
+// #include "principal_curvatures.cpp"
+// #include "vfh.cpp"
 #include <pcl/io/io.h>
-#include "pcl_ros/features/feature.hpp"
 #include <message_filters/null_types.h>
+#include <vector>
+#include "pcl_ros/features/feature.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -62,13 +63,15 @@ pcl_ros::Feature::onInit()
   childInit(*pnh_);
 
   // Allow each individual class that inherits from us to declare their own Publisher
-  // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
-  //pub_output_ = pnh_->template advertise<PointCloud2> ("output", max_queue_size_);
+  // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish
+  // PointCloud<Normal>, etc
+  // pub_output_ = pnh_->template advertise<PointCloud2> ("output", max_queue_size_);
 
   // ---[ Mandatory parameters
   if (!pnh_->getParam("k_search", k_) && !pnh_->getParam("radius_search", search_radius_)) {
     NODELET_ERROR(
-      "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.",
+      "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these "
+      "parameters before continuing.",
       getName().c_str());
     return;
   }
@@ -108,11 +111,14 @@ pcl_ros::Feature::subscribe()
   if (use_indices_ || use_surface_) {
     // Create the objects here
     if (approximate_sync_) {
-      sync_input_surface_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn,
-          PointCloudIn, PointIndices>>>(max_queue_size_);
+      sync_input_surface_indices_a_ =
+        boost::make_shared<message_filters::Synchronizer<
+            sync_policies::ApproximateTime<
+              PointCloudIn, PointCloudIn, PointIndices>>>(max_queue_size_);
     } else {
-      sync_input_surface_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn,
-          PointCloudIn, PointIndices>>>(max_queue_size_);
+      sync_input_surface_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<
+            sync_policies::ExactTime<PointCloudIn, PointCloudIn, PointIndices>>>(max_queue_size_);
     }
 
     // Subscribe to the input using a filter
@@ -121,7 +127,8 @@ pcl_ros::Feature::subscribe()
       // If indices are enabled, subscribe to the indices
       sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
       if (use_surface_) {   // Use both indices and surface
-        // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
+        // If surface is enabled, subscribe to the surface,
+        // connect the input-indices-surface trio and register
         sub_surface_filter_.subscribe(*pnh_, "surface", max_queue_size_);
         if (approximate_sync_) {
           sync_input_surface_indices_a_->connectInput(
@@ -251,9 +258,12 @@ pcl_ros::Feature::input_surface_indices_callback(
     if (indices) {
       NODELET_DEBUG(
         "[input_surface_indices_callback]\n"
-        "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+        "                                         - PointCloud with %d data points (%s), stamp %f, "
+        "and frame %s on topic %s received.\n"
+        "                                         - PointCloud with %d data points (%s), stamp %f, "
+        "and frame %s on topic %s received.\n"
+        "                                         - PointIndices with %zu values, stamp %f, and "
+        "frame %s on topic %s received.",
         cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
           cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
           "input").c_str(),
@@ -266,8 +276,10 @@ pcl_ros::Feature::input_surface_indices_callback(
     } else {
       NODELET_DEBUG(
         "[input_surface_indices_callback]\n"
-        "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+        "                                 - PointCloud with %d data points (%s), stamp %f, and "
+        "frame %s on topic %s received.\n"
+        "                                 - PointCloud with %d data points (%s), stamp %f, and "
+        "frame %s on topic %s received.",
         cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
           cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
           "input").c_str(),
@@ -279,8 +291,10 @@ pcl_ros::Feature::input_surface_indices_callback(
   } else if (indices) {
     NODELET_DEBUG(
       "[input_surface_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and frame "
+      "%s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and frame %s on "
+      "topic %s received.",
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
         "input").c_str(),
@@ -288,16 +302,18 @@ pcl_ros::Feature::input_surface_indices_callback(
       indices->header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.", cloud->width * cloud->height, fromPCL(
+      "[input_surface_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on "
+      "topic %s received.", cloud->width * cloud->height, fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
         "input").c_str());
   }
   ///
 
 
-  if ((int)(cloud->width * cloud->height) < k_) {
+  if (static_cast<int>(cloud->width * cloud->height) < k_) {
     NODELET_ERROR(
-      "[input_surface_indices_callback] Requested number of k-nearest neighbors (%d) is larger than the PointCloud size (%d)!", k_,
+      "[input_surface_indices_callback] Requested number of k-nearest neighbors (%d) is larger "
+      "than the PointCloud size (%d)!", k_,
       (int)(cloud->width * cloud->height));
     emptyPublish(cloud);
     return;
@@ -327,13 +343,15 @@ pcl_ros::FeatureFromNormals::onInit()
   childInit(*pnh_);
 
   // Allow each individual class that inherits from us to declare their own Publisher
-  // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish PointCloud<Normal>, etc
-  //pub_output_ = pnh_->template advertise<PointCloud2> ("output", max_queue_size_);
+  // This is useful for Publisher<pcl::PointCloud<T> >, as NormalEstimation can publish
+  // PointCloud<Normal>, etc
+  // pub_output_ = pnh_->template advertise<PointCloud2> ("output", max_queue_size_);
 
   // ---[ Mandatory parameters
   if (!pnh_->getParam("k_search", k_) && !pnh_->getParam("radius_search", search_radius_)) {
     NODELET_ERROR(
-      "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these parameters before continuing.",
+      "[%s::onInit] Neither 'k_search' nor 'radius_search' set! Need to set at least one of these "
+      "parameters before continuing.",
       getName().c_str());
     return;
   }
@@ -373,10 +391,13 @@ pcl_ros::FeatureFromNormals::subscribe()
 
   // Create the objects here
   if (approximate_sync_) {
-    sync_input_normals_surface_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloudIn,
-        PointCloudN, PointCloudIn, PointIndices>>>(max_queue_size_);
+    sync_input_normals_surface_indices_a_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ApproximateTime<PointCloudIn, PointCloudN,
+          PointCloudIn, PointIndices>>>(max_queue_size_);
   } else {
-    sync_input_normals_surface_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn,
+    sync_input_normals_surface_indices_e_ =
+      boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloudIn,
         PointCloudN, PointCloudIn, PointIndices>>>(max_queue_size_);
   }
 
@@ -386,7 +407,8 @@ pcl_ros::FeatureFromNormals::subscribe()
       // If indices are enabled, subscribe to the indices
       sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
       if (use_surface_) {   // Use both indices and surface
-        // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio and register
+        // If surface is enabled, subscribe to the surface, connect the input-indices-surface trio
+        // and register
         sub_surface_filter_.subscribe(*pnh_, "surface", max_queue_size_);
         if (approximate_sync_) {
           sync_input_normals_surface_indices_a_->connectInput(
@@ -490,7 +512,7 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
   }
 
   // If cloud+normals is given, check if it's valid
-  if (!isValid(cloud)) {// || !isValid (cloud_normals, "normals"))
+  if (!isValid(cloud)) {  // || !isValid (cloud_normals, "normals"))
     NODELET_ERROR("[%s::input_normals_surface_indices_callback] Invalid input!", getName().c_str());
     emptyPublish(cloud);
     return;
@@ -519,10 +541,14 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
     if (indices) {
       NODELET_DEBUG(
         "[%s::input_normals_surface_indices_callback]\n"
-        "                                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+        "                                                 - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.\n"
+        "                                                 - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.\n"
+        "                                                 - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.\n"
+        "                                                 - PointIndices with %zu values, "
+        "stamp %f, and frame %s on topic %s received.",
         getName().c_str(),
         cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
           cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -540,9 +566,12 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
     } else {
       NODELET_DEBUG(
         "[%s::input_normals_surface_indices_callback]\n"
-        "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-        "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+        "                                         - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.\n"
+        "                                         - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.\n"
+        "                                         - PointCloud with %d data points (%s), "
+        "stamp %f, and frame %s on topic %s received.",
         getName().c_str(),
         cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
           cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -559,9 +588,12 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
   } else if (indices) {
     NODELET_DEBUG(
       "[%s::input_normals_surface_indices_callback]\n"
-      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                         - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                         - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                         - PointCloud with %d data points (%s), "
+      "stamp %f, and frame %s on topic %s received.\n"
+      "                                         - PointCloud with %d data points (%s), "
+      "stamp %f, and frame %s on topic %s received.\n"
+      "                                         - PointIndices with %zu values, "
+      "stamp %f, and frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -575,8 +607,10 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
   } else {
     NODELET_DEBUG(
       "[%s::input_normals_surface_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -588,9 +622,10 @@ pcl_ros::FeatureFromNormals::input_normals_surface_indices_callback(
   }
   ///
 
-  if ((int)(cloud->width * cloud->height) < k_) {
+  if (static_cast<int>(cloud->width * cloud->height) < k_) {
     NODELET_ERROR(
-      "[%s::input_normals_surface_indices_callback] Requested number of k-nearest neighbors (%d) is larger than the PointCloud size (%d)!",
+      "[%s::input_normals_surface_indices_callback] Requested number of k-nearest neighbors (%d) "
+      "is larger than the PointCloud size (%d)!",
       getName().c_str(), k_, (int)(cloud->width * cloud->height));
     emptyPublish(cloud);
     return;

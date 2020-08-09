@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_FPFH_H_
-#define PCL_ROS_FPFH_H_
+#ifndef PCL_ROS__FEATURES__FPFH_HPP_
+#define PCL_ROS__FEATURES__FPFH_HPP_
 
 #include <pcl/features/fpfh.h>
 #include "pcl_ros/features/pfh.hpp"
@@ -94,6 +94,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_FPFH_H_
+#endif  // PCL_ROS__FEATURES__FPFH_HPP_

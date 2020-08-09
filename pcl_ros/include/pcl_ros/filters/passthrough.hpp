@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_PASSTHROUGH_H_
-#define PCL_ROS_FILTERS_PASSTHROUGH_H_
+#ifndef PCL_ROS__FILTERS__PASSTHROUGH_HPP_
+#define PCL_ROS__FILTERS__PASSTHROUGH_HPP_
 
 // PCL includes
 #include <pcl/filters/passthrough.h>
@@ -95,6 +95,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FILTERS_PASSTHROUGH_H_
+#endif  // PCL_ROS__FILTERS__PASSTHROUGH_HPP_

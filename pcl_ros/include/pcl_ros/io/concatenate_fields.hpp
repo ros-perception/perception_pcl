@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_IO_CONCATENATE_FIELDS_H_
-#define PCL_IO_CONCATENATE_FIELDS_H_
+#ifndef PCL_ROS__IO__CONCATENATE_FIELDS_HPP_
+#define PCL_ROS__IO__CONCATENATE_FIELDS_HPP_
 
 // ROS includes
 #include <nodelet_topic_tools/nodelet_lazy.h>
@@ -46,6 +46,9 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <sensor_msgs/PointCloud2.h>
+
+#include <map>
+#include <vector>
 
 namespace pcl_ros
 {
@@ -68,7 +71,7 @@ public:
   /** \brief Empty constructor.
     * \param queue_size the maximum queue size
     */
-  PointCloudConcatenateFieldsSynchronizer(int queue_size)
+  explicit PointCloudConcatenateFieldsSynchronizer(int queue_size)
   : maximum_queue_size_(queue_size), maximum_seconds_(0) {}
 
   /** \brief Empty destructor. */
@@ -98,6 +101,6 @@ private:
   /** \brief A queue for messages. */
   std::map<ros::Time, std::vector<PointCloudConstPtr>> queue_;
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_IO_CONCATENATE_H_
+#endif  // PCL_ROS__IO__CONCATENATE_FIELDS_HPP_

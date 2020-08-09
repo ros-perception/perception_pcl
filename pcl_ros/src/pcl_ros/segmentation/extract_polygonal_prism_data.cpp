@@ -36,11 +36,11 @@
  */
 
 #include <pluginlib/class_list_macros.h>
+#include <pcl/io/io.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <vector>
 #include "pcl_ros/transforms.hpp"
 #include "pcl_ros/segmentation/extract_polygonal_prism_data.hpp"
-#include <pcl/io/io.h>
-
-#include <pcl_conversions/pcl_conversions.h>
 
 using pcl_conversions::moveFromPCL;
 using pcl_conversions::moveToPCL;
@@ -73,11 +73,13 @@ pcl_ros::ExtractPolygonalPrismData::subscribe()
 
   // Create the objects here
   if (approximate_sync_) {
-    sync_input_hull_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
-        PointCloud, PointIndices>>>(max_queue_size_);
+    sync_input_hull_indices_a_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ApproximateTime<PointCloud, PointCloud, PointIndices>>>(max_queue_size_);
   } else {
-    sync_input_hull_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-        PointCloud, PointIndices>>>(max_queue_size_);
+    sync_input_hull_indices_e_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ExactTime<PointCloud, PointCloud, PointIndices>>>(max_queue_size_);
   }
 
   if (use_indices_) {
@@ -183,9 +185,12 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback(
   if (indices) {
     NODELET_DEBUG(
       "[%s::input_indices_hull_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -198,8 +203,10 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback(
   } else {
     NODELET_DEBUG(
       "[%s::input_indices_hull_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -212,7 +219,8 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback(
 
   if (cloud->header.frame_id != hull->header.frame_id) {
     NODELET_DEBUG(
-      "[%s::input_hull_callback] Planar hull has a different TF frame (%s) than the input point cloud (%s)! Using TF to transform.",
+      "[%s::input_hull_callback] Planar hull has a different TF frame (%s) than the input "
+      "point cloud (%s)! Using TF to transform.",
       getName().c_str(), hull->header.frame_id.c_str(), cloud->header.frame_id.c_str());
     PointCloud planar_hull;
     if (!pcl_ros::transformPointCloud(cloud->header.frame_id, *hull, planar_hull, tf_listener_)) {
@@ -233,7 +241,8 @@ pcl_ros::ExtractPolygonalPrismData::input_hull_indices_callback(
   impl_.setInputCloud(pcl_ptr(cloud));
   impl_.setIndices(indices_ptr);
 
-  // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
+  // Final check if the data is empty
+  // (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty()) {
     pcl::PointIndices pcl_inliers;
     moveToPCL(inliers, pcl_inliers);

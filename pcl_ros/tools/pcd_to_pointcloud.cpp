@@ -43,10 +43,6 @@
 
  **/
 
-// STL
-#include <chrono>
-#include <thread>
-
 // ROS core
 #include <ros/ros.h>
 #include <pcl/io/io.h>
@@ -54,14 +50,17 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include "pcl_ros/publisher.hpp"
+// STL
+#include <chrono>
+#include <string>
+#include <thread>
 
-using namespace std;
+#include "pcl_ros/publisher.hpp"
 
 class PCDGenerator
 {
 protected:
-  string tf_frame_;
+  std::string tf_frame_;
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
 
@@ -69,7 +68,7 @@ public:
   // ROS messages
   sensor_msgs::PointCloud2 cloud_;
 
-  string file_name_, cloud_topic_;
+  std::string file_name_, cloud_topic_;
   double wait_;
 
   pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
@@ -105,7 +104,7 @@ public:
   bool spin()
   {
     int nr_points = cloud_.width * cloud_.height;
-    string fields_list = pcl::getFieldsList(cloud_);
+    std::string fields_list = pcl::getFieldsList(cloud_);
     double interval = wait_ * 1e+6;
     while (nh_.ok()) {
       ROS_DEBUG_ONCE(
@@ -132,8 +131,6 @@ public:
     }
     return true;
   }
-
-
 };
 
 /* ---[ */
@@ -149,7 +146,7 @@ main(int argc, char ** argv)
   ros::init(argc, argv, "pcd_to_pointcloud");
 
   PCDGenerator c;
-  c.file_name_ = string(argv[1]);
+  c.file_name_ = std::string(argv[1]);
   // check if publishing interval is given
   if (argc == 2) {
     c.wait_ = 0;

@@ -53,7 +53,8 @@
 
 #include <Eigen/Geometry>
 
-using namespace std;
+// STL
+#include <string>
 
 /**
 \author Radu Bogdan Rusu
@@ -76,7 +77,7 @@ private:
   tf2_ros::TransformListener tf_listener_;
 
 public:
-  string cloud_topic_;
+  std::string cloud_topic_;
 
   ros::Subscriber sub_;
 
@@ -131,7 +132,6 @@ public:
     } else {
       writer.writeASCII(ss.str(), *cloud, v, q, 8);
     }
-
   }
 
   ////////////////////////////////////////////////////////////////////////////////

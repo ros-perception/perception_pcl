@@ -78,4 +78,4 @@ pcl_ros::NormalEstimationTBB::computePublish(
 typedef pcl_ros::NormalEstimationTBB NormalEstimationTBB;
 PLUGINLIB_EXPORT_CLASS(NormalEstimationTBB, nodelet::Nodelet)
 
-#endif // HAVE_TBB
+#endif  // HAVE_TBB

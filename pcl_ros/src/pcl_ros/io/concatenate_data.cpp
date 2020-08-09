@@ -37,10 +37,11 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <string>
 #include "pcl_ros/transforms.hpp"
 #include "pcl_ros/io/concatenate_data.hpp"
 
-#include <pcl_conversions/pcl_conversions.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -244,7 +245,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::combineClouds(
   const PointCloud2 & in2,
   PointCloud2 & out)
 {
-  //ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
+  // ROS_INFO ("Two pointclouds received: %zu and %zu.", in1.data.size (), in2.data.size ());
   PointCloud2::Ptr in1_t(new PointCloud2());
   PointCloud2::Ptr in2_t(new PointCloud2());
 

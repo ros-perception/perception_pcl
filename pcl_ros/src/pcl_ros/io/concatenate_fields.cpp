@@ -39,11 +39,12 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <pcl/io/io.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <vector>
 #include "pcl_ros/io/concatenate_fields.hpp"
 
-#include <pcl_conversions/pcl_conversions.h>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit()
 {
@@ -66,7 +67,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::onInit()
   onInitPostProcess();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe()
 {
@@ -75,19 +76,20 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::subscribe()
     &PointCloudConcatenateFieldsSynchronizer::input_callback, this);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::unsubscribe()
 {
   sub_input_.shutdown();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointCloudConstPtr & cloud)
 {
   NODELET_DEBUG(
-    "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+    "[input_callback] PointCloud with %d data points (%s), stamp %f, and frame %s on "
+    "topic %s received.",
     cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
     cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(),
     pnh_->resolveName("input").c_str());
@@ -98,7 +100,8 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointClou
       queue_.size() > 0)
     {
       NODELET_WARN(
-        "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message in queue with stamp %f.", maximum_seconds_,
+        "[input_callback] Maximum seconds limit (%f) reached. Difference is %f, erasing message "
+        "in queue with stamp %f.", maximum_seconds_,
         (*queue_.begin()).first.toSec(),
         fabs( ( (*queue_.begin()).first - cloud->header.stamp).toSec() ));
       queue_.erase(queue_.begin());
@@ -107,7 +110,7 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointClou
 
   // Push back new data
   queue_[cloud->header.stamp].push_back(cloud);
-  if ((int)queue_[cloud->header.stamp].size() >= input_messages_) {
+  if (static_cast<int>(queue_[cloud->header.stamp].size()) >= input_messages_) {
     // Concatenate together and publish
     std::vector<PointCloudConstPtr> & clouds = queue_[cloud->header.stamp];
     PointCloud cloud_out = *clouds[0];
@@ -122,7 +125,8 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointClou
 
       if (clouds[i]->width != cloud_out.width || clouds[i]->height != cloud_out.height) {
         NODELET_ERROR(
-          "[input_callback] Width/height of pointcloud %zu (%dx%d) differs from the others (%dx%d)!",
+          "[input_callback] Width/height of pointcloud %zu (%dx%d) differs "
+          "from the others (%dx%d)!",
           i, clouds[i]->width, clouds[i]->height, cloud_out.width, cloud_out.height);
         break;
       }
@@ -162,11 +166,10 @@ pcl_ros::PointCloudConcatenateFieldsSynchronizer::input_callback(const PointClou
 
   // Clean the queue to avoid overflowing
   if (maximum_queue_size_ > 0) {
-    while ((int)queue_.size() > maximum_queue_size_) {
+    while (static_cast<int>(queue_.size()) > maximum_queue_size_) {
       queue_.erase(queue_.begin());
     }
   }
-
 }
 
 typedef pcl_ros::PointCloudConcatenateFieldsSynchronizer PointCloudConcatenateFieldsSynchronizer;

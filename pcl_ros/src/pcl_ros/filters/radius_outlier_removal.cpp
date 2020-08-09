@@ -73,7 +73,6 @@ pcl_ros::RadiusOutlierRemoval::config_callback(
       "[%s::config_callback] Setting the radius to search neighbors: %f.",
       getName().c_str(), config.radius_search);
   }
-
 }
 
 
