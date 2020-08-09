@@ -34,8 +34,8 @@
  *
  */
 
-#ifndef PCL_ROS_SHOT_OMP_H_
-#define PCL_ROS_SHOT_OMP_H_
+#ifndef PCL_ROS__FEATURES__SHOT_OMP_HPP_
+#define PCL_ROS__FEATURES__SHOT_OMP_HPP_
 
 #include <pcl/features/shot_omp.h>
 #include "pcl_ros/features/shot.hpp"
@@ -73,6 +73,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_SHOT_OMP_H_
+#endif  // PCL_ROS__FEATURES__SHOT_OMP_HPP_

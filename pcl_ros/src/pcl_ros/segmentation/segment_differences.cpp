@@ -36,10 +36,10 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/segmentation/segment_differences.hpp"
 #include <pcl/io/io.h>
+#include "pcl_ros/segmentation/segment_differences.hpp"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SegmentDifferences::onInit()
 {
@@ -57,7 +57,7 @@ pcl_ros::SegmentDifferences::onInit()
   onInitPostProcess();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SegmentDifferences::subscribe()
 {
@@ -72,16 +72,18 @@ pcl_ros::SegmentDifferences::subscribe()
   srv_->setCallback(f);
 
   if (approximate_sync_) {
-    sync_input_target_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
-        PointCloud>>>(max_queue_size_);
+    sync_input_target_a_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ApproximateTime<PointCloud, PointCloud>>>(max_queue_size_);
     sync_input_target_a_->connectInput(sub_input_filter_, sub_target_filter_);
     sync_input_target_a_->registerCallback(
       bind(
         &SegmentDifferences::input_target_callback, this,
         _1, _2));
   } else {
-    sync_input_target_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-        PointCloud>>>(max_queue_size_);
+    sync_input_target_e_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ExactTime<PointCloud, PointCloud>>>(max_queue_size_);
     sync_input_target_e_->connectInput(sub_input_filter_, sub_target_filter_);
     sync_input_target_e_->registerCallback(
       bind(
@@ -90,7 +92,7 @@ pcl_ros::SegmentDifferences::subscribe()
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SegmentDifferences::unsubscribe()
 {
@@ -98,7 +100,7 @@ pcl_ros::SegmentDifferences::unsubscribe()
   sub_target_filter_.unsubscribe();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SegmentDifferences::config_callback(SegmentDifferencesConfig & config, uint32_t level)
 {
@@ -131,8 +133,10 @@ pcl_ros::SegmentDifferences::input_target_callback(
 
   NODELET_DEBUG(
     "[%s::input_indices_callback]\n"
-    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-    "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+    "                                 - PointCloud with %d data points (%s), stamp %f, and "
+    "frame %s on topic %s received.\n"
+    "                                 - PointCloud with %d data points (%s), stamp %f, and "
+    "frame %s on topic %s received.",
     getName().c_str(),
     cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
       cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(

@@ -1,15 +1,71 @@
-#ifndef pcl_ROS_POINT_CLOUD_H_
-#define pcl_ROS_POINT_CLOUD_H_
+/*
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2009, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of Willow Garage, Inc. nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef PCL_ROS__POINT_CLOUD_HPP__
+#define PCL_ROS__POINT_CLOUD_HPP__
+
+// test if testing machinery can be implemented
+#if defined(__cpp_rvalue_references) && defined(__cpp_constexpr)
+#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 1
+#else
+#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 0
+#endif
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_traits.h>
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
+#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
+#include <pcl/pcl_config.h>
+#if PCL_VERSION_COMPARE(>=, 1, 11, 0)
+#include <pcl/memory.h>
+#elif PCL_VERSION_COMPARE(>=, 1, 10, 0)
+#include <pcl/make_shared.h>
+#endif
+#endif
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
+#include <string>
+#include <utility>
+#include <vector>
+#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
+#include <type_traits>
+#include <memory>
+#endif
 
 namespace pcl
 {
@@ -18,7 +74,7 @@ namespace detail
 template<typename Stream, typename PointT>
 struct FieldStreamer
 {
-  FieldStreamer(Stream & stream)
+  explicit FieldStreamer(Stream & stream)
   : stream_(stream) {}
 
   template<typename U>
@@ -59,8 +115,8 @@ struct FieldsLength
 
   std::uint32_t length;
 };
-}   // namespace pcl::detail
-} // namespace pcl
+}  // namespace detail
+}  // namespace pcl
 
 namespace ros
 {
@@ -161,7 +217,7 @@ struct FrameId<pcl::PointCloud<T>>
   static std::string value(const pcl::PointCloud<T> & m) {return m.header.frame_id;}
 };
 
-}   // namespace ros::message_traits
+}  // namespace message_traits
 
 namespace serialization
 {
@@ -297,30 +353,11 @@ struct Serializer<pcl::PointCloud<T>>
     return length;
   }
 };
-}   // namespace ros::serialization
+}  // namespace serialization
 
 /// @todo Printer specialization in message_operations
 
-} // namespace ros
-
-// test if testing machinery can be implemented
-#if defined(__cpp_rvalue_references) && defined(__cpp_constexpr)
-#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 1
-#else
-#define ROS_POINTER_COMPATIBILITY_IMPLEMENTED 0
-#endif
-
-#if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
-#include <type_traits>  // for std::is_same
-#include <memory>       // for std::shared_ptr
-
-#include <pcl/pcl_config.h>
-#if PCL_VERSION_COMPARE(>=, 1, 11, 0)
-#include <pcl/memory.h>
-#elif PCL_VERSION_COMPARE(>=, 1, 10, 0)
-#include <pcl/make_shared.h>
-#endif
-#endif
+}  // namespace ros
 
 namespace pcl
 {
@@ -341,7 +378,7 @@ struct Holder
 {
   SharedPointer p;
 
-  Holder(const SharedPointer & p)
+  explicit Holder(const SharedPointer & p)
   : p(p) {}
   Holder(const Holder & other)
   : p(other.p) {}
@@ -373,7 +410,7 @@ inline boost::shared_ptr<T> to_boost_ptr(const std::shared_ptr<T> & p)
   }
 }
 #endif
-}   // namespace pcl::detail
+}  // namespace detail
 
 // add functions to convert to smart pointer used by ROS
 template<class T>
@@ -420,6 +457,6 @@ inline boost::shared_ptr<T> pcl_ptr(const boost::shared_ptr<T> & p)
   return p;
 }
 #endif
-} // namespace pcl
+}  // namespace pcl
 
-#endif
+#endif  // PCL_ROS__POINT_CLOUD_HPP__

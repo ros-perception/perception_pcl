@@ -35,9 +35,10 @@
  *
  */
 
-#include <pcl/io/io.h>
-#include "pcl_ros/transforms.hpp"
 #include "pcl_ros/filters/filter.hpp"
+#include <pcl/io/io.h>
+#include <vector>
+#include "pcl_ros/transforms.hpp"
 
 /*//#include <pcl/filters/pixel_grid.h>
 //#include <pcl/filters/filter_dimension.h>
@@ -48,18 +49,18 @@
 */
 
 // Include the implementations instead of compiling them separately to speed up compile time
-//#include "extract_indices.cpp"
-//#include "passthrough.cpp"
-//#include "project_inliers.cpp"
-//#include "radius_outlier_removal.cpp"
-//#include "statistical_outlier_removal.cpp"
-//#include "voxel_grid.cpp"
+// #include "extract_indices.cpp"
+// #include "passthrough.cpp"
+// #include "project_inliers.cpp"
+// #include "radius_outlier_removal.cpp"
+// #include "statistical_outlier_removal.cpp"
+// #include "voxel_grid.cpp"
 
 /*//PLUGINLIB_EXPORT_CLASS(PixelGrid,nodelet::Nodelet);
 //PLUGINLIB_EXPORT_CLASS(FilterDimension,nodelet::Nodelet);
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::Filter::computePublish(const PointCloud2::ConstPtr & input, const IndicesPtr & indices)
 {
@@ -120,12 +121,14 @@ pcl_ros::Filter::subscribe()
     sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
 
     if (approximate_sync_) {
-      sync_input_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
+      sync_input_indices_a_ =
+        boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
           pcl_msgs::PointIndices>>>(max_queue_size_);
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback(bind(&Filter::input_indices_callback, this, _1, _2));
     } else {
-      sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
+      sync_input_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
           pcl_msgs::PointIndices>>>(max_queue_size_);
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback(bind(&Filter::input_indices_callback, this, _1, _2));
@@ -182,7 +185,8 @@ pcl_ros::Filter::onInit()
 void
 pcl_ros::Filter::config_callback(pcl_ros::FilterConfig & config, uint32_t level)
 {
-  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
+  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are
+  // inexistent in PCL
   if (tf_input_frame_ != config.input_frame) {
     tf_input_frame_ = config.input_frame;
     NODELET_DEBUG(
@@ -218,8 +222,10 @@ pcl_ros::Filter::input_indices_callback(
   if (indices) {
     NODELET_DEBUG(
       "[%s::input_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
       cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -228,7 +234,8 @@ pcl_ros::Filter::input_indices_callback(
       indices->header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[%s::input_indices_callback] PointCloud with %d data points and frame %s on topic %s received.",
+      "[%s::input_indices_callback] PointCloud with %d data points and frame %s on "
+      "topic %s received.",
       getName().c_str(), cloud->width * cloud->height,
       cloud->header.frame_id.c_str(), pnh_->resolveName("input").c_str());
   }

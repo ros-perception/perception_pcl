@@ -36,21 +36,24 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/surface/moving_least_squares.hpp"
 #include <pcl/io/io.h>
+#include <vector>
+#include "pcl_ros/surface/moving_least_squares.hpp"
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::MovingLeastSquares::onInit()
 {
   PCLNodelet::onInit();
 
-  //ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
+  // ros::NodeHandle private_nh = getMTPrivateNodeHandle ();
   pub_output_ = advertise<PointCloudIn>(*pnh_, "output", max_queue_size_);
   pub_normals_ = advertise<NormalCloudOut>(*pnh_, "normals", max_queue_size_);
 
-  //if (!pnh_->getParam ("k_search", k_) && !pnh_->getParam ("search_radius", search_radius_))
+  // if (!pnh_->getParam ("k_search", k_) && !pnh_->getParam ("search_radius", search_radius_))
   if (!pnh_->getParam("search_radius", search_radius_)) {
-    //NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set at least one of these parameters before continuing.", getName ().c_str ());
+    // NODELET_ERROR ("[%s::onInit] Neither 'k_search' nor 'search_radius' set! Need to set "
+    // "at least one of these parameters before continuing.", getName ().c_str ());
     NODELET_ERROR(
       "[%s::onInit] Need a 'search_radius' parameter to be set before continuing!",
       getName().c_str());
@@ -93,8 +96,10 @@ pcl_ros::MovingLeastSquares::subscribe()
     sub_indices_filter_.subscribe(*pnh_, "indices", 1);
 
     if (approximate_sync_) {
-      sync_input_indices_a_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_a_ =
+        boost::make_shared<message_filters::Synchronizer<
+            message_filters::sync_policies::ApproximateTime<
+              PointCloudIn, PointIndices>>>(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback(
@@ -102,8 +107,10 @@ pcl_ros::MovingLeastSquares::subscribe()
           &MovingLeastSquares::input_indices_callback,
           this, _1, _2));
     } else {
-      sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<
+            message_filters::sync_policies::ExactTime<PointCloudIn,
+            PointIndices>>>(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback(
@@ -168,8 +175,10 @@ pcl_ros::MovingLeastSquares::input_indices_callback(
   if (indices) {
     NODELET_DEBUG(
       "[%s::input_indices_model_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
@@ -178,7 +187,8 @@ pcl_ros::MovingLeastSquares::input_indices_callback(
       indices->header.frame_id.c_str(), getMTPrivateNodeHandle().resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.",
+      "[%s::input_callback] PointCloud with %d data points, stamp %f, and frame %s on "
+      "topic %s received.",
       getName().c_str(), cloud->width * cloud->height, fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
       getMTPrivateNodeHandle().resolveName("input").c_str());
@@ -198,7 +208,7 @@ pcl_ros::MovingLeastSquares::input_indices_callback(
   // Initialize the spatial locator
 
   // Do the reconstructon
-  //impl_.process (output);
+  // impl_.process (output);
 
   // Publish a Boost shared ptr const data
   // Enforce that the TF frame and the timestamp are copied

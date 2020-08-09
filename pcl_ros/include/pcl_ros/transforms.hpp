@@ -34,13 +34,14 @@
  *
  */
 
-#ifndef pcl_ROS_TRANSFORMS_H_
-#define pcl_ROS_TRANSFORMS_H_
+#ifndef PCL_ROS__TRANSFORMS_HPP_
+#define PCL_ROS__TRANSFORMS_HPP_
 
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/common/transforms.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
+#include <string>
 
 namespace pcl_ros
 {
@@ -176,6 +177,6 @@ transformPointCloud(
   */
 void
 transformAsMatrix(const tf::Transform & bt, Eigen::Matrix4f & out_mat);
-}
+}  // namespace pcl_ros
 
-#endif // PCL_ROS_TRANSFORMS_H_
+#endif  // PCL_ROS__TRANSFORMS_HPP_

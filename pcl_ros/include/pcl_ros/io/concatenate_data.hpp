@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_IO_CONCATENATE_DATA_H_
-#define PCL_IO_CONCATENATE_DATA_H_
+#ifndef PCL_ROS__IO__CONCATENATE_DATA_HPP_
+#define PCL_ROS__IO__CONCATENATE_DATA_HPP_
 
 // ROS includes
 #include <tf/transform_listener.h>
@@ -46,6 +46,8 @@
 #include <message_filters/pass_through.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <string>
+#include <vector>
 
 namespace pcl_ros
 {
@@ -71,7 +73,7 @@ public:
   /** \brief Empty constructor.
     * \param queue_size the maximum queue size
     */
-  PointCloudConcatenateDataSynchronizer(int queue_size)
+  explicit PointCloudConcatenateDataSynchronizer(int queue_size)
   : maximum_queue_size_(queue_size), approximate_sync_(false) {}
 
   /** \brief Empty destructor. */
@@ -88,7 +90,9 @@ private:
   /** \brief The maximum number of messages that we can store in the queue. */
   int maximum_queue_size_;
 
-  /** \brief True if we use an approximate time synchronizer versus an exact one (false by default). */
+  /** \brief True if we use an approximate time synchronizer
+    * versus an exact one (false by default).
+    */
   bool approximate_sync_;
 
   /** \brief A vector of message filters. */
@@ -137,6 +141,6 @@ private:
 
   void combineClouds(const PointCloud2 & in1, const PointCloud2 & in2, PointCloud2 & out);
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_IO_CONCATENATE_H_
+#endif  // PCL_ROS__IO__CONCATENATE_DATA_HPP_

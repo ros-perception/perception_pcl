@@ -35,8 +35,8 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/passthrough.hpp"
+#include <pluginlib/class_list_macros.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
@@ -65,7 +65,8 @@ pcl_ros::PassThrough::config_callback(pcl_ros::FilterConfig & config, uint32_t l
   if (filter_min != config.filter_limit_min) {
     filter_min = config.filter_limit_min;
     NODELET_DEBUG(
-      "[%s::config_callback] Setting the minimum filtering value a point will be considered from to: %f.",
+      "[%s::config_callback] Setting the minimum filtering value a point will be "
+      "considered from to: %f.",
       getName().c_str(), filter_min);
     // Set the filter min-max if different
     impl_.setFilterLimits(filter_min, filter_max);
@@ -74,14 +75,15 @@ pcl_ros::PassThrough::config_callback(pcl_ros::FilterConfig & config, uint32_t l
   if (filter_max != config.filter_limit_max) {
     filter_max = config.filter_limit_max;
     NODELET_DEBUG(
-      "[%s::config_callback] Setting the maximum filtering value a point will be considered from to: %f.",
+      "[%s::config_callback] Setting the maximum filtering value a point will be "
+      "considered from to: %f.",
       getName().c_str(), filter_max);
     // Set the filter min-max if different
     impl_.setFilterLimits(filter_min, filter_max);
   }
 
   // Check the current value for the filter field
-  //std::string filter_field = impl_.getFilterFieldName ();
+  // std::string filter_field = impl_.getFilterFieldName ();
   if (impl_.getFilterFieldName() != config.filter_field_name) {
     // Set the filter field if different
     impl_.setFilterFieldName(config.filter_field_name);
@@ -108,7 +110,8 @@ pcl_ros::PassThrough::config_callback(pcl_ros::FilterConfig & config, uint32_t l
     impl_.setFilterLimitsNegative(config.filter_limit_negative);
   }
 
-  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters as they are inexistent in PCL
+  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters
+  // as they are inexistent in PCL
   if (tf_input_frame_ != config.input_frame) {
     tf_input_frame_ = config.input_frame;
     NODELET_DEBUG(

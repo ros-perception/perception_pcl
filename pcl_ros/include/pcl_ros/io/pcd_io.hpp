@@ -35,10 +35,11 @@
  *
  */
 
-#ifndef PCL_ROS_IO_PCD_IO_H_
-#define PCL_ROS_IO_PCD_IO_H_
+#ifndef PCL_ROS__IO__PCD_IO_HPP_
+#define PCL_ROS__IO__PCD_IO_HPP_
 
 #include <pcl/io/pcd_io.h>
+#include <string>
 #include "pcl_ros/pcl_nodelet.hpp"
 
 namespace pcl_ros
@@ -131,6 +132,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_IO_PCD_IO_H_
+#endif  // PCL_ROS__IO__PCD_IO_HPP_

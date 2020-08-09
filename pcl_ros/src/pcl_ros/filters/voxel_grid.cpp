@@ -88,13 +88,15 @@ pcl_ros::VoxelGrid::config_callback(pcl_ros::VoxelGridConfig & config, uint32_t 
   if (filter_min != config.filter_limit_min) {
     filter_min = config.filter_limit_min;
     NODELET_DEBUG(
-      "[config_callback] Setting the minimum filtering value a point will be considered from to: %f.",
+      "[config_callback] Setting the minimum filtering value a point will be considered "
+      "from to: %f.",
       filter_min);
   }
   if (filter_max != config.filter_limit_max) {
     filter_max = config.filter_limit_max;
     NODELET_DEBUG(
-      "[config_callback] Setting the maximum filtering value a point will be considered from to: %f.",
+      "[config_callback] Setting the maximum filtering value a point will be considered "
+      "from to: %f.",
       filter_max);
   }
   impl_.setFilterLimits(filter_min, filter_max);
@@ -113,7 +115,8 @@ pcl_ros::VoxelGrid::config_callback(pcl_ros::VoxelGridConfig & config, uint32_t 
       config.filter_field_name.c_str());
   }
 
-  // ---[ These really shouldn't be here, and as soon as dynamic_reconfigure improves, we'll remove them and inherit from Filter
+  // ---[ These really shouldn't be here, and as soon as dynamic_reconfigure improves,
+  // we'll remove them and inherit from Filter
   if (tf_input_frame_ != config.input_frame) {
     tf_input_frame_ = config.input_frame;
     NODELET_DEBUG("[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str());

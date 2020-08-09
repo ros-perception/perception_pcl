@@ -35,20 +35,16 @@
  *
  */
 
-#ifndef PCL_ROS_EXTRACT_POLYGONAL_PRISM_DATA_H_
-#define PCL_ROS_EXTRACT_POLYGONAL_PRISM_DATA_H_
+#ifndef PCL_ROS__SEGMENTATION__EXTRACT_POLYGONAL_PRISM_DATA_HPP_
+#define PCL_ROS__SEGMENTATION__EXTRACT_POLYGONAL_PRISM_DATA_HPP_
 
-#include "pcl_ros/pcl_nodelet.hpp"
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/pass_through.h>
-
-// PCL includes
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include "pcl_ros/ExtractPolygonalPrismDataConfig.hpp"
+#include "pcl_ros/pcl_nodelet.hpp"
 
 namespace pcl_ros
 {
@@ -129,6 +125,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_EXTRACT_POLYGONAL_PRISM_DATA_H_
+#endif  // PCL_ROS__SEGMENTATION__EXTRACT_POLYGONAL_PRISM_DATA_HPP_

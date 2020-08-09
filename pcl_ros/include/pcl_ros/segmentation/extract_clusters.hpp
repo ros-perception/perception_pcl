@@ -35,14 +35,13 @@
  *
  */
 
-#ifndef PCL_ROS_EXTRACT_CLUSTERS_H_
-#define PCL_ROS_EXTRACT_CLUSTERS_H_
+#ifndef PCL_ROS__SEGMENTATION__EXTRACT_CLUSTERS_HPP_
+#define PCL_ROS__SEGMENTATION__EXTRACT_CLUSTERS_HPP_
 
-#include <pcl/segmentation/extract_clusters.h>
-#include "pcl_ros/pcl_nodelet.hpp"
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <limits>
+#include "pcl_ros/pcl_nodelet.hpp"
 #include "pcl_ros/EuclideanClusterExtractionConfig.hpp"
 
 namespace pcl_ros
@@ -109,6 +108,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_EXTRACT_CLUSTERS_H_
+#endif  // PCL_ROS__SEGMENTATION__EXTRACT_CLUSTERS_HPP_

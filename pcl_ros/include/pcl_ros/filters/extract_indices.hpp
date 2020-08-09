@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_EXTRACTINDICES_H_
-#define PCL_ROS_FILTERS_EXTRACTINDICES_H_
+#ifndef PCL_ROS__FILTERS__EXTRACT_INDICES_HPP_
+#define PCL_ROS__FILTERS__EXTRACT_INDICES_HPP_
 
 // PCL includes
 #include <pcl/filters/extract_indices.h>
@@ -94,6 +94,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_FILTERS_EXTRACTINDICES_H_
+#endif  // PCL_ROS__FILTERS__EXTRACT_INDICES_HPP_

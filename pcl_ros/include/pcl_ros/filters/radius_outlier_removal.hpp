@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_RADIUSOUTLIERREMOVAL_H_
-#define PCL_ROS_FILTERS_RADIUSOUTLIERREMOVAL_H_
+#ifndef PCL_ROS__FILTERS__RADIUS_OUTLIER_REMOVAL_HPP_
+#define PCL_ROS__FILTERS__RADIUS_OUTLIER_REMOVAL_HPP_
 
 // PCL includes
 #include <pcl/filters/radius_outlier_removal.h>
@@ -96,6 +96,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_FILTERS_RADIUSOUTLIERREMOVAL_H_
+#endif  // PCL_ROS__FILTERS__RADIUS_OUTLIER_REMOVAL_HPP_

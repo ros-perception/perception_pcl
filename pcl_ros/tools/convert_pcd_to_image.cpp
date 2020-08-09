@@ -53,6 +53,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <string>
 
 /* ---[ */
 int
@@ -72,12 +73,12 @@ main(int argc, char ** argv)
   pcl::io::loadPCDFile(std::string(argv[1]), cloud);
 
   try {
-    pcl::toROSMsg(cloud, image);  //convert the cloud
+    pcl::toROSMsg(cloud, image);  // convert the cloud
   } catch (std::runtime_error & e) {
     ROS_ERROR_STREAM(
       "Error in converting cloud to image message: " <<
         e.what());
-    return 1; //fail!
+    return 1;  // fail!
   }
   ros::Rate loop_rate(5);
   while (nh.ok()) {

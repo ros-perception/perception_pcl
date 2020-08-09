@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef PCL_ROS_NORMAL_3D_H_
-#define PCL_ROS_NORMAL_3D_H_
+#ifndef PCL_ROS__FEATURES__NORMAL_3D_HPP_
+#define PCL_ROS__FEATURES__NORMAL_3D_HPP_
 
 #include <pcl/features/normal_3d.h>
 #include "pcl_ros/features/feature.hpp"
@@ -81,6 +81,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_NORMAL_3D_H_
+#endif  // PCL_ROS__FEATURES__NORMAL_3D_HPP_

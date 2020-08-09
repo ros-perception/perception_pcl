@@ -35,13 +35,14 @@
  *
  */
 
-#ifndef PCL_ROS_IO_BAG_IO_H_
-#define PCL_ROS_IO_BAG_IO_H_
+#ifndef PCL_ROS__IO__BAG_IO_HPP_
+#define PCL_ROS__IO__BAG_IO_HPP_
 
 #include <pcl_ros/pcl_nodelet.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
+#include <string>
 
 namespace pcl_ros
 {
@@ -120,12 +121,11 @@ private:
   PointCloudPtr output_;
 
   /** \brief Signals that a new PointCloud2 message has been read from the file. */
-  //bool cloud_received_;
+  // bool cloud_received_;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
+}  // namespace pcl_ros
 
-}
-
-#endif  //#ifndef PCL_ROS_IO_BAG_IO_H_
+#endif  // PCL_ROS__IO__BAG_IO_HPP_

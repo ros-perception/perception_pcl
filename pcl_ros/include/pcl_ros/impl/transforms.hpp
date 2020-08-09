@@ -34,10 +34,11 @@
  *
  */
 
-#ifndef pcl_ros_IMPL_TRANSFORMS_H_
-#define pcl_ros_IMPL_TRANSFORMS_H_
+#ifndef PCL_ROS__IMPL__TRANSFORMS_HPP_
+#define PCL_ROS__IMPL__TRANSFORMS_HPP_
 
 #include <pcl_conversions/pcl_conversions.h>
+#include <string>
 #include "pcl_ros/transforms.hpp"
 
 using pcl_conversions::fromPCL;
@@ -58,13 +59,13 @@ transformPointCloudWithNormals(
   // Rather that risking a mistake, we copy the quaternion, which is a small cost compared to
   // the conversion of the point cloud anyway. Idem for the origin.
   tf::Quaternion q = transform.getRotation();
-  Eigen::Quaternionf rotation(q.w(), q.x(), q.y(), q.z());            // internally stored as (x,y,z,w)
+  Eigen::Quaternionf rotation(q.w(), q.x(), q.y(), q.z());  // internally stored as (x,y,z,w)
   tf::Vector3 v = transform.getOrigin();
   Eigen::Vector3f origin(v.x(), v.y(), v.z());
   //    Eigen::Translation3f translation(v);
   // Assemble an Eigen Transform
-  //Eigen::Transform3f t;
-  //t = translation * rotation;
+  // Eigen::Transform3f t;
+  // t = translation * rotation;
   transformPointCloudWithNormals(cloud_in, cloud_out, origin, rotation);
 }
 
@@ -81,13 +82,13 @@ transformPointCloud(
   // Rather that risking a mistake, we copy the quaternion, which is a small cost compared to
   // the conversion of the point cloud anyway. Idem for the origin.
   tf::Quaternion q = transform.getRotation();
-  Eigen::Quaternionf rotation(q.w(), q.x(), q.y(), q.z());            // internally stored as (x,y,z,w)
+  Eigen::Quaternionf rotation(q.w(), q.x(), q.y(), q.z());  // internally stored as (x,y,z,w)
   tf::Vector3 v = transform.getOrigin();
   Eigen::Vector3f origin(v.x(), v.y(), v.z());
   //    Eigen::Translation3f translation(v);
   // Assemble an Eigen Transform
-  //Eigen::Transform3f t;
-  //t = translation * rotation;
+  // Eigen::Transform3f t;
+  // t = translation * rotation;
   transformPointCloud(cloud_in, cloud_out, origin, rotation);
 }
 
@@ -217,6 +218,5 @@ transformPointCloudWithNormals(
   cloud_out.header = toPCL(header);
   return true;
 }
-
 }  // namespace pcl_ros
-#endif
+#endif  // PCL_ROS__IMPL__TRANSFORMS_HPP_

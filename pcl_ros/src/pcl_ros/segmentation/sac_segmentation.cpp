@@ -36,10 +36,10 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include "pcl_ros/segmentation/sac_segmentation.hpp"
 #include <pcl/io/io.h>
-
 #include <pcl_conversions/pcl_conversions.h>
+#include <vector>
+#include "pcl_ros/segmentation/sac_segmentation.hpp"
 
 using pcl_conversions::fromPCL;
 
@@ -61,7 +61,7 @@ pcl_ros::SACSegmentation::onInit()
     NODELET_ERROR("[onInit] Need a 'model_type' parameter to be set before continuing!");
     return;
   }
-  double threshold; // unused - set via dynamic reconfigure in the callback
+  double threshold;  // unused - set via dynamic reconfigure in the callback
   if (!pnh_->getParam("distance_threshold", threshold)) {
     NODELET_ERROR("[onInit] Need a 'distance_threshold' parameter to be set before continuing!");
     return;
@@ -80,7 +80,8 @@ pcl_ros::SACSegmentation::onInit()
       {
         if (axis_param.size() != 3) {
           NODELET_ERROR(
-            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!",
+            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) "
+            "than required (3)!",
             getName().c_str(), axis_param.size());
           return;
         }
@@ -149,27 +150,28 @@ pcl_ros::SACSegmentation::subscribe()
 
       // Synchronize the two topics. No need for an approximate synchronizer here, as we'll
       // match the timestamps exactly
-      sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<
+            sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
       sync_input_indices_e_->connectInput(sub_input_filter_, nf_pi_);
       sync_input_indices_e_->registerCallback(
         bind(
           &SACSegmentation::input_indices_callback, this,
           _1, _2));
-    }
-    // "latched_indices" not set, proceed with regular <input,indices> pairs
-    else {
+    } else {  // "latched_indices" not set, proceed with regular <input,indices> pairs
       if (approximate_sync_) {
-        sync_input_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
-            PointIndices>>>(max_queue_size_);
+        sync_input_indices_a_ =
+          boost::make_shared<message_filters::Synchronizer<
+              sync_policies::ApproximateTime<PointCloud, PointIndices>>>(max_queue_size_);
         sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
         sync_input_indices_a_->registerCallback(
           bind(
             &SACSegmentation::input_indices_callback, this,
             _1, _2));
       } else {
-        sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-            PointIndices>>>(max_queue_size_);
+        sync_input_indices_e_ =
+          boost::make_shared<message_filters::Synchronizer<
+              sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
         sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
         sync_input_indices_e_->registerCallback(
           bind(
@@ -205,7 +207,7 @@ pcl_ros::SACSegmentation::config_callback(SACSegmentationConfig & config, uint32
   boost::mutex::scoped_lock lock(mutex_);
 
   if (impl_.getDistanceThreshold() != config.distance_threshold) {
-    //sac_->setDistanceThreshold (threshold_); - done in initSAC
+    // sac_->setDistanceThreshold (threshold_); - done in initSAC
     impl_.setDistanceThreshold(config.distance_threshold);
     NODELET_DEBUG(
       "[%s::config_callback] Setting new distance to model threshold to: %f.",
@@ -228,14 +230,14 @@ pcl_ros::SACSegmentation::config_callback(SACSegmentationConfig & config, uint32
   }
 
   if (impl_.getMaxIterations() != config.max_iterations) {
-    //sac_->setMaxIterations (max_iterations_); - done in initSAC
+    // sac_->setMaxIterations (max_iterations_); - done in initSAC
     impl_.setMaxIterations(config.max_iterations);
     NODELET_DEBUG(
       "[%s::config_callback] Setting new maximum number of iterations to: %d.",
       getName().c_str(), config.max_iterations);
   }
   if (impl_.getProbability() != config.probability) {
-    //sac_->setProbability (probability_); - done in initSAC
+    // sac_->setProbability (probability_); - done in initSAC
     impl_.setProbability(config.probability);
     NODELET_DEBUG(
       "[%s::config_callback] Setting new probability to: %f.",
@@ -307,8 +309,10 @@ pcl_ros::SACSegmentation::input_indices_callback(
   if (indices && !indices->header.frame_id.empty()) {
     NODELET_DEBUG(
       "[%s::input_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -317,7 +321,8 @@ pcl_ros::SACSegmentation::input_indices_callback(
       indices->header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.",
+      "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(), cloud->width * cloud->height, fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
         "input").c_str());
@@ -329,11 +334,13 @@ pcl_ros::SACSegmentation::input_indices_callback(
   PointCloudConstPtr cloud_tf;
 /*  if (!tf_input_frame_.empty () && cloud->header.frame_id != tf_input_frame_)
   {
-    NODELET_DEBUG ("[input_callback] Transforming input dataset from %s to %s.", cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
+    NODELET_DEBUG ("[input_callback] Transforming input dataset from %s to %s.",
+    // cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
     // Save the original frame ID
     // Convert the cloud into the different frame
     PointCloud cloud_transformed;
-    if (!pcl::transformPointCloud (tf_input_frame_, cloud->header.stamp, *cloud, cloud_transformed, tf_listener_))
+    if (!pcl::transformPointCloud (tf_input_frame_, cloud->header.stamp, *cloud,
+      cloud_transformed, tf_listener_))
       return;
     cloud_tf.reset (new PointCloud (cloud_transformed));
   }
@@ -348,7 +355,8 @@ pcl_ros::SACSegmentation::input_indices_callback(
   impl_.setInputCloud(pcl_ptr(cloud_tf));
   impl_.setIndices(indices_ptr);
 
-  // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
+  // Final check if the data is empty
+  // (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty()) {
     pcl::PointIndices pcl_inliers;
     pcl::ModelCoefficients pcl_model;
@@ -362,7 +370,7 @@ pcl_ros::SACSegmentation::input_indices_callback(
   // Probably need to transform the model of the plane here
 
   // Check if we have enough inliers, clear inliers + model if not
-  if ((int)inliers.indices.size() <= min_inliers_) {
+  if (static_cast<int>(inliers.indices.size()) <= min_inliers_) {
     inliers.indices.clear();
     model.values.clear();
   }
@@ -371,7 +379,8 @@ pcl_ros::SACSegmentation::input_indices_callback(
   pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
   pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
   NODELET_DEBUG(
-    "[%s::input_indices_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
+    "[%s::input_indices_callback] Published PointIndices with %zu values on topic %s, "
+    "and ModelCoefficients with %zu values on topic %s",
     getName().c_str(), inliers.indices.size(), pnh_->resolveName("inliers").c_str(),
     model.values.size(), pnh_->resolveName("model").c_str());
 
@@ -405,7 +414,7 @@ pcl_ros::SACSegmentationFromNormals::onInit()
       getName().c_str());
     return;
   }
-  double threshold; // unused - set via dynamic reconfigure in the callback
+  double threshold;  // unused - set via dynamic reconfigure in the callback
   if (!pnh_->getParam("distance_threshold", threshold)) {
     NODELET_ERROR(
       "[%s::onInit] Need a 'distance_threshold' parameter to be set before continuing!",
@@ -426,7 +435,8 @@ pcl_ros::SACSegmentationFromNormals::onInit()
       {
         if (axis_param.size() != 3) {
           NODELET_ERROR(
-            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than required (3)!",
+            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than "
+            "required (3)!",
             getName().c_str(), axis_param.size());
           return;
         }
@@ -475,15 +485,18 @@ pcl_ros::SACSegmentationFromNormals::subscribe()
   sub_input_filter_.subscribe(*pnh_, "input", max_queue_size_);
   sub_normals_filter_.subscribe(*pnh_, "normals", max_queue_size_);
 
-  // Subscribe to an axis direction along which the model search is to be constrained (the first 3 model coefficients will be checked)
+  // Subscribe to an axis direction along which the model search is to be constrained (the first
+  // 3 model coefficients will be checked)
   sub_axis_ = pnh_->subscribe("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
 
   if (approximate_sync_) {
-    sync_input_normals_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
-        PointCloudN, PointIndices>>>(max_queue_size_);
+    sync_input_normals_indices_a_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
   } else {
-    sync_input_normals_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-        PointCloudN, PointIndices>>>(max_queue_size_);
+    sync_input_normals_indices_e_ =
+      boost::make_shared<message_filters::Synchronizer<
+          sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
   }
 
   // If we're supposed to look for PointIndices (indices)
@@ -658,7 +671,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
     return;
   }
 
-  if (!isValid(cloud)) {// || !isValid (cloud_normals, "normals"))
+  if (!isValid(cloud)) {  // || !isValid (cloud_normals, "normals"))
     NODELET_ERROR("[%s::input_normals_indices_callback] Invalid input!", getName().c_str());
     pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
     pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
@@ -676,9 +689,12 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   if (indices && !indices->header.frame_id.empty()) {
     NODELET_DEBUG(
       "[%s::input_normals_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -692,8 +708,10 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   } else {
     NODELET_DEBUG(
       "[%s::input_normals_indices_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
@@ -711,7 +729,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   int cloud_normals_nr_points = cloud_normals->width * cloud_normals->height;
   if (cloud_nr_points != cloud_normals_nr_points) {
     NODELET_ERROR(
-      "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs from the number of points in the normals (%d)!",
+      "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs "
+      "from the number of points in the normals (%d)!",
       getName().c_str(), cloud_nr_points, cloud_normals_nr_points);
     pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
     pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
@@ -728,7 +747,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
 
   impl_.setIndices(indices_ptr);
 
-  // Final check if the data is empty (remember that indices are set to the size of the data -- if indices* = NULL)
+  // Final check if the data is empty
+  // (remember that indices are set to the size of the data -- if indices* = NULL)
   if (!cloud->points.empty()) {
     pcl::PointIndices pcl_inliers;
     pcl::ModelCoefficients pcl_model;
@@ -740,7 +760,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   }
 
   // Check if we have enough inliers, clear inliers + model if not
-  if ((int)inliers.indices.size() <= min_inliers_) {
+  if (static_cast<int>(inliers.indices.size()) <= min_inliers_) {
     inliers.indices.clear();
     model.values.clear();
   }
@@ -749,7 +769,8 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
   pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
   NODELET_DEBUG(
-    "[%s::input_normals_callback] Published PointIndices with %zu values on topic %s, and ModelCoefficients with %zu values on topic %s",
+    "[%s::input_normals_callback] Published PointIndices with %zu values on topic %s, and "
+    "ModelCoefficients with %zu values on topic %s",
     getName().c_str(), inliers.indices.size(), pnh_->resolveName("inliers").c_str(),
     model.values.size(), pnh_->resolveName("model").c_str());
   if (inliers.indices.empty()) {

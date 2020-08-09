@@ -37,8 +37,9 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <pcl/common/io.h>
-#include "pcl_ros/surface/convex_hull.hpp"
 #include <geometry_msgs/PolygonStamped.h>
+#include <vector>
+#include "pcl_ros/surface/convex_hull.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -73,8 +74,9 @@ pcl_ros::ConvexHull2D::subscribe()
     sub_indices_filter_.subscribe(*pnh_, "indices", 1);
 
     if (approximate_sync_) {
-      sync_input_indices_a_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_a_ =
+        boost::make_shared<message_filters::Synchronizer<
+            sync_policies::ApproximateTime<PointCloud, PointIndices>>>(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback(
@@ -82,8 +84,9 @@ pcl_ros::ConvexHull2D::subscribe()
           &ConvexHull2D::input_indices_callback, this, _1,
           _2));
     } else {
-      sync_input_indices_e_ = boost::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
-          PointIndices>>>(max_queue_size_);
+      sync_input_indices_e_ =
+        boost::make_shared<message_filters::Synchronizer<
+            sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback(
@@ -146,8 +149,10 @@ pcl_ros::ConvexHull2D::input_indices_callback(
   if (indices) {
     NODELET_DEBUG(
       "[%s::input_indices_model_callback]\n"
-      "                                 - PointCloud with %d data points (%s), stamp %f, and frame %s on topic %s received.\n"
-      "                                 - PointIndices with %zu values, stamp %f, and frame %s on topic %s received.",
+      "                                 - PointCloud with %d data points (%s), stamp %f, and "
+      "frame %s on topic %s received.\n"
+      "                                 - PointIndices with %zu values, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(),
       cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
@@ -156,7 +161,8 @@ pcl_ros::ConvexHull2D::input_indices_callback(
       indices->header.frame_id.c_str(), getMTPrivateNodeHandle().resolveName("indices").c_str());
   } else {
     NODELET_DEBUG(
-      "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and frame %s on topic %s received.",
+      "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and "
+      "frame %s on topic %s received.",
       getName().c_str(), cloud->width * cloud->height, fromPCL(
         cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(),
       getMTPrivateNodeHandle().resolveName("input").c_str());

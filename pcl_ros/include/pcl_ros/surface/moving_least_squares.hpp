@@ -35,25 +35,21 @@
  *
  */
 
-#ifndef PCL_ROS_MOVING_LEAST_SQUARES_H_
-#define PCL_ROS_MOVING_LEAST_SQUARES_H_
+#ifndef PCL_ROS__SURFACE__MOVING_LEAST_SQUARES_HPP_
+#define PCL_ROS__SURFACE__MOVING_LEAST_SQUARES_HPP_
 
-#include "pcl_ros/pcl_nodelet.hpp"
-
-// PCL includes
 #include <pcl/surface/mls.h>
-#include <pcl/kdtree/kdtree.h> // for KdTree
-
-// Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/MLSConfig.h"
+#include "pcl_ros/pcl_nodelet.hpp"
+#include "pcl_ros/MLSConfig.hpp"
 
 namespace pcl_ros
 {
 namespace sync_policies = message_filters::sync_policies;
 
 /** \brief @b MovingLeastSquares represents a nodelet using the MovingLeastSquares implementation.
-  * The type of the output is the same as the input, it only smooths the XYZ coordinates according to the parameters.
+  * The type of the output is the same as the input, it only smooths the XYZ coordinates according
+  * to the parameters.
   * Normals are estimated at each point as well and published on a separate topic.
   * \author Radu Bogdan Rusu, Zoltan-Csaba Marton
   */
@@ -71,7 +67,9 @@ class MovingLeastSquares : public PCLNodelet
   typedef pcl::KdTree<PointIn>::Ptr KdTreePtr;
 
 protected:
-  /** \brief An input point cloud describing the surface that is to be used for nearest neighbors estimation. */
+  /** \brief An input point cloud describing the surface that is to be used for
+    * nearest neighbors estimation.
+    */
   PointCloudInConstPtr surface_;
 
   /** \brief A pointer to the spatial search object. */
@@ -81,7 +79,7 @@ protected:
   double search_radius_;
 
   /** \brief The number of K nearest neighbors to use for each point. */
-  //int k_;
+  // int k_;
 
   /** \brief Whether to use a polynomial fit. */
   bool use_polynomial_fit_;
@@ -89,7 +87,9 @@ protected:
   /** \brief The order of the polynomial to be fit. */
   int polynomial_order_;
 
-  /** \brief How 'flat' should the neighbor weighting gaussian be (the smaller, the more local the fit). */
+  /** \brief How 'flat' should the neighbor weighting gaussian be
+    * the smaller, the more local the fit).
+    */
   double gaussian_parameter_;
 
   // ROS nodelet attributes
@@ -147,6 +147,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_ROS_MOVING_LEAST_SQUARES_H_
+#endif  // PCL_ROS__SURFACE__MOVING_LEAST_SQUARES_HPP_

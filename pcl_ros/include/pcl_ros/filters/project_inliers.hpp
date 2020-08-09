@@ -35,14 +35,13 @@
  *
  */
 
-#ifndef PCL_ROS_FILTERS_PROJECT_INLIERS_H_
-#define PCL_ROS_FILTERS_PROJECT_INLIERS_H_
+#ifndef PCL_ROS__FILTERS__PROJECT_INLIERS_HPP_
+#define PCL_ROS__FILTERS__PROJECT_INLIERS_HPP_
 
-// PCL includes
 #include <pcl/filters/project_inliers.h>
+#include <message_filters/subscriber.h>
 #include "pcl_ros/filters/filter.hpp"
 
-#include <message_filters/subscriber.h>
 
 namespace pcl_ros
 {
@@ -115,6 +114,6 @@ private:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-}
+}  // namespace pcl_ros
 
-#endif  //#ifndef PCL_FILTERS_PROJECT_INLIERS_H_
+#endif  // PCL_ROS__FILTERS__PROJECT_INLIERS_HPP_

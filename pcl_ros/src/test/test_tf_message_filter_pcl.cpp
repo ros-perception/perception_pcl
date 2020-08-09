@@ -48,7 +48,9 @@
 
 #include <gtest/gtest.h>
 
-using namespace tf;
+#include <algorithm>
+#include <string>
+#include <vector>
 
 // using a random point type, as we want to make sure that it does work with
 // other points than just XYZ
@@ -78,7 +80,7 @@ void setStamp(ros::Time & stamp, std::uint64_t & pcl_stamp)
 class Notification
 {
 public:
-  Notification(int expected_count)
+  explicit Notification(int expected_count)
   : count_(0),
     expected_count_(expected_count),
     failure_count_(0)
@@ -90,7 +92,7 @@ public:
     ++count_;
   }
 
-  void failure(const PCDType::ConstPtr & message, FilterFailureReason reason)
+  void failure(const PCDType::ConstPtr & message, tf::FilterFailureReason reason)
   {
     ++failure_count_;
   }
@@ -104,7 +106,7 @@ TEST(MessageFilter, noTransforms)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
@@ -120,7 +122,7 @@ TEST(MessageFilter, noTransformsSameFrame)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
@@ -136,7 +138,7 @@ TEST(MessageFilter, preexistingTransforms)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   PCDType::Ptr msg(new PCDType);
@@ -161,7 +163,7 @@ TEST(MessageFilter, postTransforms)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   ros::Time stamp = ros::Time::now();
@@ -190,7 +192,7 @@ TEST(MessageFilter, queueSize)
 {
   tf::TransformListener tf_client;
   Notification n(10);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 10);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 10);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
@@ -226,7 +228,7 @@ TEST(MessageFilter, setTargetFrame)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
   filter.setTargetFrame("frame1000");
 
@@ -252,7 +254,7 @@ TEST(MessageFilter, multipleTargetFrames)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
 
   std::vector<std::string> target_frames;
@@ -277,9 +279,9 @@ TEST(MessageFilter, multipleTargetFrames)
   ros::WallDuration(0.1).sleep();
   ros::spinOnce();
 
-  EXPECT_EQ(0, n.count_); // frame1->frame3 exists, frame2->frame3 does not (yet)
+  EXPECT_EQ(0, n.count_);  // frame1->frame3 exists, frame2->frame3 does not (yet)
 
-  //ros::Time::setNow(ros::Time::now() + ros::Duration(1.0));
+  // ros::Time::setNow(ros::Time::now() + ros::Duration(1.0));
 
   transform.child_frame_id_ = "frame2";
   tf_client.setTransform(transform);
@@ -295,7 +297,7 @@ TEST(MessageFilter, tolerance)
   ros::Duration offset(0.2);
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
   filter.setTolerance(offset);
 
@@ -314,9 +316,9 @@ TEST(MessageFilter, tolerance)
   msg->header.stamp = pcl_stamp;
   filter.add(msg);
 
-  EXPECT_EQ(0, n.count_); //No return due to lack of space for offset
+  EXPECT_EQ(0, n.count_);  // No return due to lack of space for offset
 
-  //ros::Time::setNow(ros::Time::now() + ros::Duration(0.1));
+  // ros::Time::setNow(ros::Time::now() + ros::Duration(0.1));
 
   transform.stamp_ += offset * 1.1;
   tf_client.setTransform(transform);
@@ -324,7 +326,7 @@ TEST(MessageFilter, tolerance)
   ros::WallDuration(0.1).sleep();
   ros::spinOnce();
 
-  EXPECT_EQ(1, n.count_); // Now have data for the message published earlier
+  EXPECT_EQ(1, n.count_);  // Now have data for the message published earlier
 
   stamp += offset;
   setStamp(stamp, pcl_stamp);
@@ -332,14 +334,14 @@ TEST(MessageFilter, tolerance)
 
   filter.add(msg);
 
-  EXPECT_EQ(1, n.count_); // Latest message is off the end of the offset
+  EXPECT_EQ(1, n.count_);  // Latest message is off the end of the offset
 }
 
 TEST(MessageFilter, outTheBackFailure)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
   ros::Time stamp = ros::Time::now();
@@ -366,7 +368,7 @@ TEST(MessageFilter, emptyFrameIDFailure)
 {
   tf::TransformListener tf_client;
   Notification n(1);
-  MessageFilter<PCDType> filter(tf_client, "frame1", 1);
+  tf::MessageFilter<PCDType> filter(tf_client, "frame1", 1);
   filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
 
   PCDType::Ptr msg(new PCDType);
