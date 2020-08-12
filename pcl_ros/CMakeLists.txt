@@ -34,16 +34,16 @@ set(dependencies
   PCL
 )
 
+include_directories(
+  include
+  ${PCL_INCLUDE_DIRS}
+)
+
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
 ament_target_dependencies(pcl_ros_tf
   ${dependencies}
 )
-target_include_directories(pcl_ros_tf
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    ${PCL_INCLUDE_DIRS})
 target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
 
 ### Nodelets
@@ -163,8 +163,10 @@ if(BUILD_TESTING)
 endif()
 
 
-install(DIRECTORY include/
-  DESTINATION include)
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
 
 install(
   TARGETS
@@ -183,6 +185,7 @@ install(
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
+  INCLUDES DESTINATION include
 )
 
 install(DIRECTORY plugins samples
