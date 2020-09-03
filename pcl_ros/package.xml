@@ -35,7 +35,13 @@
   <depend>message_filters</depend>
   <depend>nodelet</depend>
   <depend>nodelet_topic_tools</depend>
-  <depend>libpcl-all-dev</depend>
+  <depend>libpcl-common</depend>
+  <depend>libpcl-features</depend>
+  <depend>libpcl-filters</depend>
+  <depend>libpcl-io</depend>
+  <depend>libpcl-kdtree</depend>
+  <depend>libpcl-segmentation</depend>
+  <depend>libpcl-surface</depend>
   <depend>pcl_conversions</depend>
   <depend>pcl_msgs</depend>
   <depend>pluginlib</depend>
