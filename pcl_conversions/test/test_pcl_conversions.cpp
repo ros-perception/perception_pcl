@@ -9,6 +9,7 @@ namespace {
 class PCLConversionTests : public ::testing::Test {
 protected:
   virtual void SetUp() {
+    pcl_image.header.stamp = 3141592653;
     pcl_image.header.frame_id = "pcl";
     pcl_image.height = 1;
     pcl_image.width = 2;
@@ -19,6 +20,7 @@ protected:
     pcl_image.data[0] = 0x42;
     pcl_image.data[1] = 0x43;
 
+    pcl_pc2.header.stamp = 3141592653;
     pcl_pc2.header.frame_id = "pcl";
     pcl_pc2.height = 1;
     pcl_pc2.width = 2;
@@ -66,6 +68,7 @@ TEST_F(PCLConversionTests, imageConversion) {
   pcl::PCLImage pcl_image2;
   pcl_conversions::toPCL(image, pcl_image2);
   test_image(pcl_image2);
+  EXPECT_EQ(pcl_image.header.stamp, pcl_image2.header.stamp);
 }
 
 template<class T>
@@ -96,6 +99,7 @@ TEST_F(PCLConversionTests, pointcloud2Conversion) {
   pcl::PCLPointCloud2 pcl_pc2_2;
   pcl_conversions::toPCL(pc2, pcl_pc2_2);
   test_pc(pcl_pc2_2);
+  EXPECT_EQ(pcl_pc2.header.stamp, pcl_pc2_2.header.stamp);
 }
 
 } // namespace
