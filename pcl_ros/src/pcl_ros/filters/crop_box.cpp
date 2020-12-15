@@ -39,6 +39,8 @@
 #include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/filters/crop_box.h"
 
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
 pcl_ros::CropBox::child_init (ros::NodeHandle &nh, bool &has_service)

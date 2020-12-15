@@ -41,6 +41,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
+using namespace boost::placeholders;
 using pcl_conversions::moveFromPCL;
 using pcl_conversions::moveToPCL;
 

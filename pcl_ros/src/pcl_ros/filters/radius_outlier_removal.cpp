@@ -38,6 +38,8 @@
 #include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/filters/radius_outlier_removal.h"
 
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
 pcl_ros::RadiusOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_service)

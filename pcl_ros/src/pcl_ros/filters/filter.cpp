@@ -42,6 +42,8 @@
 //#include <pcl/filters/filter_dimension.h>
 */
 
+using namespace boost::placeholders;
+
 /*//typedef pcl::PixelGrid PixelGrid;
 //typedef pcl::FilterDimension FilterDimension;
 */

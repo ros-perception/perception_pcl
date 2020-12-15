@@ -39,6 +39,8 @@
 #include "pcl_ros/surface/convex_hull.h"
 #include <geometry_msgs/PolygonStamped.h>
 
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::ConvexHull2D::onInit ()

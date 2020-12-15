@@ -49,6 +49,8 @@
 //#include "vfh.cpp"
 #include "pcl_ros/features/feature.h"
 
+using namespace boost::placeholders;
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::Feature::onInit ()

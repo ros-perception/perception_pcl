@@ -37,6 +37,9 @@
 
 #include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/surface/moving_least_squares.h"
+
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::MovingLeastSquares::onInit ()

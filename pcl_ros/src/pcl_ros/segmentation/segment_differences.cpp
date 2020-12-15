@@ -38,6 +38,8 @@
 #include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/segmentation/segment_differences.h"
 
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SegmentDifferences::onInit ()

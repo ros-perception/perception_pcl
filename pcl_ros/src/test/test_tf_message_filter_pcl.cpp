@@ -37,7 +37,7 @@
 #include <tf/message_filter.h>
 #include <tf/transform_listener.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <pcl_ros/point_cloud.h>
@@ -47,6 +47,7 @@
 
 #include <gtest/gtest.h>
 
+using namespace boost::placeholders;
 using namespace tf;
 
 // using a random point type, as we want to make sure that it does work with

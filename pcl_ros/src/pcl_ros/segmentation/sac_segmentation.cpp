@@ -40,6 +40,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
+using namespace boost::placeholders;
 using pcl_conversions::fromPCL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////

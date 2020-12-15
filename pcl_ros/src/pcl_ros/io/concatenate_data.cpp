@@ -41,6 +41,8 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
+using namespace boost::placeholders;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::PointCloudConcatenateDataSynchronizer::onInit ()
