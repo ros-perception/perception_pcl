@@ -53,7 +53,7 @@ pcl_ros::ExtractPolygonalPrismData::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig> > (*pnh_);
-  dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig>::CallbackType f = boost::bind (&ExtractPolygonalPrismData::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<ExtractPolygonalPrismDataConfig>::CallbackType f = boost::bind (&ExtractPolygonalPrismData::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   // Advertise the output topics
@@ -85,7 +85,7 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   else
   {
-    sub_input_filter_.registerCallback (bind (&ExtractPolygonalPrismData::input_callback, this, _1));
+    sub_input_filter_.registerCallback (bind (&ExtractPolygonalPrismData::input_callback, this, boost::placeholders::_1));
 
     if (approximate_sync_)
       sync_input_hull_indices_a_->connectInput (sub_input_filter_, sub_hull_filter_, nf_);
@@ -94,9 +94,9 @@ pcl_ros::ExtractPolygonalPrismData::subscribe ()
   }
   // Register callbacks
   if (approximate_sync_)
-    sync_input_hull_indices_a_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_a_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   else
-    sync_input_hull_indices_e_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, _1, _2, _3));
+    sync_input_hull_indices_e_->registerCallback (bind (&ExtractPolygonalPrismData::input_hull_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

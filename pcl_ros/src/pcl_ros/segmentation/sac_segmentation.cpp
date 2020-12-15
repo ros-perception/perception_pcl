@@ -107,7 +107,7 @@ pcl_ros::SACSegmentation::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared<dynamic_reconfigure::Server<SACSegmentationConfig> >(*pnh_);
-  dynamic_reconfigure::Server<SACSegmentationConfig>::CallbackType f =  boost::bind (&SACSegmentation::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<SACSegmentationConfig>::CallbackType f =  boost::bind (&SACSegmentation::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
@@ -144,15 +144,15 @@ pcl_ros::SACSegmentation::subscribe ()
     if (latched_indices_)
     {
       // Subscribe to a callback that saves the indices
-      sub_indices_filter_.registerCallback (bind (&SACSegmentation::indices_callback, this, _1));
+      sub_indices_filter_.registerCallback (bind (&SACSegmentation::indices_callback, this, boost::placeholders::_1));
       // Subscribe to a callback that sets the header of the saved indices to the cloud header
-      sub_input_filter_.registerCallback (bind (&SACSegmentation::input_callback, this, _1));
+      sub_input_filter_.registerCallback (bind (&SACSegmentation::input_callback, this, boost::placeholders::_1));
 
       // Synchronize the two topics. No need for an approximate synchronizer here, as we'll
       // match the timestamps exactly
       sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, nf_pi_);
-      sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     // "latched_indices" not set, proceed with regular <input,indices> pairs
     else
@@ -161,19 +161,19 @@ pcl_ros::SACSegmentation::subscribe ()
       {
         sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
         sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-        sync_input_indices_a_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+        sync_input_indices_a_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else
       {
         sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
         sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-        sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, _1, _2));
+        sync_input_indices_e_->registerCallback (bind (&SACSegmentation::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_,  bind (&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_,  bind (&SACSegmentation::input_indices_callback, this, boost::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,7 +367,7 @@ pcl_ros::SACSegmentationFromNormals::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig> > (*pnh_);
-  dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>::CallbackType f = boost::bind (&SACSegmentationFromNormals::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>::CallbackType f = boost::bind (&SACSegmentationFromNormals::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   // Advertise the output topics
@@ -471,7 +471,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   else
   {
     // Create a different callback for copying over the timestamp to fake indices
-    sub_input_filter_.registerCallback (bind (&SACSegmentationFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback (bind (&SACSegmentationFromNormals::input_callback, this, boost::placeholders::_1));
 
     if (approximate_sync_)
       sync_input_normals_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_);
@@ -480,9 +480,9 @@ pcl_ros::SACSegmentationFromNormals::subscribe ()
   }
 
   if (approximate_sync_)
-    sync_input_normals_indices_a_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+    sync_input_normals_indices_a_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   else
-    sync_input_normals_indices_e_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, _1, _2, _3));
+    sync_input_normals_indices_e_->registerCallback (bind (&SACSegmentationFromNormals::input_normals_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

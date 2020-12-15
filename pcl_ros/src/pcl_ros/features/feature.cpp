@@ -80,7 +80,7 @@ pcl_ros::Feature::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared<dynamic_reconfigure::Server<FeatureConfig> > (*pnh_);
-  dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&Feature::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&Feature::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
@@ -124,7 +124,7 @@ pcl_ros::Feature::subscribe ()
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+        sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, boost::placeholders::_1));
         // surface not enabled, connect the input-indices duo and register
         if (approximate_sync_)
           sync_input_surface_indices_a_->connectInput (sub_input_filter_, nf_pc_, sub_indices_filter_);
@@ -134,7 +134,7 @@ pcl_ros::Feature::subscribe ()
     }
     else                    // Use only surface
     {
-      sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, _1));
+      sub_input_filter_.registerCallback (bind (&Feature::input_callback, this, boost::placeholders::_1));
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (*pnh_, "surface", max_queue_size_);
       if (approximate_sync_)
@@ -144,13 +144,13 @@ pcl_ros::Feature::subscribe ()
     }
     // Register callbacks
     if (approximate_sync_)
-      sync_input_surface_indices_a_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_a_->registerCallback (bind (&Feature::input_surface_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     else
-      sync_input_surface_indices_e_->registerCallback (bind (&Feature::input_surface_indices_callback, this, _1, _2, _3));
+      sync_input_surface_indices_e_->registerCallback (bind (&Feature::input_surface_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, _1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
+    sub_input_ = pnh_->subscribe<PointCloudIn> ("input", max_queue_size_,  bind (&Feature::input_surface_indices_callback, this, boost::placeholders::_1, PointCloudInConstPtr (), PointIndicesConstPtr ()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -300,7 +300,7 @@ pcl_ros::FeatureFromNormals::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared<dynamic_reconfigure::Server<FeatureConfig> > (*pnh_);
-  dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&FeatureFromNormals::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<FeatureConfig>::CallbackType f = boost::bind (&FeatureFromNormals::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
@@ -345,7 +345,7 @@ pcl_ros::FeatureFromNormals::subscribe ()
       }
       else                  // Use only indices
       {
-        sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+        sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, boost::placeholders::_1));
         if (approximate_sync_)
           // surface not enabled, connect the input-indices duo and register
           sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, sub_indices_filter_);
@@ -359,7 +359,7 @@ pcl_ros::FeatureFromNormals::subscribe ()
       // indices not enabled, connect the input-surface duo and register
       sub_surface_filter_.subscribe (*pnh_, "surface", max_queue_size_);
 
-      sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+      sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, boost::placeholders::_1));
       if (approximate_sync_)
         sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, sub_surface_filter_, nf_pi_);
       else
@@ -368,7 +368,7 @@ pcl_ros::FeatureFromNormals::subscribe ()
   }
   else
   {
-    sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback (bind (&FeatureFromNormals::input_callback, this, boost::placeholders::_1));
 
     if (approximate_sync_)
       sync_input_normals_surface_indices_a_->connectInput (sub_input_filter_, sub_normals_filter_, nf_pc_, nf_pi_);
@@ -378,9 +378,9 @@ pcl_ros::FeatureFromNormals::subscribe ()
 
   // Register callbacks
   if (approximate_sync_)
-    sync_input_normals_surface_indices_a_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_a_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
   else
-    sync_input_normals_surface_indices_e_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, _1, _2, _3, _4));
+    sync_input_normals_surface_indices_e_->registerCallback (bind (&FeatureFromNormals::input_normals_surface_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

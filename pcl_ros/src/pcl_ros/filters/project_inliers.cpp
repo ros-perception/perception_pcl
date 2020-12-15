@@ -99,13 +99,13 @@ pcl_ros::ProjectInliers::subscribe ()
   {
     sync_input_indices_model_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud2, PointIndices, ModelCoefficients> > > (max_queue_size_);
     sync_input_indices_model_a_->connectInput (sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_a_->registerCallback (bind (&ProjectInliers::input_indices_model_callback, this, _1, _2, _3));
+    sync_input_indices_model_a_->registerCallback (bind (&ProjectInliers::input_indices_model_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
   else
   {
     sync_input_indices_model_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud2, PointIndices, ModelCoefficients> > > (max_queue_size_);
     sync_input_indices_model_e_->connectInput (sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_e_->registerCallback (bind (&ProjectInliers::input_indices_model_callback, this, _1, _2, _3));
+    sync_input_indices_model_e_->registerCallback (bind (&ProjectInliers::input_indices_model_callback, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 }
 
