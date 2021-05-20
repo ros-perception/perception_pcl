@@ -13,7 +13,7 @@ find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED QUIET COMPONENTS core features filters io segmentation surface)
 
 ## Find ROS package dependencies
-find_package(ament_cmake_ros REQUIRED)
+find_package(ament_cmake REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
