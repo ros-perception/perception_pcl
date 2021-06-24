@@ -44,7 +44,7 @@ add_library(pcl_ros_tf src/transforms.cpp)
 ament_target_dependencies(pcl_ros_tf
   ${dependencies}
 )
-target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_tf SHARED ${PCL_LIBRARIES})
 
 ### Nodelets
 #
