@@ -188,7 +188,7 @@ transformPointCloud (const Eigen::Matrix4f &transform, const sensor_msgs::PointC
     out.is_dense     = in.is_dense;
     out.data.resize (in.data.size ());
     // Copy everything as it's faster than copying individual elements
-    memcpy (&out.data[0], &in.data[0], in.data.size ());
+    memcpy (out.data.data (), in.data.data (), in.data.size ());
   }
 
   Eigen::Array4i xyz_offset (in.fields[x_idx].offset, in.fields[y_idx].offset, in.fields[z_idx].offset, 0);

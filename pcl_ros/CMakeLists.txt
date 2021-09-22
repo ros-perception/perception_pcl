@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(pcl_ros)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 add_compile_options(-std=c++14)
 
 ## Find system dependencies
