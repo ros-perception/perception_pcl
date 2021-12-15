@@ -10,6 +10,28 @@ else()
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
+## Find catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+  geometry_msgs
+  message_filters
+  nodelet
+  nodelet_topic_tools
+  pcl_conversions
+  pcl_msgs
+  pluginlib
+  rosbag
+  rosconsole
+  roscpp
+  roslib
+  sensor_msgs
+  std_msgs
+  tf
+  tf2
+  tf2_eigen
+  tf2_ros
+)
+
 ## Find system dependencies
 find_package(PCL REQUIRED COMPONENTS core features filters io segmentation surface)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
@@ -40,28 +62,6 @@ if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
     endif()
   endforeach()
 endif()
-
-## Find catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
-  geometry_msgs
-  message_filters
-  nodelet
-  nodelet_topic_tools
-  pcl_conversions
-  pcl_msgs
-  pluginlib
-  rosbag
-  rosconsole
-  roscpp
-  roslib
-  sensor_msgs
-  std_msgs
-  tf
-  tf2
-  tf2_eigen
-  tf2_ros
-)
 
 ## Add include directories
 include_directories(include)
