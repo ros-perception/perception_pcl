@@ -33,8 +33,8 @@ include_directories(
   ${PCL_COMMON_INCLUDE_DIRS}
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}/
+install(DIRECTORY include/
+  DESTINATION include/${PROJECT_NAME}
 )
 
 # Add gtest based cpp test target
@@ -48,6 +48,8 @@ if(BUILD_TESTING)
   target_link_libraries(${PROJECT_NAME}-test ${Boost_LIBRARIES} ${PCL_LIBRARIES})
 endif()
 
-ament_export_include_directories(include)
+# Export old-style CMake variables
+ament_export_include_directories("include/${PROJECT_NAME}")
+
 ament_export_dependencies(${dependencies})
 ament_package()

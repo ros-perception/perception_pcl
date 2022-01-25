@@ -34,17 +34,15 @@ set(dependencies
   PCL
 )
 
-include_directories(
-  include
-  ${PCL_INCLUDE_DIRS}
-)
-
 ## Declare the pcl_ros_tf library
 add_library(pcl_ros_tf src/transforms.cpp)
+target_include_directories(pcl_ros_tf PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
 ament_target_dependencies(pcl_ros_tf
   ${dependencies}
 )
-target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
 
 ### Nodelets
 #
@@ -165,7 +163,7 @@ endif()
 
 install(
   DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/${PROJECT_NAME}
 )
 
 install(
@@ -185,14 +183,18 @@ install(
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  INCLUDES DESTINATION include
 )
 
 install(DIRECTORY plugins samples
   DESTINATION share/${PROJECT_NAME})
 
-ament_export_include_directories(include)
+# Export old-style CMake variables
+ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(pcl_ros_tf)
-ament_export_dependencies(${dependencies})
+
+# Export modern CMake targets
 ament_export_targets(export_pcl_ros HAS_LIBRARY_TARGET)
+
+ament_export_dependencies(${dependencies})
+
 ament_package()
