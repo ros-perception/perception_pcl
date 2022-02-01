@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(pcl_ros)
 
-# CMake 3.1 added support for CMAKE_CXX_STANDARD to manage the C++ standard version
-# Use CMake C++ standard management where possible for better interoperability
-# with dependencies that export target standards and/or features
-if (${CMAKE_VERSION} VERSION_LESS "3.1")
-  add_compile_options(-std=c++14)
-else()
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
