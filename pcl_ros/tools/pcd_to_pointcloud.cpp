@@ -129,37 +129,3 @@ public:
 }  // namespace pcl_ros
 
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PCDGenerator)
-
-// /* ---[ */
-// int
-// main(int argc, char ** argv)
-// {
-//   if (argc < 2) {
-//     std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" <<
-//       std::endl;
-//     return -1;
-//   }
-
-//   ros::init(argc, argv, "pcd_to_pointcloud");
-
-//   PCDGenerator c;
-//   c.file_name_ = std::string(argv[1]);
-//   // check if publishing interval is given
-//   if (argc == 2) {
-//     c.period_ms_ = 0;
-//   } else {
-//     c.period_ms_ = atof(argv[2]);
-//   }
-
-//   if (c.start() == -1) {
-//     ROS_ERROR("Could not load file %s. Exiting.", argv[1]);
-//     return -1;
-//   }
-//   ROS_INFO(
-//     "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",
-//     c.cloud_.width * c.cloud_.height, c.cloud_.data.size(), pcl::getFieldsList(c.cloud_).c_str());
-//   c.spin();
-
-//   return 0;
-// }
-/* ]--- */
