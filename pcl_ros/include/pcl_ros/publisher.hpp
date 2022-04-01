@@ -45,8 +45,8 @@
 #ifndef PCL_ROS__PUBLISHER_HPP_
 #define PCL_ROS__PUBLISHER_HPP_
 
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <pcl/conversions.h>
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -55,46 +55,47 @@
 
 namespace pcl_ros
 {
-class BasePublisher : public rclcpp::Node
+class BasePublisher
 {
 public:
-  BasePublisher(rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
-  : rclcpp::Node("pcl_ros_base_publisher", node_options)
-  {}
-
   void
-  advertise(const std::string & topic, rclcpp::QoS qos, const rclcpp::PublisherOptions & options)
+  advertise(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
   {
-    pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(topic, qos, options);
+    pub_ = nh.advertise<sensor_msgs::PointCloud2>(topic, queue_size);
   }
 
   std::string
   getTopic()
   {
-    return pub_.get_topic_name();
+    return pub_.getTopic();
   }
 
-  // uint32_t
-  // getNumSubscribers() const
-  // {
-  //   return pub_.getNumSubscribers();
-  // }
+  uint32_t
+  getNumSubscribers() const
+  {
+    return pub_.getNumSubscribers();
+  }
 
-  // void
-  // shutdown()
-  // {
-  //   pub_.shutdown();
-  // }
+  void
+  shutdown()
+  {
+    pub_.shutdown();
+  }
+
+  operator void *() const
+  {
+    return (pub_) ? reinterpret_cast<void *>(1) : reinterpret_cast<void *>(0);
+  }
 
 protected:
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2> pub_;
+  ros::Publisher pub_;
 };
 
 template<typename PointT>
 class Publisher : public BasePublisher
 {
 public:
-  using BasePublisher::BasePublisher;
+  Publisher() {}
 
   Publisher(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
   {
@@ -103,12 +104,11 @@ public:
 
   ~Publisher() {}
 
-  // TODO: Make use of the new type adaption feature in ROS 2.
-  // inline void
-  // publish(const boost::shared_ptr<const pcl::PointCloud<PointT>> & point_cloud) const
-  // {
-  //   publish(*point_cloud);
-  // }
+  inline void
+  publish(const boost::shared_ptr<const pcl::PointCloud<PointT>> & point_cloud) const
+  {
+    publish(*point_cloud);
+  }
 
   inline void
   publish(const pcl::PointCloud<PointT> & point_cloud) const
