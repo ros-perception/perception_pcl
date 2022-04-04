@@ -61,7 +61,7 @@
 
 namespace pcl_ros
 {
-class PCDGenerator : public rclcpp::Node
+class PCDPublisher : public rclcpp::Node
 {
 protected:
   std::string tf_frame_;
@@ -77,8 +77,8 @@ public:
   rclcpp::TimerBase::SharedPtr timer_;
 
   ////////////////////////////////////////////////////////////////////////////////
-  explicit PCDGenerator(const rclcpp::NodeOptions & options)
-  : rclcpp::Node("pcd_generator", options), tf_frame_("/base_link")
+  explicit PCDPublisher(const rclcpp::NodeOptions & options)
+  : rclcpp::Node("pcd_publisher", options), tf_frame_("/base_link")
   {
     // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
@@ -124,4 +124,4 @@ public:
 };
 }  // namespace pcl_ros
 
-RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PCDGenerator)
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PCDPublisher)

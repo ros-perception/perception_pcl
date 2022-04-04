@@ -130,7 +130,7 @@ ament_target_dependencies(pcd_to_pointcloud_lib
   sensor_msgs
   pcl_conversions)
 rclcpp_components_register_node(pcd_to_pointcloud_lib
-  PLUGIN "pcl_ros::PCDGenerator"
+  PLUGIN "pcl_ros::PCDPublisher"
   EXECUTABLE pcd_to_pointcloud)
 #
 #add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
