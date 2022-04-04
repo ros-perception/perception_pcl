@@ -43,126 +43,85 @@
 
  **/
 
-// ROS core
-#include <ros/ros.h>
-#include <pcl/io/io.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-
 // STL
 #include <chrono>
 #include <string>
 #include <thread>
 
-#include "pcl_ros/publisher.hpp"
+// PCL
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
 
-class PCDGenerator
+// ROS core
+#include <rclcpp/rclcpp.hpp>
+#include "rclcpp_components/register_node_macro.hpp"
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <pcl_conversions/pcl_conversions.h>
+
+namespace pcl_ros
+{
+class PCDPublisher : public rclcpp::Node
 {
 protected:
   std::string tf_frame_;
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
 
 public:
   // ROS messages
-  sensor_msgs::PointCloud2 cloud_;
+  sensor_msgs::msg::PointCloud2 cloud_;
 
   std::string file_name_, cloud_topic_;
-  double wait_;
+  size_t period_ms_;
 
-  pcl_ros::Publisher<sensor_msgs::PointCloud2> pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>> pub_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   ////////////////////////////////////////////////////////////////////////////////
-  PCDGenerator()
-  : tf_frame_("/base_link"), private_nh_("~")
+  explicit PCDPublisher(const rclcpp::NodeOptions & options)
+  : rclcpp::Node("pcd_publisher", options), tf_frame_("/base_link")
   {
     // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
     cloud_topic_ = "cloud_pcd";
-    pub_.advertise(nh_, cloud_topic_.c_str(), 1);
-    private_nh_.param("frame_id", tf_frame_, std::string("/base_link"));
-    ROS_INFO(
-      "Publishing data on topic %s with frame_id %s.", nh_.resolveName(
-        cloud_topic_).c_str(), tf_frame_.c_str());
-  }
+    tf_frame_ = this->declare_parameter("tf_frame", tf_frame_);
+    period_ms_ = this->declare_parameter("publishing_period_ms", 3000);
+    file_name_ = this->declare_parameter<std::string>("file_name");
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Start
-  int
-  start()
-  {
     if (file_name_ == "" || pcl::io::loadPCDFile(file_name_, cloud_) == -1) {
-      return -1;
+      RCLCPP_ERROR(this->get_logger(), "failed to open PCD file");
+      throw std::runtime_error{"could not open pcd file"};
     }
     cloud_.header.frame_id = tf_frame_;
-    return 0;
+    int nr_points = cloud_.width * cloud_.height;
+
+    auto fields_list = pcl::getFieldsList(cloud_);
+    auto resolved_cloud_topic =
+      this->get_node_topics_interface()->resolve_topic_name(cloud_topic_);
+
+    pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_topic_, 10);
+    timer_ = this->create_wall_timer(
+      std::chrono::milliseconds(period_ms_),
+      [this]() {
+        this->publish();
+      });
+
+    RCLCPP_INFO(
+      this->get_logger(),
+      "Publishing data with %d points (%s) on topic %s in frame %s.",
+      nr_points,
+      fields_list.c_str(),
+      resolved_cloud_topic.c_str(),
+      cloud_.header.frame_id.c_str());
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Spin (!)
-  bool spin()
+  // Publish callback that is periodically called by a timer.
+  void publish()
   {
-    int nr_points = cloud_.width * cloud_.height;
-    std::string fields_list = pcl::getFieldsList(cloud_);
-    double interval = wait_ * 1e+6;
-    while (nh_.ok()) {
-      ROS_DEBUG_ONCE(
-        "Publishing data with %d points (%s) on topic %s in frame %s.", nr_points,
-        fields_list.c_str(), nh_.resolveName(cloud_topic_).c_str(), cloud_.header.frame_id.c_str());
-      cloud_.header.stamp = ros::Time::now();
-
-      if (pub_.getNumSubscribers() > 0) {
-        ROS_DEBUG("Publishing data to %d subscribers.", pub_.getNumSubscribers());
-        pub_.publish(cloud_);
-      } else {
-        // check once a second if there is any subscriber
-        ros::Duration(1).sleep();
-        continue;
-      }
-
-      std::this_thread::sleep_for(std::chrono::microseconds(static_cast<uint32_t>(interval)));
-
-      if (interval == 0) {      // We only publish once if a 0 seconds interval is given
-        // Give subscribers 3 seconds until point cloud decays... a little ugly!
-        ros::Duration(3.0).sleep();
-        break;
-      }
-    }
-    return true;
+    cloud_.header.stamp = this->get_clock()->now();
+    pub_->publish(cloud_);
   }
 };
+}  // namespace pcl_ros
 
-/* ---[ */
-int
-main(int argc, char ** argv)
-{
-  if (argc < 2) {
-    std::cerr << "Syntax is: " << argv[0] << " <file.pcd> [publishing_interval (in seconds)]" <<
-      std::endl;
-    return -1;
-  }
-
-  ros::init(argc, argv, "pcd_to_pointcloud");
-
-  PCDGenerator c;
-  c.file_name_ = std::string(argv[1]);
-  // check if publishing interval is given
-  if (argc == 2) {
-    c.wait_ = 0;
-  } else {
-    c.wait_ = atof(argv[2]);
-  }
-
-  if (c.start() == -1) {
-    ROS_ERROR("Could not load file %s. Exiting.", argv[1]);
-    return -1;
-  }
-  ROS_INFO(
-    "Loaded a point cloud with %d points (total size is %zu) and the following channels: %s.",
-    c.cloud_.width * c.cloud_.height, c.cloud_.data.size(), pcl::getFieldsList(c.cloud_).c_str());
-  c.spin();
-
-  return 0;
-}
-/* ]--- */
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PCDPublisher)

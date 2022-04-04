@@ -10,12 +10,13 @@ endif()
 
 ## Find system dependencies
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED QUIET COMPONENTS core features filters io segmentation surface)
+find_package(PCL REQUIRED QUIET COMPONENTS core common features filters io segmentation surface)
 
 ## Find ROS package dependencies
 find_package(ament_cmake REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -118,8 +119,19 @@ ament_target_dependencies(pcl_ros_tf
 #
 ### Tools
 #
-#add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
-#target_link_libraries(pcd_to_pointcloud ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_library(pcd_to_pointcloud_lib SHARED tools/pcd_to_pointcloud.cpp)
+target_link_libraries(pcd_to_pointcloud_lib
+  ${PCL_LIBRARIES})
+target_include_directories(pcd_to_pointcloud_lib PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(pcd_to_pointcloud_lib
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  pcl_conversions)
+rclcpp_components_register_node(pcd_to_pointcloud_lib
+  PLUGIN "pcl_ros::PCDPublisher"
+  EXECUTABLE pcd_to_pointcloud)
 #
 #add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 #target_link_libraries(pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -169,12 +181,12 @@ install(
 install(
   TARGETS
     pcl_ros_tf
+    pcd_to_pointcloud_lib
 #    pcl_ros_io
 #    pcl_ros_features
 #    pcl_ros_filters
 #    pcl_ros_surface
 #    pcl_ros_segmentation
-#    pcd_to_pointcloud
 #    pointcloud_to_pcd
 #    bag_to_pcd
 #    convert_pcd_to_image
