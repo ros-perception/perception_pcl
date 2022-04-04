@@ -83,7 +83,7 @@ public:
     // Maximum number of outgoing messages to be queued for delivery to subscribers = 1
 
     cloud_topic_ = "cloud_pcd";
-    tf_frame_ = this->declare_parameter("spin_period", tf_frame_);
+    tf_frame_ = this->declare_parameter("tf_frame", tf_frame_);
     period_ms_ = this->declare_parameter("publishing_period_ms", 3000);
     file_name_ = this->declare_parameter<std::string>("file_name");
 
@@ -97,13 +97,6 @@ public:
     auto fields_list = pcl::getFieldsList(cloud_);
     auto resolved_cloud_topic =
       this->get_node_topics_interface()->resolve_topic_name(cloud_topic_);
-    RCLCPP_DEBUG(
-      this->get_logger(),
-      "Publishing data with %d points (%s) on topic %s in frame %s.",
-      nr_points,
-      fields_list.c_str(),
-      resolved_cloud_topic.c_str(),
-      cloud_.header.frame_id.c_str());
 
     pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_topic_, 10);
     timer_ = this->create_wall_timer(
@@ -114,8 +107,11 @@ public:
 
     RCLCPP_INFO(
       this->get_logger(),
-      "Publishing data on topic %s with frame_id %s.",
-      resolved_cloud_topic.c_str(), tf_frame_.c_str());
+      "Publishing data with %d points (%s) on topic %s in frame %s.",
+      nr_points,
+      fields_list.c_str(),
+      resolved_cloud_topic.c_str(),
+      cloud_.header.frame_id.c_str());
   }
 
   ////////////////////////////////////////////////////////////////////////////////

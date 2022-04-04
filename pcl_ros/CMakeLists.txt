@@ -120,7 +120,6 @@ ament_target_dependencies(pcl_ros_tf
 ### Tools
 #
 add_library(pcd_to_pointcloud_lib SHARED tools/pcd_to_pointcloud.cpp)
-# add_executable(pcd_to_pointcloud tools/pcd_to_pointcloud.cpp)
 target_link_libraries(pcd_to_pointcloud_lib
   ${PCL_LIBRARIES})
 target_include_directories(pcd_to_pointcloud_lib PUBLIC
