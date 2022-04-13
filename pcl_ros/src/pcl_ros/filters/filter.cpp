@@ -36,7 +36,7 @@
  */
 
 #include "pcl_ros/filters/filter.hpp"
-#include <pcl/io/io.h>
+#include <pcl/common/io.h>
 #include <vector>
 #include "pcl_ros/transforms.hpp"
 
