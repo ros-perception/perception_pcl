@@ -37,7 +37,7 @@
 
 #include "pcl_ros/filters/project_inliers.hpp"
 #include <pluginlib/class_list_macros.h>
-#include <pcl/io/io.h>
+#include <pcl/common/io.h>
 #include <vector>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
