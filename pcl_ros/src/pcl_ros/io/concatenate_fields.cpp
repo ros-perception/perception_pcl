@@ -37,7 +37,7 @@
 
 /** \author Radu Bogdan Rusu */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/common/io.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <vector>
