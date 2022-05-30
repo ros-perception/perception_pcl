@@ -576,7 +576,7 @@ namespace pcl {
     pcl::MsgFieldMap field_map;
     std::vector<pcl::PCLPointField> msg_fields;
     pcl_conversions::toPCL(cloud.fields, msg_fields);
-    pcl::createMapping<pcl::PointXYZ> (msg_fields, field_map);
+    pcl::createMapping<T> (msg_fields, field_map);
 
     // Copy point data
     std::uint32_t num_points = cloud.width * cloud.height;
