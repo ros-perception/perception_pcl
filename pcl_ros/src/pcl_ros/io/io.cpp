@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 //#include <pcl_ros/subscriber.h>

@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/segmentation/sac_segmentation.h"
 
 #include <pcl_conversions/pcl_conversions.h>
