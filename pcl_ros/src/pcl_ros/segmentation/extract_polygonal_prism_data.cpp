@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/transforms.h"
 #include "pcl_ros/segmentation/extract_polygonal_prism_data.h"
 

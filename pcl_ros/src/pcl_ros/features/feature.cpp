@@ -35,7 +35,7 @@
  *
  */
 
-//#include <pluginlib/class_list_macros.h>
+//#include <pluginlib/class_list_macros.hpp>
 // Include the implementations here instead of compiling them separately to speed up compile time
 //#include "normal_3d.cpp"
 //#include "boundary.cpp"
