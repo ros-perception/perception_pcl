@@ -82,6 +82,8 @@ public:
     image_pub_ = this->create_publisher<sensor_msgs::msg::Image>(image_topic_, 30);
 
     // print some info about the node
+    // FIXME!
+    // Foxy doesn't have resolve_topic_name(), newer versions can use this to resolve remaps
     // std::string r_ct = this->get_node_topics_interface()->resolve_topic_name(cloud_topic_);
     // std::string r_it = this->get_node_topics_interface()->resolve_topic_name(image_topic_);
     std::string r_ct = cloud_topic_;
