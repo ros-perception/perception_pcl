@@ -39,10 +39,10 @@
  \author Ethan Rublee
  **/
 // ROS core
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 // Image message
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 // pcl::toROSMsg
 #include <pcl/io/pcd_io.h>
 // conversions from PCL custom types
@@ -50,55 +50,58 @@
 // stl stuff
 #include <string>
 
-class PointCloudToImage
+class PointCloudToImage : public rclcpp::Node
 {
 public:
   void
-  cloud_cb(const sensor_msgs::PointCloud2ConstPtr & cloud)
+  cloud_cb(const sensor_msgs::msg::PointCloud2::SharedPtr cloud)
   {
     if (cloud->height <= 1) {
-      ROS_ERROR("Input point cloud is not organized, ignoring!");
+      RCLCPP_ERROR(this->get_logger(), "Input point cloud is not organized, ignoring!");
       return;
     }
     try {
-      pcl::toROSMsg(*cloud, image_);  // convert the cloud
-      image_.header = cloud->header;
-      image_pub_.publish(image_);  // publish our cloud image
+      pcl::toROSMsg(*cloud, this->image_);  // convert the cloud
+      this->image_.header = cloud->header;
+      this->image_pub_->publish(this->image_);  // publish our cloud image
     } catch (std::runtime_error & e) {
-      ROS_ERROR_STREAM(
+      RCLCPP_ERROR_STREAM(
+        this->get_logger(),
         "Error in converting cloud to image message: " <<
-          e.what());
+          e.what()
+      );
     }
   }
-  PointCloudToImage()
-  : cloud_topic_("input"), image_topic_("output")
+  PointCloudToImage(const std::string name)
+  : Node(name), cloud_topic_("input"), image_topic_("output")
   {
-    sub_ = nh_.subscribe(
+    this->sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
       cloud_topic_, 30,
-      &PointCloudToImage::cloud_cb, this);
-    image_pub_ = nh_.advertise<sensor_msgs::Image>(image_topic_, 30);
+      std::bind(&PointCloudToImage::cloud_cb, this, std::placeholders::_1));
+
+    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>(image_topic_, 30);
 
     // print some info about the node
-    std::string r_ct = nh_.resolveName(cloud_topic_);
-    std::string r_it = nh_.resolveName(image_topic_);
-    ROS_INFO_STREAM("Listening for incoming data on topic " << r_ct);
-    ROS_INFO_STREAM("Publishing image on topic " << r_it);
+    // std::string r_ct = this->get_node_topics_interface()->resolve_topic_name(cloud_topic_);
+    // std::string r_it = this->get_node_topics_interface()->resolve_topic_name(image_topic_);
+    std::string r_ct = cloud_topic_;
+    std::string r_it = image_topic_;
+    RCLCPP_INFO_STREAM(this->get_logger(), "Listening for incoming data on topic " << r_ct);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Publishing image on topic " << r_it);
   }
 
 private:
-  ros::NodeHandle nh_;
-  sensor_msgs::Image image_;  // cache the image message
-  std::string cloud_topic_;  // default input
+  sensor_msgs::msg::Image image_;  // cache the image message
+  std::string cloud_topic_;  // default inputww
   std::string image_topic_;  // default output
-  ros::Subscriber sub_;  // cloud subscriber
-  ros::Publisher image_pub_;  // image message publisher
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;  // cloud subscriber
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;  // image message publisher
 };
 
 int
 main(int argc, char ** argv)
 {
-  ros::init(argc, argv, "convert_pointcloud_to_image");
-  PointCloudToImage pci;  // this loads up the node
-  ros::spin();  // where she stops nobody knows
+  rclcpp::init(argc, argv);                                                                     // this loads up the node
+  rclcpp::spin(std::make_shared<PointCloudToImage>("convert_pointcloud_to_image"));             // where she stops nobody knows
   return 0;
 }
