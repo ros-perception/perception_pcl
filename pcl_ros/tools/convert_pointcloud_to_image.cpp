@@ -49,6 +49,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 // stl stuff
 #include <string>
+// to use make_shared<>
+#include <memory>
 
 class PointCloudToImage : public rclcpp::Node
 {
@@ -72,7 +74,7 @@ public:
       );
     }
   }
-  PointCloudToImage(const std::string name)
+  explicit PointCloudToImage(const std::string name)
   : Node(name), cloud_topic_("input"), image_topic_("output")
   {
     this->sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
@@ -103,7 +105,9 @@ private:
 int
 main(int argc, char ** argv)
 {
-  rclcpp::init(argc, argv);                                                                     // this loads up the node
-  rclcpp::spin(std::make_shared<PointCloudToImage>("convert_pointcloud_to_image"));             // where she stops nobody knows
+  rclcpp::init(argc, argv);  // this loads up the node
+  rclcpp::spin(
+    std::make_shared<PointCloudToImage>("convert_pointcloud_to_image")
+  );  // where she stops nobody knows
   return 0;
 }
