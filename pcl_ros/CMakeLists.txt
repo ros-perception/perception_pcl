@@ -132,8 +132,19 @@ target_link_libraries(pcl_ros_tf ${PCL_LIBRARIES})
 #add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
 #target_link_libraries(convert_pcd_to_image ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 #
-#add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
-#target_link_libraries(convert_pointcloud_to_image ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_executable(convert_pointcloud_to_image tools/convert_pointcloud_to_image.cpp)
+target_link_libraries(convert_pointcloud_to_image ${PCL_LIBRARIES})
+target_include_directories(convert_pointcloud_to_image PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(convert_pointcloud_to_image
+  ${dependencies})
+
+### Install
+
+install(TARGETS convert_pointcloud_to_image pcl_ros_tf
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 #
 ### Downloads
 #
