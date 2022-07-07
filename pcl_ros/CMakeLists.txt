@@ -10,7 +10,7 @@ endif()
 
 ## Find system dependencies
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED QUIET COMPONENTS core common features filters io segmentation surface)
+find_package(PCL REQUIRED QUIET COMPONENTS common features filters io segmentation surface)
 
 ## Find ROS package dependencies
 find_package(ament_cmake REQUIRED)
