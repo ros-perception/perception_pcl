@@ -57,6 +57,7 @@
 #endif
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <boost/foreach.hpp> // for BOOST_FOREACH
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
 #include <string>
