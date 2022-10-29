@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
-#include <pcl/point_traits.h>
+#include <pcl/type_traits.h>
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
