@@ -37,6 +37,7 @@
 #ifndef PCL_CONVERSIONS_H__
 #define PCL_CONVERSIONS_H__
 
+#include <cstddef>
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
@@ -81,13 +82,14 @@ namespace pcl_conversions {
   inline
   void fromPCL(const std::uint64_t &pcl_stamp, rclcpp::Time &stamp)
   {
-    stamp = rclcpp::Time(pcl_stamp * 1000ull); // Convert from us to ns
+    stamp = rclcpp::Time(
+      static_cast<rcl_time_point_value_t>(pcl_stamp * 1000ull));  // Convert from us to ns
   }
 
   inline
   void toPCL(const rclcpp::Time &stamp, std::uint64_t &pcl_stamp)
   {
-    pcl_stamp = stamp.nanoseconds() / 1000ull;  // Convert from ns to us
+    pcl_stamp = static_cast<std::uint64_t>(stamp.nanoseconds()) / 1000ull;  // Convert from ns to us
   }
 
   inline
@@ -211,7 +213,7 @@ namespace pcl_conversions {
   {
     pfs.resize(pcl_pfs.size());
     std::vector<pcl::PCLPointField>::const_iterator it = pcl_pfs.begin();
-    int i = 0;
+    size_t i = 0;
     for(; it != pcl_pfs.end(); ++it, ++i) {
       fromPCL(*(it), pfs[i]);
     }
@@ -231,7 +233,7 @@ namespace pcl_conversions {
   {
     pcl_pfs.resize(pfs.size());
     std::vector<sensor_msgs::msg::PointField>::const_iterator it = pfs.begin();
-    int i = 0;
+    size_t i = 0;
     for(; it != pfs.end(); ++it, ++i) {
       toPCL(*(it), pcl_pfs[i]);
     }
@@ -676,15 +678,16 @@ namespace pcl {
     {
       // Get the field sizes for the second cloud
       std::vector<sensor_msgs::msg::PointField> fields2;
-      std::vector<int> fields2_sizes;
+      std::vector<size_t> fields2_sizes;
       for (size_t j = 0; j < cloud2.fields.size (); ++j)
       {
         if (cloud2.fields[j].name == "_")
           continue;
 
-        fields2_sizes.push_back (cloud2.fields[j].count *
-                                 pcl::getFieldSize (cloud2.fields[j].datatype));
-        fields2.push_back (cloud2.fields[j]);
+        fields2_sizes.push_back(
+          cloud2.fields[j].count *
+          static_cast<size_t>(pcl::getFieldSize(cloud2.fields[j].datatype)));
+        fields2.push_back(cloud2.fields[j]);
       }
 
       cloud_out.data.resize (nrpts + (cloud2.width * cloud2.height) * cloud_out.point_step);
@@ -692,7 +695,7 @@ namespace pcl {
       // Copy the second cloud
       for (size_t cp = 0; cp < cloud2.width * cloud2.height; ++cp)
       {
-        int i = 0;
+        size_t i = 0;
         for (size_t j = 0; j < fields2.size (); ++j)
         {
           if (cloud1.fields[i].name == "_")
@@ -737,7 +740,7 @@ namespace pcl {
 
 } // namespace pcl
 
-/* TODO when ROS2 type masquareding is implemented */ 
+/* TODO when ROS2 type masquerading is implemented */ 
 /**
 namespace ros
 {
