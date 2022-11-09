@@ -45,7 +45,7 @@ pcl_ros::VoxelGrid::child_init (ros::NodeHandle &nh, bool &has_service)
   // Enable the dynamic reconfigure service
   has_service = true;
   srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind (&VoxelGrid::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   return (true);

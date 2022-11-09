@@ -118,7 +118,7 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   }
 
   // Bogus null filter
-  filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, _1));
+  filters_[0]->registerCallback (bind (&PointCloudConcatenateDataSynchronizer::input_callback, this, boost::placeholders::_1));
 
   switch (input_topics_.size ())
   {
@@ -186,9 +186,9 @@ pcl_ros::PointCloudConcatenateDataSynchronizer::subscribe ()
   }
 
   if (approximate_sync_)
-    ts_a_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_a_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5, boost::placeholders::_6, boost::placeholders::_7, boost::placeholders::_8));
   else
-    ts_e_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    ts_e_->registerCallback (boost::bind (&PointCloudConcatenateDataSynchronizer::input, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5, boost::placeholders::_6, boost::placeholders::_7, boost::placeholders::_8));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

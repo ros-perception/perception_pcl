@@ -65,20 +65,20 @@ pcl_ros::SegmentDifferences::subscribe ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<SegmentDifferencesConfig> > (*pnh_);
-  dynamic_reconfigure::Server<SegmentDifferencesConfig>::CallbackType f =  boost::bind (&SegmentDifferences::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<SegmentDifferencesConfig>::CallbackType f =  boost::bind (&SegmentDifferences::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   if (approximate_sync_)
   {
     sync_input_target_a_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_a_->connectInput (sub_input_filter_, sub_target_filter_);
-    sync_input_target_a_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
+    sync_input_target_a_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, boost::placeholders::_1, boost::placeholders::_2));
   }
   else
   {
     sync_input_target_e_ = boost::make_shared <message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloud> > > (max_queue_size_);
     sync_input_target_e_->connectInput (sub_input_filter_, sub_target_filter_);
-    sync_input_target_e_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, _1, _2));
+    sync_input_target_e_->registerCallback (bind (&SegmentDifferences::input_target_callback, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 }
 

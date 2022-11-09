@@ -37,7 +37,7 @@
 #include <tf/message_filter.h>
 #include <tf/transform_listener.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <pcl_ros/point_cloud.h>
@@ -104,7 +104,7 @@ TEST(MessageFilter, noTransforms)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
 
   boost::shared_ptr<PCDType> msg(new PCDType);
   ros::Time stamp = ros::Time::now();
@@ -120,7 +120,7 @@ TEST(MessageFilter, noTransformsSameFrame)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
 
   boost::shared_ptr<PCDType> msg(new PCDType);
   ros::Time stamp = ros::Time::now();
@@ -136,7 +136,7 @@ TEST(MessageFilter, preexistingTransforms)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
 
   boost::shared_ptr<PCDType> msg(new PCDType);
 
@@ -157,7 +157,7 @@ TEST(MessageFilter, postTransforms)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
 
   ros::Time stamp = ros::Time::now();
   boost::shared_ptr<PCDType> msg(new PCDType);
@@ -182,8 +182,8 @@ TEST(MessageFilter, queueSize)
   tf::TransformListener tf_client;
   Notification n(10);
   MessageFilter<PCDType> filter(tf_client, "frame1", 10);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
+  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, boost::placeholders::_1, boost::placeholders::_2));
 
   ros::Time stamp = ros::Time::now();
   std::uint64_t pcl_stamp;
@@ -215,7 +215,7 @@ TEST(MessageFilter, setTargetFrame)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
   filter.setTargetFrame("frame1000");
 
   ros::Time stamp = ros::Time::now();
@@ -237,7 +237,7 @@ TEST(MessageFilter, multipleTargetFrames)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
 
   std::vector<std::string> target_frames;
   target_frames.push_back("frame1");
@@ -276,7 +276,7 @@ TEST(MessageFilter, tolerance)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerCallback(boost::bind(&Notification::notify, &n, _1));
+  filter.registerCallback(boost::bind(&Notification::notify, &n, boost::placeholders::_1));
   filter.setTolerance(offset);
 
   ros::Time stamp = ros::Time::now();
@@ -316,7 +316,7 @@ TEST(MessageFilter, outTheBackFailure)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
+  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, boost::placeholders::_1, boost::placeholders::_2));
 
   ros::Time stamp = ros::Time::now();
   boost::shared_ptr<PCDType> msg(new PCDType);
@@ -339,7 +339,7 @@ TEST(MessageFilter, emptyFrameIDFailure)
   tf::TransformListener tf_client;
   Notification n(1);
   MessageFilter<PCDType> filter(tf_client, "frame1", 1);
-  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, _1, _2));
+  filter.registerFailureCallback(boost::bind(&Notification::failure, &n, boost::placeholders::_1, boost::placeholders::_2));
 
   boost::shared_ptr<PCDType> msg(new PCDType);
   msg->header.frame_id = "";

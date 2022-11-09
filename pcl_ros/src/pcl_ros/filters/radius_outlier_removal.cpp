@@ -45,7 +45,7 @@ pcl_ros::RadiusOutlierRemoval::child_init (ros::NodeHandle &nh, bool &has_servic
   // Enable the dynamic reconfigure service
   has_service = true;
   srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind (&RadiusOutlierRemoval::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   return (true);

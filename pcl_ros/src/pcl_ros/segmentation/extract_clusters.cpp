@@ -76,7 +76,7 @@ pcl_ros::EuclideanClusterExtraction::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared <dynamic_reconfigure::Server<EuclideanClusterExtractionConfig> > (*pnh_);
-  dynamic_reconfigure::Server<EuclideanClusterExtractionConfig>::CallbackType f =  boost::bind (&EuclideanClusterExtraction::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<EuclideanClusterExtractionConfig>::CallbackType f =  boost::bind (&EuclideanClusterExtraction::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   NODELET_DEBUG ("[%s::onInit] Nodelet successfully created with the following parameters:\n"
@@ -108,18 +108,18 @@ pcl_ros::EuclideanClusterExtraction::subscribe ()
     {
       sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud, PointIndices> > > (max_queue_size_);
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (bind (&EuclideanClusterExtraction::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_, bind (&EuclideanClusterExtraction::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = pnh_->subscribe<PointCloud> ("input", max_queue_size_, bind (&EuclideanClusterExtraction::input_indices_callback, this, boost::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

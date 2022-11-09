@@ -62,7 +62,7 @@ pcl_ros::MovingLeastSquares::onInit ()
 
   // Enable the dynamic reconfigure service
   srv_ = boost::make_shared<dynamic_reconfigure::Server<MLSConfig> > (*pnh_);
-  dynamic_reconfigure::Server<MLSConfig>::CallbackType f = boost::bind (&MovingLeastSquares::config_callback, this, _1, _2 );
+  dynamic_reconfigure::Server<MLSConfig>::CallbackType f = boost::bind (&MovingLeastSquares::config_callback, this, boost::placeholders::_1, boost::placeholders::_2 );
   srv_->setCallback (f); 
 
   // ---[ Optional parameters
@@ -93,19 +93,19 @@ pcl_ros::MovingLeastSquares::subscribe ()
       sync_input_indices_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_a_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_a_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else
     {
       sync_input_indices_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloudIn, PointIndices> > >(max_queue_size_);
       // surface not enabled, connect the input-indices duo and register
       sync_input_indices_e_->connectInput (sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, _1, _2));
+      sync_input_indices_e_->registerCallback (bind (&MovingLeastSquares::input_indices_callback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   else
     // Subscribe in an old fashion to input only (no filters)
-    sub_input_ = pnh_->subscribe<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, _1, PointIndicesConstPtr ()));
+    sub_input_ = pnh_->subscribe<PointCloudIn> ("input", 1,  bind (&MovingLeastSquares::input_indices_callback, this, boost::placeholders::_1, PointIndicesConstPtr ()));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

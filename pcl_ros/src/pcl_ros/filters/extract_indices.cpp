@@ -45,7 +45,7 @@ pcl_ros::ExtractIndices::child_init (ros::NodeHandle &nh, bool &has_service)
   has_service = true;
 
   srv_ = boost::make_shared <dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig> > (nh);
-  dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>::CallbackType f =  boost::bind (&ExtractIndices::config_callback, this, _1, _2);
+  dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>::CallbackType f =  boost::bind (&ExtractIndices::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
   srv_->setCallback (f);
 
   use_indices_ = true;
