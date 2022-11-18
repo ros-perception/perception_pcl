@@ -114,9 +114,9 @@ public:
   publish(const pcl::PointCloud<PointT> & point_cloud) const
   {
     // Fill point cloud binary data
-    sensor_msgs::PointCloud2 msg;
-    pcl::toROSMsg(point_cloud, msg);
-    pub_.publish(boost::make_shared<const sensor_msgs::PointCloud2>(msg));
+    sensor_msgs::PointCloud2::Ptr msg_ptr(new sensor_msgs::PointCloud2);
+    pcl::toROSMsg(point_cloud, *msg_ptr);
+    pub_.publish(msg_ptr);
   }
 };
 
