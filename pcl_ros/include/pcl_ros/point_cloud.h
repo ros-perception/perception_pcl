@@ -3,7 +3,12 @@
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
+#include <pcl/pcl_config.h> // for PCL_VERSION_COMPARE
+#if PCL_VERSION_COMPARE(>=, 1, 11, 0)
+#include <pcl/type_traits.h>
+#else
 #include <pcl/point_traits.h>
+#endif // PCL_VERSION_COMPARE(>=, 1, 11, 0)
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -282,7 +287,6 @@ namespace ros
 #include <type_traits>  // for std::is_same
 #include <memory>       // for std::shared_ptr
 
-#include <pcl/pcl_config.h>
 #if PCL_VERSION_COMPARE(>=, 1, 11, 0)
 #include <pcl/memory.h>
 #elif PCL_VERSION_COMPARE(>=, 1, 10, 0)
