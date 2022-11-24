@@ -40,49 +40,41 @@
 
 // PCL includes
 #include <pcl/filters/voxel_grid.h>
+#include <vector>
 #include "pcl_ros/filters/filter.hpp"
-
-// Dynamic reconfigure
-#include "pcl_ros/VoxelGridConfig.hpp"
 
 namespace pcl_ros
 {
 /** \brief @b VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples + filters the data.
-  * \author Radu Bogdan Rusu
-  */
+    * \author Radu Bogdan Rusu
+    */
 class VoxelGrid : public Filter
 {
-protected:
-  /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>> srv_;
+public:
+  /** \brief Empty constructor */
+  explicit VoxelGrid(const rclcpp::NodeOptions & options);
 
+protected:
   /** \brief The PCL filter implementation used. */
   pcl::VoxelGrid<pcl::PCLPointCloud2> impl_;
 
   /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    */
-  virtual void
-  filter(
-    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output);
-
-  /** \brief Child initialization routine.
-    * \param nh ROS node handle
-    * \param has_service set to true if the child has a Dynamic Reconfigure service
-    */
-  bool
-  child_init(ros::NodeHandle & nh, bool & has_service);
-
-  /** \brief Dynamic reconfigure callback
-    * \param config the config object
-    * \param level the dynamic reconfigure level
-    */
+      * \param input the input point cloud dataset
+      * \param indices the input set of indices to use from \a input
+      * \param output the resultant filtered dataset
+      */
   void
-  config_callback(pcl_ros::VoxelGridConfig & config, uint32_t level);
+  filter(
+    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output) override;
 
+  /** \brief Parameter callback
+      * \param params parameter values to set
+      */
+  rcl_interfaces::msg::SetParametersResult
+  config_callback(const std::vector<rclcpp::Parameter> & params);
+
+  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

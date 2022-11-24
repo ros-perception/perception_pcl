@@ -40,30 +40,26 @@
 
 // PCL includes
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <mutex>
+#include <vector>
 #include "pcl_ros/filters/filter.hpp"
-
-// Dynamic reconfigure
-#include "pcl_ros/StatisticalOutlierRemovalConfig.hpp"
 
 namespace pcl_ros
 {
 /** \brief @b StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier data. For more
-  * information check:
-  * <ul>
-  * <li> R. B. Rusu, Z. C. Marton, N. Blodow, M. Dolha, and M. Beetz.
-  *      Towards 3D Point Cloud Based Object Maps for Household Environments
-  *      Robotics and Autonomous Systems Journal (Special Issue on Semantic Knowledge), 2008.
-  * </ul>
-  *
-  * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
-  * \author Radu Bogdan Rusu
-  */
+    * information check:
+    * <ul>
+    * <li> R. B. Rusu, Z. C. Marton, N. Blodow, M. Dolha, and M. Beetz.
+    *      Towards 3D Point Cloud Based Object Maps for Household Environments
+    *      Robotics and Autonomous Systems Journal (Special Issue on Semantic Knowledge), 2008.
+    * </ul>
+    *
+    * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
+    * \author Radu Bogdan Rusu
+    */
 class StatisticalOutlierRemoval : public Filter
 {
 protected:
-  /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>> srv_;
-
   /** \brief Call the actual filter.
     * \param input the input point cloud dataset
     * \param indices the input set of indices to use from \a input
@@ -71,10 +67,10 @@ protected:
     */
   inline void
   filter(
-    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
+    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
     PointCloud2 & output)
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
     pcl_conversions::toPCL(*(input), *(pcl_input));
     impl_.setInputCloud(pcl_input);
@@ -84,24 +80,21 @@ protected:
     pcl_conversions::moveFromPCL(pcl_output, output);
   }
 
-  /** \brief Child initialization routine.
-    * \param nh ROS node handle
-    * \param has_service set to true if the child has a Dynamic Reconfigure service
-    */
-  bool child_init(ros::NodeHandle & nh, bool & has_service);
+  /** \brief Parameter callback
+      * \param params parameter values to set
+      */
+  rcl_interfaces::msg::SetParametersResult
+  config_callback(const std::vector<rclcpp::Parameter> & params);
 
-  /** \brief Dynamic reconfigure callback
-    * \param config the config object
-    * \param level the dynamic reconfigure level
-    */
-  void config_callback(pcl_ros::StatisticalOutlierRemovalConfig & config, uint32_t level);
-
+  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 private:
   /** \brief The PCL filter implementation used. */
   pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> impl_;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  explicit StatisticalOutlierRemoval(const rclcpp::NodeOptions & options);
 };
 }  // namespace pcl_ros
 

@@ -35,53 +35,97 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/statistical_outlier_removal.hpp"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::StatisticalOutlierRemoval::child_init(ros::NodeHandle & nh, bool & has_service)
-{
-  // Enable the dynamic reconfigure service
-  has_service = true;
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>>(
-    nh);
-  dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>::CallbackType f =
-    boost::bind(&StatisticalOutlierRemoval::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::NodeOptions & options)
+: Filter("StatisticalOutlierRemovalNode", options) {
+  rcl_interfaces::msg::ParameterDescriptor mean_k_desc;
+  mean_k_desc.name = "mean_k";
+  mean_k_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  mean_k_desc.description =
+    "The number of points (k) to use for mean distance estimation";
+  rcl_interfaces::msg::IntegerRange mean_k_range;
+  mean_k_range.from_value = 2;
+  mean_k_range.to_value = 100;
+  mean_k_desc.integer_range.push_back(mean_k_range);
+  declare_parameter(mean_k_desc.name, rclcpp::ParameterValue(2), mean_k_desc).get<int>();
 
-  return true;
+  rcl_interfaces::msg::ParameterDescriptor stddev_desc;
+  stddev_desc.name = "stddev";
+  stddev_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  stddev_desc.description =
+    "The standard deviation multiplier threshold. All points outside the mean "
+    "+- sigma * std_mul will be considered outliers.";
+  rcl_interfaces::msg::FloatingPointRange stddev_range;
+  stddev_range.from_value = 0.0;
+  stddev_range.to_value = 5.0;
+  stddev_desc.floating_point_range.push_back(stddev_range);
+  declare_parameter(
+    stddev_desc.name, rclcpp::ParameterValue(0.0),
+    stddev_desc).get<double>();
+
+  rcl_interfaces::msg::ParameterDescriptor neg_desc;
+  neg_desc.name = "negative";
+  neg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  neg_desc.description =
+    "Set whether the inliers should be returned (true) or the outliers (false)";
+  declare_parameter(neg_desc.name, rclcpp::ParameterValue(false), neg_desc);
+
+  // Validate initial values using same callback
+  callback_handle_ =
+    add_on_set_parameters_callback(
+      std::bind(
+        &StatisticalOutlierRemoval::config_callback, this,
+        std::placeholders::_1));
+  std::vector<std::string> param_names{
+    mean_k_desc.name,
+    stddev_desc.name,
+    neg_desc.name
+  };
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::StatisticalOutlierRemoval::config_callback(
-  pcl_ros::StatisticalOutlierRemovalConfig & config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::StatisticalOutlierRemoval::config_callback(const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
-  if (impl_.getMeanK() != config.mean_k) {
-    impl_.setMeanK(config.mean_k);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the number of points (k) to use for mean "
-      "distance estimation to: %d.",
-      getName().c_str(), config.mean_k);
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "mean_k") {
+      if (impl_.getMeanK() != param.as_int()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the number of points (k) to use for mean "
+          "distance estimation to: %ld.", param.as_int());
+        impl_.setMeanK(param.as_int());
+      }
+    }
+
+    if (param.get_name() == "stddev") {
+      if (impl_.getStddevMulThresh() != param.as_double()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the standard deviation multiplier threshold to: %f.",
+          param.as_double());
+        impl_.setStddevMulThresh(param.as_double());
+      }
+    }
+
+    if (param.get_name() == "negative") {
+      if (impl_.getNegative() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Returning only inliers: %s.", param.as_bool() ? "false" : "true");
+        impl_.setNegative(param.as_int());
+      }
+    }
   }
 
-  if (impl_.getStddevMulThresh() != config.stddev) {
-    impl_.setStddevMulThresh(config.stddev);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the standard deviation multiplier threshold to: %f.",
-      getName().c_str(), config.stddev);
-  }
-
-  if (impl_.getNegative() != config.negative) {
-    impl_.setNegative(config.negative);
-    NODELET_DEBUG(
-      "[%s::config_callback] Returning only inliers: %s.",
-      getName().c_str(), config.negative ? "false" : "true");
-  }
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
-typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::StatisticalOutlierRemoval)
