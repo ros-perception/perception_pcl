@@ -75,7 +75,7 @@ namespace pcl_ros
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-/** \brief @b PCLNode represents the base PCL Node class. All PCL node should inherit from 
+/** \brief @b PCLNode represents the base PCL Node class. All PCL node should inherit from
  *  this class. */
 class PCLNode : public rclcpp::Node
 {
@@ -185,7 +185,7 @@ protected:
   /** \brief The maximum queue size (default: 3). */
   int max_queue_size_ = 3;
 
-  /** \brief True if we use an approximate time synchronizer versus an exact one 
+  /** \brief True if we use an approximate time synchronizer versus an exact one
    *  (false by default). */
   bool approximate_sync_ = false;
 

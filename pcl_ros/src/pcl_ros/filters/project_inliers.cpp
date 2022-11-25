@@ -46,7 +46,8 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   // The type of model to use (user given parameter).
   int model_type;
   if (!this->get_parameter("model_type", model_type)) {
-    RCLCPP_ERROR(this->get_logger(),
+    RCLCPP_ERROR(
+      this->get_logger(),
       "[%s::onConstruct] Need a 'model_type' parameter to be set before continuing!",
       this->get_name());
     return;
@@ -66,7 +67,8 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   // Subscribe to the input using a filter
   sub_input_filter_.subscribe(this->shared_from_this(), "input");
 
-  RCLCPP_DEBUG(this->get_logger(),
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::onConstruct] Node successfully created with the following parameters:\n"
     "  - model_type      : %d\n"
     "  - copy_all_data   : %s\n"
@@ -95,9 +97,9 @@ pcl_ros::ProjectInliers::subscribe()
 
   if (approximate_sync_) {
     sync_input_indices_model_a_ = std::make_shared<
-        message_filters::Synchronizer<
-            message_filters::sync_policies::ApproximateTime<
-                PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+      message_filters::Synchronizer<
+        message_filters::sync_policies::ApproximateTime<
+          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_a_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_a_->registerCallback(
       std::bind(
@@ -106,9 +108,9 @@ pcl_ros::ProjectInliers::subscribe()
         std::placeholders::_3));
   } else {
     sync_input_indices_model_e_ = std::make_shared<
-        message_filters::Synchronizer<
-            message_filters::sync_policies::ExactTime<
-                PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+      message_filters::Synchronizer<
+        message_filters::sync_policies::ExactTime<
+          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_e_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_e_->registerCallback(
       std::bind(
@@ -150,7 +152,8 @@ pcl_ros::ProjectInliers::input_indices_model_callback(
     return;
   }
 
-  RCLCPP_DEBUG(this->get_logger(),
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::input_indices_model_callback]\n"
     "  - PointCloud with %d data points (%s), stamp %d.%09d, and frame %s on topic %s received.\n"
     "  - PointIndices with %zu values, stamp %d.%09d, and frame %s on topic %s received.\n"

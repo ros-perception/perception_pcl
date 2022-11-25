@@ -141,7 +141,8 @@ pcl_ros::PassThrough::config_callback(const std::vector<rclcpp::Parameter> & par
       // Check the current values for filter min-max
       if (filter_min != param.as_double()) {
         filter_min = param.as_double();
-        RCLCPP_DEBUG(get_logger(),
+        RCLCPP_DEBUG(
+          get_logger(),
           "Setting the minimum filtering value a point will be considered from to: %f.",
           filter_min);
         // Set the filter min-max if different
@@ -152,7 +153,8 @@ pcl_ros::PassThrough::config_callback(const std::vector<rclcpp::Parameter> & par
       // Check the current values for filter min-max
       if (filter_max != param.as_double()) {
         filter_max = param.as_double();
-        RCLCPP_DEBUG(get_logger(),
+        RCLCPP_DEBUG(
+          get_logger(),
           "Setting the maximum filtering value a point will be considered from to: %f.",
           filter_max);
         // Set the filter min-max if different

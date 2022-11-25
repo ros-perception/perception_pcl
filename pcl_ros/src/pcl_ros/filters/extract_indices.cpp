@@ -50,10 +50,10 @@ pcl_ros::ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
   // Validate initial values using same callback
   callback_handle_ =
     add_on_set_parameters_callback(
-      std::bind(
-        &ExtractIndices::config_callback, this,
-        std::placeholders::_1));
-  std::vector<std::string> param_names{ neg_desc.name };
+    std::bind(
+      &ExtractIndices::config_callback, this,
+      std::placeholders::_1));
+  std::vector<std::string> param_names{neg_desc.name};
   auto result = config_callback(get_parameters(param_names));
   if (!result.successful) {
     throw std::runtime_error(result.reason);

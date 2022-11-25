@@ -87,6 +87,7 @@ protected:
   config_callback(const std::vector<rclcpp::Parameter> & params);
 
   OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+
 private:
   /** \brief The PCL filter implementation used. */
   pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> impl_;

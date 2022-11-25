@@ -75,6 +75,7 @@ protected:
   config_callback(const std::vector<rclcpp::Parameter> & params);
 
   OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

@@ -135,9 +135,9 @@ pcl_ros::CropBox::CropBox(const rclcpp::NodeOptions & options)
   // Validate initial values using same callback
   callback_handle_ =
     add_on_set_parameters_callback(
-      std::bind(
-        &CropBox::config_callback, this,
-        std::placeholders::_1));
+    std::bind(
+      &CropBox::config_callback, this,
+      std::placeholders::_1));
   std::vector<std::string> param_names{
     min_x_desc.name,
     min_y_desc.name,

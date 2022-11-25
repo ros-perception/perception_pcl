@@ -38,7 +38,8 @@
 #include "pcl_ros/filters/statistical_outlier_removal.hpp"
 
 pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::NodeOptions & options)
-: Filter("StatisticalOutlierRemovalNode", options) {
+: Filter("StatisticalOutlierRemovalNode", options)
+{
   rcl_interfaces::msg::ParameterDescriptor mean_k_desc;
   mean_k_desc.name = "mean_k";
   mean_k_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
@@ -74,9 +75,9 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
   // Validate initial values using same callback
   callback_handle_ =
     add_on_set_parameters_callback(
-      std::bind(
-        &StatisticalOutlierRemoval::config_callback, this,
-        std::placeholders::_1));
+    std::bind(
+      &StatisticalOutlierRemoval::config_callback, this,
+      std::placeholders::_1));
   std::vector<std::string> param_names{
     mean_k_desc.name,
     stddev_desc.name,
