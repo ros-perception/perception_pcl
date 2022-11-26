@@ -65,7 +65,9 @@
 #include <pcl_msgs/msg/point_indices.hpp>
 #include <pcl_msgs/msg/model_coefficients.hpp>
 
-// TODO(daisukes): type masquerading needs to be implemented
+#include "pcl_ros/node_lazy.hpp"
+
+// TODO(daisukes): type adaptation needs to be implemented
 // #include "pcl_ros/point_cloud.hpp"
 
 using pcl_conversions::fromPCL;
@@ -77,7 +79,7 @@ namespace pcl_ros
 ////////////////////////////////////////////////////////////////////////////////////////////
 /** \brief @b PCLNode represents the base PCL Node class. All PCL node should inherit from
  *  this class. */
-class PCLNode : public rclcpp::Node
+class PCLNode : public pcl_ros::NodeLazy
 {
 public:
   typedef sensor_msgs::msg::PointCloud2 PointCloud2;
@@ -99,7 +101,7 @@ public:
 
   /** \brief Empty constructor. */
   PCLNode(std::string node_name, const rclcpp::NodeOptions & options)
-  : rclcpp::Node(node_name, options),
+  : pcl_ros::NodeLazy(node_name, options),
     tf_buffer_(this->get_clock()),
     tf_listener_(tf_buffer_)
   {

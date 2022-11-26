@@ -80,6 +80,8 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   impl_.setModelType(model_type);
   impl_.setCopyAllFields(copy_all_fields);
   impl_.setCopyAllData(copy_all_data);
+
+  constructor_post_process();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

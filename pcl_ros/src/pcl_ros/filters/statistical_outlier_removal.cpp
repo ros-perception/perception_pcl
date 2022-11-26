@@ -87,6 +87,7 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
   if (!result.successful) {
     throw std::runtime_error(result.reason);
   }
+  constructor_post_process();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

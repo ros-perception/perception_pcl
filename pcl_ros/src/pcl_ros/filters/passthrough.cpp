@@ -115,6 +115,7 @@ pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions & options)
   if (!result.successful) {
     throw std::runtime_error(result.reason);
   }
+  constructor_post_process();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

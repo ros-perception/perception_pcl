@@ -62,10 +62,8 @@
 pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & options)
 : PCLNode(node_name, options)
 {
-  pub_output_ = this->create_publisher<PointCloud2>("output", cloudQoS());
+  pub_output_ = advertise<PointCloud2>("output", cloudQoS());
 
-  // TODO(sloretz) subscribe only when there is a subscriber to our output
-  subscribe();
   RCLCPP_DEBUG(this->get_logger(), "Node successfully created.");
 }
 
@@ -125,6 +123,7 @@ pcl_ros::Filter::computePublish(
 void
 pcl_ros::Filter::subscribe()
 {
+  RCLCPP_DEBUG(get_logger(), "Filter::subscribe");
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter

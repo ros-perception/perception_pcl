@@ -80,6 +80,7 @@ pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & 
   if (!result.successful) {
     throw std::runtime_error(result.reason);
   }
+  constructor_post_process();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
