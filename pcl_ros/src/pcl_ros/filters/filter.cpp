@@ -240,3 +240,65 @@ pcl_ros::Filter::input_indices_callback(
 
   computePublish(cloud_tf, vindices);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+std::vector<std::string>
+pcl_ros::Filter::add_common_parameters()
+{
+  rcl_interfaces::msg::ParameterDescriptor ffn_desc;
+  ffn_desc.name = "filter_field_name";
+  ffn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  ffn_desc.description = "The field name used for filtering";
+  declare_parameter(ffn_desc.name, rclcpp::ParameterValue("z"), ffn_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmin_desc;
+  flmin_desc.name = "filter_limit_min";
+  flmin_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmin_desc.description = "The minimum allowed field value a point will be considered from";
+  rcl_interfaces::msg::FloatingPointRange flmin_range;
+  flmin_range.from_value = -100000.0;
+  flmin_range.to_value = 100000.0;
+  flmin_desc.floating_point_range.push_back(flmin_range);
+  declare_parameter(flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmax_desc;
+  flmax_desc.name = "filter_limit_max";
+  flmax_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmax_desc.description = "The maximum allowed field value a point will be considered from";
+  rcl_interfaces::msg::FloatingPointRange flmax_range;
+  flmax_range.from_value = -100000.0;
+  flmax_range.to_value = 100000.0;
+  flmax_desc.floating_point_range.push_back(flmax_range);
+  declare_parameter(flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flneg_desc;
+  flneg_desc.name = "filter_limit_negative";
+  flneg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  flneg_desc.description =
+    "Set to true if we want to return the data outside [filter_limit_min; filter_limit_max].";
+  declare_parameter(flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
+  input_frame_desc.name = "input_frame";
+  input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  input_frame_desc.description =
+    "The input TF frame the data should be transformed into before processing, "
+    "if input.header.frame_id is different.";
+  declare_parameter(input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
+  output_frame_desc.name = "output_frame";
+  output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  output_frame_desc.description =
+    "The output TF frame the data should be transformed into after processing, "
+    "if input.header.frame_id is different.";
+  declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
+}

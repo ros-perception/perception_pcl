@@ -40,6 +40,8 @@
 pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
 : Filter("VoxelGridNode", options)
 {
+  std::vector<std::string> param_names = add_common_parameters();
+
   rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
   leaf_size_desc.name = "leaf_size";
   leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -50,9 +52,26 @@ pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
   leaf_size_desc.floating_point_range.push_back(leaf_size_range);
   declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
-  std::vector<std::string> param_names{
-    leaf_size_desc.name,
-  };
+  rcl_interfaces::msg::ParameterDescriptor min_points_per_voxel_desc;
+  min_points_per_voxel_desc.name = "min_points_per_voxel";
+  min_points_per_voxel_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_points_per_voxel_desc.description =
+    "The minimum number of points required for a voxel to be used.";
+  rcl_interfaces::msg::IntegerRange min_points_per_voxel_range;
+  min_points_per_voxel_range.from_value = 1;
+  min_points_per_voxel_range.to_value = 100000;
+  min_points_per_voxel_desc.integer_range.push_back(min_points_per_voxel_range);
+  declare_parameter(
+    min_points_per_voxel_desc.name, rclcpp::ParameterValue(1), min_points_per_voxel_desc);
+
+  callback_handle_ =
+    add_on_set_parameters_callback(
+    std::bind(
+      &VoxelGrid::config_callback, this,
+      std::placeholders::_1));
+
+  param_names.push_back(leaf_size_desc.name);
+  param_names.push_back(min_points_per_voxel_desc.name);
   auto result = config_callback(get_parameters(param_names));
   if (!result.successful) {
     throw std::runtime_error(result.reason);

@@ -124,6 +124,9 @@ protected:
   void
   computePublish(const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices);
 
+  /** \brief Add common parameters */
+  std::vector<std::string> add_common_parameters();
+
 private:
   /** \brief Synchronized input, and indices.*/
   std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,

@@ -44,36 +44,34 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
 {
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
+  declare_parameter("model_type", rclcpp::ParameterType::PARAMETER_INTEGER);
   int model_type;
-  if (!this->get_parameter("model_type", model_type)) {
+  if (!get_parameter("model_type", model_type)) {
     RCLCPP_ERROR(
-      this->get_logger(),
-      "[%s::onConstruct] Need a 'model_type' parameter to be set before continuing!",
-      this->get_name());
+      get_logger(),
+      "[onConstruct] Need a 'model_type' parameter to be set before continuing!");
     return;
   }
   // ---[ Optional parameters
   // True if all data will be returned, false if only the projected inliers. Default: false.
-  bool copy_all_data = false;
+  declare_parameter("copy_all_data", rclcpp::ParameterValue(false));
+  bool copy_all_data = get_parameter("copy_all_data").as_bool();
 
   // True if all fields will be returned, false if only XYZ. Default: true.
-  bool copy_all_fields = true;
+  declare_parameter("copy_all_fields", rclcpp::ParameterValue(true));
+  bool copy_all_fields = get_parameter("copy_all_fields").as_bool();
 
-  this->get_parameter("copy_all_data", copy_all_data);
-  this->get_parameter("copy_all_fields", copy_all_fields);
-
-  pub_output_ = this->create_publisher<PointCloud2>("output", max_queue_size_);
+  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
 
   // Subscribe to the input using a filter
-  sub_input_filter_.subscribe(this->shared_from_this(), "input");
+  sub_input_filter_.subscribe(shared_from_this(), "input");
 
   RCLCPP_DEBUG(
     this->get_logger(),
-    "[%s::onConstruct] Node successfully created with the following parameters:\n"
+    "[onConstruct] Node successfully created with the following parameters:\n"
     "  - model_type      : %d\n"
     "  - copy_all_data   : %s\n"
     "  - copy_all_fields : %s",
-    this->get_name(),
     model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
 
   // Set given parameters here
