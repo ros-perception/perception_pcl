@@ -43,21 +43,21 @@
 
  **/
 
+// PCL
+#include <pcl/common/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 // STL
 #include <chrono>
 #include <string>
 #include <thread>
 
-// PCL
-#include <pcl/common/io.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-
 // ROS core
 #include <rclcpp/rclcpp.hpp>
 #include "rclcpp_components/register_node_macro.hpp"
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <pcl_conversions/pcl_conversions.h>
 
 namespace pcl_ros
 {
