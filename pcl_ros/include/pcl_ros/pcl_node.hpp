@@ -67,7 +67,7 @@
 
 #include "pcl_ros/node_lazy.hpp"
 
-// TODO(daisukes): type adaptation needs to be implemented
+// TODO(xxx): type adaptation needs to be implemented
 // #include "pcl_ros/point_cloud.hpp"
 
 using pcl_conversions::fromPCL;
@@ -244,7 +244,7 @@ protected:
   inline bool
   isValid(const PointIndicesConstPtr & indices, const std::string & topic_name = "indices")
   {
-    // ToDo(daisukes): Here is commented out since the initial commit, but uncommented
+    // TODO(xxx): Here is commented out since the initial commit, but uncommented
     //                 It supporsed to be working, but need to check
     if (indices->indices.empty()) {
       RCLCPP_WARN(
@@ -264,7 +264,7 @@ protected:
   inline bool
   isValid(const ModelCoefficientsConstPtr & model, const std::string & topic_name = "model")
   {
-    // ToDo(daisukes): Here is commented out since the initial commit, but uncommented
+    // TODO(xxx): Here is commented out since the initial commit, but uncommented
     //                 It supporsed to be working, but need to check
     if (model->values.empty()) {
       RCLCPP_WARN(
