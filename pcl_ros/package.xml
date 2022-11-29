@@ -26,8 +26,10 @@
   <author email="william@osrfoundation.org">William Woodall</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>libpcl-all-dev</build_depend>
+
   <depend>eigen</depend>
-  <depend>libpcl-all-dev</depend>
   <depend>pcl_conversions</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
@@ -36,6 +38,13 @@
   <depend>tf2</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
+
+  <exec_depend>libpcl-common</exec_depend>
+  <exec_depend>libpcl-features</exec_depend>
+  <exec_depend>libpcl-filters</exec_depend>
+  <exec_depend>libpcl-io</exec_depend>
+  <exec_depend>libpcl-segmentation</exec_depend>
+  <exec_depend>libpcl-surface</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
