@@ -70,7 +70,7 @@ public:
     // option to use lazy transport
     // TODO(xxx): work around until connection callback is implemented
     // https://github.com/ros2/rmw/issues/330
-    declare_parameter("lazy_check_interval", rclcpp::ParameterValue(1.0));
+    declare_parameter("lazy_check_interval", rclcpp::ParameterValue(0.1));
     lazy_check_interval_ = get_parameter("lazy_check_interval").as_double();
     if (lazy_) {
       timer_lazy_check_ = create_wall_timer(

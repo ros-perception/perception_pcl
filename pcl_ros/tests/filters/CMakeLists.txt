@@ -16,26 +16,22 @@ ament_target_dependencies(dummy_point_cloud2_publisher
 )
 set(options true false)
 foreach(use_indices IN LISTS options)
-  set(filter_name_pairs
-    crop_box|CropBox
-    extract_indices|ExtractIndices
-    passthrough|PassThrough
-    #project_inliers|ProjectInliers
-    radius_outlier_removal|RadiusOutlierRemoval
-    statistical_outlier_removal|StatisticalOutlierRemoval
-    voxel_grid|VoxelGrid
+  set(filter_names
+    crop_box
+    extract_indices
+    passthrough
+    #project_inliers
+    radius_outlier_removal
+    statistical_outlier_removal
+    voxel_grid
   )
-  foreach(pair IN LISTS filter_name_pairs)
-    string(REPLACE "|" ";" pair ${pair})
-    list(GET pair 0 filter_name)
-    list(GET pair 1 class_name)
+  foreach(filter_name IN LISTS filter_names)
     ament_add_test(test_filter_${filter_name}_use_indices=${use_indices}
       GENERATE_RESULT_FOR_RETURN_CODE_ZERO
       COMMAND "launch_test" "${CMAKE_CURRENT_SOURCE_DIR}/test_filters_launch.py"
       ENV
         DUMMY_PUBLISHER=$<TARGET_FILE:dummy_point_cloud2_publisher>
         FILTER_NAME=${filter_name}
-        CLASS_NAME=${class_name}
         EXTRA_ROS_ARGS=-p\ use_indices:=${use_indices}
     )
   endforeach()

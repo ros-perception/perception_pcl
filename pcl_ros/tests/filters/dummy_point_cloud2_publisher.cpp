@@ -30,76 +30,79 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_msgs/msg/point_indices.hpp>
 #include <pcl_msgs/msg/model_coefficients.hpp>
-#include <pcl_conversions/pcl_conversions.h>
 
 using namespace std::chrono_literals;
 
 class DummyPointCloud2Publisher : public rclcpp::Node
 {
-  public:
-    DummyPointCloud2Publisher()
-    : Node("dummy_point_cloud2_publisher"), count_(0)
-    {
-      point_cloud2_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("point_cloud2", 10);
-      indices_pub_ = this->create_publisher<pcl_msgs::msg::PointIndices>("indices", 10);
-      model_pub_ = this->create_publisher<pcl_msgs::msg::ModelCoefficients>("model", 10);
-      timer_ = this->create_wall_timer(500ms, std::bind(&DummyPointCloud2Publisher::timer_callback, this));
+public:
+  DummyPointCloud2Publisher()
+  : Node("dummy_point_cloud2_publisher"), count_(0)
+  {
+    point_cloud2_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("point_cloud2", 10);
+    indices_pub_ = this->create_publisher<pcl_msgs::msg::PointIndices>("indices", 10);
+    model_pub_ = this->create_publisher<pcl_msgs::msg::ModelCoefficients>("model", 10);
+    timer_ = this->create_wall_timer(
+      500ms, std::bind(&DummyPointCloud2Publisher::timer_callback, this));
+  }
+
+private:
+  void timer_callback()
+  {
+    auto now = get_clock()->now();
+    builtin_interfaces::msg::Time now_msg;
+    now_msg.sec = now.nanoseconds() / 1000000000;
+    now_msg.nanosec = now.nanoseconds() % 1000000000;
+
+    sensor_msgs::msg::PointCloud2 point_cloud2_msg;
+
+    // create point cloud object
+    pcl::PointCloud<pcl::PointXYZ> random_pcl;
+
+    // fill cloud with random points
+    unsigned int global_seed = 100;
+    for (int v = 0; v < 1000; ++v) {
+      pcl::PointXYZ newPoint;
+      newPoint.x = (rand_r(&global_seed) * 100.0) / RAND_MAX;
+      newPoint.y = (rand_r(&global_seed) * 100.0) / RAND_MAX;
+      newPoint.z = (rand_r(&global_seed) * 100.0) / RAND_MAX;
+      random_pcl.points.push_back(newPoint);
     }
 
-  private:
-    void timer_callback() {
-      auto now = get_clock()->now();
-      builtin_interfaces::msg::Time now_msg;
-      now_msg.sec = now.nanoseconds()/1000000000;
-      now_msg.nanosec = now.nanoseconds()%1000000000;
+    // publish point cloud
+    pcl::toROSMsg<pcl::PointXYZ>(random_pcl, point_cloud2_msg);
+    point_cloud2_msg.header.stamp = now_msg;
+    point_cloud2_pub_->publish(point_cloud2_msg);
 
-      sensor_msgs::msg::PointCloud2 point_cloud2_msg;
+    // these are for ProjectInliers filter
+    // publish indices
+    pcl_msgs::msg::PointIndices indices_msg;
+    indices_msg.header.stamp = now_msg;
+    indices_msg.indices.push_back(0);
+    indices_pub_->publish(indices_msg);
 
-      // create point cloud object
-      pcl::PointCloud<pcl::PointXYZ> random_pcl;
+    // publish model
+    pcl_msgs::msg::ModelCoefficients model_msg;
+    model_msg.header.stamp = now_msg;
+    model_msg.values.push_back(0);
+    model_msg.values.push_back(0);
+    model_msg.values.push_back(1);
+    model_msg.values.push_back(0);
+    model_pub_->publish(model_msg);
 
-      // fill cloud with random points
-      for (int v=0; v<1000; ++v) {
-        pcl::PointXYZ newPoint;
-        newPoint.x = (rand() * 100.0) / RAND_MAX;
-        newPoint.y = (rand() * 100.0) / RAND_MAX;
-        newPoint.z = (rand() * 100.0) / RAND_MAX;
-        random_pcl.points.push_back(newPoint);
-      }
+    RCLCPP_INFO(get_logger(), "publish dummy point cloud2 message");
+  }
 
-      // publish point cloud
-      pcl::toROSMsg<pcl::PointXYZ>(random_pcl, point_cloud2_msg);
-      point_cloud2_msg.header.stamp = now_msg;
-      point_cloud2_pub_->publish(point_cloud2_msg);
-
-      // these are for ProjectInliers filter
-      // publish indices
-      pcl_msgs::msg::PointIndices indices_msg;
-      indices_msg.header.stamp = now_msg;
-      indices_msg.indices.push_back(0);
-      indices_pub_->publish(indices_msg);
-
-      // publish model
-      pcl_msgs::msg::ModelCoefficients model_msg;
-      model_msg.header.stamp = now_msg;
-      model_msg.values.push_back(0);
-      model_msg.values.push_back(0);
-      model_msg.values.push_back(1);
-      model_msg.values.push_back(0);
-      model_pub_->publish(model_msg);
-
-      RCLCPP_INFO(get_logger(), "publish dummy point cloud2 message");
-    }
-
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud2_pub_;
-    rclcpp::Publisher<pcl_msgs::msg::PointIndices>::SharedPtr indices_pub_;
-    rclcpp::Publisher<pcl_msgs::msg::ModelCoefficients>::SharedPtr model_pub_;
-    size_t count_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud2_pub_;
+  rclcpp::Publisher<pcl_msgs::msg::PointIndices>::SharedPtr indices_pub_;
+  rclcpp::Publisher<pcl_msgs::msg::ModelCoefficients>::SharedPtr model_pub_;
+  size_t count_;
 };
 
 int main(int argc, char * argv[])

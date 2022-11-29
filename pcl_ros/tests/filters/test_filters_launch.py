@@ -29,20 +29,15 @@
 
 import time
 import unittest
-import inspect
-import yaml
-import sys
 from threading import Thread, Event
 
 import os
-import ament_index_python
 
 import rclpy
 import rclpy.node
 
 from sensor_msgs.msg import PointCloud2
 
-from launch_ros.actions import Node
 import launch
 import launch.actions
 import launch_ros.actions
@@ -58,7 +53,6 @@ import pytest
 def generate_test_description():
     dummy_publisher = os.getenv('DUMMY_PUBLISHER')
     filter_name = os.getenv('FILTER_NAME')
-    class_name = os.getenv('CLASS_NAME')
     extra_ros_args = []
     if os.getenv('EXTRA_ROS_ARGS'):
         extra_ros_args = os.getenv('EXTRA_ROS_ARGS').split(" ")
@@ -73,8 +67,7 @@ def generate_test_description():
         package='pcl_ros',
         executable="filter_{}_node".format(filter_name),
         output="screen",
-        ros_arguments=[#"--log-level", "{}Node:=debug".format(class_name), 
-                       "-r", "input:=point_cloud2"] + extra_ros_args
+        ros_arguments=["-r", "input:=point_cloud2"] + extra_ros_args
     )
 
     return launch.LaunchDescription([
@@ -97,7 +90,7 @@ class TestFilters(unittest.TestCase):
 
     def setUp(self):
         # Create a ROS node for tests
-        self.node = rclpy.create_node('input_output_node')
+        self.node = TestNode('test_node')
 
     def tearDown(self):
         self.node.destroy_node()
@@ -109,26 +102,25 @@ class TestFilters(unittest.TestCase):
 
     def test_output(self):
         try:
-            node = TestNode('test_node')
-            node.start_subscriber()
-            msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+            self.node.start_subscriber()
+            msgs_received_flag = self.node.msg_event_object.wait(timeout=5.0)
             assert msgs_received_flag, 'Did not receive msgs !'
         finally:
-            node.stop()
+            self.node.stop()
 
     def test_output_resubscribe(self):
         try:
-            node = TestNode('test_node')
-            node.start_subscriber()
-            msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+            self.node.start_subscriber()
+            msgs_received_flag = self.node.msg_event_object.wait(timeout=5.0)
             assert msgs_received_flag, 'Did not receive msgs !'
-            node.stop_subscriber()
+            self.node.stop_subscriber()
             time.sleep(1)
-            node.start_subscriber()
-            msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+            self.node.start_subscriber()
+            msgs_received_flag = self.node.msg_event_object.wait(timeout=5.0)
             assert msgs_received_flag, 'Did not receive msgs !'
         finally:
-            node.stop()
+            self.node.stop()
+
 
 class TestNode(rclpy.node.Node):
     def __init__(self, name='test_node'):
@@ -136,14 +128,14 @@ class TestNode(rclpy.node.Node):
 
         # Add a spin thread
         self.alive = True
-        self.ros_spin_thread = Thread(target=self.spin)
+        self.ros_spin_thread = Thread(target=self.spin, daemon=True)
         self.ros_spin_thread.start()
 
     def spin(self):
         while self.alive:
             rclpy.spin_once(self)
-            time.sleep(0.01)
-    
+            time.sleep(0.1)
+
     def stop(self):
         self.alive = False
         self.destroy_node()
@@ -161,7 +153,6 @@ class TestNode(rclpy.node.Node):
     def stop_subscriber(self):
         self.destroy_subscription(self.subscription)
         self.subscription = None
-
 
     def subscriber_callback(self, data):
         self.msg_event_object.set()
