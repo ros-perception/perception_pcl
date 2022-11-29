@@ -23,8 +23,6 @@
 
   <build_depend>libpcl-all-dev</build_depend>
 
-  <build_export_depend>libpcl-all-dev</build_export_depend>
-
   <depend>eigen</depend>
   <depend>message_filters</depend>
   <depend>pcl_msgs</depend>
