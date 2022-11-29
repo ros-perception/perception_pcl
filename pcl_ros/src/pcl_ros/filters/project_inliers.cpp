@@ -63,9 +63,6 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
 
   pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
 
-  // Subscribe to the input using a filter
-  sub_input_filter_.subscribe(shared_from_this(), "input");
-
   RCLCPP_DEBUG(
     this->get_logger(),
     "[onConstruct] Node successfully created with the following parameters:\n"
@@ -86,14 +83,22 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
 void
 pcl_ros::ProjectInliers::subscribe()
 {
+  RCLCPP_DEBUG(get_logger(), "subscribe");
 /*
   TODO : implement use_indices_
   if (use_indices_)
   {*/
 
-  sub_indices_filter_.subscribe(this->shared_from_this(), "indices");
+  sub_input_filter_.subscribe(
+    shared_from_this(), "input",
+    cloudQoS().get_rmw_qos_profile());
+  sub_indices_filter_.subscribe(
+    this->shared_from_this(), "indices",
+    indicesQoS().get_rmw_qos_profile());
+  sub_model_.subscribe(
+    this->shared_from_this(), "model",
+    indicesQoS().get_rmw_qos_profile());
 
-  sub_model_.subscribe(this->shared_from_this(), "model");
 
   if (approximate_sync_) {
     sync_input_indices_model_a_ = std::make_shared<
@@ -128,8 +133,8 @@ pcl_ros::ProjectInliers::unsubscribe()
   TODO : implement use_indices_
   if (use_indices_)
   {*/
-
   sub_input_filter_.unsubscribe();
+  sub_indices_filter_.unsubscribe();
   sub_model_.unsubscribe();
 }
 

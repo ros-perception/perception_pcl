@@ -123,7 +123,6 @@ pcl_ros::Filter::computePublish(
 void
 pcl_ros::Filter::subscribe()
 {
-  RCLCPP_DEBUG(get_logger(), "Filter::subscribe");
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
@@ -173,7 +172,7 @@ pcl_ros::Filter::unsubscribe()
     sub_input_filter_.unsubscribe();
     sub_indices_filter_.unsubscribe();
   } else {
-    pub_output_.reset();
+    sub_input_.reset();
   }
 }
 
@@ -301,4 +300,14 @@ pcl_ros::Filter::add_common_parameters()
     "The output TF frame the data should be transformed into after processing, "
     "if input.header.frame_id is different.";
   declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
+
+  return std::vector<std::string> {
+    ffn_desc.name,
+    flmin_desc.name,
+    flmax_desc.name,
+    flneg_desc.name,
+    keep_organized_desc.name,
+    input_frame_desc.name,
+    output_frame_desc.name
+  };
 }
