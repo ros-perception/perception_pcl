@@ -80,6 +80,7 @@ namespace pcl_ros
 ////////////////////////////////////////////////////////////////////////////////////////////
 /** \brief @b PCLNode represents the base PCL Node class. All PCL node should inherit from
  *  this class. */
+template<typename T, typename PublisherT = rclcpp::Publisher<T>>
 class PCLNode : public rclcpp::Node
 {
 public:
@@ -187,7 +188,7 @@ protected:
   /** \brief The output PointCloud publisher. Allow each individual class that inherits from this
     *  to declare the Publisher with their type.
     */
-  rclcpp::PublisherBase::SharedPtr pub_output_;
+  std::shared_ptr<PublisherT> pub_output_;
 
   /** \brief The maximum queue size (default: 3). */
   int max_queue_size_;
