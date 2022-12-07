@@ -104,7 +104,7 @@ public:
   /** \brief Empty constructor. */
   PCLNode(std::string node_name, const rclcpp::NodeOptions & options)
   : rclcpp::Node(node_name, options),
-    use_indices_(false), latched_indices_(false),
+    use_indices_(false), transient_local_indices_(false),
     max_queue_size_(3), approximate_sync_(false),
     tf_buffer_(this->get_clock()),
     tf_listener_(tf_buffer_)
@@ -129,11 +129,11 @@ public:
 
     {
       rcl_interfaces::msg::ParameterDescriptor desc;
-      desc.name = "latched_indices";
+      desc.name = "transient_local_indices";
       desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
       desc.description = "Does indices topic use transient local documentation";
       desc.read_only = true;
-      latched_indices_ = declare_parameter(desc.name, latched_indices_, desc);
+      transient_local_indices_ = declare_parameter(desc.name, transient_local_indices_, desc);
     }
 
     {
@@ -148,13 +148,13 @@ public:
 
     RCLCPP_DEBUG(
       this->get_logger(), "PCL Node successfully created with the following parameters:\n"
-      " - approximate_sync : %s\n"
-      " - use_indices      : %s\n"
-      " - latched_indices  : %s\n"
-      " - max_queue_size   : %d",
+      " - approximate_sync          : %s\n"
+      " - use_indices               : %s\n"
+      " - transient_local_indices_  : %s\n"
+      " - max_queue_size            : %d",
       (approximate_sync_) ? "true" : "false",
       (use_indices_) ? "true" : "false",
-      (latched_indices_) ? "true" : "false",
+      (transient_local_indices_) ? "true" : "false",
       max_queue_size_);
   }
 
@@ -167,7 +167,7 @@ protected:
    * indices specifying the subset of the point cloud that will be used for
    * the operation. In the case where use_indices_ is true, the ~input and
    * ~indices topics must be synchronised in time, either exact or within a
-   * specified jitter. See also @ref latched_indices_ and approximate_sync.
+   * specified jitter. See also @ref transient_local_indices_ and approximate_sync.
    **/
   bool use_indices_;
   /** \brief Set to true if the indices topic has transient_local durability.
@@ -177,7 +177,7 @@ protected:
    * value from ~indices can be used instead of requiring a synchronised
    * message.
    **/
-  bool latched_indices_;  // TODO(daisukes): should this be renamed to like `transient_local_indices_`?
+  bool transient_local_indices_;
 
   /** \brief The message filter subscriber for PointCloud2. */
   message_filters::Subscriber<PointCloud2> sub_input_filter_;  // TODO(xxx): type adaptation
