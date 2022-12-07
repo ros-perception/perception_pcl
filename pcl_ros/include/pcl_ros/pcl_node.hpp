@@ -69,7 +69,6 @@
 // ROS2 includes
 #include <rclcpp/rclcpp.hpp>
 
-// TODO(xxx): type adaptation needs to be implemented
 // #include "pcl_ros/point_cloud.hpp"
 
 using pcl_conversions::fromPCL;
@@ -180,13 +179,15 @@ protected:
   bool transient_local_indices_;
 
   /** \brief The message filter subscriber for PointCloud2. */
-  message_filters::Subscriber<PointCloud2> sub_input_filter_;  // TODO(xxx): type adaptation
+  message_filters::Subscriber<PointCloud2> sub_input_filter_;
 
   /** \brief The message filter subscriber for PointIndices. */
   message_filters::Subscriber<PointIndices> sub_indices_filter_;
 
-  /** \brief The output PointCloud publisher. */
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_output_;  // TODO(xxx): type adaptation
+  /** \brief The output PointCloud publisher. Allow each individual class that inherits from this
+    *  to declare the Publisher with their type.
+    */
+  rclcpp::PublisherBase::SharedPtr pub_output_;
 
   /** \brief The maximum queue size (default: 3). */
   int max_queue_size_;
