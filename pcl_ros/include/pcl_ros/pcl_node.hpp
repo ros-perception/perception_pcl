@@ -250,7 +250,6 @@ protected:
   inline bool
   isValid(const PointIndicesConstPtr & indices, const std::string & topic_name = "indices")
   {
-    // TODO(daisuke): should I leave this commented out?
     /*if (indices->indices.empty ())
     {
       RCLCPP_WARN(
@@ -271,7 +270,6 @@ protected:
   inline bool
   isValid(const ModelCoefficientsConstPtr & model, const std::string & topic_name = "model")
   {
-    // TODO(daisuke): should I leave this commented out?
     /*if (model->values.empty ())
     {
       RCLCPP_WARN(
