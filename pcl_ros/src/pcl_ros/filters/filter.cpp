@@ -158,38 +158,40 @@ pcl_ros::Filter::unsubscribe()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & options, bool use_frame_params)
+pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & options)
 : PCLNode(node_name, options)
 {
   pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
-
-  if (use_frame_params) {
-    rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
-    input_frame_desc.name = "input_frame";
-    input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-    input_frame_desc.description = "The input TF frame the data should be transformed into before processing, if input.header.frame_id is different.";
-    declare_parameter(input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
-
-    rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
-    output_frame_desc.name = "output_frame";
-    output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-    output_frame_desc.description = "The output TF frame the data should be transformed into after processing, if input.header.frame_id is different.";
-    declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
-
-    // Validate initial values using same callback
-    callback_handle_ =
-      add_on_set_parameters_callback(std::bind(&Filter::config_callback, this, std::placeholders::_1));
-
-    std::vector<std::string> param_names{input_frame_desc.name, output_frame_desc.name};
-    auto result = config_callback(get_parameters(param_names));
-    if (!result.successful) {
-      throw std::runtime_error(result.reason);
-    }
-  }
-
   // TODO(daisukes): lazy subscription after rclcpp#2060
   subscribe();
   RCLCPP_DEBUG(this->get_logger(), "Node successfully created.");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::use_frame_params()
+{
+  rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
+  input_frame_desc.name = "input_frame";
+  input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  input_frame_desc.description = "The input TF frame the data should be transformed into before processing, if input.header.frame_id is different.";
+  declare_parameter(input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
+  output_frame_desc.name = "output_frame";
+  output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  output_frame_desc.description = "The output TF frame the data should be transformed into after processing, if input.header.frame_id is different.";
+  declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
+
+  // Validate initial values using same callback
+  callback_handle_ =
+    add_on_set_parameters_callback(std::bind(&Filter::config_callback, this, std::placeholders::_1));
+
+  std::vector<std::string> param_names{input_frame_desc.name, output_frame_desc.name};
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

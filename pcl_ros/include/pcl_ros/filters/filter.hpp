@@ -63,11 +63,14 @@ public:
   /** \brief Filter constructor
     * \param node_name node name
     * \param options node options
-    * \param use_frame_params declare and handle parameter callback for input_frame and output_frame if true
     */
-  Filter(std::string node_name, const rclcpp::NodeOptions & options, bool use_frame_params=false);
+  Filter(std::string node_name, const rclcpp::NodeOptions & options);
 
 protected:
+  /** \brief declare and subscribe to param callback for input_frame and output_frame params */
+  void
+  use_frame_params();
+
   /** \brief The input PointCloud subscriber. */
   rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
 
