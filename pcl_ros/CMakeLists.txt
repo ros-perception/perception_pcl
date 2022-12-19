@@ -80,19 +80,19 @@ ament_target_dependencies(pcl_ros_tf
 #
 #
 ### Declare the pcl_ros_filters library
-#add_library(pcl_ros_filters
+add_library(pcl_ros_filters SHARED
 #  src/pcl_ros/filters/extract_indices.cpp
-#  src/pcl_ros/filters/filter.cpp
+  src/pcl_ros/filters/filter.cpp
 #  src/pcl_ros/filters/passthrough.cpp
 #  src/pcl_ros/filters/project_inliers.cpp
 #  src/pcl_ros/filters/radius_outlier_removal.cpp
 #  src/pcl_ros/filters/statistical_outlier_removal.cpp
 #  src/pcl_ros/filters/voxel_grid.cpp
 #  src/pcl_ros/filters/crop_box.cpp
-#)
-#target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-#add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
-#class_loader_hide_library_symbols(pcl_ros_filters)
+)
+target_link_libraries(pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES})
+ament_target_dependencies(pcl_ros_filters ${dependencies})
+class_loader_hide_library_symbols(pcl_ros_filters)
 #
 ### Declare the pcl_ros_segmentation library
 #add_library (pcl_ros_segmentation
@@ -184,7 +184,7 @@ install(
     pcd_to_pointcloud_lib
 #    pcl_ros_io
 #    pcl_ros_features
-#    pcl_ros_filters
+    pcl_ros_filters
 #    pcl_ros_surface
 #    pcl_ros_segmentation
 #    pointcloud_to_pcd
