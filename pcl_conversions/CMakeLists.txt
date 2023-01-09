@@ -51,5 +51,5 @@ endif()
 # Export old-style CMake variables
 ament_export_include_directories("include/${PROJECT_NAME}")
 
-ament_export_dependencies(${dependencies})
+ament_export_dependencies(${dependencies} PCL)
 ament_package()
