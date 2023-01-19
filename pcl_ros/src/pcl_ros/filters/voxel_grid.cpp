@@ -74,14 +74,17 @@ pcl_ros::VoxelGrid::config_callback (pcl_ros::VoxelGridConfig &config, uint32_t 
   boost::mutex::scoped_lock lock (mutex_);
 
   Eigen::Vector3f leaf_size = impl_.getLeafSize ();
+  Eigen::Vector3f config_leaf_size;
 
-  if (leaf_size[0] != config.leaf_size)
-  {
-    leaf_size.setConstant (config.leaf_size);
-    NODELET_DEBUG ("[config_callback] Setting the downsampling leaf size to: %f.", leaf_size[0]);
-    impl_.setLeafSize (leaf_size[0], leaf_size[1], leaf_size[2]);
+  config_leaf_size[0] = (config.leaf_size_x >= 0.0 ? config.leaf_size_x : config.leaf_size);
+  config_leaf_size[1] = (config.leaf_size_y >= 0.0 ? config.leaf_size_y : config.leaf_size);
+  config_leaf_size[2] = (config.leaf_size_z >= 0.0 ? config.leaf_size_z : config.leaf_size);
+
+  if (leaf_size != config_leaf_size) {
+    NODELET_DEBUG("[config_callback] Setting the downsampling leaf size to: (%f, %f, %f).",
+      config_leaf_size[0], config_leaf_size[1], config_leaf_size[2]);
+    impl_.setLeafSize(config_leaf_size[0], config_leaf_size[1], config_leaf_size[2]);
   }
-  
   unsigned int minPointsPerVoxel = impl_.getMinimumPointsNumberPerVoxel ();
   if (minPointsPerVoxel != ((unsigned int) config.min_points_per_voxel))
   {
