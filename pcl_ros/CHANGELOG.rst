@@ -2,6 +2,18 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding separate leaf sizes for each axis in the VoxelGrid filter (`#393 <https://github.com/ros-perception/perception_pcl/issues/393>`_)
+* Add logic for missing pcl/point_traits.h in newer PCL versions (`#381 <https://github.com/ros-perception/perception_pcl/issues/381>`_)
+  point_traits.h is no longer available, starting with PCL 1.13.0
+  Since PCL 1.11.0, type_traits.h should be used instead
+* Add boost include, missing in upcoming PCL versions (`#373 <https://github.com/ros-perception/perception_pcl/issues/373>`_)
+  Was removed in pcl/conversions.h here: https://github.com/PointCloudLibrary/pcl/commit/292593abd3b69af315c7fe3379363bdce7800d5a
+* Switch to hpp headers of pluginlib (`#370 <https://github.com/ros-perception/perception_pcl/issues/370>`_)
+  Co-authored-by: Jochen Sprickerhof <jspricke@debian.org>
+* Contributors: Jochen Sprickerhof, Markus Vieth, Tom Moore
+
 1.7.0 (2019-07-03)
 ------------------
 * Added option for fixed filename (via local parameter) (`#102 <https://github.com/ros-perception/perception_pcl/issues/102>`_)
