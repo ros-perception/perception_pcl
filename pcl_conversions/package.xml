@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pcl_conversions</name>
-  <version>1.7.4</version>
+  <version>1.7.5</version>
   <description>Provides conversions from PCL data types and ROS message types</description>
 
   <author email="william@osrfoundation.org">William Woodall</author>

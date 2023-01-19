@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pcl_ros</name>
-  <version>1.7.4</version>
+  <version>1.7.5</version>
   <description>
 
   PCL (Point Cloud Library) ROS interface stack. PCL-ROS is the preferred

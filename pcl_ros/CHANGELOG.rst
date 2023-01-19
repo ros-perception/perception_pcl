@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.5 (2023-01-19)
+------------------
 * Adding separate leaf sizes for each axis in the VoxelGrid filter (`#393 <https://github.com/ros-perception/perception_pcl/issues/393>`_)
 * Add logic for missing pcl/point_traits.h in newer PCL versions (`#381 <https://github.com/ros-perception/perception_pcl/issues/381>`_)
   point_traits.h is no longer available, starting with PCL 1.13.0
