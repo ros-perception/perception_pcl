@@ -34,7 +34,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "pcl_ros/features/shot_omp.hpp"
 
 void

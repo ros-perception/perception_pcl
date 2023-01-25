@@ -37,7 +37,7 @@
  */
 
 #include "pcl_ros/filters/crop_box.hpp"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
