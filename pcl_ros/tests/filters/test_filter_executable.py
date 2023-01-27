@@ -27,10 +27,20 @@ def generate_test_description():
         ros_arguments.extend(["-p", "approximate_sync:={}".format(approximate_sync)])
 
     return launch.LaunchDescription([
-        launch.actions.ExecuteProcess(
-            cmd=['ros2', 'component', 'standalone', 'pcl_ros_tests_filters', dummy_plugin],
-            name='dummy_topics_node',
-            output='screen'
+
+        launch_ros.actions.ComposableNodeContainer(
+            name='filter_container',
+            namespace='',
+            package='rclcpp_components',
+            executable='component_container',
+            composable_node_descriptions=[
+                launch_ros.descriptions.ComposableNode(
+                    package='pcl_ros_tests_filters',
+                    plugin=dummy_plugin,
+                    name='dummy_publisher',
+                ),
+            ],
+            output='screen',
         ),
         launch_ros.actions.Node(
             package='pcl_ros',

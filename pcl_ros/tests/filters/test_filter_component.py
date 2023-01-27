@@ -76,7 +76,7 @@ def generate_test_description():
                     parameters=[parameters],
                 ),
             ],
-            output='both',
+            output='screen',
         ),
         launch_testing.actions.ReadyToTest()
     ])
