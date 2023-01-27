@@ -26,6 +26,7 @@ find_package(tf2_ros REQUIRED)
 set(dependencies
   pcl_conversions
   rclcpp
+  rclcpp_components
   sensor_msgs
   geometry_msgs
   tf2
@@ -81,7 +82,7 @@ ament_target_dependencies(pcl_ros_tf
 #
 ### Declare the pcl_ros_filters library
 add_library(pcl_ros_filters SHARED
-#  src/pcl_ros/filters/extract_indices.cpp
+  src/pcl_ros/filters/extract_indices.cpp
   src/pcl_ros/filters/filter.cpp
 #  src/pcl_ros/filters/passthrough.cpp
 #  src/pcl_ros/filters/project_inliers.cpp
@@ -92,6 +93,10 @@ add_library(pcl_ros_filters SHARED
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES})
 ament_target_dependencies(pcl_ros_filters ${dependencies})
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::ExtractIndices"
+  EXECUTABLE filter_extract_indices_node
+)
 class_loader_hide_library_symbols(pcl_ros_filters)
 #
 ### Declare the pcl_ros_segmentation library
@@ -163,6 +168,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  add_subdirectory(tests/filters)
   #add_rostest_gtest(test_tf_message_filter_pcl tests/test_tf_message_filter_pcl.launch src/test/test_tf_message_filter_pcl.cpp)
   #target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   #add_rostest(samples/pcl_ros/features/sample_normal_3d.launch ARGS gui:=false)
