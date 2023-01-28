@@ -71,6 +71,9 @@ protected:
   void
   use_frame_params();
 
+  /** \brief Add common parameters */
+  std::vector<std::string> add_common_params();
+
   /** \brief The input PointCloud subscriber. */
   rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
 

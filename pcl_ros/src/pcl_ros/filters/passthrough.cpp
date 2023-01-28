@@ -36,95 +36,97 @@
  */
 
 #include "pcl_ros/filters/passthrough.hpp"
-#include <pluginlib/class_list_macros.h>
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::PassThrough::child_init(ros::NodeHandle & nh, bool & has_service)
+pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions & options)
+: Filter("PassThroughNode", options)
 {
-  // Enable the dynamic reconfigure service
-  has_service = true;
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::FilterConfig>>(nh);
-  dynamic_reconfigure::Server<pcl_ros::FilterConfig>::CallbackType f = boost::bind(
-    &PassThrough::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+  use_frame_params();
+  std::vector<std::string> param_names = add_common_params();
 
-  return true;
+  callback_handle_ =
+    add_on_set_parameters_callback(
+    std::bind(
+      &PassThrough::config_callback, this,
+      std::placeholders::_1));
+
+  auto result = config_callback(get_parameters(param_names));
+  if (!result.successful) {
+    throw std::runtime_error(result.reason);
+  }
+  // TODO(daisukes): lazy subscription after rclcpp#2060
+  subscribe();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::PassThrough::config_callback(pcl_ros::FilterConfig & config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::PassThrough::config_callback(const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   double filter_min, filter_max;
   impl_.getFilterLimits(filter_min, filter_max);
 
-  // Check the current values for filter min-max
-  if (filter_min != config.filter_limit_min) {
-    filter_min = config.filter_limit_min;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the minimum filtering value a point will be "
-      "considered from to: %f.",
-      getName().c_str(), filter_min);
-    // Set the filter min-max if different
-    impl_.setFilterLimits(filter_min, filter_max);
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "filter_field_name") {
+      // Check the current value for the filter field
+      if (impl_.getFilterFieldName() != param.as_string()) {
+        // Set the filter field if different
+        impl_.setFilterFieldName(param.as_string());
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter field name to: %s.",
+          param.as_string().c_str());
+      }
+    }
+    if (param.get_name() == "filter_limit_min") {
+      // Check the current values for filter min-max
+      if (filter_min != param.as_double()) {
+        filter_min = param.as_double();
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the minimum filtering value a point will be considered from to: %f.",
+          filter_min);
+        // Set the filter min-max if different
+        impl_.setFilterLimits(filter_min, filter_max);
+      }
+    }
+    if (param.get_name() == "filter_limit_max") {
+      // Check the current values for filter min-max
+      if (filter_max != param.as_double()) {
+        filter_max = param.as_double();
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the maximum filtering value a point will be considered from to: %f.",
+          filter_max);
+        // Set the filter min-max if different
+        impl_.setFilterLimits(filter_min, filter_max);
+      }
+    }
+    if (param.get_name() == "filter_limit_negative") {
+      // Check the current value for the negative flag
+      if (impl_.getNegative() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter negative flag to: %s.",
+          param.as_bool() ? "true" : "false");
+        // Call the virtual method in the child
+        impl_.setNegative(param.as_bool());
+      }
+    }
+    if (param.get_name() == "keep_organized") {
+      // Check the current value for keep_organized
+      if (impl_.getKeepOrganized() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter keep_organized value to: %s.",
+          param.as_bool() ? "true" : "false");
+        // Call the virtual method in the child
+        impl_.setKeepOrganized(param.as_bool());
+      }
+    }
   }
-  // Check the current values for filter min-max
-  if (filter_max != config.filter_limit_max) {
-    filter_max = config.filter_limit_max;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the maximum filtering value a point will be "
-      "considered from to: %f.",
-      getName().c_str(), filter_max);
-    // Set the filter min-max if different
-    impl_.setFilterLimits(filter_min, filter_max);
-  }
-
-  // Check the current value for the filter field
-  // std::string filter_field = impl_.getFilterFieldName ();
-  if (impl_.getFilterFieldName() != config.filter_field_name) {
-    // Set the filter field if different
-    impl_.setFilterFieldName(config.filter_field_name);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the filter field name to: %s.",
-      getName().c_str(), config.filter_field_name.c_str());
-  }
-
-  // Check the current value for keep_organized
-  if (impl_.getKeepOrganized() != config.keep_organized) {
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the filter keep_organized value to: %s.",
-      getName().c_str(), config.keep_organized ? "true" : "false");
-    // Call the virtual method in the child
-    impl_.setKeepOrganized(config.keep_organized);
-  }
-
-  // Check the current value for the negative flag
-  if (impl_.getFilterLimitsNegative() != config.filter_limit_negative) {
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the filter negative flag to: %s.",
-      getName().c_str(), config.filter_limit_negative ? "true" : "false");
-    // Call the virtual method in the child
-    impl_.setFilterLimitsNegative(config.filter_limit_negative);
-  }
-
-  // The following parameters are updated automatically for all PCL_ROS Nodelet Filters
-  // as they are inexistent in PCL
-  if (tf_input_frame_ != config.input_frame) {
-    tf_input_frame_ = config.input_frame;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the input TF frame to: %s.",
-      getName().c_str(), tf_input_frame_.c_str());
-  }
-  if (tf_output_frame_ != config.output_frame) {
-    tf_output_frame_ = config.output_frame;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the output TF frame to: %s.",
-      getName().c_str(), tf_output_frame_.c_str());
-  }
+  // TODO(sloretz) constraint validation
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
-typedef pcl_ros::PassThrough PassThrough;
-PLUGINLIB_EXPORT_CLASS(PassThrough, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PassThrough)
