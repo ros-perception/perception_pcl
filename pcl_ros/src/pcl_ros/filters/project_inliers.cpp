@@ -143,11 +143,9 @@ pcl_ros::ProjectInliers::input_indices_model_callback(
   const PointIndicesConstPtr & indices,
   const ModelCoefficientsConstPtr & model)
 {
-  /*
-   No count_subscribers functionality yet in ROS2
-   if (pub_output_->count_subscribers () <= 0)
+  if (pub_output_->get_subscription_count() <= 0) {
     return;
-   */
+  }
 
   if (!isValid(model) || !isValid(indices) || !isValid(cloud)) {
     RCLCPP_ERROR(

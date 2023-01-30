@@ -49,10 +49,7 @@ pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions & options)
       &PassThrough::config_callback, this,
       std::placeholders::_1));
 
-  auto result = config_callback(get_parameters(param_names));
-  if (!result.successful) {
-    throw std::runtime_error(result.reason);
-  }
+  config_callback(get_parameters(param_names));
   // TODO(daisukes): lazy subscription after rclcpp#2060
   subscribe();
 }
