@@ -61,7 +61,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::Filter::computePublish(const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices)
+pcl_ros::Filter::computePublish(
+  const PointCloud2::ConstSharedPtr & input,
+  const IndicesPtr & indices)
 {
   PointCloud2 output;
   // Call the virtual method in the child
@@ -116,21 +118,30 @@ pcl_ros::Filter::subscribe()
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe(this, "input", rclcpp::QoS(max_queue_size_).get_rmw_qos_profile());
-    sub_indices_filter_.subscribe(this, "indices", rclcpp::QoS(max_queue_size_).get_rmw_qos_profile());
+    auto sensor_qos_profile = rclcpp::QoS(
+      rclcpp::KeepLast(max_queue_size_),
+      rmw_qos_profile_sensor_data).get_rmw_qos_profile();
+    sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
+    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
 
     if (approximate_sync_) {
       sync_input_indices_a_ =
         std::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
           pcl_msgs::msg::PointIndices>>>(max_queue_size_);
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback(std::bind(&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
+      sync_input_indices_a_->registerCallback(
+        std::bind(
+          &Filter::input_indices_callback, this,
+          std::placeholders::_1, std::placeholders::_2));
     } else {
       sync_input_indices_e_ =
         std::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
           pcl_msgs::msg::PointIndices>>>(max_queue_size_);
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback(std::bind(&Filter::input_indices_callback, this, std::placeholders::_1, std::placeholders::_2));
+      sync_input_indices_e_->registerCallback(
+        std::bind(
+          &Filter::input_indices_callback, this,
+          std::placeholders::_1, std::placeholders::_2));
     }
   } else {
     // Workaround for a callback with custom arguments ros2/rclcpp#766
@@ -162,8 +173,6 @@ pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & optio
 : PCLNode(node_name, options)
 {
   pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
-  // TODO(daisukes): lazy subscription after rclcpp#2060
-  subscribe();
   RCLCPP_DEBUG(this->get_logger(), "Node successfully created.");
 }
 
@@ -174,24 +183,85 @@ pcl_ros::Filter::use_frame_params()
   rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
   input_frame_desc.name = "input_frame";
   input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-  input_frame_desc.description = "The input TF frame the data should be transformed into before processing, if input.header.frame_id is different.";
+  input_frame_desc.description =
+    "The input TF frame the data should be transformed into before processing, "
+    "if input.header.frame_id is different.";
   declare_parameter(input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
 
   rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
   output_frame_desc.name = "output_frame";
   output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-  output_frame_desc.description = "The output TF frame the data should be transformed into after processing, if input.header.frame_id is different.";
+  output_frame_desc.description =
+    "The output TF frame the data should be transformed into after processing, "
+    "if input.header.frame_id is different.";
   declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
 
   // Validate initial values using same callback
   callback_handle_ =
-    add_on_set_parameters_callback(std::bind(&Filter::config_callback, this, std::placeholders::_1));
+    add_on_set_parameters_callback(
+    std::bind(
+      &Filter::config_callback, this,
+      std::placeholders::_1));
 
   std::vector<std::string> param_names{input_frame_desc.name, output_frame_desc.name};
   auto result = config_callback(get_parameters(param_names));
   if (!result.successful) {
     throw std::runtime_error(result.reason);
   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+std::vector<std::string>
+pcl_ros::Filter::add_common_params()
+{
+  rcl_interfaces::msg::ParameterDescriptor ffn_desc;
+  ffn_desc.name = "filter_field_name";
+  ffn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  ffn_desc.description = "The field name used for filtering";
+  declare_parameter(ffn_desc.name, rclcpp::ParameterValue("z"), ffn_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmin_desc;
+  flmin_desc.name = "filter_limit_min";
+  flmin_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmin_desc.description = "The minimum allowed field value a point will be considered from";
+  rcl_interfaces::msg::FloatingPointRange flmin_range;
+  flmin_range.from_value = -100000.0;
+  flmin_range.to_value = 100000.0;
+  flmin_desc.floating_point_range.push_back(flmin_range);
+  declare_parameter(flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmax_desc;
+  flmax_desc.name = "filter_limit_max";
+  flmax_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmax_desc.description = "The maximum allowed field value a point will be considered from";
+  rcl_interfaces::msg::FloatingPointRange flmax_range;
+  flmax_range.from_value = -100000.0;
+  flmax_range.to_value = 100000.0;
+  flmax_desc.floating_point_range.push_back(flmax_range);
+  declare_parameter(flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flneg_desc;
+  flneg_desc.name = "filter_limit_negative";
+  flneg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  flneg_desc.description =
+    "Set to true if we want to return the data outside [filter_limit_min; filter_limit_max].";
+  declare_parameter(flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
+  return std::vector<std::string> {
+    ffn_desc.name,
+    flmin_desc.name,
+    flmax_desc.name,
+    flneg_desc.name,
+    keep_organized_desc.name
+  };
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
