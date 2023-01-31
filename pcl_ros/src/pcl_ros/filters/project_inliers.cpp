@@ -36,46 +36,39 @@
  */
 
 #include "pcl_ros/filters/project_inliers.hpp"
-#include <pluginlib/class_list_macros.h>
-#include <pcl/common/io.h>
-#include <vector>
+#include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ProjectInliers::onInit()
+pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
+: Filter("ProjectInliersNode", options), model_()
 {
-  PCLNodelet::onInit();
-
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
+  declare_parameter("model_type", rclcpp::ParameterType::PARAMETER_INTEGER);
   int model_type;
-  if (!pnh_->getParam("model_type", model_type)) {
-    NODELET_ERROR(
-      "[%s::onInit] Need a 'model_type' parameter to be set before continuing!",
-      getName().c_str());
+  if (!get_parameter("model_type", model_type)) {
+    RCLCPP_ERROR(
+      get_logger(),
+      "[onConstruct] Need a 'model_type' parameter to be set before continuing!");
     return;
   }
   // ---[ Optional parameters
   // True if all data will be returned, false if only the projected inliers. Default: false.
-  bool copy_all_data = false;
+  declare_parameter("copy_all_data", rclcpp::ParameterValue(false));
+  bool copy_all_data = get_parameter("copy_all_data").as_bool();
 
   // True if all fields will be returned, false if only XYZ. Default: true.
-  bool copy_all_fields = true;
+  declare_parameter("copy_all_fields", rclcpp::ParameterValue(true));
+  bool copy_all_fields = get_parameter("copy_all_fields").as_bool();
 
-  pnh_->getParam("copy_all_data", copy_all_data);
-  pnh_->getParam("copy_all_fields", copy_all_fields);
+  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
 
-  pub_output_ = advertise<PointCloud2>(*pnh_, "output", max_queue_size_);
-
-  // Subscribe to the input using a filter
-  sub_input_filter_.subscribe(*pnh_, "input", max_queue_size_);
-
-  NODELET_DEBUG(
-    "[%s::onInit] Nodelet successfully created with the following parameters:\n"
-    " - model_type      : %d\n"
-    " - copy_all_data   : %s\n"
-    " - copy_all_fields : %s",
-    getName().c_str(),
+  RCLCPP_DEBUG(
+    this->get_logger(),
+    "[onConstruct] Node successfully created with the following parameters:\n"
+    "  - model_type      : %d\n"
+    "  - copy_all_data   : %s\n"
+    "  - copy_all_fields : %s",
     model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
 
   // Set given parameters here
@@ -83,42 +76,50 @@ pcl_ros::ProjectInliers::onInit()
   impl_.setCopyAllFields(copy_all_fields);
   impl_.setCopyAllData(copy_all_data);
 
-  onInitPostProcess();
+  // TODO(daisukes): lazy subscription after rclcpp#2060
+  subscribe();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::ProjectInliers::subscribe()
 {
+  RCLCPP_DEBUG(get_logger(), "subscribe");
 /*
   TODO : implement use_indices_
   if (use_indices_)
   {*/
 
-  sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
-
-  sub_model_.subscribe(*pnh_, "model", max_queue_size_);
+  auto qos_profile = rclcpp::QoS(
+    rclcpp::KeepLast(max_queue_size_),
+    rmw_qos_profile_default).get_rmw_qos_profile();
+  auto sensor_qos_profile = rclcpp::QoS(
+    rclcpp::KeepLast(max_queue_size_),
+    rmw_qos_profile_sensor_data).get_rmw_qos_profile();
+  sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
+  sub_indices_filter_.subscribe(this, "indices", qos_profile);
+  sub_model_.subscribe(this, "model", qos_profile);
 
   if (approximate_sync_) {
-    sync_input_indices_model_a_ =
-      boost::make_shared<message_filters::Synchronizer<
-          message_filters::sync_policies::ApproximateTime<
-            PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_a_ = std::make_shared<
+      message_filters::Synchronizer<
+        message_filters::sync_policies::ApproximateTime<
+          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_a_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_a_->registerCallback(
-      bind(
-        &ProjectInliers::input_indices_model_callback,
-        this, _1, _2, _3));
+      std::bind(
+        &ProjectInliers::input_indices_model_callback, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   } else {
-    sync_input_indices_model_e_ =
-      boost::make_shared<message_filters::Synchronizer<
-          message_filters::sync_policies::ExactTime<
-            PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_e_ = std::make_shared<
+      message_filters::Synchronizer<
+        message_filters::sync_policies::ExactTime<
+          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
     sync_input_indices_model_e_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_e_->registerCallback(
-      bind(
-        &ProjectInliers::input_indices_model_callback,
-        this, _1, _2, _3));
+      std::bind(
+        &ProjectInliers::input_indices_model_callback, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 }
 
@@ -130,42 +131,39 @@ pcl_ros::ProjectInliers::unsubscribe()
   TODO : implement use_indices_
   if (use_indices_)
   {*/
-
   sub_input_filter_.unsubscribe();
+  sub_indices_filter_.unsubscribe();
   sub_model_.unsubscribe();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::ProjectInliers::input_indices_model_callback(
-  const PointCloud2::ConstPtr & cloud,
+  const PointCloud2::ConstSharedPtr & cloud,
   const PointIndicesConstPtr & indices,
   const ModelCoefficientsConstPtr & model)
 {
-  if (pub_output_.getNumSubscribers() <= 0) {
+  if (pub_output_->get_subscription_count() == 0) {
     return;
   }
 
   if (!isValid(model) || !isValid(indices) || !isValid(cloud)) {
-    NODELET_ERROR("[%s::input_indices_model_callback] Invalid input!", getName().c_str());
+    RCLCPP_ERROR(
+      this->get_logger(), "[%s::input_indices_model_callback] Invalid input!", this->get_name());
     return;
   }
 
-  NODELET_DEBUG(
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::input_indices_model_callback]\n"
-    "                                 - PointCloud with %d data points (%s), stamp %f, and "
-    "frame %s on topic %s received.\n"
-    "                                 - PointIndices with %zu values, stamp %f, and "
-    "frame %s on topic %s received.\n"
-    "                                 - ModelCoefficients with %zu values, stamp %f, and "
-    "frame %s on topic %s received.",
-    getName().c_str(),
-    cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
-    cloud->header.stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName("input").c_str(),
-    indices->indices.size(), indices->header.stamp.toSec(),
-    indices->header.frame_id.c_str(), pnh_->resolveName("inliers").c_str(),
-    model->values.size(), model->header.stamp.toSec(),
-    model->header.frame_id.c_str(), pnh_->resolveName("model").c_str());
+    "  - PointCloud with %d data points (%s), stamp %d.%09d, and frame %s on topic %s received.\n"
+    "  - PointIndices with %zu values, stamp %d.%09d, and frame %s on topic %s received.\n"
+    "  - ModelCoefficients with %zu values, stamp %d.%09d, and frame %s on topic %s received.",
+    this->get_name(), cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
+    cloud->header.stamp.sec, cloud->header.stamp.nanosec, cloud->header.frame_id.c_str(), "input",
+    indices->indices.size(), indices->header.stamp.sec, indices->header.stamp.nanosec,
+    indices->header.frame_id.c_str(), "inliers", model->values.size(),
+    model->header.stamp.sec, model->header.stamp.nanosec, model->header.frame_id.c_str(), "model");
 
   tf_input_orig_frame_ = cloud->header.frame_id;
 
@@ -178,5 +176,5 @@ pcl_ros::ProjectInliers::input_indices_model_callback(
   computePublish(cloud, vindices);
 }
 
-typedef pcl_ros::ProjectInliers ProjectInliers;
-PLUGINLIB_EXPORT_CLASS(ProjectInliers, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::ProjectInliers)

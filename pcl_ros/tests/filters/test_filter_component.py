@@ -27,6 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+import ast
 import os
 import unittest
 
@@ -46,14 +47,8 @@ from sensor_msgs.msg import PointCloud2
 def generate_test_description():
     dummy_plugin = os.getenv('DUMMY_PLUGIN')
     filter_plugin = os.getenv('FILTER_PLUGIN')
-    use_indices = os.getenv('USE_INDICES')
-    approximate_sync = os.getenv('APPROXIMATE_SYNC')
+    parameters = ast.literal_eval(os.getenv('PARAMETERS')) if 'PARAMETERS' in os.environ else {}
 
-    parameters = {}
-    if use_indices:
-        parameters['use_indices'] = (use_indices == 'true')
-    if approximate_sync:
-        parameters['approximate_sync'] = (approximate_sync == 'true')
     print(parameters)
 
     return launch.LaunchDescription([
