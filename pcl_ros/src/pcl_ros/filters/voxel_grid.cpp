@@ -35,100 +35,102 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/voxel_grid.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::VoxelGrid::child_init(ros::NodeHandle & nh, bool & has_service)
-{
-  // Enable the dynamic reconfigure service
-  has_service = true;
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>>(nh);
-  dynamic_reconfigure::Server<pcl_ros::VoxelGridConfig>::CallbackType f = boost::bind(
-    &VoxelGrid::config_callback, this, _1, _2);
-  srv_->setCallback(f);
 
-  return true;
+pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
+: Filter("VoxelGrid", options)
+{
+  use_frame_params();
+  std::vector<std::string> param_names = add_common_params();
+
+  callback_handle_ =
+    add_on_set_parameters_callback(
+    std::bind(
+      &VoxelGrid::config_callback, this,
+      std::placeholders::_1));
+
+  config_callback(get_parameters(param_names));
+  // TODO(daisukes): lazy subscription after rclcpp#2060
+  subscribe();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::VoxelGrid::filter(
-  const PointCloud2::ConstPtr & input,
-  const IndicesPtr & indices,
-  PointCloud2 & output)
-{
-  boost::mutex::scoped_lock lock(mutex_);
-  pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
-  impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
-  pcl::PCLPointCloud2 pcl_output;
-  impl_.filter(pcl_output);
-  pcl_conversions::moveFromPCL(pcl_output, output);
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::VoxelGrid::config_callback(pcl_ros::VoxelGridConfig & config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock(mutex_);
-
-  Eigen::Vector3f leaf_size = impl_.getLeafSize();
-
-  if (leaf_size[0] != config.leaf_size) {
-    leaf_size.setConstant(config.leaf_size);
-    NODELET_DEBUG("[config_callback] Setting the downsampling leaf size to: %f.", leaf_size[0]);
-    impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
-  }
+  std::lock_guard<std::mutex> lock(mutex_);
 
   double filter_min, filter_max;
   impl_.getFilterLimits(filter_min, filter_max);
-  if (filter_min != config.filter_limit_min) {
-    filter_min = config.filter_limit_min;
-    NODELET_DEBUG(
-      "[config_callback] Setting the minimum filtering value a point will be considered "
-      "from to: %f.",
-      filter_min);
-  }
-  if (filter_max != config.filter_limit_max) {
-    filter_max = config.filter_limit_max;
-    NODELET_DEBUG(
-      "[config_callback] Setting the maximum filtering value a point will be considered "
-      "from to: %f.",
-      filter_max);
-  }
-  impl_.setFilterLimits(filter_min, filter_max);
 
-  if (impl_.getFilterLimitsNegative() != config.filter_limit_negative) {
-    impl_.setFilterLimitsNegative(config.filter_limit_negative);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the filter negative flag to: %s.",
-      getName().c_str(), config.filter_limit_negative ? "true" : "false");
-  }
+  Eigen::Vector3f leaf_size = impl_.getLeafSize();
 
-  if (impl_.getFilterFieldName() != config.filter_field_name) {
-    impl_.setFilterFieldName(config.filter_field_name);
-    NODELET_DEBUG(
-      "[config_callback] Setting the filter field name to: %s.",
-      config.filter_field_name.c_str());
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "filter_field_name") {
+      // Check the current value for the filter field
+      if (impl_.getFilterFieldName() != param.as_string()) {
+        // Set the filter field if different
+        impl_.setFilterFieldName(param.as_string());
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter field name to: %s.",
+          param.as_string().c_str());
+      }
+    }
+    if (param.get_name() == "filter_limit_min") {
+      // Check the current values for filter min-max
+      if (filter_min != param.as_double()) {
+        filter_min = param.as_double();
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the minimum filtering value a point will be considered from to: %f.",
+          filter_min);
+        // Set the filter min-max if different
+        impl_.setFilterLimits(filter_min, filter_max);
+      }
+    }
+    if (param.get_name() == "filter_limit_max") {
+      // Check the current values for filter min-max
+      if (filter_max != param.as_double()) {
+        filter_max = param.as_double();
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the maximum filtering value a point will be considered from to: %f.",
+          filter_max);
+        // Set the filter min-max if different
+        impl_.setFilterLimits(filter_min, filter_max);
+      }
+    }
+    if (param.get_name() == "leaf_size") {
+      double new_leaf_size = param.as_double();
+      if (leaf_size[0] != new_leaf_size) {
+        leaf_size.setConstant(new_leaf_size);
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the downsampling leaf size to: %f.",
+          new_leaf_size);
+        // Set the filter min-max if different
+        impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
+      }
+    }
+    if (param.get_name() == "filter_limit_negative") {
+      bool new_filter_limits_negative = param.as_bool();
+      if (impl_.getFilterLimitsNegative() != new_filter_limits_negative) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the filter negative flag to: %s.",
+          (new_filter_limits_negative ? "true" : "false"));
+        impl_.setFilterLimitsNegative(new_filter_limits_negative);
+      }
+    }
   }
-
-  // ---[ These really shouldn't be here, and as soon as dynamic_reconfigure improves,
-  // we'll remove them and inherit from Filter
-  if (tf_input_frame_ != config.input_frame) {
-    tf_input_frame_ = config.input_frame;
-    NODELET_DEBUG("[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str());
-  }
-  if (tf_output_frame_ != config.output_frame) {
-    tf_output_frame_ = config.output_frame;
-    NODELET_DEBUG(
-      "[config_callback] Setting the output TF frame to: %s.",
-      tf_output_frame_.c_str());
-  }
-  // ]---
+  // TODO(sloretz) constraint validation
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
-typedef pcl_ros::VoxelGrid VoxelGrid;
-PLUGINLIB_EXPORT_CLASS(VoxelGrid, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::VoxelGrid)
