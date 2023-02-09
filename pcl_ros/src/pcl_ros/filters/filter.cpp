@@ -303,7 +303,7 @@ pcl_ros::Filter::add_common_params()
   declare_parameter(leaf_size_y_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor leaf_size_z_desc;
-  leaf_size_z_desc.name = "min_points_per_voxel";
+  leaf_size_z_desc.name = "leaf_size_z";
   leaf_size_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   leaf_size_z_desc.description = "The size of a leaf (on z) used for downsampling. \
     If negative, leaf_size is used instead.";
@@ -328,7 +328,6 @@ pcl_ros::Filter::add_common_params()
   }
   declare_parameter(
     min_points_per_voxel_desc.name, rclcpp::ParameterValue(2), min_points_per_voxel_desc);
-
 
   // filter: CropBox
 
