@@ -214,6 +214,8 @@ pcl_ros::Filter::use_frame_params()
 std::vector<std::string>
 pcl_ros::Filter::add_common_params()
 {
+  // filter: Passthrough
+
   rcl_interfaces::msg::ParameterDescriptor ffn_desc;
   ffn_desc.name = "filter_field_name";
   ffn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
@@ -255,6 +257,8 @@ pcl_ros::Filter::add_common_params()
     "or removed from the PointCloud, thus potentially breaking its organized structure.";
   declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
 
+  // filter: VoxelGrid
+
   rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
   leaf_size_desc.name = "leaf_size";
   leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -262,53 +266,51 @@ pcl_ros::Filter::add_common_params()
     "The size of a leaf (on x,y,z) used for downsampling";
   declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
+  // filter: CropBox
+
   rcl_interfaces::msg::ParameterDescriptor min_x_desc;
   min_x_desc.name = "min_x";
   min_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_x_desc.description =
     "Minimum x value below which points will be removed";
-  declare_parameter(min_x_desc.name,
-    rclcpp::ParameterValue(-1.0), min_x_desc);
+  declare_parameter(min_x_desc.name, rclcpp::ParameterValue(-1.0), min_x_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_x_desc;
   max_x_desc.name = "max_x";
   max_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_x_desc.description =
     "Maximum x value above which points will be removed";
-  declare_parameter(max_x_desc.name,
-    rclcpp::ParameterValue(1.0), max_x_desc);
+  declare_parameter(max_x_desc.name, rclcpp::ParameterValue(1.0), max_x_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_y_desc;
   min_y_desc.name = "min_y";
   min_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_y_desc.description =
     "Minimum y value below which points will be removed";
-  declare_parameter(min_y_desc.name,
-    rclcpp::ParameterValue(-1.0), min_y_desc);
+  declare_parameter(min_y_desc.name, rclcpp::ParameterValue(-1.0), min_y_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_y_desc;
   max_y_desc.name = "max_y";
   max_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_y_desc.description =
     "Maximum y value above which points will be removed";
-  declare_parameter(max_y_desc.name,
-    rclcpp::ParameterValue(1.0), max_y_desc);
+  declare_parameter(max_y_desc.name, rclcpp::ParameterValue(1.0), max_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_z_desc;
   min_z_desc.name = "min_z";
   min_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_z_desc.description =
     "Minimum z value below which points will be removed";
-  declare_parameter(min_z_desc.name,
-    rclcpp::ParameterValue(-1.0), min_z_desc);
+  declare_parameter(min_z_desc.name, rclcpp::ParameterValue(-1.0), min_z_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_z_desc;
   max_z_desc.name = "max_z";
   max_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_z_desc.description =
     "Maximum z value above which points will be removed";
-  declare_parameter(max_z_desc.name,
-    rclcpp::ParameterValue(1.0), max_z_desc);
+  declare_parameter(max_z_desc.name, rclcpp::ParameterValue(1.0), max_z_desc);
+
+  // filter: RadiusOutlierRemoval
 
   rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
   min_neighbors_desc.name = "min_neighbors";
@@ -323,6 +325,30 @@ pcl_ros::Filter::add_common_params()
   radius_search_desc.description =
     "Radius of the sphere that will determine which points are neighbors.";
   declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
+
+  // filter: StatisticalOutlierRemoval
+
+  rcl_interfaces::msg::ParameterDescriptor mean_k_desc;
+  mean_k_desc.name = "mean_k";
+  mean_k_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  mean_k_desc.description =
+    "The number of points (k) to use for mean distance estimation.";
+  declare_parameter(mean_k_desc.name, rclcpp::ParameterValue(2), mean_k_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor stddev_desc;
+  stddev_desc.name = "stddev";
+  stddev_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  stddev_desc.description =
+    "The standard deviation multiplier threshold. \
+    All points outside the mean +- sigma * std_mul will be considered outliers.";
+  declare_parameter(stddev_desc.name, rclcpp::ParameterValue(0.0), stddev_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor negative_desc;
+  negative_desc.name = "negative";
+  negative_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  negative_desc.description =
+    "Set whether the inliers should be returned (true) or the outliers (false).";
+  declare_parameter(negative_desc.name, rclcpp::ParameterValue(false), negative_desc);
 
   return std::vector<std::string> {
     ffn_desc.name,
@@ -339,6 +365,9 @@ pcl_ros::Filter::add_common_params()
     max_z_desc.name,
     min_neighbors_desc.name,
     radius_search_desc.name,
+    mean_k_desc.name,
+    stddev_desc.name,
+    negative_desc.name,
   };
 }
 

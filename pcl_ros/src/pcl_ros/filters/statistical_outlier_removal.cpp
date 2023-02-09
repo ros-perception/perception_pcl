@@ -35,53 +35,65 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/statistical_outlier_removal.hpp"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::StatisticalOutlierRemoval::child_init(ros::NodeHandle & nh, bool & has_service)
+pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::NodeOptions & options)
+: Filter("StatisticalOutlierRemovalNode", options)
 {
-  // Enable the dynamic reconfigure service
-  has_service = true;
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>>(
-    nh);
-  dynamic_reconfigure::Server<pcl_ros::StatisticalOutlierRemovalConfig>::CallbackType f =
-    boost::bind(&StatisticalOutlierRemoval::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+  use_frame_params();
+  std::vector<std::string> param_names = add_common_params();
 
-  return true;
+  callback_handle_ =
+    add_on_set_parameters_callback(
+    std::bind(
+      &StatisticalOutlierRemoval::config_callback, this,
+      std::placeholders::_1));
+
+  config_callback(get_parameters(param_names));
+  // TODO(daisukes): lazy subscription after rclcpp#2060
+  subscribe();
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::StatisticalOutlierRemoval::config_callback(
-  pcl_ros::StatisticalOutlierRemovalConfig & config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::StatisticalOutlierRemoval::config_callback(const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
-  if (impl_.getMeanK() != config.mean_k) {
-    impl_.setMeanK(config.mean_k);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the number of points (k) to use for mean "
-      "distance estimation to: %d.",
-      getName().c_str(), config.mean_k);
+
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "mean_k") {
+      if (impl_.getMeanK() != param.as_int()) {
+        RCLCPP_DEBUG(get_logger(),
+          "Setting the number of points (k) to use for mean distance estimation to: %ld.",
+          param.as_int());
+        impl_.setMeanK(param.as_int());
+      }
+    }
+    if (param.get_name() == "stddev") {
+      if (impl_.getStddevMulThresh() != param.as_double()) {
+        RCLCPP_DEBUG(get_logger(),
+          "Setting the standard deviation multiplier threshold to: %f.",
+          param.as_double());
+        impl_.setStddevMulThresh(param.as_double());
+      }
+    }
+    if (param.get_name() == "negative") {
+      if (impl_.getNegative() != param.as_bool()) {
+        RCLCPP_DEBUG(get_logger(),
+          "Returning only inliers: %s.",
+          (param.as_bool() ? "false" : "true"));
+        impl_.setNegative(param.as_bool());
+      }
+    }   
   }
 
-  if (impl_.getStddevMulThresh() != config.stddev) {
-    impl_.setStddevMulThresh(config.stddev);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the standard deviation multiplier threshold to: %f.",
-      getName().c_str(), config.stddev);
-  }
-
-  if (impl_.getNegative() != config.negative) {
-    impl_.setNegative(config.negative);
-    NODELET_DEBUG(
-      "[%s::config_callback] Returning only inliers: %s.",
-      getName().c_str(), config.negative ? "false" : "true");
-  }
+  // TODO(sloretz) constraint validation
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
-typedef pcl_ros::StatisticalOutlierRemoval StatisticalOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(StatisticalOutlierRemoval, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::StatisticalOutlierRemoval)
