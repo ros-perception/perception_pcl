@@ -226,20 +226,24 @@ pcl_ros::Filter::add_common_params()
   flmin_desc.name = "filter_limit_min";
   flmin_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   flmin_desc.description = "The minimum allowed field value a point will be considered from";
-  rcl_interfaces::msg::FloatingPointRange flmin_range;
-  flmin_range.from_value = -100000.0;
-  flmin_range.to_value = 100000.0;
-  flmin_desc.floating_point_range.push_back(flmin_range);
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -100000.0;
+    float_range.to_value = 100000.0;
+    flmin_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
 
   rcl_interfaces::msg::ParameterDescriptor flmax_desc;
   flmax_desc.name = "filter_limit_max";
   flmax_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   flmax_desc.description = "The maximum allowed field value a point will be considered from";
-  rcl_interfaces::msg::FloatingPointRange flmax_range;
-  flmax_range.from_value = -100000.0;
-  flmax_range.to_value = 100000.0;
-  flmax_desc.floating_point_range.push_back(flmax_range);
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -100000.0;
+    float_range.to_value = 100000.0;
+    flmax_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
 
   rcl_interfaces::msg::ParameterDescriptor flneg_desc;
@@ -273,6 +277,12 @@ pcl_ros::Filter::add_common_params()
   min_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_x_desc.description =
     "Minimum x value below which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    min_x_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(min_x_desc.name, rclcpp::ParameterValue(-1.0), min_x_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_x_desc;
@@ -280,6 +290,12 @@ pcl_ros::Filter::add_common_params()
   max_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_x_desc.description =
     "Maximum x value above which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    max_x_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(max_x_desc.name, rclcpp::ParameterValue(1.0), max_x_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_y_desc;
@@ -287,6 +303,12 @@ pcl_ros::Filter::add_common_params()
   min_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_y_desc.description =
     "Minimum y value below which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    min_y_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(min_y_desc.name, rclcpp::ParameterValue(-1.0), min_y_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_y_desc;
@@ -294,6 +316,12 @@ pcl_ros::Filter::add_common_params()
   max_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_y_desc.description =
     "Maximum y value above which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    max_y_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(max_y_desc.name, rclcpp::ParameterValue(1.0), max_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_z_desc;
@@ -301,6 +329,12 @@ pcl_ros::Filter::add_common_params()
   min_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   min_z_desc.description =
     "Minimum z value below which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    min_z_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(min_z_desc.name, rclcpp::ParameterValue(-1.0), min_z_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_z_desc;
@@ -308,6 +342,12 @@ pcl_ros::Filter::add_common_params()
   max_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   max_z_desc.description =
     "Maximum z value above which points will be removed";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1000.0;
+    float_range.to_value = 1000.0;
+    max_z_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(max_z_desc.name, rclcpp::ParameterValue(1.0), max_z_desc);
 
   // filter: RadiusOutlierRemoval
@@ -317,6 +357,12 @@ pcl_ros::Filter::add_common_params()
   min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
   min_neighbors_desc.description =
     "The number of neighbors that need to be present in order to be classified as an inlier.";
+  {
+    rcl_interfaces::msg::IntegerRange int_range;
+    int_range.from_value = 0;
+    int_range.to_value = 1000;
+    min_neighbors_desc.integer_range.push_back(int_range);
+  }
   declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc);
 
   rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
@@ -324,6 +370,12 @@ pcl_ros::Filter::add_common_params()
   radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   radius_search_desc.description =
     "Radius of the sphere that will determine which points are neighbors.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = 0.0;
+    float_range.to_value = 10.0;
+    radius_search_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
 
   // filter: StatisticalOutlierRemoval
@@ -333,6 +385,12 @@ pcl_ros::Filter::add_common_params()
   mean_k_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
   mean_k_desc.description =
     "The number of points (k) to use for mean distance estimation.";
+  {
+    rcl_interfaces::msg::IntegerRange int_range;
+    int_range.from_value = 2;
+    int_range.to_value = 100;
+    mean_k_desc.integer_range.push_back(int_range);
+  }
   declare_parameter(mean_k_desc.name, rclcpp::ParameterValue(2), mean_k_desc);
 
   rcl_interfaces::msg::ParameterDescriptor stddev_desc;
@@ -341,6 +399,12 @@ pcl_ros::Filter::add_common_params()
   stddev_desc.description =
     "The standard deviation multiplier threshold. \
     All points outside the mean +- sigma * std_mul will be considered outliers.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = 0.0;
+    float_range.to_value = 5.0;
+    stddev_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(stddev_desc.name, rclcpp::ParameterValue(0.0), stddev_desc);
 
   rcl_interfaces::msg::ParameterDescriptor negative_desc;
