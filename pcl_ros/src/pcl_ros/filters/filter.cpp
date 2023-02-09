@@ -255,12 +255,20 @@ pcl_ros::Filter::add_common_params()
     "or removed from the PointCloud, thus potentially breaking its organized structure.";
   declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
 
+  rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
+  leaf_size_desc.name = "leaf_size";
+  leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  leaf_size_desc.description =
+    "Set the extent of a leaf, which is essentially the voxel size for accumulation.";
+  declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.05), leaf_size_desc);
+
   return std::vector<std::string> {
     ffn_desc.name,
     flmin_desc.name,
     flmax_desc.name,
     flneg_desc.name,
-    keep_organized_desc.name
+    keep_organized_desc.name,
+    leaf_size_desc.name
   };
 }
 

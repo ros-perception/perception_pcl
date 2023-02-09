@@ -40,7 +40,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
-: Filter("VoxelGrid", options)
+: Filter("VoxelGridNode", options)
 {
   use_frame_params();
   std::vector<std::string> param_names = add_common_params();
@@ -103,6 +103,16 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
         impl_.setFilterLimits(filter_min, filter_max);
       }
     }
+    if (param.get_name() == "filter_limit_negative") {
+      bool new_filter_limits_negative = param.as_bool();
+      if (impl_.getFilterLimitsNegative() != new_filter_limits_negative) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the filter negative flag to: %s.",
+          (new_filter_limits_negative ? "true" : "false"));
+        impl_.setFilterLimitsNegative(new_filter_limits_negative);
+      }
+    }
     if (param.get_name() == "leaf_size") {
       double new_leaf_size = param.as_double();
       if (leaf_size[0] != new_leaf_size) {
@@ -113,16 +123,6 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
           new_leaf_size);
         // Set the filter min-max if different
         impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
-      }
-    }
-    if (param.get_name() == "filter_limit_negative") {
-      bool new_filter_limits_negative = param.as_bool();
-      if (impl_.getFilterLimitsNegative() != new_filter_limits_negative) {
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Setting the filter negative flag to: %s.",
-          (new_filter_limits_negative ? "true" : "false"));
-        impl_.setFilterLimitsNegative(new_filter_limits_negative);
       }
     }
   }
