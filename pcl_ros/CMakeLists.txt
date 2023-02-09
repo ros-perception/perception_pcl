@@ -86,7 +86,7 @@ add_library(pcl_ros_filters SHARED
   src/pcl_ros/filters/filter.cpp
   src/pcl_ros/filters/passthrough.cpp
   src/pcl_ros/filters/project_inliers.cpp
-#  src/pcl_ros/filters/radius_outlier_removal.cpp
+  src/pcl_ros/filters/radius_outlier_removal.cpp
 #  src/pcl_ros/filters/statistical_outlier_removal.cpp
   src/pcl_ros/filters/voxel_grid.cpp
   src/pcl_ros/filters/crop_box.cpp
@@ -112,6 +112,10 @@ rclcpp_components_register_node(pcl_ros_filters
 rclcpp_components_register_node(pcl_ros_filters
   PLUGIN "pcl_ros::CropBox"
   EXECUTABLE filter_crop_box_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::RadiusOutlierRemoval"
+  EXECUTABLE filter_radius_outlier_removal_node
 )
 class_loader_hide_library_symbols(pcl_ros_filters)
 #

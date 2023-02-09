@@ -259,8 +259,8 @@ pcl_ros::Filter::add_common_params()
   leaf_size_desc.name = "leaf_size";
   leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   leaf_size_desc.description =
-    "Set the extent of a leaf, which is essentially the voxel size for accumulation.";
-  declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.05), leaf_size_desc);
+    "The size of a leaf (on x,y,z) used for downsampling";
+  declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_x_desc;
   min_x_desc.name = "min_x";
@@ -268,7 +268,7 @@ pcl_ros::Filter::add_common_params()
   min_x_desc.description =
     "Minimum x value below which points will be removed";
   declare_parameter(min_x_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_x_desc);
+    rclcpp::ParameterValue(-1.0), min_x_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_x_desc;
   max_x_desc.name = "max_x";
@@ -276,7 +276,7 @@ pcl_ros::Filter::add_common_params()
   max_x_desc.description =
     "Maximum x value above which points will be removed";
   declare_parameter(max_x_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_x_desc);
+    rclcpp::ParameterValue(1.0), max_x_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_y_desc;
   min_y_desc.name = "min_y";
@@ -284,7 +284,7 @@ pcl_ros::Filter::add_common_params()
   min_y_desc.description =
     "Minimum y value below which points will be removed";
   declare_parameter(min_y_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_y_desc);
+    rclcpp::ParameterValue(-1.0), min_y_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_y_desc;
   max_y_desc.name = "max_y";
@@ -292,7 +292,7 @@ pcl_ros::Filter::add_common_params()
   max_y_desc.description =
     "Maximum y value above which points will be removed";
   declare_parameter(max_y_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_y_desc);
+    rclcpp::ParameterValue(1.0), max_y_desc);
 
   rcl_interfaces::msg::ParameterDescriptor min_z_desc;
   min_z_desc.name = "min_z";
@@ -300,7 +300,7 @@ pcl_ros::Filter::add_common_params()
   min_z_desc.description =
     "Minimum z value below which points will be removed";
   declare_parameter(min_z_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_z_desc);
+    rclcpp::ParameterValue(-1.0), min_z_desc);
   
   rcl_interfaces::msg::ParameterDescriptor max_z_desc;
   max_z_desc.name = "max_z";
@@ -308,8 +308,22 @@ pcl_ros::Filter::add_common_params()
   max_z_desc.description =
     "Maximum z value above which points will be removed";
   declare_parameter(max_z_desc.name,
-    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_z_desc);
-    
+    rclcpp::ParameterValue(1.0), max_z_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
+  min_neighbors_desc.name = "min_neighbors";
+  min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_neighbors_desc.description =
+    "The number of neighbors that need to be present in order to be classified as an inlier.";
+  declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
+  radius_search_desc.name = "radius_search";
+  radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  radius_search_desc.description =
+    "Radius of the sphere that will determine which points are neighbors.";
+  declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
+
   return std::vector<std::string> {
     ffn_desc.name,
     flmin_desc.name,
@@ -323,6 +337,8 @@ pcl_ros::Filter::add_common_params()
     max_y_desc.name,
     min_z_desc.name,
     max_z_desc.name,
+    min_neighbors_desc.name,
+    radius_search_desc.name,
   };
 }
 
