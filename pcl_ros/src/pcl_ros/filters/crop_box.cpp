@@ -106,6 +106,21 @@ pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
       }
     }
   }
+
+  // Check the current values for minimum point
+  if (min_point != impl_.getMin()) {
+    RCLCPP_DEBUG(get_logger(), "Setting the minimum point to: %f %f %f.",
+      min_point(0), min_point(1), min_point(2));
+    impl_.setMin(min_point);
+  }
+  
+  // Check the current values for the maximum point
+  if (max_point != impl_.getMax()) {
+    RCLCPP_DEBUG(get_logger(), "Setting the maximum point to: %f %f %f.",
+      max_point(0), max_point(1), max_point(2));
+    impl_.setMax(max_point);
+  }
+
   // TODO(sloretz) constraint validation
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
