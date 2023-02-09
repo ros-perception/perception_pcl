@@ -262,13 +262,67 @@ pcl_ros::Filter::add_common_params()
     "Set the extent of a leaf, which is essentially the voxel size for accumulation.";
   declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.05), leaf_size_desc);
 
+  rcl_interfaces::msg::ParameterDescriptor min_x_desc;
+  min_x_desc.name = "min_x";
+  min_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  min_x_desc.description =
+    "Minimum x value below which points will be removed";
+  declare_parameter(min_x_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_x_desc);
+  
+  rcl_interfaces::msg::ParameterDescriptor max_x_desc;
+  max_x_desc.name = "max_x";
+  max_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  max_x_desc.description =
+    "Maximum x value above which points will be removed";
+  declare_parameter(max_x_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_x_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor min_y_desc;
+  min_y_desc.name = "min_y";
+  min_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  min_y_desc.description =
+    "Minimum y value below which points will be removed";
+  declare_parameter(min_y_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_y_desc);
+  
+  rcl_interfaces::msg::ParameterDescriptor max_y_desc;
+  max_y_desc.name = "max_y";
+  max_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  max_y_desc.description =
+    "Maximum y value above which points will be removed";
+  declare_parameter(max_y_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_y_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor min_z_desc;
+  min_z_desc.name = "min_z";
+  min_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  min_z_desc.description =
+    "Minimum z value below which points will be removed";
+  declare_parameter(min_z_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::min()), min_z_desc);
+  
+  rcl_interfaces::msg::ParameterDescriptor max_z_desc;
+  max_z_desc.name = "max_z";
+  max_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  max_z_desc.description =
+    "Maximum z value above which points will be removed";
+  declare_parameter(max_z_desc.name,
+    rclcpp::ParameterValue(std::numeric_limits<double>::max()), max_z_desc);
+    
   return std::vector<std::string> {
     ffn_desc.name,
     flmin_desc.name,
     flmax_desc.name,
     flneg_desc.name,
     keep_organized_desc.name,
-    leaf_size_desc.name
+    leaf_size_desc.name,
+    min_x_desc.name,
+    max_x_desc.name,
+    min_y_desc.name,
+    max_y_desc.name,
+    min_z_desc.name,
+    max_z_desc.name,
   };
 }
 
