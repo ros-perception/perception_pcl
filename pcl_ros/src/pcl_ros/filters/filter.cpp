@@ -268,7 +268,67 @@ pcl_ros::Filter::add_common_params()
   leaf_size_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
   leaf_size_desc.description =
     "The size of a leaf (on x,y,z) used for downsampling";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = 0.0;
+    float_range.to_value = 1.0;
+    leaf_size_desc.floating_point_range.push_back(float_range);
+  }
   declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor leaf_size_x_desc;
+  leaf_size_x_desc.name = "leaf_size_x";
+  leaf_size_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  leaf_size_x_desc.description = "The size of a leaf (on x) used for downsampling. \
+    If negative, leaf_size is used instead.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1.0;
+    float_range.to_value = 1.0;
+    leaf_size_x_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(leaf_size_x_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_x_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor leaf_size_y_desc;
+  leaf_size_y_desc.name = "leaf_size_y";
+  leaf_size_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  leaf_size_y_desc.description = "The size of a leaf (on y) used for downsampling. \
+    If negative, leaf_size is used instead.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1.0;
+    float_range.to_value = 1.0;
+    leaf_size_y_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(leaf_size_y_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_y_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor leaf_size_z_desc;
+  leaf_size_z_desc.name = "min_points_per_voxel";
+  leaf_size_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  leaf_size_z_desc.description = "The size of a leaf (on z) used for downsampling. \
+    If negative, leaf_size is used instead.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -1.0;
+    float_range.to_value = 1.0;
+    leaf_size_z_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(leaf_size_z_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_z_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor min_points_per_voxel_desc;
+  min_points_per_voxel_desc.name = "min_points_per_voxel";
+  min_points_per_voxel_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_points_per_voxel_desc.description =
+    "The minimum number of points required for a voxel to be used.";
+  {
+    rcl_interfaces::msg::IntegerRange int_range;
+    int_range.from_value = 1;
+    int_range.to_value = 100000;
+    min_points_per_voxel_desc.integer_range.push_back(int_range);
+  }
+  declare_parameter(
+    min_points_per_voxel_desc.name, rclcpp::ParameterValue(2), min_points_per_voxel_desc);
+
 
   // filter: CropBox
 
@@ -407,6 +467,8 @@ pcl_ros::Filter::add_common_params()
   }
   declare_parameter(stddev_desc.name, rclcpp::ParameterValue(0.0), stddev_desc);
 
+  // filters: StatisticalOutlierRemoval, CropBox
+
   rcl_interfaces::msg::ParameterDescriptor negative_desc;
   negative_desc.name = "negative";
   negative_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
@@ -421,6 +483,10 @@ pcl_ros::Filter::add_common_params()
     flneg_desc.name,
     keep_organized_desc.name,
     leaf_size_desc.name,
+    leaf_size_x_desc.name,
+    leaf_size_y_desc.name,
+    leaf_size_z_desc.name,
+    min_points_per_voxel_desc.name,
     min_x_desc.name,
     max_x_desc.name,
     min_y_desc.name,

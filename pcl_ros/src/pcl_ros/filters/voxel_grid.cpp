@@ -67,6 +67,11 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
   impl_.getFilterLimits(filter_min, filter_max);
 
   Eigen::Vector3f leaf_size = impl_.getLeafSize();
+  double leaf_size_x = -1.0;
+  double leaf_size_y = -1.0;
+  double leaf_size_z = -1.0;
+
+  // By default, extra
 
   for (const rclcpp::Parameter & param : params) {
     if (param.get_name() == "filter_field_name") {
@@ -113,19 +118,37 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
         impl_.setFilterLimitsNegative(new_filter_limits_negative);
       }
     }
+    // Defer final logic to after all parameters are collected.
     if (param.get_name() == "leaf_size") {
-      double new_leaf_size = param.as_double();
-      if (leaf_size[0] != new_leaf_size) {
-        leaf_size.setConstant(new_leaf_size);
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Setting the downsampling leaf size to: %f.",
-          new_leaf_size);
-        // Set the filter min-max if different
-        impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
-      }
+      leaf_size.setConstant(param.as_double());
+    }
+    if (param.get_name() == "leaf_size_x") {
+      leaf_size_x = param.as_double();
+    }
+    if (param.get_name() == "leaf_size_y") {
+      leaf_size_y = param.as_double();
+    }
+    if (param.get_name() == "leaf_size_z") {
+      leaf_size_z = param.as_double();
     }
   }
+
+  // Decide on the final leaf size and optionally update.
+  if (leaf_size_x >= 0.0) {
+    leaf_size[0] = leaf_size_x;
+  }
+  if (leaf_size_y >= 0.0) {
+    leaf_size[1] = leaf_size_y;
+  }
+  if (leaf_size_z >= 0.0) {
+    leaf_size[2] = leaf_size_z;
+  }
+  if (impl_.getLeafSize() != leaf_size) {
+    RCLCPP_DEBUG(get_logger(), "Setting the downsampling leaf size to: %f %f %f.",
+      leaf_size[0], leaf_size[1], leaf_size[2]);
+    impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
+  }
+
   // TODO(sloretz) constraint validation
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
