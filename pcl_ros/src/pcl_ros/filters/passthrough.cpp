@@ -41,7 +41,20 @@ pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions & options)
 : Filter("PassThroughNode", options)
 {
   use_frame_params();
-  std::vector<std::string> param_names = add_common_params();
+  std::vector<std::string> common_param_names = add_common_params();
+
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
+  std::vector<std::string> param_names {
+    keep_organized_desc.name,
+  };
+  param_names.insert(param_names.end(), common_param_names.begin(), common_param_names.end());
 
   callback_handle_ =
     add_on_set_parameters_callback(
@@ -50,6 +63,7 @@ pcl_ros::PassThrough::PassThrough(const rclcpp::NodeOptions & options)
       std::placeholders::_1));
 
   config_callback(get_parameters(param_names));
+
   // TODO(daisukes): lazy subscription after rclcpp#2060
   subscribe();
 }
