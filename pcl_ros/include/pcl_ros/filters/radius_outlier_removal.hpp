@@ -38,12 +38,12 @@
 #ifndef PCL_ROS__FILTERS__RADIUS_OUTLIER_REMOVAL_HPP_
 #define PCL_ROS__FILTERS__RADIUS_OUTLIER_REMOVAL_HPP_
 
-// STL includes
-#include <vector>
-
 // PCL includes
 #include <pcl/filters/radius_outlier_removal.h>
 #include "pcl_ros/filters/filter.hpp"
+
+// STL includes
+#include <vector>
 
 namespace pcl_ros
 {
