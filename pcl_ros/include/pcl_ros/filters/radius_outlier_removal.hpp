@@ -40,10 +40,8 @@
 
 // PCL includes
 #include <pcl/filters/radius_outlier_removal.h>
-#include "pcl_ros/filters/filter.hpp"
-
-// STL includes
 #include <vector>
+#include "pcl_ros/filters/filter.hpp"
 
 namespace pcl_ros
 {
