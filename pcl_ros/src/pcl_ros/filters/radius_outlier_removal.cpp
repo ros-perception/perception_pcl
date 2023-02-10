@@ -63,14 +63,16 @@ pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Paramet
   for (const rclcpp::Parameter & param : params) {
     if (param.get_name() == "min_neighbors") {
       if (impl_.getMinNeighborsInRadius() != param.as_int()) {
-        RCLCPP_DEBUG(get_logger(), "Setting the number of neighbors in radius: %ld.",
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the number of neighbors in radius: %ld.",
           param.as_int());
         impl_.setMinNeighborsInRadius(param.as_int());
       }
     }
     if (param.get_name() == "radius_search") {
       if (impl_.getRadiusSearch() != param.as_double()) {
-        RCLCPP_DEBUG(get_logger(), "Setting the radius to search neighbors: %f.",
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the radius to search neighbors: %f.",
           param.as_double());
         impl_.setRadiusSearch(param.as_double());
       }

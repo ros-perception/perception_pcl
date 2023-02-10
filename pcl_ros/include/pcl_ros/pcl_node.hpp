@@ -201,7 +201,7 @@ protected:
   /** \brief TF listener object. */
   tf2_ros::TransformListener tf_listener_;
   tf2_ros::Buffer tf_buffer_;
-  
+
   /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
     * \param cloud the point cloud to test
     * \param topic_name an optional topic name (only used for printing, defaults to "input")
