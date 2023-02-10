@@ -53,6 +53,12 @@ ament_add_pytest_test(test_pcl_ros::StatisticalOutlierRemoval
       FILTER_PLUGIN=pcl_ros::StatisticalOutlierRemoval
   APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
 )
+ament_add_pytest_test(test_pcl_ros::CropBox
+  test_filter_component.py
+  ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
+      FILTER_PLUGIN=pcl_ros::CropBox
+  APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
+)
 
 # test executables
 ament_add_pytest_test(test_filter_extract_indices_node
@@ -84,5 +90,11 @@ ament_add_pytest_test(test_filter_statistical_outlier_removal_node
   test_filter_executable.py
   ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
       FILTER_EXECUTABLE=filter_statistical_outlier_removal_node
+    APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
+)      
+ament_add_pytest_test(test_filter_crop_box_node
+  test_filter_executable.py
+  ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
+      FILTER_EXECUTABLE=filter_crop_box_node
   APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
 )
