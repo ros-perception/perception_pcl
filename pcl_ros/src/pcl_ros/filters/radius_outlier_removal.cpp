@@ -40,8 +40,36 @@
 pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & options)
 : Filter("RadiusOutlierRemovalNode", options)
 {
-  use_frame_params();
-  std::vector<std::string> param_names = add_common_params();
+  rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
+  min_neighbors_desc.name = "min_neighbors";
+  min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_neighbors_desc.description =
+    "The number of neighbors that need to be present in order to be classified as an inlier.";
+  {
+    rcl_interfaces::msg::IntegerRange int_range;
+    int_range.from_value = 0;
+    int_range.to_value = 1000;
+    min_neighbors_desc.integer_range.push_back(int_range);
+  }
+  declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
+  radius_search_desc.name = "radius_search";
+  radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  radius_search_desc.description =
+    "Radius of the sphere that will determine which points are neighbors.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = 0.0;
+    float_range.to_value = 10.0;
+    radius_search_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
+
+  const std::vector<std::string> param_names {
+    min_neighbors_desc.name,
+    radius_search_desc.name,
+  };
 
   callback_handle_ =
     add_on_set_parameters_callback(
@@ -50,6 +78,7 @@ pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & 
       std::placeholders::_1));
 
   config_callback(get_parameters(param_names));
+
   // TODO(daisukes): lazy subscription after rclcpp#2060
   subscribe();
 }
@@ -79,7 +108,7 @@ pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Paramet
     }
   }
 
-  // TODO(sloretz) constraint validation
+  // Range constraints are enforced by rclcpp::Parameter.
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
   return result;

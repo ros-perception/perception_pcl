@@ -255,42 +255,12 @@ pcl_ros::Filter::add_common_params()
     "or removed from the PointCloud, thus potentially breaking its organized structure.";
   declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
 
-  // filter: RadiusOutlierRemoval
-
-  rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
-  min_neighbors_desc.name = "min_neighbors";
-  min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
-  min_neighbors_desc.description =
-    "The number of neighbors that need to be present in order to be classified as an inlier.";
-  {
-    rcl_interfaces::msg::IntegerRange int_range;
-    int_range.from_value = 0;
-    int_range.to_value = 1000;
-    min_neighbors_desc.integer_range.push_back(int_range);
-  }
-  declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc);
-
-  rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
-  radius_search_desc.name = "radius_search";
-  radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-  radius_search_desc.description =
-    "Radius of the sphere that will determine which points are neighbors.";
-  {
-    rcl_interfaces::msg::FloatingPointRange float_range;
-    float_range.from_value = 0.0;
-    float_range.to_value = 10.0;
-    radius_search_desc.floating_point_range.push_back(float_range);
-  }
-  declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
-
   return std::vector<std::string> {
     ffn_desc.name,
     flmin_desc.name,
     flmax_desc.name,
     flneg_desc.name,
-    keep_organized_desc.name,
-    min_neighbors_desc.name,
-    radius_search_desc.name,
+    keep_organized_desc.name
   };
 }
 
