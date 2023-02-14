@@ -568,8 +568,15 @@ namespace pcl {
   void fromROSMsg(const sensor_msgs::msg::PointCloud2 &cloud, pcl::PointCloud<T> &pcl_cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
+#if PCL_VERSION_COMPARE(>=, 1, 13, 1)
+    pcl_conversions::copyPointCloud2MetaData(cloud, pcl_pc2); // Like pcl_conversions::toPCL, but does not copy the binary data
+    pcl::MsgFieldMap field_map;
+    pcl::createMapping<T> (pcl_pc2.fields, field_map);
+    pcl::fromPCLPointCloud2(pcl_pc2, pcl_cloud, field_map, &cloud.data[0]);
+#else
     pcl_conversions::toPCL(cloud, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_cloud);
+#endif
   }
 
   template<typename T>
