@@ -41,6 +41,12 @@ ament_add_pytest_test(test_pcl_ros::ProjectInliers
       PARAMETERS={'model_type':0}
   APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
 )
+ament_add_pytest_test(test_pcl_ros::RadiusOutlierRemoval
+  test_filter_component.py
+  ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
+      FILTER_PLUGIN=pcl_ros::RadiusOutlierRemoval
+  APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
+)
 
 # test executables
 ament_add_pytest_test(test_filter_extract_indices_node
@@ -60,5 +66,11 @@ ament_add_pytest_test(test_filter_project_inliers_node
   ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
       FILTER_EXECUTABLE=filter_project_inliers_node
       PARAMETERS={'model_type':0}
+  APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
+)
+ament_add_pytest_test(test_filter_radius_outlier_removal_node
+  test_filter_executable.py
+  ENV DUMMY_PLUGIN=pcl_ros_tests_filters::DummyTopics
+      FILTER_EXECUTABLE=filter_radius_outlier_removal_node
   APPEND_ENV AMENT_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/test_ament_index
 )
