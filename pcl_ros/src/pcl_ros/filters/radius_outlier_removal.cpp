@@ -35,46 +35,84 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
 #include "pcl_ros/filters/radius_outlier_removal.hpp"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool
-pcl_ros::RadiusOutlierRemoval::child_init(ros::NodeHandle & nh, bool & has_service)
+pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & options)
+: Filter("RadiusOutlierRemovalNode", options)
 {
-  // Enable the dynamic reconfigure service
-  has_service = true;
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>>(nh);
-  dynamic_reconfigure::Server<pcl_ros::RadiusOutlierRemovalConfig>::CallbackType f = boost::bind(
-    &RadiusOutlierRemoval::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+  rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
+  min_neighbors_desc.name = "min_neighbors";
+  min_neighbors_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
+  min_neighbors_desc.description =
+    "The number of neighbors that need to be present in order to be classified as an inlier.";
+  {
+    rcl_interfaces::msg::IntegerRange int_range;
+    int_range.from_value = 0;
+    int_range.to_value = 1000;
+    min_neighbors_desc.integer_range.push_back(int_range);
+  }
+  declare_parameter(min_neighbors_desc.name, rclcpp::ParameterValue(5), min_neighbors_desc);
 
-  return true;
+  rcl_interfaces::msg::ParameterDescriptor radius_search_desc;
+  radius_search_desc.name = "radius_search";
+  radius_search_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  radius_search_desc.description =
+    "Radius of the sphere that will determine which points are neighbors.";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = 0.0;
+    float_range.to_value = 10.0;
+    radius_search_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
+
+  const std::vector<std::string> param_names {
+    min_neighbors_desc.name,
+    radius_search_desc.name,
+  };
+
+  callback_handle_ =
+    add_on_set_parameters_callback(
+    std::bind(
+      &RadiusOutlierRemoval::config_callback, this,
+      std::placeholders::_1));
+
+  config_callback(get_parameters(param_names));
+
+  // TODO(daisukes): lazy subscription after rclcpp#2060
+  subscribe();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::RadiusOutlierRemoval::config_callback(
-  pcl_ros::RadiusOutlierRemovalConfig & config,
-  uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Parameter> & params)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
-  if (impl_.getMinNeighborsInRadius() != config.min_neighbors) {
-    impl_.setMinNeighborsInRadius(config.min_neighbors);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the number of neighbors in radius: %d.",
-      getName().c_str(), config.min_neighbors);
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "min_neighbors") {
+      if (impl_.getMinNeighborsInRadius() != param.as_int()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the number of neighbors in radius: %ld.",
+          param.as_int());
+        impl_.setMinNeighborsInRadius(param.as_int());
+      }
+    }
+    if (param.get_name() == "radius_search") {
+      if (impl_.getRadiusSearch() != param.as_double()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the radius to search neighbors: %f.",
+          param.as_double());
+        impl_.setRadiusSearch(param.as_double());
+      }
+    }
   }
 
-  if (impl_.getRadiusSearch() != config.radius_search) {
-    impl_.setRadiusSearch(config.radius_search);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the radius to search neighbors: %f.",
-      getName().c_str(), config.radius_search);
-  }
+  // Range constraints are enforced by rclcpp::Parameter.
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
-
-typedef pcl_ros::RadiusOutlierRemoval RadiusOutlierRemoval;
-PLUGINLIB_EXPORT_CLASS(RadiusOutlierRemoval, nodelet::Nodelet);
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::RadiusOutlierRemoval)
