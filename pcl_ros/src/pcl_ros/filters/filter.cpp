@@ -247,20 +247,11 @@ pcl_ros::Filter::add_common_params()
     "Set to true if we want to return the data outside [filter_limit_min; filter_limit_max].";
   declare_parameter(flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
 
-  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
-  keep_organized_desc.name = "keep_organized";
-  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
-  keep_organized_desc.description =
-    "Set whether the filtered points should be kept and set to NaN, "
-    "or removed from the PointCloud, thus potentially breaking its organized structure.";
-  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
-
   return std::vector<std::string> {
     ffn_desc.name,
     flmin_desc.name,
     flmax_desc.name,
-    flneg_desc.name,
-    keep_organized_desc.name
+    flneg_desc.name
   };
 }
 
