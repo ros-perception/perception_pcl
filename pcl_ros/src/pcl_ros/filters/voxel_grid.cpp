@@ -57,48 +57,6 @@ pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
   }
   declare_parameter(leaf_size_desc.name, rclcpp::ParameterValue(0.01), leaf_size_desc);
 
-  rcl_interfaces::msg::ParameterDescriptor leaf_size_x_desc;
-  leaf_size_x_desc.name = "leaf_size_x";
-  leaf_size_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-  leaf_size_x_desc.description =
-    "The size of a leaf (on x) used for downsampling. "
-    "If negative, leaf_size is used instead.";
-  {
-    rcl_interfaces::msg::FloatingPointRange float_range;
-    float_range.from_value = -1.0;
-    float_range.to_value = 1.0;
-    leaf_size_x_desc.floating_point_range.push_back(float_range);
-  }
-  declare_parameter(leaf_size_x_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_x_desc);
-
-  rcl_interfaces::msg::ParameterDescriptor leaf_size_y_desc;
-  leaf_size_y_desc.name = "leaf_size_y";
-  leaf_size_y_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-  leaf_size_y_desc.description =
-    "The size of a leaf (on y) used for downsampling."
-    "If negative, leaf_size is used instead.";
-  {
-    rcl_interfaces::msg::FloatingPointRange float_range;
-    float_range.from_value = -1.0;
-    float_range.to_value = 1.0;
-    leaf_size_y_desc.floating_point_range.push_back(float_range);
-  }
-  declare_parameter(leaf_size_y_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_y_desc);
-
-  rcl_interfaces::msg::ParameterDescriptor leaf_size_z_desc;
-  leaf_size_z_desc.name = "leaf_size_z";
-  leaf_size_z_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-  leaf_size_z_desc.description =
-    "The size of a leaf (on z) used for downsampling."
-    "If negative, leaf_size is used instead.";
-  {
-    rcl_interfaces::msg::FloatingPointRange float_range;
-    float_range.from_value = -1.0;
-    float_range.to_value = 1.0;
-    leaf_size_z_desc.floating_point_range.push_back(float_range);
-  }
-  declare_parameter(leaf_size_z_desc.name, rclcpp::ParameterValue(-1.0), leaf_size_z_desc);
-
   rcl_interfaces::msg::ParameterDescriptor min_points_per_voxel_desc;
   min_points_per_voxel_desc.name = "min_points_per_voxel";
   min_points_per_voxel_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
@@ -115,9 +73,6 @@ pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
 
   std::vector<std::string> param_names {
     leaf_size_desc.name,
-    leaf_size_x_desc.name,
-    leaf_size_y_desc.name,
-    leaf_size_z_desc.name,
     min_points_per_voxel_desc.name,
   };
   param_names.insert(param_names.end(), common_param_names.begin(), common_param_names.end());
@@ -145,9 +100,6 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
   impl_.getFilterLimits(filter_min, filter_max);
 
   Eigen::Vector3f leaf_size = impl_.getLeafSize();
-  double leaf_size_x = -1.0;
-  double leaf_size_y = -1.0;
-  double leaf_size_z = -1.0;
 
   unsigned int minPointsPerVoxel = impl_.getMinimumPointsNumberPerVoxel();
 
@@ -205,36 +157,15 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
         impl_.setMinimumPointsNumberPerVoxel(param.as_int());
       }
     }
-    // Defer decision on final leaf size until after all parameters are collected.
     if (param.get_name() == "leaf_size") {
       leaf_size.setConstant(param.as_double());
+      if (impl_.getLeafSize() != leaf_size) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the downsampling leaf size to: %f %f %f.",
+          leaf_size[0], leaf_size[1], leaf_size[2]);
+        impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
+      }
     }
-    if (param.get_name() == "leaf_size_x") {
-      leaf_size_x = param.as_double();
-    }
-    if (param.get_name() == "leaf_size_y") {
-      leaf_size_y = param.as_double();
-    }
-    if (param.get_name() == "leaf_size_z") {
-      leaf_size_z = param.as_double();
-    }
-  }
-
-  // Decide on the final leaf size and optionally update.
-  if (leaf_size_x >= 0.0) {
-    leaf_size[0] = leaf_size_x;
-  }
-  if (leaf_size_y >= 0.0) {
-    leaf_size[1] = leaf_size_y;
-  }
-  if (leaf_size_z >= 0.0) {
-    leaf_size[2] = leaf_size_z;
-  }
-  if (impl_.getLeafSize() != leaf_size) {
-    RCLCPP_DEBUG(
-      get_logger(), "Setting the downsampling leaf size to: %f %f %f.",
-      leaf_size[0], leaf_size[1], leaf_size[2]);
-    impl_.setLeafSize(leaf_size[0], leaf_size[1], leaf_size[2]);
   }
 
   // Range constraints are enforced by rclcpp::Parameter.
