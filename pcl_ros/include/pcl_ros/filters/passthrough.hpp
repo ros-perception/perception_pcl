@@ -60,17 +60,7 @@ protected:
   inline void
   filter(
     const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output) override
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-    pcl_conversions::toPCL(*(input), *(pcl_input));
-    impl_.setInputCloud(pcl_input);
-    impl_.setIndices(indices);
-    pcl::PCLPointCloud2 pcl_output;
-    impl_.filter(pcl_output);
-    pcl_conversions::moveFromPCL(pcl_output, output);
-  }
+    PointCloud2 & output) override;
 
   /** \brief Parameter callback
     * \param params parameter values to set
