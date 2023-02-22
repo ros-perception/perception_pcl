@@ -68,19 +68,7 @@ protected:
   inline void
   filter(
     const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output)
-  {
-    pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-    pcl_conversions::toPCL(*(input), *(pcl_input));
-    impl_.setInputCloud(pcl_input);
-    impl_.setIndices(indices);
-    pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
-    pcl_conversions::toPCL(*(model_), *(pcl_model));
-    impl_.setModelCoefficients(pcl_model);
-    pcl::PCLPointCloud2 pcl_output;
-    impl_.filter(pcl_output);
-    pcl_conversions::moveFromPCL(pcl_output, output);
-  }
+    PointCloud2 & output) override;
 
 private:
   /** \brief A pointer to the vector of model coefficients. */

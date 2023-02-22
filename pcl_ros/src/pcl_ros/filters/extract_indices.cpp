@@ -60,6 +60,21 @@ pcl_ros::ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
   subscribe();
 }
 
+void
+pcl_ros::ExtractIndices::filter(
+  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
+  PointCloud2 & output)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+  pcl_conversions::toPCL(*(input), *(pcl_input));
+  impl_.setInputCloud(pcl_input);
+  impl_.setIndices(indices);
+  pcl::PCLPointCloud2 pcl_output;
+  impl_.filter(pcl_output);
+  pcl_conversions::moveFromPCL(pcl_output, output);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 rcl_interfaces::msg::SetParametersResult
 pcl_ros::ExtractIndices::config_callback(const std::vector<rclcpp::Parameter> & params)
