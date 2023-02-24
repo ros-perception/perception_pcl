@@ -38,10 +38,6 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 
-#include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
-
-#include <pcl_ros/point_cloud.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <ros/ros.h>
@@ -51,6 +47,11 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
+#include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
+
+#include <pcl_ros/point_cloud.hpp>
 
 // using a random point type, as we want to make sure that it does work with
 // other points than just XYZ

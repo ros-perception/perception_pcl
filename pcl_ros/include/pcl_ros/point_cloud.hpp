@@ -44,12 +44,12 @@
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
-#include <pcl/pcl_config.h> // for PCL_VERSION_COMPARE
+#include <pcl/pcl_config.h>  // for PCL_VERSION_COMPARE
 #if PCL_VERSION_COMPARE(>=, 1, 11, 0)
 #include <pcl/type_traits.h>
 #else
 #include <pcl/point_traits.h>
-#endif // PCL_VERSION_COMPARE(>=, 1, 11, 0)
+#endif  // PCL_VERSION_COMPARE(>=, 1, 11, 0)
 #include <pcl/for_each_type.h>
 #include <pcl/conversions.h>
 #if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
@@ -61,9 +61,6 @@
 #endif
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <boost/foreach.hpp> // for BOOST_FOREACH
-#include <boost/mpl/size.hpp>
-#include <boost/ref.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -71,6 +68,9 @@
 #include <type_traits>
 #include <memory>
 #endif
+#include <boost/foreach.hpp>  // for BOOST_FOREACH
+#include <boost/mpl/size.hpp>
+#include <boost/ref.hpp>
 
 namespace pcl
 {
