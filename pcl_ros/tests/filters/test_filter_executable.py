@@ -36,9 +36,8 @@ import launch.actions
 import launch_ros.actions
 import launch_testing.actions
 import launch_testing.markers
-import pytest
-
 from launch_testing_ros import WaitForTopics
+import pytest
 from sensor_msgs.msg import PointCloud2
 
 
@@ -49,9 +48,9 @@ def generate_test_description():
     filter_executable = os.getenv('FILTER_EXECUTABLE')
     parameters = ast.literal_eval(os.getenv('PARAMETERS')) if 'PARAMETERS' in os.environ else {}
 
-    ros_arguments = ["-r", "input:=point_cloud2"]
+    ros_arguments = ['-r', 'input:=point_cloud2']
     for key in parameters.keys():
-        ros_arguments.extend(["-p", "{}:={}".format(key, parameters[key])])
+        ros_arguments.extend(['-p', '{}:={}'.format(key, parameters[key])])
 
     return launch.LaunchDescription([
 
@@ -72,7 +71,7 @@ def generate_test_description():
         launch_ros.actions.Node(
             package='pcl_ros',
             executable=filter_executable,
-            output="screen",
+            output='screen',
             ros_arguments=ros_arguments
         ),
         launch_testing.actions.ReadyToTest()
@@ -80,6 +79,7 @@ def generate_test_description():
 
 
 class TestFilter(unittest.TestCase):
+
     def test_filter_output(self):
         wait_for_topics = WaitForTopics([('output', PointCloud2)], timeout=5.0)
         assert wait_for_topics.wait()
