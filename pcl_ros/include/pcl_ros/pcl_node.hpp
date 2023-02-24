@@ -194,8 +194,8 @@ protected:
   bool approximate_sync_;
 
   /** \brief TF listener object. */
-  tf2_ros::TransformListener tf_listener_;
   tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
 
   /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
     * \param cloud the point cloud to test
@@ -244,7 +244,9 @@ protected:
     * \param topic_name an optional topic name (only used for printing, defaults to "indices")
     */
   inline bool
-  isValid(const PointIndicesConstPtr & indices, const std::string & topic_name = "indices")
+  isValid(
+    [[maybe_unused]] const PointIndicesConstPtr & indices,
+    [[maybe_unused]] const std::string & topic_name = "indices")
   {
     /*if (indices->indices.empty ())
     {
@@ -264,7 +266,9 @@ protected:
     * \param topic_name an optional topic name (only used for printing, defaults to "model")
     */
   inline bool
-  isValid(const ModelCoefficientsConstPtr & model, const std::string & topic_name = "model")
+  isValid(
+    [[maybe_unused]] const ModelCoefficientsConstPtr & model,
+    [[maybe_unused]] const std::string & topic_name = "model")
   {
     /*if (model->values.empty ())
     {
