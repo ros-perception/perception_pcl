@@ -245,8 +245,8 @@ protected:
     */
   inline bool
   isValid(
-    [[maybe_unused]] const PointIndicesConstPtr & indices,
-    [[maybe_unused]] const std::string & topic_name = "indices")
+    const PointIndicesConstPtr & /*indices*/,
+    const std::string & /*topic_name*/ = "indices")
   {
     /*if (indices->indices.empty ())
     {
@@ -267,8 +267,8 @@ protected:
     */
   inline bool
   isValid(
-    [[maybe_unused]] const ModelCoefficientsConstPtr & model,
-    [[maybe_unused]] const std::string & topic_name = "model")
+    const ModelCoefficientsConstPtr & /*model*/,
+    const std::string & /*topic_name*/ = "model")
   {
     /*if (model->values.empty ())
     {
