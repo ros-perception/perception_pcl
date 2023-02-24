@@ -44,30 +44,25 @@
 #ifndef PCL_ROS__PCL_NODE_HPP_
 #define PCL_ROS__PCL_NODE_HPP_
 
-#include <sensor_msgs/msg/point_cloud2.hpp>
-// PCL includes
-#include <pcl_msgs/msg/point_indices.hpp>
-#include <pcl_msgs/msg/model_coefficients.hpp>
-#include <pcl/pcl_base.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-// ROS Nodelet includes
-// #include <nodelet_topic_tools/nodelet_lazy.h>  // TODO(daisukes): lazy subscription
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-
-// Include TF
+#include <pcl/pcl_base.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
+// #include <nodelet_topic_tools/nodelet_lazy.h>  // TODO(daisukes): lazy subscription
 
-// STL
 #include <memory>
 #include <string>
 #include <vector>
-// ROS2 includes
+
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <pcl_msgs/msg/point_indices.hpp>
+#include <pcl_msgs/msg/model_coefficients.hpp>
 
 // #include "pcl_ros/point_cloud.hpp"
 
@@ -199,9 +194,9 @@ protected:
   bool approximate_sync_;
 
   /** \brief TF listener object. */
-  tf2_ros::TransformListener tf_listener_;
   tf2_ros::Buffer tf_buffer_;
-  
+  tf2_ros::TransformListener tf_listener_;
+
   /** \brief Test whether a given PointCloud message is "valid" (i.e., has points, and width and height are non-zero).
     * \param cloud the point cloud to test
     * \param topic_name an optional topic name (only used for printing, defaults to "input")
@@ -249,7 +244,9 @@ protected:
     * \param topic_name an optional topic name (only used for printing, defaults to "indices")
     */
   inline bool
-  isValid(const PointIndicesConstPtr & indices, const std::string & topic_name = "indices")
+  isValid(
+    const PointIndicesConstPtr & /*indices*/,
+    const std::string & /*topic_name*/ = "indices")
   {
     /*if (indices->indices.empty ())
     {
@@ -269,7 +266,9 @@ protected:
     * \param topic_name an optional topic name (only used for printing, defaults to "model")
     */
   inline bool
-  isValid(const ModelCoefficientsConstPtr & model, const std::string & topic_name = "model")
+  isValid(
+    const ModelCoefficientsConstPtr & /*model*/,
+    const std::string & /*topic_name*/ = "model")
   {
     /*if (model->values.empty ())
     {

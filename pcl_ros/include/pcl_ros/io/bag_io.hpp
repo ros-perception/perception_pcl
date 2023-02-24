@@ -38,11 +38,11 @@
 #ifndef PCL_ROS__IO__BAG_IO_HPP_
 #define PCL_ROS__IO__BAG_IO_HPP_
 
-#include <pcl_ros/pcl_nodelet.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <string>
+#include <pcl_ros/pcl_nodelet.hpp>
 
 namespace pcl_ros
 {
