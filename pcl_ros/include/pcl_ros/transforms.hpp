@@ -37,11 +37,11 @@
 #ifndef PCL_ROS__TRANSFORMS_HPP_
 #define PCL_ROS__TRANSFORMS_HPP_
 
-#include <pcl/common/transforms.h>
+#include <pcl/point_cloud.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <string>
 #include <rclcpp/time.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
