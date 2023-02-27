@@ -36,7 +36,6 @@
  */
 
 #include "pcl_ros/filters/project_inliers.hpp"
-#include <pcl/io/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
