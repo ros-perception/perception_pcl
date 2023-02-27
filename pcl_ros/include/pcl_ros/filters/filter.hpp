@@ -38,7 +38,6 @@
 #ifndef PCL_ROS__FILTERS__FILTER_HPP_
 #define PCL_ROS__FILTERS__FILTER_HPP_
 
-#include <pcl/filters/filter.h>
 #include <memory>
 #include <string>
 #include <vector>

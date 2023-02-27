@@ -40,7 +40,6 @@
 
 // PCL includes
 #include <pcl/filters/extract_indices.h>
-#include <mutex>
 #include <vector>
 #include "pcl_ros/filters/filter.hpp"
 
