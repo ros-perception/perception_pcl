@@ -59,7 +59,6 @@
 #endif
 #endif
 #include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -67,6 +66,7 @@
 #include <type_traits>
 #include <memory>
 #endif
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <boost/foreach.hpp>  // for BOOST_FOREACH
 #include <boost/mpl/size.hpp>
 #include <boost/ref.hpp>
@@ -127,7 +127,7 @@ namespace ros
 // In ROS 1.3.1+, we can specialize the functor used to create PointCloud<T> objects
 // on the subscriber side. This allows us to generate the mapping between message
 // data and object fields only once and reuse it.
-#if 0 //ROS_VERSION_MINIMUM(1, 3, 1)
+#if 0  // ROS_VERSION_MINIMUM(1, 3, 1)
 template<typename T>
 struct DefaultMessageCreator<pcl::PointCloud<T>>
 {
