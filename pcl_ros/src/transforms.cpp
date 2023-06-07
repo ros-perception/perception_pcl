@@ -77,7 +77,7 @@ transformPointCloud(
     transform =
       tf_buffer.lookupTransform(
       target_frame, in.header.frame_id, tf2_ros::fromMsg(
-        in.header.stamp));
+        in.header.stamp), tf2::Duration(std::chrono::seconds(1)));
   } catch (tf2::LookupException & e) {
     RCLCPP_ERROR(rclcpp::get_logger("pcl_ros"), "%s", e.what());
     return false;
