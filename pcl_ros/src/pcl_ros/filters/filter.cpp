@@ -118,9 +118,8 @@ pcl_ros::Filter::subscribe()
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
-    auto sensor_qos_profile = rclcpp::QoS(
-      rclcpp::KeepLast(max_queue_size_),
-      rmw_qos_profile_sensor_data).get_rmw_qos_profile();
+    auto sensor_qos_profile =
+      rclcpp::SensorDataQoS().keep_last(max_queue_size_).get_rmw_qos_profile();
     sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
     sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
 
@@ -151,7 +150,7 @@ pcl_ros::Filter::subscribe()
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ =
       this->create_subscription<PointCloud2>(
-      "input", max_queue_size_,
+      "input", rclcpp::SensorDataQoS().keep_last(max_queue_size_),
       callback);
   }
 }
