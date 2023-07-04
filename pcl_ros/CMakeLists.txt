@@ -30,7 +30,7 @@ set(dependencies
   tf2
   tf2_geometry_msgs
   tf2_ros
-  EIGEN3
+  Eigen3
   PCL
 )
 
