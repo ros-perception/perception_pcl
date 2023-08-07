@@ -152,28 +152,28 @@ namespace message_traits
 template<typename T>
 struct MD5Sum<pcl::PointCloud<T>>
 {
-  static const char * value() {return MD5Sum<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return MD5Sum<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 
-  static const uint64_t static_value1 = MD5Sum<sensor_msgs::PointCloud2>::static_value1;
-  static const uint64_t static_value2 = MD5Sum<sensor_msgs::PointCloud2>::static_value2;
+  static const uint64_t static_value1 = MD5Sum<sensor_msgs::msg::PointCloud2>::static_value1;
+  static const uint64_t static_value2 = MD5Sum<sensor_msgs::msg::PointCloud2>::static_value2;
 
   // If the definition of sensor_msgs/PointCloud2 changes, we'll get a compile error here.
-  ROS_STATIC_ASSERT(static_value1 == 0x1158d486dd51d683ULL);
-  ROS_STATIC_ASSERT(static_value2 == 0xce2f1be655c3c181ULL);
+  static_assert(static_value1 == 0x1158d486dd51d683ULL);
+  static_assert(static_value2 == 0xce2f1be655c3c181ULL);
 };
 
 template<typename T>
 struct DataType<pcl::PointCloud<T>>
 {
-  static const char * value() {return DataType<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return DataType<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 };
 
 template<typename T>
 struct Definition<pcl::PointCloud<T>>
 {
-  static const char * value() {return Definition<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return Definition<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 };
 
@@ -191,26 +191,26 @@ struct TimeStamp<pcl::PointCloud<T>>
   // pointer returned by the first functions may go out of scope, but there
   // isn't a lot I can do about that. This is a good reason to refuse to
   // returning pointers like this...
-  static ros::Time * pointer(typename pcl::PointCloud<T> & m)
+  static rclcpp::Time * pointer(typename pcl::PointCloud<T> & m)
   {
-    header_.reset(new std_msgs::Header());
+    header_.reset(new std_msgs::msg::Header());
     pcl_conversions::fromPCL(m.header, *(header_));
     return &(header_->stamp);
   }
-  static ros::Time const * pointer(const typename pcl::PointCloud<T> & m)
+  static rclcpp::Time const * pointer(const typename pcl::PointCloud<T> & m)
   {
-    header_const_.reset(new std_msgs::Header());
+    header_const_.reset(new std_msgs::msg::Header());
     pcl_conversions::fromPCL(m.header, *(header_const_));
     return &(header_const_->stamp);
   }
-  static ros::Time value(const typename pcl::PointCloud<T> & m)
+  static rclcpp::Time value(const typename pcl::PointCloud<T> & m)
   {
     return pcl_conversions::fromPCL(m.header).stamp;
   }
 
 private:
-  static boost::shared_ptr<std_msgs::Header> header_;
-  static boost::shared_ptr<std_msgs::Header> header_const_;
+  static boost::shared_ptr<std_msgs::msg::Header> header_;
+  static boost::shared_ptr<std_msgs::msg::Header> header_const_;
 };
 
 template<typename T>
@@ -268,14 +268,14 @@ struct Serializer<pcl::PointCloud<T>>
   template<typename Stream>
   inline static void read(Stream & stream, pcl::PointCloud<T> & m)
   {
-    std_msgs::Header header;
+    std_msgs::msg::Header header;
     stream.next(header);
     pcl_conversions::toPCL(header, m.header);
     stream.next(m.height);
     stream.next(m.width);
 
     /// @todo Check that fields haven't changed!
-    std::vector<sensor_msgs::PointField> fields;
+    std::vector<sensor_msgs::msg::PointField> fields;
     stream.next(fields);
 
     // Construct field mapping if deserializing for the first time
