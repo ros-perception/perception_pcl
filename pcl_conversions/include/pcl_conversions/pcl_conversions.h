@@ -675,7 +675,7 @@ namespace pcl {
     // Height = 1 => no more organized
     cloud_out.width    = cloud1.width * cloud1.height + cloud2.width * cloud2.height;
     cloud_out.height   = 1;
-    cloud_out.row_step = cloud_out.width;
+    cloud_out.row_step = cloud_out.width * cloud_out.point_step;
     if (!cloud1.is_dense || !cloud2.is_dense)
       cloud_out.is_dense = false;
     else
