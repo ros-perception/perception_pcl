@@ -46,6 +46,7 @@
 // ROS core
 #include <ros/ros.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/transforms.h>
 
 #include <string>
 #include <sstream>
@@ -123,16 +124,23 @@ public:
     }
 
     bool try_load_pointcloud() {
+        Eigen::Vector4f origin = Eigen::Vector4f::Zero();
+        Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
+        pcl::PCLPointCloud2 loadedCloud;
         if (file_name.empty()) {
             ROS_ERROR_STREAM("Can't load pointcloud: no file name provided");
             return false;
         }
-        else if (pcl::io::loadPCDFile(file_name, cloud) < 0) {
+        else if (pcl::io::loadPCDFile(file_name, loadedCloud, origin, orientation) < 0) {
             ROS_ERROR_STREAM("Failed to parse pointcloud from file ('" << file_name << "')");
             return false;
         }
+        pcl_conversions::moveFromPCL(loadedCloud, cloud);
         // success: set frame_id appropriately
         cloud.header.frame_id = frame_id;
+        // Ignore origin[3], PCL doesn't fill it.
+        Eigen::Isometry3f transform = Eigen::Translation3f {origin.head<3>()} * orientation;
+        pcl_ros::transformPointCloud(transform.matrix(), cloud, cloud);
         return true;
     }
 
