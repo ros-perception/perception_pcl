@@ -37,6 +37,7 @@
   <depend>geometry_msgs</depend>
   <depend>tf2</depend>
   <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_eigen</depend>
   <depend>tf2_ros</depend>
 
   <exec_depend>libpcl-common</exec_depend>
