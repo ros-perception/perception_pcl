@@ -66,6 +66,7 @@ private:
   bool binary_;
   bool compressed_;
   bool rgb_;
+  bool use_transform_;
   std::string fixed_frame_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
@@ -83,6 +84,7 @@ public:
     Eigen::Vector4f v = Eigen::Vector4f::Zero();
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     if (!fixed_frame_.empty()) {
+      use_transform_ = false;
       try {
         geometry_msgs::msg::TransformStamped transform;
         transform = tf_buffer_.lookupTransform(
@@ -99,20 +101,24 @@ public:
           transform.transform.rotation.x,
           transform.transform.rotation.y,
           transform.transform.rotation.z);
-      } catch (tf2::TransformException & ex) {
-        RCLCPP_ERROR(this->get_logger(), "Transform error: %s", ex.what());
-        return;
-      }
 
-      Eigen::Affine3d transform;
-      transform =
-        tf2::transformToEigen(
-        tf_buffer_.lookupTransform(
-          fixed_frame_, cloud_msg->header.frame_id,
-          cloud_msg->header.stamp));
-      v = Eigen::Vector4f::Zero();
-      v.head<3>() = transform.translation().cast<float>();
-      q = transform.rotation().cast<float>();
+        Eigen::Affine3d transform_eigen;
+        transform_eigen =
+          tf2::transformToEigen(
+          tf_buffer_.lookupTransform(
+            fixed_frame_, cloud_msg->header.frame_id,
+            cloud_msg->header.stamp));
+        v = Eigen::Vector4f::Zero();
+        v.head<3>() = transform_eigen.translation().cast<float>();
+        q = transform_eigen.rotation().cast<float>();
+        use_transform_ = true;
+      } catch (tf2::LookupException & ex) {
+        RCLCPP_WARN(this->get_logger(), "skip transform: %s", ex.what());
+      } catch (tf2::TransformException & ex) {
+        RCLCPP_ERROR(this->get_logger(), "skip transform: %s", ex.what());
+      }
+    } else {
+      use_transform_ = false;
     }
 
     std::stringstream ss;
@@ -122,12 +128,16 @@ public:
     if (rgb_) {
       pcl::PointCloud<pcl::PointXYZRGB> cloud;
       pcl::fromROSMsg(*cloud_msg, cloud);
-      transformPointCloud(cloud, cloud, v, q);
+      if (use_transform_) {
+        transformPointCloud(cloud, cloud, v, q);
+      }
       writePCDFile(ss.str(), cloud);
     } else {
       pcl::PointCloud<pcl::PointXYZ> cloud;
       pcl::fromROSMsg(*cloud_msg, cloud);
-      transformPointCloud(cloud, cloud, v, q);
+      if (use_transform_) {
+        transformPointCloud(cloud, cloud, v, q);
+      }
       writePCDFile(ss.str(), cloud);
     }
   }
