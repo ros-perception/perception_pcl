@@ -65,6 +65,7 @@ private:
   std::string prefix_;
   bool binary_;
   bool compressed_;
+  bool rgb_;
   std::string fixed_frame_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
@@ -114,48 +115,70 @@ public:
       q = transform.rotation().cast<float>();
     }
 
-    pcl::PointCloud<pcl::PointXYZRGB> cloud;
-    pcl::fromROSMsg(*cloud_msg, cloud);
-    for (size_t i = 0; i < cloud.size(); ++i) {
-      Eigen::Vector3f pt = cloud[i].getVector3fMap();
-      pt = q * pt + v.head<3>();
-      cloud[i].x = pt[0];
-      cloud[i].y = pt[1];
-      cloud[i].z = pt[2];
-    }
-
     std::stringstream ss;
     ss << prefix_ << cloud_msg->header.stamp.sec << "." << cloud_msg->header.stamp.nanosec <<
       ".pcd";
     RCLCPP_INFO(this->get_logger(), "Writing to %s", ss.str().c_str());
+    if (rgb_) {
+      pcl::PointCloud<pcl::PointXYZRGB> cloud;
+      pcl::fromROSMsg(*cloud_msg, cloud);
+      transformPointCloud(cloud, cloud, v, q);
+      writePCDFile(ss.str(), cloud);
+    } else {
+      pcl::PointCloud<pcl::PointXYZ> cloud;
+      pcl::fromROSMsg(*cloud_msg, cloud);
+      transformPointCloud(cloud, cloud, v, q);
+      writePCDFile(ss.str(), cloud);
+    }
+  }
 
+  template<typename T>
+  void transformPointCloud(
+    const pcl::PointCloud<T> & cloud_in, pcl::PointCloud<T> & cloud_out,
+    const Eigen::Vector4f & v, const Eigen::Quaternionf & q)
+  {
+    cloud_out = cloud_in;
+    for (size_t i = 0; i < cloud_in.size(); ++i) {
+      Eigen::Vector3f pt = cloud_in[i].getVector3fMap();
+      pt = q * pt + v.head<3>();
+      cloud_out[i].x = pt[0];
+      cloud_out[i].y = pt[1];
+      cloud_out[i].z = pt[2];
+    }
+  }
+
+  template<typename T>
+  void writePCDFile(const std::string & filename, const pcl::PointCloud<T> & cloud)
+  {
     pcl::PCDWriter writer;
     if (binary_) {
       if (compressed_) {
-        writer.writeBinaryCompressed(ss.str(), cloud);
+        writer.writeBinaryCompressed(filename, cloud);
       } else {
-        writer.writeBinary(ss.str(), cloud);
+        writer.writeBinary(filename, cloud);
       }
     } else {
-      writer.writeASCII(ss.str(), cloud, 8);
+      writer.writeASCII(filename, cloud, 8);
     }
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   explicit PointCloudToPCD(const rclcpp::NodeOptions & options)
   : rclcpp::Node("pointcloud_to_pcd", options),
-    binary_(false), compressed_(false),
+    binary_(false), compressed_(false), rgb_(false),
     tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
   {
     this->declare_parameter("prefix", prefix_);
     this->declare_parameter("fixed_frame", fixed_frame_);
     this->declare_parameter("binary", binary_);
     this->declare_parameter("compressed", compressed_);
+    this->declare_parameter("rgb", rgb_);
 
     this->get_parameter("prefix", prefix_);
     this->get_parameter("fixed_frame", fixed_frame_);
     this->get_parameter("binary", binary_);
     this->get_parameter("compressed", compressed_);
+    this->get_parameter("rgb", rgb_);
 
     auto sensor_qos = rclcpp::SensorDataQoS();
     sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
