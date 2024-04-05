@@ -35,27 +35,6 @@
  *
  */
 
-// ROS core
-#include <ros/ros.h>
-
-#include <sensor_msgs/PointCloud2.h>
-
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_eigen/tf2_eigen.h>
-
-// PCL includes
-#include <pcl/common/io.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-
-#include <pcl_conversions/pcl_conversions.h>
-
-#include <Eigen/Geometry>
-
-// STL
-#include <string>
-
 /**
 \author Radu Bogdan Rusu
 
@@ -63,122 +42,160 @@
 Cloud Data) file format.
 
 **/
-class PointCloudToPCD
-{
-protected:
-  ros::NodeHandle nh_;
 
+#include <pcl/common/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include "rclcpp_components/register_node_macro.hpp"
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
+
+namespace pcl_ros
+{
+
+class PointCloudToPCD : public rclcpp::Node
+{
 private:
   std::string prefix_;
   bool binary_;
   bool compressed_;
+  bool rgb_;
+  bool use_transform_;
   std::string fixed_frame_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
 public:
-  std::string cloud_topic_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
 
-  ros::Subscriber sub_;
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Callback
-  void
-  cloud_cb(const boost::shared_ptr<const pcl::PCLPointCloud2> & cloud)
+  void cloud_cb(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg)
   {
-    if ((cloud->width * cloud->height) == 0) {
+    if (cloud_msg->data.empty()) {
+      RCLCPP_ERROR(this->get_logger(), "Received empty point cloud message!");
       return;
     }
-
-    ROS_INFO(
-      "Received %d data points in frame %s with the following fields: %s",
-      (int)cloud->width * cloud->height,
-      cloud->header.frame_id.c_str(),
-      pcl::getFieldsList(*cloud).c_str());
 
     Eigen::Vector4f v = Eigen::Vector4f::Zero();
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     if (!fixed_frame_.empty()) {
-      if (!tf_buffer_.canTransform(
-          fixed_frame_, cloud->header.frame_id,
-          pcl_conversions::fromPCL(cloud->header.stamp), ros::Duration(3.0)))
-      {
-        ROS_WARN("Could not get transform!");
-        return;
-      }
+      use_transform_ = false;
+      try {
+        geometry_msgs::msg::TransformStamped transform;
+        transform = tf_buffer_.lookupTransform(
+          fixed_frame_, cloud_msg->header.frame_id,
+          cloud_msg->header.stamp);
 
-      Eigen::Affine3d transform;
-      transform =
-        tf2::transformToEigen(
-        tf_buffer_.lookupTransform(
-          fixed_frame_, cloud->header.frame_id,
-          pcl_conversions::fromPCL(cloud->header.stamp)));
-      v = Eigen::Vector4f::Zero();
-      v.head<3>() = transform.translation().cast<float>();
-      q = transform.rotation().cast<float>();
+        v = Eigen::Vector4f::Zero();
+        v.head<3>() = Eigen::Vector3f(
+          transform.transform.translation.x,
+          transform.transform.translation.y,
+          transform.transform.translation.z);
+        q = Eigen::Quaternionf(
+          transform.transform.rotation.w,
+          transform.transform.rotation.x,
+          transform.transform.rotation.y,
+          transform.transform.rotation.z);
+
+        Eigen::Affine3d transform_eigen;
+        transform_eigen =
+          tf2::transformToEigen(
+          tf_buffer_.lookupTransform(
+            fixed_frame_, cloud_msg->header.frame_id,
+            cloud_msg->header.stamp));
+        v = Eigen::Vector4f::Zero();
+        v.head<3>() = transform_eigen.translation().cast<float>();
+        q = transform_eigen.rotation().cast<float>();
+        use_transform_ = true;
+      } catch (tf2::LookupException & ex) {
+        RCLCPP_WARN(this->get_logger(), "skip transform: %s", ex.what());
+      } catch (tf2::TransformException & ex) {
+        RCLCPP_ERROR(this->get_logger(), "skip transform: %s", ex.what());
+      }
+    } else {
+      use_transform_ = false;
     }
 
     std::stringstream ss;
-    ss << prefix_ << cloud->header.stamp << ".pcd";
-    ROS_INFO("Data saved to %s", ss.str().c_str());
+    ss << prefix_ << cloud_msg->header.stamp.sec << "." << cloud_msg->header.stamp.nanosec <<
+      ".pcd";
+    RCLCPP_INFO(this->get_logger(), "Writing to %s", ss.str().c_str());
+    if (rgb_) {
+      pcl::PointCloud<pcl::PointXYZRGB> cloud;
+      pcl::fromROSMsg(*cloud_msg, cloud);
+      if (use_transform_) {
+        transformPointCloud(cloud, cloud, v, q);
+      }
+      writePCDFile(ss.str(), cloud);
+    } else {
+      pcl::PointCloud<pcl::PointXYZ> cloud;
+      pcl::fromROSMsg(*cloud_msg, cloud);
+      if (use_transform_) {
+        transformPointCloud(cloud, cloud, v, q);
+      }
+      writePCDFile(ss.str(), cloud);
+    }
+  }
 
+  template<typename T>
+  void transformPointCloud(
+    const pcl::PointCloud<T> & cloud_in, pcl::PointCloud<T> & cloud_out,
+    const Eigen::Vector4f & v, const Eigen::Quaternionf & q)
+  {
+    cloud_out = cloud_in;
+    for (size_t i = 0; i < cloud_in.size(); ++i) {
+      Eigen::Vector3f pt = cloud_in[i].getVector3fMap();
+      pt = q * pt + v.head<3>();
+      cloud_out[i].x = pt[0];
+      cloud_out[i].y = pt[1];
+      cloud_out[i].z = pt[2];
+    }
+  }
+
+  template<typename T>
+  void writePCDFile(const std::string & filename, const pcl::PointCloud<T> & cloud)
+  {
     pcl::PCDWriter writer;
     if (binary_) {
       if (compressed_) {
-        writer.writeBinaryCompressed(ss.str(), *cloud, v, q);
+        writer.writeBinaryCompressed(filename, cloud);
       } else {
-        writer.writeBinary(ss.str(), *cloud, v, q);
+        writer.writeBinary(filename, cloud);
       }
     } else {
-      writer.writeASCII(ss.str(), *cloud, v, q, 8);
+      writer.writeASCII(filename, cloud, 8);
     }
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  PointCloudToPCD()
-  : binary_(false), compressed_(false), tf_listener_(tf_buffer_)
+  explicit PointCloudToPCD(const rclcpp::NodeOptions & options)
+  : rclcpp::Node("pointcloud_to_pcd", options),
+    binary_(false), compressed_(false), rgb_(false),
+    tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
   {
-    // Check if a prefix parameter is defined for output file names.
-    ros::NodeHandle priv_nh("~");
-    if (priv_nh.getParam("prefix", prefix_)) {
-      ROS_INFO_STREAM("PCD file prefix is: " << prefix_);
-    } else if (nh_.getParam("prefix", prefix_)) {
-      ROS_WARN_STREAM(
-        "Non-private PCD prefix parameter is DEPRECATED: " <<
-          prefix_);
-    }
+    this->declare_parameter("prefix", prefix_);
+    this->declare_parameter("fixed_frame", fixed_frame_);
+    this->declare_parameter("binary", binary_);
+    this->declare_parameter("compressed", compressed_);
+    this->declare_parameter("rgb", rgb_);
 
-    priv_nh.getParam("fixed_frame", fixed_frame_);
-    priv_nh.getParam("binary", binary_);
-    priv_nh.getParam("compressed", compressed_);
-    if (binary_) {
-      if (compressed_) {
-        ROS_INFO_STREAM("Saving as binary compressed PCD");
-      } else {
-        ROS_INFO_STREAM("Saving as binary PCD");
-      }
-    } else {
-      ROS_INFO_STREAM("Saving as binary PCD");
-    }
+    this->get_parameter("prefix", prefix_);
+    this->get_parameter("fixed_frame", fixed_frame_);
+    this->get_parameter("binary", binary_);
+    this->get_parameter("compressed", compressed_);
+    this->get_parameter("rgb", rgb_);
 
-    cloud_topic_ = "input";
-
-    sub_ = nh_.subscribe(cloud_topic_, 1, &PointCloudToPCD::cloud_cb, this);
-    ROS_INFO(
-      "Listening for incoming data on topic %s",
-      nh_.resolveName(cloud_topic_).c_str());
+    auto sensor_qos = rclcpp::SensorDataQoS();
+    sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
+      "input", sensor_qos,
+      std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1));
   }
 };
+}  // namespace pcl_ros
 
-/* ---[ */
-int
-main(int argc, char ** argv)
-{
-  ros::init(argc, argv, "pointcloud_to_pcd", ros::init_options::AnonymousName);
-
-  PointCloudToPCD b;
-  ros::spin();
-
-  return 0;
-}
-/* ]--- */
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::PointCloudToPCD)
