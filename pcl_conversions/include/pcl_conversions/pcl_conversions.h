@@ -560,7 +560,12 @@ namespace pcl {
   void toROSMsg(const pcl::PointCloud<T> &pcl_cloud, sensor_msgs::msg::PointCloud2 &cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
+#if PCL_VERSION_COMPARE(>=, 1, 14, 1)
+    // if PCL version is recent enough, request that all padding be removed to make the msg as small as possible
+    pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2, false);
+#else
     pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+#endif
     pcl_conversions::moveFromPCL(pcl_pc2, cloud);
   }
 
