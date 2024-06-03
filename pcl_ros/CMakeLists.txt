@@ -178,7 +178,7 @@ ament_target_dependencies(pointcloud_to_pcd_lib
   tf2_ros)
 rclcpp_components_register_node(pointcloud_to_pcd_lib
   PLUGIN "pcl_ros::PointCloudToPCD"
-  EXECUTABLE pointcloud_to_pcd) 
+  EXECUTABLE pointcloud_to_pcd)
 
 #
 #add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
@@ -236,7 +236,7 @@ install(
     pcl_ros_filters
 #    pcl_ros_surface
 #    pcl_ros_segmentation
-   pointcloud_to_pcd_lib
+    pointcloud_to_pcd_lib
 #    bag_to_pcd
 #    convert_pcd_to_image
 #    convert_pointcloud_to_image
