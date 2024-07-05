@@ -32,6 +32,22 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * !!! NOTE !!!
+ *
+ * There are a number of portions of the code that have been commented
+ * out in order to get around a host of compilation failures.
+ *
+ * These portions include:
+ *  - Functions defined in the `message_traits` namespace.
+ *  - Functions defined in the `serialization` namespace.
+ *
+ *  It's not entirely clear why commenting this out allows us to build
+ *  without failures, but as we gain a better understanding, we'll be
+ *  sure to add more documentation and/or reconsider the changes that
+ *  have been made.
+*/
+
 #ifndef PCL_ROS__POINT_CLOUD_HPP__
 #define PCL_ROS__POINT_CLOUD_HPP__
 
@@ -149,14 +165,15 @@ struct DefaultMessageCreator<pcl::PointCloud<T>>
 
 namespace message_traits
 {
+/*
 template<typename T>
 struct MD5Sum<pcl::PointCloud<T>>
 {
-  static const char * value() {return MD5Sum<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return MD5Sum<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 
-  static const uint64_t static_value1 = MD5Sum<sensor_msgs::PointCloud2>::static_value1;
-  static const uint64_t static_value2 = MD5Sum<sensor_msgs::PointCloud2>::static_value2;
+  static const uint64_t static_value1 = MD5Sum<sensor_msgs::msg::PointCloud2>::static_value1;
+  static const uint64_t static_value2 = MD5Sum<sensor_msgs::msg::PointCloud2>::static_value2;
 
   // If the definition of sensor_msgs/PointCloud2 changes, we'll get a compile error here.
   ROS_STATIC_ASSERT(static_value1 == 0x1158d486dd51d683ULL);
@@ -166,14 +183,14 @@ struct MD5Sum<pcl::PointCloud<T>>
 template<typename T>
 struct DataType<pcl::PointCloud<T>>
 {
-  static const char * value() {return DataType<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return DataType<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 };
 
 template<typename T>
 struct Definition<pcl::PointCloud<T>>
 {
-  static const char * value() {return Definition<sensor_msgs::PointCloud2>::value();}
+  static const char * value() {return Definition<sensor_msgs::msg::PointCloud2>::value();}
   static const char * value(const pcl::PointCloud<T> &) {return value();}
 };
 
@@ -193,13 +210,13 @@ struct TimeStamp<pcl::PointCloud<T>>
   // returning pointers like this...
   static ros::Time * pointer(typename pcl::PointCloud<T> & m)
   {
-    header_.reset(new std_msgs::Header());
+    header_.reset(new std_msgs::msg::Header());
     pcl_conversions::fromPCL(m.header, *(header_));
     return &(header_->stamp);
   }
   static ros::Time const * pointer(const typename pcl::PointCloud<T> & m)
   {
-    header_const_.reset(new std_msgs::Header());
+    header_const_.reset(new std_msgs::msg::Header());
     pcl_conversions::fromPCL(m.header, *(header_const_));
     return &(header_const_->stamp);
   }
@@ -209,8 +226,8 @@ struct TimeStamp<pcl::PointCloud<T>>
   }
 
 private:
-  static boost::shared_ptr<std_msgs::Header> header_;
-  static boost::shared_ptr<std_msgs::Header> header_const_;
+  static boost::shared_ptr<std_msgs::msg::Header> header_;
+  static boost::shared_ptr<std_msgs::msg::Header> header_const_;
 };
 
 template<typename T>
@@ -220,11 +237,12 @@ struct FrameId<pcl::PointCloud<T>>
   static std::string const * pointer(const pcl::PointCloud<T> & m) {return &m.header.frame_id;}
   static std::string value(const pcl::PointCloud<T> & m) {return m.header.frame_id;}
 };
-
+*/
 }  // namespace message_traits
 
 namespace serialization
 {
+/*
 template<typename T>
 struct Serializer<pcl::PointCloud<T>>
 {
@@ -268,14 +286,14 @@ struct Serializer<pcl::PointCloud<T>>
   template<typename Stream>
   inline static void read(Stream & stream, pcl::PointCloud<T> & m)
   {
-    std_msgs::Header header;
+    std_msgs::msg::Header header;
     stream.next(header);
     pcl_conversions::toPCL(header, m.header);
     stream.next(m.height);
     stream.next(m.width);
 
     /// @todo Check that fields haven't changed!
-    std::vector<sensor_msgs::PointField> fields;
+    std::vector<sensor_msgs::msg::PointField> fields;
     stream.next(fields);
 
     // Construct field mapping if deserializing for the first time
@@ -357,6 +375,7 @@ struct Serializer<pcl::PointCloud<T>>
     return length;
   }
 };
+*/
 }  // namespace serialization
 
 /// @todo Printer specialization in message_operations
