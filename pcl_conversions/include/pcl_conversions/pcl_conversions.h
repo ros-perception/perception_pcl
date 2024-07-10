@@ -217,6 +217,10 @@ namespace pcl_conversions {
     for(; it != pcl_pfs.end(); ++it, ++i) {
       fromPCL(*(it), pfs[i]);
     }
+    std::sort(pfs.begin(), pfs.end(), [](const auto& field_a, const auto& field_b)
+                                      {
+                                        return field_a.offset < field_b.offset;
+                                      });
   }
 
   inline
