@@ -67,7 +67,12 @@ pcl_ros::Filter::computePublish(
 {
   PointCloud2 output;
   // Call the virtual method in the child
-  filter(input, indices, output);
+  if (!input->data.empty()) {
+    filter(input, indices, output);
+  } else {
+    RCLCPP_DEBUG(this->get_logger(), "Received empty input point cloud");
+    output = *input;
+  }
 
   PointCloud2::UniquePtr cloud_tf(new PointCloud2(output));     // set the output by default
   // Check whether the user has given a different output TF frame
