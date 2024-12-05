@@ -41,8 +41,8 @@
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
-#include <message_filters/message_event.h>
-#include <message_filters/message_traits.h>
+#include <message_filters/message_event.hpp>
+#include <message_filters/message_traits.hpp>
 
 #include <pcl/conversions.h>
 
