@@ -56,8 +56,8 @@ pcl_ros::ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
   if (!result.successful) {
     throw std::runtime_error(result.reason);
   }
-  // TODO(daisukes): lazy subscription after rclcpp#2060
-  subscribe();
+
+  createPublishers();
 }
 
 void

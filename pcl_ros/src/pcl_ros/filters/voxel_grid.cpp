@@ -85,8 +85,7 @@ pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
 
   config_callback(get_parameters(param_names));
 
-  // TODO(daisukes): lazy subscription after rclcpp#2060
-  subscribe();
+  createPublishers();
 }
 
 void
