@@ -75,8 +75,7 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   impl_.setCopyAllFields(copy_all_fields);
   impl_.setCopyAllData(copy_all_data);
 
-  // TODO(daisukes): lazy subscription after rclcpp#2060
-  subscribe();
+  createPublishers();
 }
 
 void

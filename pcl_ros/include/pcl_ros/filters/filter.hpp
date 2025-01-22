@@ -126,6 +126,10 @@ protected:
   virtual void
   unsubscribe();
 
+  /** \brief Create publishers for output PointCloud2 data. */
+  virtual void
+  createPublishers();
+
   /** \brief Call the child filter () method, optionally transform the result, and publish it.
     * \param input the input point cloud dataset.
     * \param indices a pointer to the vector of point indices to use.

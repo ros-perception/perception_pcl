@@ -88,8 +88,7 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
 
   config_callback(get_parameters(param_names));
 
-  // TODO(daisukes): lazy subscription after rclcpp#2060
-  subscribe();
+  createPublishers();
 }
 
 void

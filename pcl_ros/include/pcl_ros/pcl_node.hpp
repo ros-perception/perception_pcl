@@ -53,7 +53,6 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
-// #include <nodelet_topic_tools/nodelet_lazy.h>  // TODO(daisukes): lazy subscription
 
 #include <memory>
 #include <string>

@@ -176,8 +176,30 @@ pcl_ros::Filter::unsubscribe()
 pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & options)
 : PCLNode(node_name, options)
 {
-  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
   RCLCPP_DEBUG(this->get_logger(), "Node successfully created.");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl_ros::Filter::createPublishers()
+{
+  auto pub_options = rclcpp::PublisherOptions();
+  pub_options.event_callbacks.matched_callback = [this](rclcpp::MatchedInfo & /*info*/) {
+      if (pub_output_->get_subscription_count() == 0) {
+        unsubscribe();
+      } else {
+        if (use_indices_) {
+          if (!sub_input_filter_.getSubscriber() || !sub_indices_filter_.getSubscriber()) {
+            subscribe();
+          }
+        } else {
+          if (!sub_input_) {
+            subscribe();
+          }
+        }
+      }
+    };
+  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_, pub_options);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
