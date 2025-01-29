@@ -78,16 +78,16 @@ public:
     this->declare_parameter<bool>("compressed", false);
     this->declare_parameter<bool>("rgb", false);
     this->declare_parameter<bool>("save_on_shutdown", true);
-    this->declare_parameter<double>("save_timer_sec", 0.0);       // 0.0 = disabled
+    this->declare_parameter<double>("save_timer_sec", 0.0);  // 0.0 = disabled
 
     // Retrieve parameter values
-    prefix_                = this->get_parameter("prefix").as_string();
-    fixed_frame_           = this->get_parameter("fixed_frame").as_string();
-    binary_                = this->get_parameter("binary").as_bool();
-    compressed_            = this->get_parameter("compressed").as_bool();
-    rgb_                   = this->get_parameter("rgb").as_bool();
-    save_on_shutdown_      = this->get_parameter("save_on_shutdown").as_bool();
-    double save_timer_sec  = this->get_parameter("save_timer_sec").as_double();
+    prefix_ = this->get_parameter("prefix").as_string();
+    fixed_frame_ = this->get_parameter("fixed_frame").as_string();
+    binary_ = this->get_parameter("binary").as_bool();
+    compressed_ = this->get_parameter("compressed").as_bool();
+    rgb_ = this->get_parameter("rgb").as_bool();
+    save_on_shutdown_ = this->get_parameter("save_on_shutdown").as_bool();
+    double save_timer_sec = this->get_parameter("save_timer_sec").as_double();
 
     RCLCPP_INFO(this->get_logger(), "prefix: %s", prefix_.c_str());
     RCLCPP_INFO(this->get_logger(), "fixed_frame: %s", fixed_frame_.c_str());
@@ -96,9 +96,14 @@ public:
     RCLCPP_INFO(this->get_logger(), "rgb: %s", rgb_ ? "true" : "false");
     RCLCPP_INFO(this->get_logger(), "save_on_shutdown: %s", save_on_shutdown_ ? "true" : "false");
     if (save_timer_sec > 0.0) {
-      RCLCPP_INFO(this->get_logger(), "PCD file will be automatically saved after %.2f seconds (save_timer_sec).", save_timer_sec);
-    }else{
-      RCLCPP_INFO(this->get_logger(), "PCD file will not be automatically saved. Will be saved on the shutdown of the node.");
+      RCLCPP_INFO(
+        this->get_logger(),
+        "PCD file will be automatically saved after %.2f seconds (save_timer_sec).",
+        save_timer_sec);
+    } else {
+      RCLCPP_INFO(
+        this->get_logger(),
+        "PCD file will not be automatically saved. Will be saved on the shutdown of the node.");
     }
 
     // Create a subscription with SensorDataQoS
@@ -165,14 +170,16 @@ private:
     if (!fixed_frame_.empty()) {
       try {
         geometry_msgs::msg::TransformStamped transform =
-          tf_buffer_.lookupTransform(fixed_frame_, cloud_msg->header.frame_id, cloud_msg->header.stamp);
+          tf_buffer_.lookupTransform(
+          fixed_frame_, cloud_msg->header.frame_id, cloud_msg->header.stamp);
 
         Eigen::Affine3d transform_eigen = tf2::transformToEigen(transform);
         translation.head<3>() = transform_eigen.translation().cast<float>();
         rotation = transform_eigen.rotation().cast<float>();
         use_transform_ = true;
       } catch (tf2::TransformException & ex) {
-        RCLCPP_WARN(this->get_logger(), "Transform to frame '%s' failed: %s. Using original frame.",
+        RCLCPP_WARN(
+          this->get_logger(), "Transform to frame '%s' failed: %s. Using original frame.",
           fixed_frame_.c_str(), ex.what());
         use_transform_ = false;
       }
@@ -188,7 +195,9 @@ private:
       }
       // Accumulate
       accumulated_cloud_xyzrgb_ += pcl_cloud;
-      RCLCPP_INFO(this->get_logger(), "Accumulated (XYZRGB) cloud size: %zu", accumulated_cloud_xyzrgb_.size());
+      RCLCPP_INFO(
+        this->get_logger(), "Accumulated (XYZRGB) cloud size: %zu",
+        accumulated_cloud_xyzrgb_.size());
     } else {
       pcl::PointCloud<pcl::PointXYZ> pcl_cloud;
       pcl::fromROSMsg(*cloud_msg, pcl_cloud);
@@ -198,9 +207,10 @@ private:
       }
       // Accumulate
       accumulated_cloud_xyz_ += pcl_cloud;
-      RCLCPP_INFO(this->get_logger(), "Accumulated (XYZ) cloud size: %zu", accumulated_cloud_xyz_.size());
+      RCLCPP_INFO(
+        this->get_logger(), "Accumulated (XYZ) cloud size: %zu",
+        accumulated_cloud_xyz_.size());
     }
-
   }
 
   /**
