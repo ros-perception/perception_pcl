@@ -121,8 +121,9 @@ public:
     }
 
     std::stringstream ss;
-    ss << prefix_ << cloud_msg->header.stamp.sec << "." << cloud_msg->header.stamp.nanosec <<
-      ".pcd";
+    ss << prefix_ << cloud_msg->header.stamp.sec << "."
+       << std::setw(9) << std::setfill('0') << cloud_msg->header.stamp.nanosec
+       << ".pcd";
     RCLCPP_INFO(this->get_logger(), "Writing to %s", ss.str().c_str());
     if (rgb_) {
       pcl::PointCloud<pcl::PointXYZRGB> cloud;
