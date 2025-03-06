@@ -82,10 +82,16 @@ ament_target_dependencies(pcl_ros_tf
 #class_loader_hide_library_symbols(pcl_ros_features)
 #
 #
+
+### Declare library for base filter plugin
+add_library(pcl_ros_filter
+  src/pcl_ros/filters/filter.cpp
+)
+target_link_libraries(pcl_ros_filter pcl_ros_tf ${PCL_LIBRARIES})
+
 ### Declare the pcl_ros_filters library
 add_library(pcl_ros_filters SHARED
   src/pcl_ros/filters/extract_indices.cpp
-  src/pcl_ros/filters/filter.cpp
   src/pcl_ros/filters/passthrough.cpp
   src/pcl_ros/filters/project_inliers.cpp
   src/pcl_ros/filters/radius_outlier_removal.cpp
@@ -93,7 +99,7 @@ add_library(pcl_ros_filters SHARED
   src/pcl_ros/filters/voxel_grid.cpp
   src/pcl_ros/filters/crop_box.cpp
 )
-target_link_libraries(pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES})
+target_link_libraries(pcl_ros_filters pcl_ros_filter pcl_ros_tf ${PCL_LIBRARIES})
 ament_target_dependencies(pcl_ros_filters ${dependencies})
 rclcpp_components_register_node(pcl_ros_filters
   PLUGIN "pcl_ros::ExtractIndices"
@@ -233,6 +239,7 @@ install(
     pcd_to_pointcloud_lib
 #    pcl_ros_io
 #    pcl_ros_features
+    pcl_ros_filter
     pcl_ros_filters
 #    pcl_ros_surface
 #    pcl_ros_segmentation
