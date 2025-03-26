@@ -305,28 +305,38 @@ namespace pcl_conversions {
   void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::msg::PointIndices &pi)
   {
     fromPCL(pcl_pi.header, pi.header);
-    pi.indices = pcl_pi.indices;
+    pi.indices.clear();
+    pi.indices.insert(pi.indices.begin(), pcl_pi.indices.begin(), pcl_pi.indices.end());
   }
 
   inline
   void moveFromPCL(pcl::PointIndices &pcl_pi, pcl_msgs::msg::PointIndices &pi)
   {
     fromPCL(pcl_pi.header, pi.header);
-    pi.indices.swap(pcl_pi.indices);
+    pi.indices.clear();
+    pi.indices.insert(pi.indices.begin(),
+                      std::make_move_iterator(pcl_pi.indices.begin()),
+                      std::make_move_iterator(pcl_pi.indices.end()));
+    pcl_pi.indices.clear();
   }
 
   inline
   void toPCL(const pcl_msgs::msg::PointIndices &pi, pcl::PointIndices &pcl_pi)
   {
     toPCL(pi.header, pcl_pi.header);
-    pcl_pi.indices = pi.indices;
+    pcl_pi.indices.clear();
+    pcl_pi.indices.insert(pcl_pi.indices.begin(), pi.indices.begin(), pi.indices.end());
   }
 
   inline
   void moveToPCL(pcl_msgs::msg::PointIndices &pi, pcl::PointIndices &pcl_pi)
   {
     toPCL(pi.header, pcl_pi.header);
-    pcl_pi.indices.swap(pi.indices);
+    pcl_pi.indices.clear();
+    pcl_pi.indices.insert(pcl_pi.indices.begin(),
+                          std::make_move_iterator(pi.indices.begin()),
+                          std::make_move_iterator(pi.indices.end()));
+    pi.indices.clear();
   }
 
   /** pcl::ModelCoefficients <=> pcl_msgs::ModelCoefficients **/
