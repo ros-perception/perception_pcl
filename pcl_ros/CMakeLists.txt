@@ -23,6 +23,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(rosbag2_transport REQUIRED)
 
 set(dependencies
   pcl_conversions
@@ -186,12 +187,24 @@ rclcpp_components_register_node(pointcloud_to_pcd_lib
   PLUGIN "pcl_ros::PointCloudToPCD"
   EXECUTABLE pointcloud_to_pcd)
 
+add_library(bag_to_pcd_lib SHARED tools/bag_to_pcd.cpp)
+target_link_libraries(bag_to_pcd_lib
+  ${PCL_LIBRARIES})
+target_include_directories(bag_to_pcd_lib PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(bag_to_pcd_lib
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  pcl_conversions
+  rosbag2_transport)
+rclcpp_components_register_node(bag_to_pcd_lib
+  PLUGIN "pcl_ros::BagToPCD"
+  EXECUTABLE bag_to_pcd)
+
 #
 #add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 #target_link_libraries(pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-#
-#add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
-#target_link_libraries(bag_to_pcd pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 #
 #add_executable(convert_pcd_to_image tools/convert_pcd_to_image.cpp)
 #target_link_libraries(convert_pcd_to_image ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -244,7 +257,7 @@ install(
 #    pcl_ros_surface
 #    pcl_ros_segmentation
     pointcloud_to_pcd_lib
-#    bag_to_pcd
+    bag_to_pcd_lib
 #    convert_pcd_to_image
 #    convert_pointcloud_to_image
   EXPORT export_pcl_ros
