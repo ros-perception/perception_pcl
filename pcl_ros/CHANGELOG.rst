@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.3 (2025-04-07)
+------------------
 * Fix pcd timestamp format output in pointcloud_to_pcd (`#481 <https://github.com/ros-perception/perception_pcl/issues/481>`_)
 * Split off pcl_ros_filter into separate library (`#480 <https://github.com/ros-perception/perception_pcl/issues/480>`_)
 * Add lazy feature to ros2 branch (`#477 <https://github.com/ros-perception/perception_pcl/issues/477>`_)
