@@ -2,6 +2,14 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix pcd timestamp format output in pointcloud_to_pcd (`#481 <https://github.com/ros-perception/perception_pcl/issues/481>`_)
+* Split off pcl_ros_filter into separate library (`#480 <https://github.com/ros-perception/perception_pcl/issues/480>`_)
+* Add lazy feature to ros2 branch (`#477 <https://github.com/ros-perception/perception_pcl/issues/477>`_)
+* Deprecating tf2 C Headers (`#469 <https://github.com/ros-perception/perception_pcl/issues/469>`_)
+* Contributors: Adraub, Błażej Sowa, Lucas Wendland, Paul Bovbel, Tatsuro Sakaguchi
+
 2.6.2 (2024-11-07)
 ------------------
 * Fix handling of empty input point cloud in computePublish method (`#467 <https://github.com/ros-perception/perception_pcl/issues/467>`_)
