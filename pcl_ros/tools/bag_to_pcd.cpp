@@ -69,13 +69,21 @@ public:
   explicit BagToPCD(const rclcpp::NodeOptions & options)
   : rclcpp::Node("bag_to_pcd", options)
   {
-    bag_path_ = this->declare_parameter<std::string>("bag_path");
-    topic_name_ = this->declare_parameter<std::string>("topic_name");
-    output_directory_ = this->declare_parameter<std::string>("output_directory");
+    bag_path_ = this->declare_parameter<std::string>("bag_path", "");
+    topic_name_ = this->declare_parameter<std::string>("topic_name", "");
+    output_directory_ = this->declare_parameter<std::string>("output_directory", "");
 
-    timer_ = this->create_wall_timer(100ms,
-        [this](){return this->timer_callback();}
-    );
+    if (bag_path_.empty() || topic_name_.empty() || output_directory_.empty()) {
+      RCLCPP_ERROR(this->get_logger(), "Required parameter not set.");
+      RCLCPP_ERROR(this->get_logger(),
+                   "Example: ros2 run pcl_ros bag_to_pcd --ros-args "
+                   "-p bag_path:=rosbag2_2025_01_01/ "
+                   "-p topic_name:=/pointcloud "
+                   "-p output_directory:=pcds");
+      throw std::runtime_error{"Required parameter not set."};
+    }
+
+    timer_ = this->create_wall_timer(100ms, [this]() {return this->timer_callback();});
 
     rosbag2_storage::StorageOptions storage_options;
     storage_options.uri = bag_path_;
