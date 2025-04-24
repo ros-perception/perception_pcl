@@ -44,13 +44,13 @@ Cloud Data) format.
 
  **/
 
-#include <chrono>
-
 #include <pcl/common/io.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/PCLPointCloud2.h>
+
+#include <chrono>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/serialization.hpp>
@@ -112,7 +112,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   std::unique_ptr<rosbag2_cpp::Reader> reader_;
   rclcpp::Serialization<sensor_msgs::msg::PointCloud2> serialization_;
-
 };
 }  // namespace pcl_ros
 
