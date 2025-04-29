@@ -42,6 +42,7 @@
 // PCL includes
 #include <pcl/filters/crop_box.h>
 #include <vector>
+#include <visualization_msgs/msg/marker.hpp>
 #include "pcl_ros/filters/filter.hpp"
 
 namespace pcl_ros
@@ -70,8 +71,21 @@ protected:
     */
   rcl_interfaces::msg::SetParametersResult
   config_callback(const std::vector<rclcpp::Parameter> & params);
+  /** \brief Create publishers for output PointCloud2 data as well as the crop box marker. */
+  void createPublishers() override;
+  /** \brief Update the crop box marker msg. */
+  void update_marker_msg();
 
   OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+  /** \brief The crop box marker msg publisher for visualization and debugging purposes. */
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr crop_box_marker_publisher_;
+  /**
+   * \brief The crop box marker message.
+   *
+   * The marker's cube gets updated whenever the min/max points are changed.
+   * The header is adjusted with every point cloud callback.
+   */
+  visualization_msgs::msg::Marker crop_box_marker_msg_;
 
 private:
   /** \brief The PCL filter implementation used. */
