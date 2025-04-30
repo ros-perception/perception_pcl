@@ -31,8 +31,9 @@ set(dependencies
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(
-  ${PROJECT_NAME} INTERFACE
-  include
+  ${PROJECT_NAME}
+  INTERFACE PUBLIC
+  "$<INSTALL_INTERFACE:include>"
   ${PCL_COMMON_INCLUDE_DIRS}
 )
 
