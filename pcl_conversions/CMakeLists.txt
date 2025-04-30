@@ -32,7 +32,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(
   ${PROJECT_NAME}
-  INTERFACE PUBLIC
+  INTERFACE
   "$<INSTALL_INTERFACE:include>"
   ${PCL_COMMON_INCLUDE_DIRS}
 )
