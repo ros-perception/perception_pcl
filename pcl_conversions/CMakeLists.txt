@@ -33,6 +33,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
   ${PROJECT_NAME}
   INTERFACE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
 )
 
@@ -63,7 +64,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 
   ament_add_gtest(${PROJECT_NAME}-test test/test_pcl_conversions.cpp)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} ${Boost_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 endif()
 
 ament_export_targets(${PROJECT_NAME}_export)
