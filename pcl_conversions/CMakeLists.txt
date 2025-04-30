@@ -34,7 +34,6 @@ target_include_directories(
   ${PROJECT_NAME}
   INTERFACE
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-  ${PCL_COMMON_INCLUDE_DIRS}
 )
 
 target_link_libraries(
