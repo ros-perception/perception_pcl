@@ -23,6 +23,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 set(dependencies
   pcl_conversions
@@ -36,6 +37,7 @@ set(dependencies
   tf2_ros
   EIGEN3
   PCL
+  visualization_msgs
 )
 
 ## Declare the pcl_ros_tf library

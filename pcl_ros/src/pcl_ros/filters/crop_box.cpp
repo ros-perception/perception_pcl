@@ -172,6 +172,13 @@ pcl_ros::CropBox::filter(
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
+  // Publish the crop box as a cube marker for visualization purposes
+  if (crop_box_marker_publisher_->get_subscription_count() > 0) {
+    crop_box_marker_msg_.header.frame_id =
+      tf_input_frame_.empty() ? input->header.frame_id : tf_input_frame_;
+    crop_box_marker_msg_.header.stamp = input->header.stamp;
+    crop_box_marker_publisher_->publish(crop_box_marker_msg_);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,12 +233,14 @@ pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
     }
   }
 
+  auto crop_box_marker_updated = false;
   // Check the current values for minimum point
   if (min_point != impl_.getMin()) {
     RCLCPP_DEBUG(
       get_logger(), "Setting the minimum point to: %f %f %f.",
       min_point(0), min_point(1), min_point(2));
     impl_.setMin(min_point);
+    crop_box_marker_updated = true;
   }
 
   // Check the current values for the maximum point
@@ -240,12 +249,44 @@ pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
       get_logger(), "Setting the maximum point to: %f %f %f.",
       max_point(0), max_point(1), max_point(2));
     impl_.setMax(max_point);
+    crop_box_marker_updated = true;
+  }
+  if (crop_box_marker_updated) {
+    update_marker_msg();
   }
 
   // Range constraints are enforced by rclcpp::Parameter.
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
   return result;
+}
+
+void pcl_ros::CropBox::createPublishers()
+{
+  pcl_ros::Filter::createPublishers();
+  crop_box_marker_publisher_ = create_publisher<visualization_msgs::msg::Marker>(
+    "~/crop_box_marker", max_queue_size_);
+}
+
+void pcl_ros::CropBox::update_marker_msg()
+{
+  auto min_point = impl_.getMin();
+  auto max_point = impl_.getMax();
+  crop_box_marker_msg_.ns = get_name() + std::string("/crop_box_marker");
+  crop_box_marker_msg_.type = visualization_msgs::msg::Marker::CUBE;
+  crop_box_marker_msg_.action = visualization_msgs::msg::Marker::ADD;
+  crop_box_marker_msg_.color.g = 1.0;
+  crop_box_marker_msg_.color.a = 0.5;
+  crop_box_marker_msg_.frame_locked = true;
+  Eigen::Vector4f center = (max_point + min_point) / 2.0;
+  Eigen::Vector4f size = max_point - min_point;
+  crop_box_marker_msg_.pose.position.x = center.x();
+  crop_box_marker_msg_.pose.position.y = center.y();
+  crop_box_marker_msg_.pose.position.z = center.z();
+  crop_box_marker_msg_.pose.orientation.w = 1.0;
+  crop_box_marker_msg_.scale.x = size.x();
+  crop_box_marker_msg_.scale.y = size.y();
+  crop_box_marker_msg_.scale.z = size.z();
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
