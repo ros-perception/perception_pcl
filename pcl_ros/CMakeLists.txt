@@ -174,6 +174,7 @@ rclcpp_components_register_node(pcd_to_pointcloud_lib
 
 add_library(pointcloud_to_pcd_lib SHARED tools/pointcloud_to_pcd.cpp)
 target_link_libraries(pointcloud_to_pcd_lib
+  pcl_ros_tf
   ${PCL_LIBRARIES})
 target_include_directories(pointcloud_to_pcd_lib PUBLIC
   ${PCL_INCLUDE_DIRS})
