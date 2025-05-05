@@ -42,7 +42,7 @@
 #include <pcl/features/feature.h>
 #include <pcl_msgs/PointIndices.h>
 
-#include <message_filters/pass_through.h>
+#include <message_filters/pass_through.hpp>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -117,7 +117,7 @@ protected:
   bool use_surface_;
 
   /** \brief Parameter for the spatial locator tree. By convention, the values represent:
-    * 0: ANN (Approximate Nearest Neigbor library) kd-tree
+    * 0: ANN (Approximate Nearest Neighbor library) kd-tree
     * 1: FLANN (Fast Library for Approximate Nearest Neighbors) kd-tree
     * 2: Organized spatial dataset index
     */
