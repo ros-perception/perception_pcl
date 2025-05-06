@@ -41,13 +41,13 @@
 // ROS includes
 #include <tf/transform_listener.h>
 #include <nodelet_topic_tools/nodelet_lazy.h>
+#include <string>
+#include <vector>
 #include <message_filters/subscriber.hpp>
 #include <message_filters/synchronizer.hpp>
 #include <message_filters/pass_through.hpp>
 #include <message_filters/sync_policies/exact_time.hpp>
 #include <message_filters/sync_policies/approximate_time.hpp>
-#include <string>
-#include <vector>
 
 namespace pcl_ros
 {

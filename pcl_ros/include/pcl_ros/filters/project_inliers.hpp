@@ -40,9 +40,9 @@
 
 // PCL includes
 #include <pcl/filters/project_inliers.h>
-#include <message_filters/subscriber.hpp>
 #include <memory>
 #include "pcl_ros/filters/filter.hpp"
+#include <message_filters/subscriber.hpp>
 
 
 namespace pcl_ros
