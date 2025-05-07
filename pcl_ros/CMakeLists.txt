@@ -219,9 +219,6 @@ rclcpp_components_register_node(combined_pointcloud_to_pcd_lib
   PLUGIN "pcl_ros::CombinedPointCloudToPCD"
   EXECUTABLE combined_pointcloud_to_pcd)
 #
-#add_executable(combined_pointcloud_to_pcd tools/combined_pointcloud_to_pcd.cpp)
-#target_link_libraries(combined_pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-#
 #add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
 #target_link_libraries(pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 #
@@ -279,6 +276,7 @@ install(
 #    pcl_ros_surface
 #    pcl_ros_segmentation
     pointcloud_to_pcd_lib
+    combined_pointcloud_to_pcd_lib
 #    bag_to_pcd
 #    convert_pcd_to_image
 #    convert_pointcloud_to_image
