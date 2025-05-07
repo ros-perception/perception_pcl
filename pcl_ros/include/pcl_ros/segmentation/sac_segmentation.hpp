@@ -38,10 +38,10 @@
 #ifndef PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
 #define PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
 
-#include <message_filters/pass_through.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <dynamic_reconfigure/server.h>
 #include <string>
+#include <message_filters/pass_through.hpp>
 #include "pcl_ros/pcl_nodelet.hpp"
 #include "pcl_ros/SACSegmentationConfig.hpp"
 #include "pcl_ros/SACSegmentationFromNormalsConfig.hpp"

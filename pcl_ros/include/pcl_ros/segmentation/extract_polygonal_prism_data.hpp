@@ -38,11 +38,11 @@
 #ifndef PCL_ROS__SEGMENTATION__EXTRACT_POLYGONAL_PRISM_DATA_HPP_
 #define PCL_ROS__SEGMENTATION__EXTRACT_POLYGONAL_PRISM_DATA_HPP_
 
-#include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <dynamic_reconfigure/server.h>
+#include <message_filters/sync_policies/exact_time.hpp>
+#include <message_filters/sync_policies/approximate_time.hpp>
+#include <message_filters/pass_through.hpp>
 #include "pcl_ros/ExtractPolygonalPrismDataConfig.hpp"
 #include "pcl_ros/pcl_nodelet.hpp"
 
