@@ -23,6 +23,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(rosbag2_transport REQUIRED)
 
 set(dependencies
@@ -37,6 +38,7 @@ set(dependencies
   tf2_ros
   EIGEN3
   PCL
+  visualization_msgs
 )
 
 ## Declare the pcl_ros_tf library
@@ -173,6 +175,7 @@ rclcpp_components_register_node(pcd_to_pointcloud_lib
 
 add_library(pointcloud_to_pcd_lib SHARED tools/pointcloud_to_pcd.cpp)
 target_link_libraries(pointcloud_to_pcd_lib
+  pcl_ros_tf
   ${PCL_LIBRARIES})
 target_include_directories(pointcloud_to_pcd_lib PUBLIC
   ${PCL_INCLUDE_DIRS})
