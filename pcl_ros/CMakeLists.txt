@@ -293,7 +293,7 @@ install(
 #    pcl_ros_segmentation
     pointcloud_to_pcd_lib
     combined_pointcloud_to_pcd_lib
-    bag_to_pcd
+    bag_to_pcd_lib
 #    convert_pcd_to_image
 #    convert_pointcloud_to_image
   EXPORT export_pcl_ros
