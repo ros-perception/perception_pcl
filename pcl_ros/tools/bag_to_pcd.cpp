@@ -46,8 +46,6 @@ Cloud Data) format.
 
 #include <pcl/common/io.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/PCLPointCloud2.h>
 
 #include <chrono>
@@ -104,8 +102,8 @@ private:
       sensor_msgs::msg::PointCloud2 pointcloud_msg;
       serialization_.deserialize_message(&serialized_msg, &pointcloud_msg);
 
-      pcl::PointCloud<pcl::PointXYZ> cloud;
-      pcl::fromROSMsg(pointcloud_msg, cloud);
+      pcl::PCLPointCloud2 cloud;
+      pcl_conversions::moveToPCL(pointcloud_msg, cloud);
 
       std::stringstream ss;
       ss << output_directory_ << "/" << msg->recv_timestamp << ".pcd";
