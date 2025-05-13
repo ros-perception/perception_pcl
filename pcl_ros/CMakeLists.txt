@@ -24,6 +24,7 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(rosbag2_transport REQUIRED)
 
 set(dependencies
   pcl_conversions
@@ -214,6 +215,21 @@ ament_target_dependencies(combined_pointcloud_to_pcd_lib
   tf2_eigen
   tf2_ros)
 
+add_library(bag_to_pcd_lib SHARED tools/bag_to_pcd.cpp)
+target_link_libraries(bag_to_pcd_lib
+  ${PCL_LIBRARIES})
+target_include_directories(bag_to_pcd_lib PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(bag_to_pcd_lib
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  pcl_conversions
+  rosbag2_transport)
+rclcpp_components_register_node(bag_to_pcd_lib
+  PLUGIN "pcl_ros::BagToPCD"
+  EXECUTABLE bag_to_pcd)
+
 # Register the component
 rclcpp_components_register_node(combined_pointcloud_to_pcd_lib
   PLUGIN "pcl_ros::CombinedPointCloudToPCD"
@@ -277,7 +293,7 @@ install(
 #    pcl_ros_segmentation
     pointcloud_to_pcd_lib
     combined_pointcloud_to_pcd_lib
-#    bag_to_pcd
+    bag_to_pcd_lib
 #    convert_pcd_to_image
 #    convert_pointcloud_to_image
   EXPORT export_pcl_ros

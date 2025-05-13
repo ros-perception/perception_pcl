@@ -42,6 +42,7 @@
   <depend>tf2_eigen</depend>
   <depend>tf2_ros</depend>
   <depend>visualization_msgs</depend>
+  <depend>rosbag2_transport</depend>
 
   <exec_depend>libpcl-common</exec_depend>
   <exec_depend>libpcl-features</exec_depend>

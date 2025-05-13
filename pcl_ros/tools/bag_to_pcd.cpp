@@ -44,116 +44,82 @@ Cloud Data) format.
 
  **/
 
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
 #include <pcl/common/io.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/PCLPointCloud2.h>
 
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
-#include <sstream>
-#include <string>
+#include <chrono>
 
-#include <boost/filesystem.hpp>
-#include "pcl_ros/transforms.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
+#include <rosbag2_transport/reader_writer_factory.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
-typedef sensor_msgs::PointCloud2 PointCloud;
-typedef PointCloud::Ptr PointCloudPtr;
-typedef PointCloud::ConstPtr PointCloudConstPtr;
 
-/* ---[ */
-int
-main(int argc, char ** argv)
+using namespace std::chrono_literals;
+
+namespace pcl_ros
 {
-  ros::init(argc, argv, "bag_to_pcd");
-  if (argc < 4) {
-    std::cerr << "Syntax is: " << argv[0] <<
-      " <file_in.bag> <topic> <output_directory> [<target_frame>]" << std::endl;
-    std::cerr << "Example: " << argv[0] << " data.bag /laser_tilt_cloud ./pointclouds /base_link" <<
-      std::endl;
-    return -1;
-  }
+class BagToPCD : public rclcpp::Node
+{
+public:
+  explicit BagToPCD(const rclcpp::NodeOptions & options)
+  : rclcpp::Node("bag_to_pcd", options)
+  {
+    bag_path_ = this->declare_parameter<std::string>("bag_path", "");
+    topic_name_ = this->declare_parameter<std::string>("topic_name", "");
+    output_directory_ = this->declare_parameter<std::string>("output_directory", "");
 
-  // TF
-  tf::TransformListener tf_listener;
-  tf::TransformBroadcaster tf_broadcaster;
-
-  rosbag::Bag bag;
-  rosbag::View view;
-  rosbag::View::iterator view_it;
-
-  try {
-    bag.open(argv[1], rosbag::bagmode::Read);
-  } catch (rosbag::BagException) {
-    std::cerr << "Error opening file " << argv[1] << std::endl;
-    return -1;
-  }
-
-  view.addQuery(bag, rosbag::TypeQuery("sensor_msgs/PointCloud2"));
-  view.addQuery(bag, rosbag::TypeQuery("tf/tfMessage"));
-  view.addQuery(bag, rosbag::TypeQuery("tf2_msgs/TFMessage"));
-  view_it = view.begin();
-
-  std::string output_dir = std::string(argv[3]);
-  boost::filesystem::path outpath(output_dir);
-  if (!boost::filesystem::exists(outpath)) {
-    if (!boost::filesystem::create_directories(outpath)) {
-      std::cerr << "Error creating directory " << output_dir << std::endl;
-      return -1;
+    if (bag_path_.empty() || topic_name_.empty() || output_directory_.empty()) {
+      RCLCPP_ERROR(this->get_logger(), "Required parameter not set.");
+      RCLCPP_ERROR(this->get_logger(),
+                   "Example: ros2 run pcl_ros bag_to_pcd --ros-args "
+                   "-p bag_path:=rosbag2_2025_01_01/ "
+                   "-p topic_name:=/pointcloud "
+                   "-p output_directory:=pcds");
+      throw std::runtime_error{"Required parameter not set."};
     }
-    std::cerr << "Creating directory " << output_dir << std::endl;
+
+    timer_ = this->create_wall_timer(100ms, [this]() {return this->timer_callback();});
+
+    rosbag2_storage::StorageOptions storage_options;
+    storage_options.uri = bag_path_;
+    reader_ = rosbag2_transport::ReaderWriterFactory::make_reader(storage_options);
+    reader_->open(storage_options);
   }
 
-  // Add the PointCloud2 handler
-  std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << argv[2] << " to " <<
-    output_dir << std::endl;
-
-  PointCloud cloud_t;
-  ros::Duration r(0.001);
-  // Loop over the whole bag file
-  while (view_it != view.end()) {
-    // Handle TF messages first
-    tf::tfMessage::ConstPtr tf = view_it->instantiate<tf::tfMessage>();
-    if (tf != NULL) {
-      tf_broadcaster.sendTransform(tf->transforms);
-      ros::spinOnce();
-      r.sleep();
-    } else {
-      // Get the PointCloud2 message
-      PointCloudConstPtr cloud = view_it->instantiate<PointCloud>();
-      if (cloud == NULL) {
-        ++view_it;
+private:
+  void timer_callback()
+  {
+    while (reader_->has_next()) {
+      rosbag2_storage::SerializedBagMessageSharedPtr msg = reader_->read_next();
+      if (msg->topic_name != topic_name_) {
         continue;
       }
 
-      // If a target_frame was specified
-      if (argc > 4) {
-        // Transform it
-        if (!pcl_ros::transformPointCloud(argv[4], *cloud, cloud_t, tf_listener)) {
-          ++view_it;
-          continue;
-        }
-      } else {
-        // Else, don't transform it
-        cloud_t = *cloud;
-      }
+      rclcpp::SerializedMessage serialized_msg(*msg->serialized_data);
+      sensor_msgs::msg::PointCloud2 pointcloud_msg;
+      serialization_.deserialize_message(&serialized_msg, &pointcloud_msg);
 
-      std::cerr << "Got " << cloud_t.width * cloud_t.height << " data points in frame " <<
-        cloud_t.header.frame_id << " with the following fields: " << pcl::getFieldsList(cloud_t) <<
-        std::endl;
+      pcl::PCLPointCloud2 cloud;
+      pcl_conversions::moveToPCL(pointcloud_msg, cloud);
 
       std::stringstream ss;
-      ss << output_dir << "/" << cloud_t.header.stamp << ".pcd";
-      std::cerr << "Data saved to " << ss.str() << std::endl;
-      pcl::io::savePCDFile(
-        ss.str(), cloud_t, Eigen::Vector4f::Zero(),
-        Eigen::Quaternionf::Identity(), true);
+      ss << output_directory_ << "/" << msg->recv_timestamp << ".pcd";
+      RCLCPP_INFO(this->get_logger(), "Writing to: %s", ss.str().c_str());
+      pcl::io::savePCDFile(ss.str(), cloud);
+      break;
     }
-    // Increment the iterator
-    ++view_it;
   }
+  std::string bag_path_;
+  std::string topic_name_;
+  std::string output_directory_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<rosbag2_cpp::Reader> reader_;
+  rclcpp::Serialization<sensor_msgs::msg::PointCloud2> serialization_;
+};
+}  // namespace pcl_ros
 
-  return 0;
-}
-/* ]--- */
+
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::BagToPCD)
