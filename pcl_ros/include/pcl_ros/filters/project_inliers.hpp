@@ -77,11 +77,20 @@ private:
   /** \brief The message filter subscriber for model coefficients. */
   message_filters::Subscriber<ModelCoefficients> sub_model_;
 
+  typedef message_filters::sync_policies::ApproximateTime<
+      PointCloud2, PointIndices, ModelCoefficients> SyncApproxPolInputIndicesModel;
+  typedef message_filters::Synchronizer<SyncApproxPolInputIndicesModel>
+    SynchronizerApproxInputIndicesModel;
+
+  typedef message_filters::sync_policies::ExactTime<
+      PointCloud2, PointIndices, ModelCoefficients> SyncExactPolInputIndicesModel;
+  typedef message_filters::Synchronizer<SyncExactPolInputIndicesModel>
+    SynchronizerExactInputIndicesModel;
+
   /** \brief Synchronized input, indices, and model coefficients.*/
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
-    PointIndices, ModelCoefficients>>> sync_input_indices_model_e_;
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
-    PointIndices, ModelCoefficients>>> sync_input_indices_model_a_;
+  std::shared_ptr<SynchronizerExactInputIndicesModel> sync_input_indices_model_e_;
+  std::shared_ptr<SynchronizerApproxInputIndicesModel> sync_input_indices_model_a_;
+
   /** \brief The PCL filter implementation used. */
   pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
 

@@ -124,14 +124,14 @@ pcl_ros::Filter::subscribe()
   if (use_indices_) {
     // Subscribe to the input using a filter
     auto sensor_qos_profile =
-      rclcpp::SensorDataQoS().keep_last(max_queue_size_).get_rmw_qos_profile();
+      rclcpp::SensorDataQoS().keep_last(max_queue_size_);
     sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
     sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
 
     if (approximate_sync_) {
       sync_input_indices_a_ =
-        std::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
-          pcl_msgs::msg::PointIndices>>>(max_queue_size_);
+        std::make_shared<SynchronizerApproxInputIndices>(SyncApproxPolInputIndices(
+          max_queue_size_));
       sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_a_->registerCallback(
         std::bind(
@@ -139,8 +139,8 @@ pcl_ros::Filter::subscribe()
           std::placeholders::_1, std::placeholders::_2));
     } else {
       sync_input_indices_e_ =
-        std::make_shared<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
-          pcl_msgs::msg::PointIndices>>>(max_queue_size_);
+        std::make_shared<SynchronizerExactInputIndices>(SyncExactPolInputIndices(
+          max_queue_size_));
       sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
       sync_input_indices_e_->registerCallback(
         std::bind(

@@ -107,29 +107,25 @@ pcl_ros::ProjectInliers::subscribe()
 
   auto qos_profile = rclcpp::QoS(
     rclcpp::KeepLast(max_queue_size_),
-    rmw_qos_profile_default).get_rmw_qos_profile();
+    rmw_qos_profile_default);
   auto sensor_qos_profile = rclcpp::QoS(
     rclcpp::KeepLast(max_queue_size_),
-    rmw_qos_profile_sensor_data).get_rmw_qos_profile();
+    rmw_qos_profile_sensor_data);
   sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
   sub_indices_filter_.subscribe(this, "indices", qos_profile);
   sub_model_.subscribe(this, "model", qos_profile);
 
   if (approximate_sync_) {
-    sync_input_indices_model_a_ = std::make_shared<
-      message_filters::Synchronizer<
-        message_filters::sync_policies::ApproximateTime<
-          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_a_ = std::make_shared<SynchronizerApproxInputIndicesModel>(
+      SyncApproxPolInputIndicesModel(max_queue_size_));
     sync_input_indices_model_a_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_a_->registerCallback(
       std::bind(
         &ProjectInliers::input_indices_model_callback, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   } else {
-    sync_input_indices_model_e_ = std::make_shared<
-      message_filters::Synchronizer<
-        message_filters::sync_policies::ExactTime<
-          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
+    sync_input_indices_model_e_ = std::make_shared<SynchronizerExactInputIndicesModel>(
+      SyncExactPolInputIndicesModel(max_queue_size_));
     sync_input_indices_model_e_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
     sync_input_indices_model_e_->registerCallback(
       std::bind(

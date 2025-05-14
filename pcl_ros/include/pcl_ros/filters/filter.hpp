@@ -141,11 +141,17 @@ private:
   /** \brief Pointer to parameters callback handle. */
   OnSetParametersCallbackHandle::SharedPtr callback_handle_;
 
+  typedef message_filters::sync_policies::ApproximateTime<
+      PointCloud2, PointIndices> SyncApproxPolInputIndices;
+  typedef message_filters::Synchronizer<SyncApproxPolInputIndices> SynchronizerApproxInputIndices;
+
+  typedef message_filters::sync_policies::ExactTime<
+      PointCloud2, PointIndices> SyncExactPolInputIndices;
+  typedef message_filters::Synchronizer<SyncExactPolInputIndices> SynchronizerExactInputIndices;
+
   /** \brief Synchronized input, and indices.*/
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
-    PointIndices>>> sync_input_indices_e_;
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
-    PointIndices>>> sync_input_indices_a_;
+  std::shared_ptr<SynchronizerExactInputIndices> sync_input_indices_e_;
+  std::shared_ptr<SynchronizerApproxInputIndices> sync_input_indices_a_;
 
   /** \brief Parameter callback
     * \param params parameter values to set
