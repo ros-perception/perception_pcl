@@ -216,16 +216,17 @@ ament_target_dependencies(combined_pointcloud_to_pcd_lib
   tf2_ros)
 
 add_library(bag_to_pcd_lib SHARED tools/bag_to_pcd.cpp)
-target_link_libraries(bag_to_pcd_lib
-  ${PCL_LIBRARIES})
-target_include_directories(bag_to_pcd_lib PUBLIC
-  ${PCL_INCLUDE_DIRS})
-ament_target_dependencies(bag_to_pcd_lib
-  rclcpp
-  rclcpp_components
-  sensor_msgs
-  pcl_conversions
-  rosbag2_transport)
+target_include_directories(bag_to_pcd_lib PRIVATE
+  ${PCL_INCLUDE_DIRS}
+)
+target_link_libraries(bag_to_pcd_lib PRIVATE
+  ${PCL_LIBRARIES}
+  ${sensor_msgs_TARGETS}
+  pcl_conversions::pcl_conversions
+  rclcpp::rclcpp
+  rclcpp_components::component
+  rosbag2_transport::rosbag2_transport
+)
 rclcpp_components_register_node(bag_to_pcd_lib
   PLUGIN "pcl_ros::BagToPCD"
   EXECUTABLE bag_to_pcd)
