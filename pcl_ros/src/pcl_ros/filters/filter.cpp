@@ -123,8 +123,7 @@ pcl_ros::Filter::subscribe()
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
-    auto sensor_qos_profile =
-      rclcpp::SensorDataQoS().keep_last(max_queue_size_).get_rmw_qos_profile();
+    auto sensor_qos_profile = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
     sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
     sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
 
