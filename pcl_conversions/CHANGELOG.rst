@@ -2,8 +2,8 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.0 (2025-05-15)
+------------------
 * Modern CMake (`#489 <https://github.com/ros-perception/perception_pcl/issues/489>`_)
 * Contributors: Patrick Roncagliolo
 
