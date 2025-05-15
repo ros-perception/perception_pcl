@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.0 (2025-05-15)
+------------------
 * Fix downstream CMake error: rosbag2_transport not found (`#494 <https://github.com/ros-perception/perception_pcl/issues/494>`_)
 * Port bag_to_pcd to ROS 2 (`#486 <https://github.com/ros-perception/perception_pcl/issues/486>`_)
 * Add CombinedPointCloudToPCD Node for Accumulating Multiple Point Clouds into a Single PCD (`#479 <https://github.com/ros-perception/perception_pcl/issues/479>`_)
