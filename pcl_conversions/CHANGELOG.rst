@@ -2,6 +2,11 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Modern CMake (`#489 <https://github.com/ros-perception/perception_pcl/issues/489>`_)
+* Contributors: Patrick Roncagliolo
+
 2.6.3 (2025-04-07)
 ------------------
 * Update for ROS 2 file name changes (`#472 <https://github.com/ros-perception/perception_pcl/issues/472>`_)

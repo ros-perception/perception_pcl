@@ -2,6 +2,17 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix downstream CMake error: rosbag2_transport not found (`#494 <https://github.com/ros-perception/perception_pcl/issues/494>`_)
+* Port bag_to_pcd to ROS 2 (`#486 <https://github.com/ros-perception/perception_pcl/issues/486>`_)
+* Add CombinedPointCloudToPCD Node for Accumulating Multiple Point Clouds into a Single PCD (`#479 <https://github.com/ros-perception/perception_pcl/issues/479>`_)
+* Fix deprecation of .h files in message_filters (`#493 <https://github.com/ros-perception/perception_pcl/issues/493>`_)
+* Improve pointcloud_to_pcd by keeping all field available in sensor_msgs (`#491 <https://github.com/ros-perception/perception_pcl/issues/491>`_)
+* Added crop box marker publisher (`#488 <https://github.com/ros-perception/perception_pcl/issues/488>`_)
+* Properly order the header includes for cpplint (`#490 <https://github.com/ros-perception/perception_pcl/issues/490>`_)
+* Contributors: Adraub, Alireza Moayyedi, Ramon Wijnands, Tim Clephas, Valerio Passamano, vladimirjendrol
+
 2.6.3 (2025-04-07)
 ------------------
 * Fix pcd timestamp format output in pointcloud_to_pcd (`#481 <https://github.com/ros-perception/perception_pcl/issues/481>`_)
