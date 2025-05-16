@@ -2,6 +2,12 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix warning: 'subscribe<>' is deprecated: use rclcpp::QoS (`#497 <https://github.com/ros-perception/perception_pcl/issues/497>`_)
+* Bump minimum cmake version to 3.20 (`#496 <https://github.com/ros-perception/perception_pcl/issues/496>`_)
+* Contributors: Ramon Wijnands
+
 2.7.0 (2025-05-15)
 ------------------
 * Fix downstream CMake error: rosbag2_transport not found (`#494 <https://github.com/ros-perception/perception_pcl/issues/494>`_)
