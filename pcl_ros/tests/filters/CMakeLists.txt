@@ -4,13 +4,12 @@ find_package(ament_cmake_pytest REQUIRED)
 add_library(dummy_topics SHARED
   dummy_topics.cpp
 )
-target_link_libraries(dummy_topics ${PCL_LIBRARIES})
-ament_target_dependencies(dummy_topics
-  rclcpp
-  rclcpp_components
-  pcl_conversions
-  sensor_msgs
-  PCL
+target_link_libraries(dummy_topics
+  ${PCL_LIBRARIES}
+  ${sensor_msgs_TARGETS}
+  pcl_conversions::pcl_conversions
+  rclcpp::rclcpp
+  rclcpp_components::component
 )
 
 # generate test ament index to locate dummy_topics comonent from tests
