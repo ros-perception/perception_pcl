@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.2 (2025-05-23)
+------------------
 * Remove calls to `ament_target_dependencies` (`#498 <https://github.com/ros-perception/perception_pcl/issues/498>`_)
 * Contributors: Ramon Wijnands
 
