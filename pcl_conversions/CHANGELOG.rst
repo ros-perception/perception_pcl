@@ -2,6 +2,9 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.7.1 (2025-05-16)
 ------------------
 * Bump minimum cmake version to 3.20 (`#496 <https://github.com/ros-perception/perception_pcl/issues/496>`_)
