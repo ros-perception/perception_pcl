@@ -315,7 +315,7 @@ ament_export_libraries(pcl_ros_tf)
 ament_export_targets(export_pcl_ros HAS_LIBRARY_TARGET)
 
 ament_export_dependencies(
-  EIGEN3
+  Eigen3
   geometry_msgs
   PCL
   pcl_conversions
@@ -326,6 +326,7 @@ ament_export_dependencies(
   tf2_eigen
   tf2_geometry_msgs
   tf2_ros
+  visualization_msgs
 )
 
 ament_package()
