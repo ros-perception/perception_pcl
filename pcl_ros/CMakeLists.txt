@@ -26,6 +26,7 @@ find_package(tf2_ros REQUIRED)
 set(dependencies
   pcl_conversions
   rclcpp
+  rclcpp_components
   sensor_msgs
   geometry_msgs
   tf2
@@ -80,19 +81,48 @@ ament_target_dependencies(pcl_ros_tf
 #
 #
 ### Declare the pcl_ros_filters library
-#add_library(pcl_ros_filters
-#  src/pcl_ros/filters/extract_indices.cpp
-#  src/pcl_ros/filters/filter.cpp
-#  src/pcl_ros/filters/passthrough.cpp
-#  src/pcl_ros/filters/project_inliers.cpp
-#  src/pcl_ros/filters/radius_outlier_removal.cpp
-#  src/pcl_ros/filters/statistical_outlier_removal.cpp
-#  src/pcl_ros/filters/voxel_grid.cpp
-#  src/pcl_ros/filters/crop_box.cpp
-#)
-#target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-#add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
-#class_loader_hide_library_symbols(pcl_ros_filters)
+add_library(pcl_ros_filters SHARED
+  src/pcl_ros/filters/extract_indices.cpp
+  src/pcl_ros/filters/filter.cpp
+  src/pcl_ros/filters/passthrough.cpp
+  src/pcl_ros/filters/project_inliers.cpp
+  src/pcl_ros/filters/radius_outlier_removal.cpp
+  src/pcl_ros/filters/statistical_outlier_removal.cpp
+  src/pcl_ros/filters/voxel_grid.cpp
+  src/pcl_ros/filters/crop_box.cpp
+)
+target_link_libraries(pcl_ros_filters pcl_ros_tf ${PCL_LIBRARIES})
+ament_target_dependencies(pcl_ros_filters ${dependencies})
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::ExtractIndices"
+  EXECUTABLE filter_extract_indices_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::PassThrough"
+  EXECUTABLE filter_passthrough_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::ProjectInliers"
+  EXECUTABLE filter_project_inliers_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::RadiusOutlierRemoval"
+  EXECUTABLE filter_radius_outlier_removal_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::StatisticalOutlierRemoval"
+  EXECUTABLE filter_statistical_outlier_removal_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::CropBox"
+  EXECUTABLE filter_crop_box_node
+)
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::VoxelGrid"
+  EXECUTABLE filter_voxel_grid_node
+)
+# add_dependencies(pcl_ros_filters ${PROJECT_NAME}_gencfg)
+class_loader_hide_library_symbols(pcl_ros_filters)
 #
 ### Declare the pcl_ros_segmentation library
 #add_library (pcl_ros_segmentation
@@ -163,6 +193,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  add_subdirectory(tests/filters)
   #add_rostest_gtest(test_tf_message_filter_pcl tests/test_tf_message_filter_pcl.launch src/test/test_tf_message_filter_pcl.cpp)
   #target_link_libraries(test_tf_message_filter_pcl ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   #add_rostest(samples/pcl_ros/features/sample_normal_3d.launch ARGS gui:=false)
@@ -184,7 +215,7 @@ install(
     pcd_to_pointcloud_lib
 #    pcl_ros_io
 #    pcl_ros_features
-#    pcl_ros_filters
+    pcl_ros_filters
 #    pcl_ros_surface
 #    pcl_ros_segmentation
 #    pointcloud_to_pcd
