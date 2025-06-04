@@ -82,7 +82,7 @@ ament_target_dependencies(pcl_ros_tf
 #
 ### Declare the pcl_ros_filters library
 add_library(pcl_ros_filters SHARED
- # src/pcl_ros/filters/extract_indices.cpp
+ src/pcl_ros/filters/extract_indices.cpp
  src/pcl_ros/filters/filter.cpp
  # src/pcl_ros/filters/passthrough.cpp
  # src/pcl_ros/filters/project_inliers.cpp
@@ -93,6 +93,10 @@ add_library(pcl_ros_filters SHARED
 )
 target_link_libraries(pcl_ros_filters pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 ament_target_dependencies(pcl_ros_filters ${dependencies})
+rclcpp_components_register_node(pcl_ros_filters
+  PLUGIN "pcl_ros::ExtractIndices"
+  EXECUTABLE filter_extract_indices_node
+)
 rclcpp_components_register_node(pcl_ros_filters
   PLUGIN "pcl_ros::VoxelGrid"
   EXECUTABLE filter_voxel_grid_node
