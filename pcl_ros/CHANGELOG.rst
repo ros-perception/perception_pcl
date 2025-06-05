@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.3 (2025-06-05)
+------------------
 * Fix ament_export_dependencies (`#500 <https://github.com/ros-perception/perception_pcl/issues/500>`_)
 * Contributors: Thomas Emter
 
