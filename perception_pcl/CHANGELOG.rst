@@ -2,6 +2,9 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.7.2 (2025-05-23)
 ------------------
 
