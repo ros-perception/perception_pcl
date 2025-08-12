@@ -39,10 +39,14 @@
 #define PCL_ROS__SEGMENTATION__SEGMENT_DIFFERENCES_HPP_
 
 #include <pcl/segmentation/segment_differences.h>
-#include <dynamic_reconfigure/server.h>
-#include "pcl_ros/SegmentDifferencesConfig.hpp"
-#include "pcl_ros/pcl_nodelet.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
+#include "pcl_ros/pcl_nodelet.hpp"
 
 namespace pcl_ros
 {
@@ -58,25 +62,24 @@ namespace sync_policies = message_filters::sync_policies;
 class SegmentDifferences : public PCLNodelet
 {
   typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-  typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-  typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+  typedef PointCloud::Ptr PointCloudPtr;
+  typedef PointCloud::ConstPtr PointCloudConstPtr;
 
 public:
   /** \brief Empty constructor. */
-  SegmentDifferences() {}
+  SegmentDifferences()
+  : PCLNodelet("segment_differences")
+  {}
 
 protected:
   /** \brief The message filter subscriber for PointCloud2. */
   message_filters::Subscriber<PointCloud> sub_target_filter_;
 
   /** \brief Synchronized input, and planar hull.*/
-  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
+  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
     PointCloud>>> sync_input_target_e_;
-  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
+  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
     PointCloud>>> sync_input_target_a_;
-
-  /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<SegmentDifferencesConfig>> srv_;
 
   /** \brief Nodelet initialization routine. */
   void onInit();
@@ -85,11 +88,10 @@ protected:
   void subscribe();
   void unsubscribe();
 
-  /** \brief Dynamic reconfigure callback
-    * \param config the config object
-    * \param level the dynamic reconfigure level
+  /** \brief Parameter callback
+    * \param distance_threshold the distance threshold parameter
     */
-  void config_callback(SegmentDifferencesConfig & config, uint32_t level);
+  void config_callback();
 
   /** \brief Input point cloud callback.
     * \param cloud the pointer to the input point cloud
@@ -102,6 +104,12 @@ protected:
 private:
   /** \brief The PCL implementation used. */
   pcl::SegmentDifferences<pcl::PointXYZ> impl_;
+
+  /** \brief Distance threshold parameter */
+  double distance_threshold_;
+
+  /** \brief Parameter callback handle */
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_callback_handle_;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

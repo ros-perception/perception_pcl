@@ -38,11 +38,10 @@
 #ifndef PCL_ROS__SEGMENTATION__EXTRACT_CLUSTERS_HPP_
 #define PCL_ROS__SEGMENTATION__EXTRACT_CLUSTERS_HPP_
 
-#include <dynamic_reconfigure/server.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pcl/segmentation/extract_clusters.h>
 #include <limits>
 #include "pcl_ros/pcl_nodelet.hpp"
-#include "pcl_ros/EuclideanClusterExtractionConfig.hpp"
 
 namespace pcl_ros
 {
@@ -58,7 +57,7 @@ class EuclideanClusterExtraction : public PCLNodelet
 public:
   /** \brief Empty constructor. */
   EuclideanClusterExtraction()
-  : publish_indices_(false), max_clusters_(std::numeric_limits<int>::max()) {}
+  : PCLNodelet("euclidean_cluster_extraction"), publish_indices_(false), max_clusters_(std::numeric_limits<int>::max()) {}
 
 protected:
   // ROS nodelet attributes
@@ -68,8 +67,8 @@ protected:
   /** \brief Maximum number of clusters to publish. */
   int max_clusters_;
 
-  /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<EuclideanClusterExtractionConfig>> srv_;
+  /** \brief Parameter callback handle. */
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_callback_handle_;
 
   /** \brief Nodelet initialization routine. */
   void onInit();
@@ -78,11 +77,11 @@ protected:
   void subscribe();
   void unsubscribe();
 
-  /** \brief Dynamic reconfigure callback
-    * \param config the config object
-    * \param level the dynamic reconfigure level
+  /** \brief Parameter callback
+    * \param parameters the changed parameters
     */
-  void config_callback(EuclideanClusterExtractionConfig & config, uint32_t level);
+  rcl_interfaces::msg::SetParametersResult config_callback(
+    const std::vector<rclcpp::Parameter> & parameters);
 
   /** \brief Input point cloud callback.
     * \param cloud the pointer to the input point cloud
@@ -97,12 +96,12 @@ private:
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> impl_;
 
   /** \brief The input PointCloud subscriber. */
-  ros::Subscriber sub_input_;
+  rclcpp::Subscription<PointCloud>::SharedPtr sub_input_;
 
   /** \brief Synchronized input, and indices.*/
-  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
+  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
     PointIndices>>> sync_input_indices_e_;
-  boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
+  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
     PointIndices>>> sync_input_indices_a_;
 
 public:
