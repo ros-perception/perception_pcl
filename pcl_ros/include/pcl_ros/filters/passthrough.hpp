@@ -52,7 +52,7 @@ class PassThrough : public Filter
 {
 protected:
   /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::FilterConfig>> srv_;
+  // boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::FilterConfig>> srv_;
 
   /** \brief Call the actual filter.
     * \param input the input point cloud dataset
@@ -64,7 +64,7 @@ protected:
     const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
     PointCloud2 & output)
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
     pcl_conversions::toPCL(*(input), *(pcl_input));
     impl_.setInputCloud(pcl_input);
@@ -78,15 +78,15 @@ protected:
     * \param nh ROS node handle
     * \param has_service set to true if the child has a Dynamic Reconfigure service
     */
-  bool
-  child_init(ros::NodeHandle & nh, bool & has_service);
+  // bool
+  // child_init(ros::NodeHandle & nh, bool & has_service);
 
   /** \brief Dynamic reconfigure service callback.
     * \param config the dynamic reconfigure FilterConfig object
     * \param level the dynamic reconfigure level
     */
-  void
-  config_callback(pcl_ros::FilterConfig & config, uint32_t level);
+  // void
+  // config_callback(pcl_ros::FilterConfig & config, uint32_t level);
 
 private:
   /** \brief The PCL filter implementation used. */

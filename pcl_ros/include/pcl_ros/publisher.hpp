@@ -45,13 +45,14 @@
 #ifndef PCL_ROS__PUBLISHER_HPP_
 #define PCL_ROS__PUBLISHER_HPP_
 
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl/conversions.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <string>
+#include <memory>
 
 namespace pcl_ros
 {
@@ -59,36 +60,42 @@ class BasePublisher
 {
 public:
   void
-  advertise(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
+  advertise(rclcpp::Node::SharedPtr node, const std::string & topic, const rclcpp::QoS & qos)
   {
-    pub_ = nh.advertise<sensor_msgs::PointCloud2>(topic, queue_size);
+    pub_ = node->create_publisher<sensor_msgs::msg::PointCloud2>(topic, qos);
+  }
+
+  void
+  advertise(rclcpp::Node::SharedPtr node, const std::string & topic, size_t queue_size)
+  {
+    advertise(node, topic, rclcpp::QoS(queue_size));
   }
 
   std::string
-  getTopic()
+  getTopic() const
   {
-    return pub_.getTopic();
+    return pub_->get_topic_name();
   }
 
-  uint32_t
+  size_t
   getNumSubscribers() const
   {
-    return pub_.getNumSubscribers();
+    return pub_->get_subscription_count();
   }
 
   void
   shutdown()
   {
-    pub_.shutdown();
+    pub_.reset();
   }
 
-  operator void *() const
+  operator bool() const
   {
-    return (pub_) ? reinterpret_cast<void *>(1) : reinterpret_cast<void *>(0);
+    return pub_ != nullptr;
   }
 
 protected:
-  ros::Publisher pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
 };
 
 template<typename PointT>
@@ -97,15 +104,20 @@ class Publisher : public BasePublisher
 public:
   Publisher() {}
 
-  Publisher(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
+  Publisher(rclcpp::Node::SharedPtr node, const std::string & topic, const rclcpp::QoS & qos)
   {
-    advertise(nh, topic, queue_size);
+    advertise(node, topic, qos);
+  }
+
+  Publisher(rclcpp::Node::SharedPtr node, const std::string & topic, size_t queue_size)
+  {
+    advertise(node, topic, queue_size);
   }
 
   ~Publisher() {}
 
   inline void
-  publish(const boost::shared_ptr<const pcl::PointCloud<PointT>> & point_cloud) const
+  publish(const std::shared_ptr<const pcl::PointCloud<PointT>> & point_cloud) const
   {
     publish(*point_cloud);
   }
@@ -114,37 +126,40 @@ public:
   publish(const pcl::PointCloud<PointT> & point_cloud) const
   {
     // Fill point cloud binary data
-    sensor_msgs::PointCloud2::Ptr msg_ptr(new sensor_msgs::PointCloud2);
+    auto msg_ptr = std::make_shared<sensor_msgs::msg::PointCloud2>();
     pcl::toROSMsg(point_cloud, *msg_ptr);
-    pub_.publish(msg_ptr);
+    pub_->publish(*msg_ptr);
   }
 };
 
 template<>
-class Publisher<sensor_msgs::PointCloud2>: public BasePublisher
+class Publisher<sensor_msgs::msg::PointCloud2>: public BasePublisher
 {
 public:
   Publisher() {}
 
-  Publisher(ros::NodeHandle & nh, const std::string & topic, uint32_t queue_size)
+  Publisher(rclcpp::Node::SharedPtr node, const std::string & topic, const rclcpp::QoS & qos)
   {
-    advertise(nh, topic, queue_size);
+    advertise(node, topic, qos);
+  }
+
+  Publisher(rclcpp::Node::SharedPtr node, const std::string & topic, size_t queue_size)
+  {
+    advertise(node, topic, queue_size);
   }
 
   ~Publisher() {}
 
   void
-  publish(const sensor_msgs::PointCloud2Ptr & point_cloud) const
+  publish(const std::shared_ptr<const sensor_msgs::msg::PointCloud2> & point_cloud) const
   {
-    pub_.publish(point_cloud);
-    // pub_.publish (*point_cloud);
+    pub_->publish(*point_cloud);
   }
 
   void
-  publish(const sensor_msgs::PointCloud2 & point_cloud) const
+  publish(const sensor_msgs::msg::PointCloud2 & point_cloud) const
   {
-    pub_.publish(boost::make_shared<const sensor_msgs::PointCloud2>(point_cloud));
-    // pub_.publish (point_cloud);
+    pub_->publish(point_cloud);
   }
 };
 }  // namespace pcl_ros

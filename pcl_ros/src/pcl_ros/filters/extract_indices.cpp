@@ -35,37 +35,73 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <rclcpp_components/register_node_macro.hpp>
 #include "pcl_ros/filters/extract_indices.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl_ros::ExtractIndices::child_init(ros::NodeHandle & nh, bool & has_service)
+pcl_ros::ExtractIndices::child_init(bool & has_service)
 {
-  has_service = true;
+  has_service = false;
 
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>>(nh);
-  dynamic_reconfigure::Server<pcl_ros::ExtractIndicesConfig>::CallbackType f = boost::bind(
-    &ExtractIndices::config_callback, this, _1, _2);
-  srv_->setCallback(f);
-
+  // Declare parameter
+  negative_ = this->declare_parameter("negative", false);
+  
+  // Set the initial value
+  impl_.setNegative(negative_);
+  
   use_indices_ = true;
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-pcl_ros::ExtractIndices::config_callback(pcl_ros::ExtractIndicesConfig & config, uint32_t level)
+pcl_ros::ExtractIndices::filter(
+  const PointCloud2ConstPtr & input, 
+  const IndicesPtr & indices, 
+  PointCloud2 & output)
 {
-  boost::mutex::scoped_lock lock(mutex_);
-
-  if (impl_.getNegative() != config.negative) {
-    impl_.setNegative(config.negative);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting the extraction to: %s.", getName().c_str(),
-      (config.negative ? "indices" : "everything but the indices"));
+  std::lock_guard<std::mutex> lock(mutex_);
+  
+  pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
+  pcl_conversions::toPCL(*input, *pcl_input);
+  
+  impl_.setInputCloud(pcl_input);
+  if (indices) {
+    impl_.setIndices(indices);
   }
+  
+  pcl::PCLPointCloud2 pcl_output;
+  impl_.filter(pcl_output);
+  
+  pcl_conversions::moveFromPCL(pcl_output, output);
 }
 
-typedef pcl_ros::ExtractIndices ExtractIndices;
-PLUGINLIB_EXPORT_CLASS(ExtractIndices, nodelet::Nodelet);
+//////////////////////////////////////////////////////////////////////////////////////////////
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::ExtractIndices::config_callback(const std::vector<rclcpp::Parameter> & parameters)
+{
+  // Call parent callback first
+  auto result = Filter::config_callback(parameters);
+  if (!result.successful) {
+    return result;
+  }
+
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  for (const auto & parameter : parameters) {
+    if (parameter.get_name() == "negative") {
+      negative_ = parameter.as_bool();
+      impl_.setNegative(negative_);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting the extraction to: %s.", 
+        this->get_name(),
+        (negative_ ? "everything but the indices" : "indices"));
+    }
+  }
+
+  return result;
+}
+
+RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::ExtractIndices)

@@ -35,7 +35,7 @@
  *
  */
 
-#include <pluginlib/class_list_macros.h>
+#include <rclcpp_components/register_node_macro.hpp>
 #include <pcl/io/io.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <vector>
@@ -50,80 +50,90 @@ pcl_ros::SACSegmentation::onInit()
   // Call the super onInit ()
   PCLNodelet::onInit();
 
-
   // Advertise the output topics
-  pub_indices_ = advertise<PointIndices>(*pnh_, "inliers", max_queue_size_);
-  pub_model_ = advertise<ModelCoefficients>(*pnh_, "model", max_queue_size_);
+  pub_indices_ = advertise<PointIndices>(*this, "inliers", max_queue_size_);
+  pub_model_ = advertise<ModelCoefficients>(*this, "model", max_queue_size_);
 
   // ---[ Mandatory parameters
-  int model_type;
-  if (!pnh_->getParam("model_type", model_type)) {
-    NODELET_ERROR("[onInit] Need a 'model_type' parameter to be set before continuing!");
+  this->declare_parameter("model_type", -1);
+  this->declare_parameter("distance_threshold", 0.0);
+  this->declare_parameter("method_type", 0);
+  this->declare_parameter("axis", std::vector<double>{0.0, 0.0, 0.0});
+  this->declare_parameter("min_inliers", 0);
+  this->declare_parameter("max_iterations", 50);
+  this->declare_parameter("probability", 0.99);
+  this->declare_parameter("eps_angle", 0.0);
+  this->declare_parameter("optimize_coefficients", true);
+  this->declare_parameter("radius_min", 0.0);
+  this->declare_parameter("radius_max", std::numeric_limits<double>::max());
+  this->declare_parameter("input_frame", std::string(""));
+  this->declare_parameter("output_frame", std::string(""));
+
+  int model_type = this->get_parameter("model_type").as_int();
+  if (model_type == -1) {
+    RCLCPP_ERROR(this->get_logger(), "[onInit] Need a 'model_type' parameter to be set before continuing!");
     return;
   }
-  double threshold;  // unused - set via dynamic reconfigure in the callback
-  if (!pnh_->getParam("distance_threshold", threshold)) {
-    NODELET_ERROR("[onInit] Need a 'distance_threshold' parameter to be set before continuing!");
+
+  double threshold = this->get_parameter("distance_threshold").as_double();
+  if (threshold == 0.0) {
+    RCLCPP_ERROR(this->get_logger(), "[onInit] Need a 'distance_threshold' parameter to be set before continuing!");
     return;
   }
 
   // ---[ Optional parameters
-  int method_type = 0;
-  pnh_->getParam("method_type", method_type);
-
-  XmlRpc::XmlRpcValue axis_param;
-  pnh_->getParam("axis", axis_param);
+  int method_type = this->get_parameter("method_type").as_int();
+  
+  std::vector<double> axis_param = this->get_parameter("axis").as_double_array();
   Eigen::Vector3f axis = Eigen::Vector3f::Zero();
-
-  switch (axis_param.getType()) {
-    case XmlRpc::XmlRpcValue::TypeArray:
-      {
-        if (axis_param.size() != 3) {
-          NODELET_ERROR(
-            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) "
-            "than required (3)!",
-            getName().c_str(), axis_param.size());
-          return;
-        }
-        for (int i = 0; i < 3; ++i) {
-          if (axis_param[i].getType() != XmlRpc::XmlRpcValue::TypeDouble) {
-            NODELET_ERROR(
-              "[%s::onInit] Need floating point values for 'axis' parameter.",
-              getName().c_str());
-            return;
-          }
-          double value = axis_param[i]; axis[i] = value;
-        }
-        break;
-      }
-    default:
-      {
-        break;
-      }
+  
+  if (axis_param.size() == 3) {
+    for (int i = 0; i < 3; ++i) {
+      axis[i] = axis_param[i];
+    }
+  } else if (axis_param.size() != 0) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "[%s::onInit] Parameter 'axis' given but with a different number of values (%zu) than required (3)!",
+      this->get_name(), axis_param.size());
+    return;
   }
+
+  min_inliers_ = this->get_parameter("min_inliers").as_int();
 
   // Initialize the random number generator
   srand(time(0));
 
-  // Enable the dynamic reconfigure service
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<SACSegmentationConfig>>(*pnh_);
-  dynamic_reconfigure::Server<SACSegmentationConfig>::CallbackType f = boost::bind(
-    &SACSegmentation::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+  // Setup parameter callback
+  param_callback_handle_ = this->add_on_set_parameters_callback(
+    std::bind(&SACSegmentation::config_callback, this, std::placeholders::_1));
 
-  NODELET_DEBUG(
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::onInit] Nodelet successfully created with the following parameters:\n"
     " - model_type               : %d\n"
     " - method_type              : %d\n"
     " - model_threshold          : %f\n"
     " - axis                     : [%f, %f, %f]\n",
-    getName().c_str(), model_type, method_type, threshold,
+    this->get_name(), model_type, method_type, threshold,
     axis[0], axis[1], axis[2]);
 
   // Set given parameters here
   impl_.setModelType(model_type);
   impl_.setMethodType(method_type);
   impl_.setAxis(axis);
+  impl_.setDistanceThreshold(threshold);
+  impl_.setMaxIterations(this->get_parameter("max_iterations").as_int());
+  impl_.setProbability(this->get_parameter("probability").as_double());
+  impl_.setEpsAngle(this->get_parameter("eps_angle").as_double());
+  impl_.setOptimizeCoefficients(this->get_parameter("optimize_coefficients").as_bool());
+  
+  double radius_min = this->get_parameter("radius_min").as_double();
+  double radius_max = this->get_parameter("radius_max").as_double();
+  impl_.setRadiusLimits(radius_min, radius_max);
+
+  tf_input_frame_ = this->get_parameter("input_frame").as_string();
+  tf_output_frame_ = this->get_parameter("output_frame").as_string();
 
   onInitPostProcess();
 }
@@ -135,8 +145,8 @@ pcl_ros::SACSegmentation::subscribe()
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
-    sub_input_filter_.subscribe(*pnh_, "input", max_queue_size_);
-    sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
+    sub_input_filter_.subscribe(*this, "input", rmw_qos_profile_sensor_data);
+    sub_indices_filter_.subscribe(*this, "indices", rmw_qos_profile_default);
 
     // when "use_indices" is set to true, and "latched_indices" is set to true,
     // we'll subscribe and get a separate callback for PointIndices that will
@@ -144,47 +154,47 @@ pcl_ros::SACSegmentation::subscribe()
     // will take care of meshing the new PointClouds with the old saved indices.
     if (latched_indices_) {
       // Subscribe to a callback that saves the indices
-      sub_indices_filter_.registerCallback(bind(&SACSegmentation::indices_callback, this, _1));
+      sub_indices_filter_.registerCallback(std::bind(&SACSegmentation::indices_callback, this, std::placeholders::_1));
       // Subscribe to a callback that sets the header of the saved indices to the cloud header
-      sub_input_filter_.registerCallback(bind(&SACSegmentation::input_callback, this, _1));
+      sub_input_filter_.registerCallback(std::bind(&SACSegmentation::input_callback, this, std::placeholders::_1));
 
       // Synchronize the two topics. No need for an approximate synchronizer here, as we'll
       // match the timestamps exactly
       sync_input_indices_e_ =
-        boost::make_shared<message_filters::Synchronizer<
+        std::make_shared<message_filters::Synchronizer<
             sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
-      sync_input_indices_e_->connectInput(sub_input_filter_, nf_pi_);
+      sync_input_indices_e_->connectInput(sub_input_filter_, nf_);
       sync_input_indices_e_->registerCallback(
-        bind(
+        std::bind(
           &SACSegmentation::input_indices_callback, this,
-          _1, _2));
+          std::placeholders::_1, std::placeholders::_2));
     } else {  // "latched_indices" not set, proceed with regular <input,indices> pairs
       if (approximate_sync_) {
         sync_input_indices_a_ =
-          boost::make_shared<message_filters::Synchronizer<
+          std::make_shared<message_filters::Synchronizer<
               sync_policies::ApproximateTime<PointCloud, PointIndices>>>(max_queue_size_);
         sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
         sync_input_indices_a_->registerCallback(
-          bind(
+          std::bind(
             &SACSegmentation::input_indices_callback, this,
-            _1, _2));
+            std::placeholders::_1, std::placeholders::_2));
       } else {
         sync_input_indices_e_ =
-          boost::make_shared<message_filters::Synchronizer<
+          std::make_shared<message_filters::Synchronizer<
               sync_policies::ExactTime<PointCloud, PointIndices>>>(max_queue_size_);
         sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
         sync_input_indices_e_->registerCallback(
-          bind(
+          std::bind(
             &SACSegmentation::input_indices_callback, this,
-            _1, _2));
+            std::placeholders::_1, std::placeholders::_2));
       }
     }
   } else {
     // Subscribe in an old fashion to input only (no filters)
     sub_input_ =
-      pnh_->subscribe<PointCloud>(
+      this->create_subscription<PointCloud>(
       "input", max_queue_size_,
-      bind(&SACSegmentation::input_indices_callback, this, _1, PointIndicesConstPtr()));
+      std::bind(&SACSegmentation::input_indices_callback, this, std::placeholders::_1, PointIndicesConstPtr()));
   }
 }
 
@@ -196,85 +206,87 @@ pcl_ros::SACSegmentation::unsubscribe()
     sub_input_filter_.unsubscribe();
     sub_indices_filter_.unsubscribe();
   } else {
-    sub_input_.shutdown();
+    sub_input_.reset();
   }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::config_callback(SACSegmentationConfig & config, uint32_t level)
+rcl_interfaces::msg::SetParametersResult
+pcl_ros::SACSegmentation::config_callback(const std::vector<rclcpp::Parameter> & parameters)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
 
-  if (impl_.getDistanceThreshold() != config.distance_threshold) {
-    // sac_->setDistanceThreshold (threshold_); - done in initSAC
-    impl_.setDistanceThreshold(config.distance_threshold);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new distance to model threshold to: %f.",
-      getName().c_str(), config.distance_threshold);
-  }
-  // The maximum allowed difference between the model normal and the given axis _in radians_
-  if (impl_.getEpsAngle() != config.eps_angle) {
-    impl_.setEpsAngle(config.eps_angle);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new epsilon angle to model threshold to: %f (%f degrees).",
-      getName().c_str(), config.eps_angle, config.eps_angle * 180.0 / M_PI);
+  for (const auto & param : parameters) {
+    if (param.get_name() == "distance_threshold") {
+      double distance_threshold = param.as_double();
+      impl_.setDistanceThreshold(distance_threshold);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new distance to model threshold to: %f.",
+        this->get_name(), distance_threshold);
+    } else if (param.get_name() == "eps_angle") {
+      double eps_angle = param.as_double();
+      impl_.setEpsAngle(eps_angle);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new epsilon angle to model threshold to: %f (%f degrees).",
+        this->get_name(), eps_angle, eps_angle * 180.0 / M_PI);
+    } else if (param.get_name() == "min_inliers") {
+      min_inliers_ = param.as_int();
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new minimum number of inliers to: %d.",
+        this->get_name(), min_inliers_);
+    } else if (param.get_name() == "max_iterations") {
+      int max_iterations = param.as_int();
+      impl_.setMaxIterations(max_iterations);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new maximum number of iterations to: %d.",
+        this->get_name(), max_iterations);
+    } else if (param.get_name() == "probability") {
+      double probability = param.as_double();
+      impl_.setProbability(probability);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new probability to: %f.",
+        this->get_name(), probability);
+    } else if (param.get_name() == "optimize_coefficients") {
+      bool optimize_coefficients = param.as_bool();
+      impl_.setOptimizeCoefficients(optimize_coefficients);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting coefficient optimization to: %s.",
+        this->get_name(), optimize_coefficients ? "true" : "false");
+    } else if (param.get_name() == "radius_min") {
+      double radius_min = param.as_double();
+      double radius_max;
+      impl_.getRadiusLimits(radius_min, radius_max);
+      impl_.setRadiusLimits(radius_min, radius_max);
+      RCLCPP_DEBUG(this->get_logger(), "[config_callback] Setting minimum allowable model radius to: %f.", radius_min);
+    } else if (param.get_name() == "radius_max") {
+      double radius_min, radius_max;
+      radius_max = param.as_double();
+      impl_.getRadiusLimits(radius_min, radius_max);
+      impl_.setRadiusLimits(radius_min, radius_max);
+      RCLCPP_DEBUG(this->get_logger(), "[config_callback] Setting maximum allowable model radius to: %f.", radius_max);
+    } else if (param.get_name() == "input_frame") {
+      tf_input_frame_ = param.as_string();
+      RCLCPP_DEBUG(this->get_logger(), "[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str());
+      RCLCPP_WARN(this->get_logger(), "input_frame TF not implemented yet!");
+    } else if (param.get_name() == "output_frame") {
+      tf_output_frame_ = param.as_string();
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[config_callback] Setting the output TF frame to: %s.",
+        tf_output_frame_.c_str());
+      RCLCPP_WARN(this->get_logger(), "output_frame TF not implemented yet!");
+    }
   }
 
-  // Number of inliers
-  if (min_inliers_ != config.min_inliers) {
-    min_inliers_ = config.min_inliers;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new minimum number of inliers to: %d.",
-      getName().c_str(), min_inliers_);
-  }
-
-  if (impl_.getMaxIterations() != config.max_iterations) {
-    // sac_->setMaxIterations (max_iterations_); - done in initSAC
-    impl_.setMaxIterations(config.max_iterations);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new maximum number of iterations to: %d.",
-      getName().c_str(), config.max_iterations);
-  }
-  if (impl_.getProbability() != config.probability) {
-    // sac_->setProbability (probability_); - done in initSAC
-    impl_.setProbability(config.probability);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new probability to: %f.",
-      getName().c_str(), config.probability);
-  }
-  if (impl_.getOptimizeCoefficients() != config.optimize_coefficients) {
-    impl_.setOptimizeCoefficients(config.optimize_coefficients);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting coefficient optimization to: %s.",
-      getName().c_str(), (config.optimize_coefficients) ? "true" : "false");
-  }
-
-  double radius_min, radius_max;
-  impl_.getRadiusLimits(radius_min, radius_max);
-  if (radius_min != config.radius_min) {
-    radius_min = config.radius_min;
-    NODELET_DEBUG("[config_callback] Setting minimum allowable model radius to: %f.", radius_min);
-    impl_.setRadiusLimits(radius_min, radius_max);
-  }
-  if (radius_max != config.radius_max) {
-    radius_max = config.radius_max;
-    NODELET_DEBUG("[config_callback] Setting maximum allowable model radius to: %f.", radius_max);
-    impl_.setRadiusLimits(radius_min, radius_max);
-  }
-
-  if (tf_input_frame_ != config.input_frame) {
-    tf_input_frame_ = config.input_frame;
-    NODELET_DEBUG("[config_callback] Setting the input TF frame to: %s.", tf_input_frame_.c_str());
-    NODELET_WARN("input_frame TF not implemented yet!");
-  }
-  if (tf_output_frame_ != config.output_frame) {
-    tf_output_frame_ = config.output_frame;
-    NODELET_DEBUG(
-      "[config_callback] Setting the output TF frame to: %s.",
-      tf_output_frame_.c_str());
-    NODELET_WARN("output_frame TF not implemented yet!");
-  }
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,49 +295,51 @@ pcl_ros::SACSegmentation::input_indices_callback(
   const PointCloudConstPtr & cloud,
   const PointIndicesConstPtr & indices)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
-  pcl_msgs::PointIndices inliers;
-  pcl_msgs::ModelCoefficients model;
+  pcl_msgs::msg::PointIndices inliers;
+  pcl_msgs::msg::ModelCoefficients model;
   // Enforce that the TF frame and the timestamp are copied
   inliers.header = model.header = fromPCL(cloud->header);
 
   // If cloud is given, check if it's valid
   if (!isValid(cloud)) {
-    NODELET_ERROR("[%s::input_indices_callback] Invalid input!", getName().c_str());
-    pub_indices_.publish(inliers);
-    pub_model_.publish(model);
+    RCLCPP_ERROR(this->get_logger(), "[%s::input_indices_callback] Invalid input!", this->get_name());
+    pub_indices_->publish(inliers);
+    pub_model_->publish(model);
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid(indices)) {
-    NODELET_ERROR("[%s::input_indices_callback] Invalid indices!", getName().c_str());
-    pub_indices_.publish(inliers);
-    pub_model_.publish(model);
+    RCLCPP_ERROR(this->get_logger(), "[%s::input_indices_callback] Invalid indices!", this->get_name());
+    pub_indices_->publish(inliers);
+    pub_model_->publish(model);
     return;
   }
 
   /// DEBUG
   if (indices && !indices->header.frame_id.empty()) {
-    NODELET_DEBUG(
+    RCLCPP_DEBUG(
+      this->get_logger(),
       "[%s::input_indices_callback]\n"
       "                                 - PointCloud with %d data points (%s), stamp %f, and "
       "frame %s on topic %s received.\n"
       "                                 - PointIndices with %zu values, stamp %f, and "
       "frame %s on topic %s received.",
-      getName().c_str(),
-      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
-        cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
-        "input").c_str(),
-      indices->indices.size(), indices->header.stamp.toSec(),
-      indices->header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
+      this->get_name(),
+      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), 
+      rclcpp::Time(fromPCL(cloud->header).stamp).seconds(), 
+      cloud->header.frame_id.c_str(), "input",
+      indices->indices.size(), rclcpp::Time(indices->header.stamp).seconds(),
+      indices->header.frame_id.c_str(), "indices");
   } else {
-    NODELET_DEBUG(
+    RCLCPP_DEBUG(
+      this->get_logger(),
       "[%s::input_indices_callback] PointCloud with %d data points, stamp %f, and "
       "frame %s on topic %s received.",
-      getName().c_str(), cloud->width * cloud->height, fromPCL(
-        cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
-        "input").c_str());
+      this->get_name(), cloud->width * cloud->height, 
+      rclcpp::Time(fromPCL(cloud->header).stamp).seconds(), 
+      cloud->header.frame_id.c_str(), "input");
   }
   ///
 
@@ -334,7 +348,7 @@ pcl_ros::SACSegmentation::input_indices_callback(
   PointCloudConstPtr cloud_tf;
 /*  if (!tf_input_frame_.empty () && cloud->header.frame_id != tf_input_frame_)
   {
-    NODELET_DEBUG ("[input_callback] Transforming input dataset from %s to %s.",
+    RCLCPP_DEBUG (this->get_logger(), "[input_callback] Transforming input dataset from %s to %s.",
     // cloud->header.frame_id.c_str (), tf_input_frame_.c_str ());
     // Save the original frame ID
     // Convert the cloud into the different frame
@@ -376,16 +390,17 @@ pcl_ros::SACSegmentation::input_indices_callback(
   }
 
   // Publish
-  pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-  pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
-  NODELET_DEBUG(
+  pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+  pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::input_indices_callback] Published PointIndices with %zu values on topic %s, "
     "and ModelCoefficients with %zu values on topic %s",
-    getName().c_str(), inliers.indices.size(), pnh_->resolveName("inliers").c_str(),
-    model.values.size(), pnh_->resolveName("model").c_str());
+    this->get_name(), inliers.indices.size(), "inliers",
+    model.values.size(), "model");
 
   if (inliers.indices.empty()) {
-    NODELET_WARN("[%s::input_indices_callback] No inliers found!", getName().c_str());
+    RCLCPP_WARN(this->get_logger(), "[%s::input_indices_callback] No inliers found!", this->get_name());
   }
 }
 
@@ -396,83 +411,94 @@ pcl_ros::SACSegmentationFromNormals::onInit()
   // Call the super onInit ()
   PCLNodelet::onInit();
 
-  // Enable the dynamic reconfigure service
-  srv_ = boost::make_shared<dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>>(*pnh_);
-  dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>::CallbackType f = boost::bind(
-    &SACSegmentationFromNormals::config_callback, this, _1, _2);
-  srv_->setCallback(f);
+  // Declare parameters
+  this->declare_parameter("model_type", -1);
+  this->declare_parameter("distance_threshold", 0.0);
+  this->declare_parameter("method_type", 0);
+  this->declare_parameter("axis", std::vector<double>{0.0, 0.0, 0.0});
+  this->declare_parameter("min_inliers", 0);
+  this->declare_parameter("max_iterations", 50);
+  this->declare_parameter("probability", 0.99);
+  this->declare_parameter("eps_angle", 0.0);
+  this->declare_parameter("optimize_coefficients", true);
+  this->declare_parameter("normal_distance_weight", 0.1);
+  this->declare_parameter("radius_min", 0.0);
+  this->declare_parameter("radius_max", std::numeric_limits<double>::max());
+
+  // Setup parameter callback
+  param_callback_handle_ = this->add_on_set_parameters_callback(
+    std::bind(&SACSegmentationFromNormals::config_callback, this, std::placeholders::_1));
 
   // Advertise the output topics
-  pub_indices_ = advertise<PointIndices>(*pnh_, "inliers", max_queue_size_);
-  pub_model_ = advertise<ModelCoefficients>(*pnh_, "model", max_queue_size_);
+  pub_indices_ = advertise<PointIndices>(*this, "inliers", max_queue_size_);
+  pub_model_ = advertise<ModelCoefficients>(*this, "model", max_queue_size_);
 
   // ---[ Mandatory parameters
-  int model_type;
-  if (!pnh_->getParam("model_type", model_type)) {
-    NODELET_ERROR(
+  int model_type = this->get_parameter("model_type").as_int();
+  if (model_type == -1) {
+    RCLCPP_ERROR(
+      this->get_logger(),
       "[%s::onInit] Need a 'model_type' parameter to be set before continuing!",
-      getName().c_str());
+      this->get_name());
     return;
   }
-  double threshold;  // unused - set via dynamic reconfigure in the callback
-  if (!pnh_->getParam("distance_threshold", threshold)) {
-    NODELET_ERROR(
+
+  double threshold = this->get_parameter("distance_threshold").as_double();
+  if (threshold == 0.0) {
+    RCLCPP_ERROR(
+      this->get_logger(),
       "[%s::onInit] Need a 'distance_threshold' parameter to be set before continuing!",
-      getName().c_str());
+      this->get_name());
     return;
   }
 
   // ---[ Optional parameters
-  int method_type = 0;
-  pnh_->getParam("method_type", method_type);
-
-  XmlRpc::XmlRpcValue axis_param;
-  pnh_->getParam("axis", axis_param);
+  int method_type = this->get_parameter("method_type").as_int();
+  
+  std::vector<double> axis_param = this->get_parameter("axis").as_double_array();
   Eigen::Vector3f axis = Eigen::Vector3f::Zero();
-
-  switch (axis_param.getType()) {
-    case XmlRpc::XmlRpcValue::TypeArray:
-      {
-        if (axis_param.size() != 3) {
-          NODELET_ERROR(
-            "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than "
-            "required (3)!",
-            getName().c_str(), axis_param.size());
-          return;
-        }
-        for (int i = 0; i < 3; ++i) {
-          if (axis_param[i].getType() != XmlRpc::XmlRpcValue::TypeDouble) {
-            NODELET_ERROR(
-              "[%s::onInit] Need floating point values for 'axis' parameter.",
-              getName().c_str());
-            return;
-          }
-          double value = axis_param[i]; axis[i] = value;
-        }
-        break;
-      }
-    default:
-      {
-        break;
-      }
+  
+  if (axis_param.size() == 3) {
+    for (int i = 0; i < 3; ++i) {
+      axis[i] = axis_param[i];
+    }
+  } else if (axis_param.size() != 0) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "[%s::onInit] Parameter 'axis' given but with a different number of values (%zu) than required (3)!",
+      this->get_name(), axis_param.size());
+    return;
   }
+
+  min_inliers_ = this->get_parameter("min_inliers").as_int();
 
   // Initialize the random number generator
   srand(time(0));
 
-  NODELET_DEBUG(
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::onInit] Nodelet successfully created with the following parameters:\n"
     " - model_type               : %d\n"
     " - method_type              : %d\n"
     " - model_threshold          : %f\n"
     " - axis                     : [%f, %f, %f]\n",
-    getName().c_str(), model_type, method_type, threshold,
+    this->get_name(), model_type, method_type, threshold,
     axis[0], axis[1], axis[2]);
 
   // Set given parameters here
   impl_.setModelType(model_type);
   impl_.setMethodType(method_type);
   impl_.setAxis(axis);
+  impl_.setDistanceThreshold(threshold);
+  impl_.setMaxIterations(this->get_parameter("max_iterations").as_int());
+  impl_.setProbability(this->get_parameter("probability").as_double());
+  impl_.setEpsAngle(this->get_parameter("eps_angle").as_double());
+  impl_.setOptimizeCoefficients(this->get_parameter("optimize_coefficients").as_bool());
+  impl_.setNormalDistanceWeight(this->get_parameter("normal_distance_weight").as_double());
+  
+  double radius_min = this->get_parameter("radius_min").as_double();
+  double radius_max = this->get_parameter("radius_max").as_double();
+  impl_.setRadiusLimits(radius_min, radius_max);
 
   onInitPostProcess();
 }
@@ -482,27 +508,28 @@ void
 pcl_ros::SACSegmentationFromNormals::subscribe()
 {
   // Subscribe to the input and normals using filters
-  sub_input_filter_.subscribe(*pnh_, "input", max_queue_size_);
-  sub_normals_filter_.subscribe(*pnh_, "normals", max_queue_size_);
+  sub_input_filter_.subscribe(*this, "input", rmw_qos_profile_sensor_data);
+  sub_normals_filter_.subscribe(*this, "normals", rmw_qos_profile_sensor_data);
 
   // Subscribe to an axis direction along which the model search is to be constrained (the first
   // 3 model coefficients will be checked)
-  sub_axis_ = pnh_->subscribe("axis", 1, &SACSegmentationFromNormals::axis_callback, this);
+  sub_axis_ = this->create_subscription<ModelCoefficients>(
+    "axis", 1, std::bind(&SACSegmentationFromNormals::axis_callback, this, std::placeholders::_1));
 
   if (approximate_sync_) {
     sync_input_normals_indices_a_ =
-      boost::make_shared<message_filters::Synchronizer<
+      std::make_shared<message_filters::Synchronizer<
           sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
   } else {
     sync_input_normals_indices_e_ =
-      boost::make_shared<message_filters::Synchronizer<
+      std::make_shared<message_filters::Synchronizer<
           sync_policies::ExactTime<PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
   }
 
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
-    sub_indices_filter_.subscribe(*pnh_, "indices", max_queue_size_);
+    sub_indices_filter_.subscribe(*this, "indices", rmw_qos_profile_default);
 
     if (approximate_sync_) {
       sync_input_normals_indices_a_->connectInput(
@@ -515,7 +542,7 @@ pcl_ros::SACSegmentationFromNormals::subscribe()
     }
   } else {
     // Create a different callback for copying over the timestamp to fake indices
-    sub_input_filter_.registerCallback(bind(&SACSegmentationFromNormals::input_callback, this, _1));
+    sub_input_filter_.registerCallback(std::bind(&SACSegmentationFromNormals::input_callback, this, std::placeholders::_1));
 
     if (approximate_sync_) {
       sync_input_normals_indices_a_->connectInput(sub_input_filter_, sub_normals_filter_, nf_);
@@ -526,14 +553,14 @@ pcl_ros::SACSegmentationFromNormals::subscribe()
 
   if (approximate_sync_) {
     sync_input_normals_indices_a_->registerCallback(
-      bind(
+      std::bind(
         &SACSegmentationFromNormals::
-        input_normals_indices_callback, this, _1, _2, _3));
+        input_normals_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   } else {
     sync_input_normals_indices_e_->registerCallback(
-      bind(
+      std::bind(
         &SACSegmentationFromNormals::
-        input_normals_indices_callback, this, _1, _2, _3));
+        input_normals_indices_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 }
 
@@ -544,7 +571,7 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe()
   sub_input_filter_.unsubscribe();
   sub_normals_filter_.unsubscribe();
 
-  sub_axis_.shutdown();
+  sub_axis_.reset();
 
   if (use_indices_) {
     sub_indices_filter_.unsubscribe();
@@ -554,99 +581,106 @@ pcl_ros::SACSegmentationFromNormals::unsubscribe()
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl_ros::SACSegmentationFromNormals::axis_callback(
-  const pcl_msgs::ModelCoefficientsConstPtr & model)
+  const ModelCoefficientsConstPtr & model)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   if (model->values.size() < 3) {
-    NODELET_ERROR(
+    RCLCPP_ERROR(
+      this->get_logger(),
       "[%s::axis_callback] Invalid axis direction / model coefficients with %zu values sent on %s!",
-      getName().c_str(), model->values.size(), pnh_->resolveName("axis").c_str());
+      this->get_name(), model->values.size(), "axis");
     return;
   }
-  NODELET_DEBUG(
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::axis_callback] Received axis direction: %f %f %f",
-    getName().c_str(), model->values[0], model->values[1], model->values[2]);
+    this->get_name(), model->values[0], model->values[1], model->values[2]);
 
   Eigen::Vector3f axis(model->values[0], model->values[1], model->values[2]);
   impl_.setAxis(axis);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
+rcl_interfaces::msg::SetParametersResult
 pcl_ros::SACSegmentationFromNormals::config_callback(
-  SACSegmentationFromNormalsConfig & config,
-  uint32_t level)
+  const std::vector<rclcpp::Parameter> & parameters)
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
 
-  if (impl_.getDistanceThreshold() != config.distance_threshold) {
-    impl_.setDistanceThreshold(config.distance_threshold);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting distance to model threshold to: %f.",
-      getName().c_str(), config.distance_threshold);
-  }
-  // The maximum allowed difference between the model normal and the given axis _in radians_
-  if (impl_.getEpsAngle() != config.eps_angle) {
-    impl_.setEpsAngle(config.eps_angle);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new epsilon angle to model threshold to: %f (%f degrees).",
-      getName().c_str(), config.eps_angle, config.eps_angle * 180.0 / M_PI);
+  for (const auto & param : parameters) {
+    if (param.get_name() == "distance_threshold") {
+      double distance_threshold = param.as_double();
+      impl_.setDistanceThreshold(distance_threshold);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting distance to model threshold to: %f.",
+        this->get_name(), distance_threshold);
+    } else if (param.get_name() == "eps_angle") {
+      double eps_angle = param.as_double();
+      impl_.setEpsAngle(eps_angle);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new epsilon angle to model threshold to: %f (%f degrees).",
+        this->get_name(), eps_angle, eps_angle * 180.0 / M_PI);
+    } else if (param.get_name() == "max_iterations") {
+      int max_iterations = param.as_int();
+      impl_.setMaxIterations(max_iterations);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new maximum number of iterations to: %d.",
+        this->get_name(), max_iterations);
+    } else if (param.get_name() == "min_inliers") {
+      min_inliers_ = param.as_int();
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new minimum number of inliers to: %d.",
+        this->get_name(), min_inliers_);
+    } else if (param.get_name() == "probability") {
+      double probability = param.as_double();
+      impl_.setProbability(probability);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new probability to: %f.",
+        this->get_name(), probability);
+    } else if (param.get_name() == "optimize_coefficients") {
+      bool optimize_coefficients = param.as_bool();
+      impl_.setOptimizeCoefficients(optimize_coefficients);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting coefficient optimization to: %s.",
+        this->get_name(), optimize_coefficients ? "true" : "false");
+    } else if (param.get_name() == "normal_distance_weight") {
+      double normal_distance_weight = param.as_double();
+      impl_.setNormalDistanceWeight(normal_distance_weight);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting new distance weight to: %f.",
+        this->get_name(), normal_distance_weight);
+    } else if (param.get_name() == "radius_min") {
+      double radius_min = param.as_double();
+      double radius_max;
+      impl_.getRadiusLimits(radius_min, radius_max);
+      impl_.setRadiusLimits(radius_min, radius_max);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting minimum allowable model radius to: %f.",
+        this->get_name(), radius_min);
+    } else if (param.get_name() == "radius_max") {
+      double radius_min, radius_max;
+      radius_max = param.as_double();
+      impl_.getRadiusLimits(radius_min, radius_max);
+      impl_.setRadiusLimits(radius_min, radius_max);
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "[%s::config_callback] Setting maximum allowable model radius to: %f.",
+        this->get_name(), radius_max);
+    }
   }
 
-  if (impl_.getMaxIterations() != config.max_iterations) {
-    impl_.setMaxIterations(config.max_iterations);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new maximum number of iterations to: %d.",
-      getName().c_str(), config.max_iterations);
-  }
-
-  // Number of inliers
-  if (min_inliers_ != config.min_inliers) {
-    min_inliers_ = config.min_inliers;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new minimum number of inliers to: %d.",
-      getName().c_str(), min_inliers_);
-  }
-
-
-  if (impl_.getProbability() != config.probability) {
-    impl_.setProbability(config.probability);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new probability to: %f.",
-      getName().c_str(), config.probability);
-  }
-
-  if (impl_.getOptimizeCoefficients() != config.optimize_coefficients) {
-    impl_.setOptimizeCoefficients(config.optimize_coefficients);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting coefficient optimization to: %s.",
-      getName().c_str(), (config.optimize_coefficients) ? "true" : "false");
-  }
-
-  if (impl_.getNormalDistanceWeight() != config.normal_distance_weight) {
-    impl_.setNormalDistanceWeight(config.normal_distance_weight);
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting new distance weight to: %f.",
-      getName().c_str(), config.normal_distance_weight);
-  }
-
-  double radius_min, radius_max;
-  impl_.getRadiusLimits(radius_min, radius_max);
-  if (radius_min != config.radius_min) {
-    radius_min = config.radius_min;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting minimum allowable model radius to: %f.",
-      getName().c_str(), radius_min);
-    impl_.setRadiusLimits(radius_min, radius_max);
-  }
-  if (radius_max != config.radius_max) {
-    radius_max = config.radius_max;
-    NODELET_DEBUG(
-      "[%s::config_callback] Setting maximum allowable model radius to: %f.",
-      getName().c_str(), radius_max);
-    impl_.setRadiusLimits(radius_min, radius_max);
-  }
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -657,7 +691,7 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   const PointIndicesConstPtr & indices
 )
 {
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   PointIndices inliers;
   ModelCoefficients model;
@@ -665,29 +699,30 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   inliers.header = model.header = fromPCL(cloud->header);
 
   if (impl_.getModelType() < 0) {
-    NODELET_ERROR("[%s::input_normals_indices_callback] Model type not set!", getName().c_str());
-    pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-    pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
+    RCLCPP_ERROR(this->get_logger(), "[%s::input_normals_indices_callback] Model type not set!", this->get_name());
+    pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+    pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
     return;
   }
 
   if (!isValid(cloud)) {  // || !isValid (cloud_normals, "normals"))
-    NODELET_ERROR("[%s::input_normals_indices_callback] Invalid input!", getName().c_str());
-    pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-    pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
+    RCLCPP_ERROR(this->get_logger(), "[%s::input_normals_indices_callback] Invalid input!", this->get_name());
+    pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+    pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
     return;
   }
   // If indices are given, check if they are valid
   if (indices && !isValid(indices)) {
-    NODELET_ERROR("[%s::input_normals_indices_callback] Invalid indices!", getName().c_str());
-    pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-    pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
+    RCLCPP_ERROR(this->get_logger(), "[%s::input_normals_indices_callback] Invalid indices!", this->get_name());
+    pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+    pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
     return;
   }
 
   /// DEBUG
   if (indices && !indices->header.frame_id.empty()) {
-    NODELET_DEBUG(
+    RCLCPP_DEBUG(
+      this->get_logger(),
       "[%s::input_normals_indices_callback]\n"
       "                                 - PointCloud with %d data points (%s), stamp %f, and "
       "frame %s on topic %s received.\n"
@@ -695,45 +730,44 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
       "frame %s on topic %s received.\n"
       "                                 - PointIndices with %zu values, stamp %f, and "
       "frame %s on topic %s received.",
-      getName().c_str(),
-      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
-        cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
-        "input").c_str(),
-      cloud_normals->width * cloud_normals->height, pcl::getFieldsList(
-        *cloud_normals).c_str(), fromPCL(
-        cloud_normals->header).stamp.toSec(),
-      cloud_normals->header.frame_id.c_str(), pnh_->resolveName("normals").c_str(),
-      indices->indices.size(), indices->header.stamp.toSec(),
-      indices->header.frame_id.c_str(), pnh_->resolveName("indices").c_str());
+      this->get_name(),
+      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), 
+      rclcpp::Time(fromPCL(cloud->header).stamp).seconds(), 
+      cloud->header.frame_id.c_str(), "input",
+      cloud_normals->width * cloud_normals->height, pcl::getFieldsList(*cloud_normals).c_str(), 
+      rclcpp::Time(fromPCL(cloud_normals->header).stamp).seconds(),
+      cloud_normals->header.frame_id.c_str(), "normals",
+      indices->indices.size(), rclcpp::Time(indices->header.stamp).seconds(),
+      indices->header.frame_id.c_str(), "indices");
   } else {
-    NODELET_DEBUG(
+    RCLCPP_DEBUG(
+      this->get_logger(),
       "[%s::input_normals_indices_callback]\n"
       "                                 - PointCloud with %d data points (%s), stamp %f, and "
       "frame %s on topic %s received.\n"
       "                                 - PointCloud with %d data points (%s), stamp %f, and "
       "frame %s on topic %s received.",
-      getName().c_str(),
-      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), fromPCL(
-        cloud->header).stamp.toSec(), cloud->header.frame_id.c_str(), pnh_->resolveName(
-        "input").c_str(),
-      cloud_normals->width * cloud_normals->height, pcl::getFieldsList(
-        *cloud_normals).c_str(), fromPCL(
-        cloud_normals->header).stamp.toSec(),
-      cloud_normals->header.frame_id.c_str(), pnh_->resolveName("normals").c_str());
+      this->get_name(),
+      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(), 
+      rclcpp::Time(fromPCL(cloud->header).stamp).seconds(), 
+      cloud->header.frame_id.c_str(), "input",
+      cloud_normals->width * cloud_normals->height, pcl::getFieldsList(*cloud_normals).c_str(), 
+      rclcpp::Time(fromPCL(cloud_normals->header).stamp).seconds(),
+      cloud_normals->header.frame_id.c_str(), "normals");
   }
   ///
-
 
   // Extra checks for safety
   int cloud_nr_points = cloud->width * cloud->height;
   int cloud_normals_nr_points = cloud_normals->width * cloud_normals->height;
   if (cloud_nr_points != cloud_normals_nr_points) {
-    NODELET_ERROR(
+    RCLCPP_ERROR(
+      this->get_logger(),
       "[%s::input_normals_indices_callback] Number of points in the input dataset (%d) differs "
       "from the number of points in the normals (%d)!",
-      getName().c_str(), cloud_nr_points, cloud_normals_nr_points);
-    pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-    pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
+      this->get_name(), cloud_nr_points, cloud_normals_nr_points);
+    pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+    pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
     return;
   }
 
@@ -766,19 +800,20 @@ pcl_ros::SACSegmentationFromNormals::input_normals_indices_callback(
   }
 
   // Publish
-  pub_indices_.publish(boost::make_shared<const PointIndices>(inliers));
-  pub_model_.publish(boost::make_shared<const ModelCoefficients>(model));
-  NODELET_DEBUG(
+  pub_indices_->publish(std::make_shared<const PointIndices>(inliers));
+  pub_model_->publish(std::make_shared<const ModelCoefficients>(model));
+  RCLCPP_DEBUG(
+    this->get_logger(),
     "[%s::input_normals_callback] Published PointIndices with %zu values on topic %s, and "
     "ModelCoefficients with %zu values on topic %s",
-    getName().c_str(), inliers.indices.size(), pnh_->resolveName("inliers").c_str(),
-    model.values.size(), pnh_->resolveName("model").c_str());
+    this->get_name(), inliers.indices.size(), "inliers",
+    model.values.size(), "model");
   if (inliers.indices.empty()) {
-    NODELET_WARN("[%s::input_indices_callback] No inliers found!", getName().c_str());
+    RCLCPP_WARN(this->get_logger(), "[%s::input_indices_callback] No inliers found!", this->get_name());
   }
 }
 
 typedef pcl_ros::SACSegmentation SACSegmentation;
 typedef pcl_ros::SACSegmentationFromNormals SACSegmentationFromNormals;
-PLUGINLIB_EXPORT_CLASS(SACSegmentation, nodelet::Nodelet)
-PLUGINLIB_EXPORT_CLASS(SACSegmentationFromNormals, nodelet::Nodelet)
+RCLCPP_COMPONENTS_REGISTER_NODE(SACSegmentation)
+RCLCPP_COMPONENTS_REGISTER_NODE(SACSegmentationFromNormals)
