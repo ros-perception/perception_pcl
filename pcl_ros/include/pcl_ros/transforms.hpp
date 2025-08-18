@@ -38,8 +38,8 @@
 #define PCL_ROS__TRANSFORMS_HPP_
 
 #include <pcl/point_cloud.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_listener.hpp>
 
 #include <Eigen/Core>
 #include <string>
