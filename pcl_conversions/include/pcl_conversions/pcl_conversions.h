@@ -41,8 +41,8 @@
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
-#include <message_filters/message_event.h>
-#include <message_filters/message_traits.h>
+#include <message_filters/message_event.hpp>
+#include <message_filters/message_traits.hpp>
 
 #include <pcl/conversions.h>
 
@@ -80,20 +80,20 @@ namespace pcl_conversions {
   /** PCLHeader <=> Header **/
 
   inline
-  void fromPCL(const std::uint64_t &pcl_stamp, rclcpp::Time &stamp)
+  void fromPCL(const std::uint64_t & pcl_stamp, rclcpp::Time & stamp)
   {
     stamp = rclcpp::Time(
-      static_cast<rcl_time_point_value_t>(pcl_stamp * 1000ull));  // Convert from us to ns
+      static_cast < rcl_time_point_value_t > (pcl_stamp * 1000ull));  // Convert from us to ns
   }
 
   inline
-  void toPCL(const rclcpp::Time &stamp, std::uint64_t &pcl_stamp)
+  void toPCL(const rclcpp::Time & stamp, std::uint64_t & pcl_stamp)
   {
-    pcl_stamp = static_cast<std::uint64_t>(stamp.nanoseconds()) / 1000ull;  // Convert from ns to us
+    pcl_stamp = static_cast < std::uint64_t > (stamp.nanoseconds()) / 1000ull;  // Convert from ns to us
   }
 
   inline
-  rclcpp::Time fromPCL(const std::uint64_t &pcl_stamp)
+  rclcpp::Time fromPCL(const std::uint64_t & pcl_stamp)
   {
     rclcpp::Time stamp;
     fromPCL(pcl_stamp, stamp);
@@ -101,7 +101,7 @@ namespace pcl_conversions {
   }
 
   inline
-  std::uint64_t toPCL(const rclcpp::Time &stamp)
+  std::uint64_t toPCL(const rclcpp::Time & stamp)
   {
     std::uint64_t pcl_stamp;
     toPCL(stamp, pcl_stamp);
@@ -111,14 +111,14 @@ namespace pcl_conversions {
   /** PCLHeader <=> Header **/
 
   inline
-  void fromPCL(const pcl::PCLHeader &pcl_header, std_msgs::msg::Header &header)
+  void fromPCL(const pcl::PCLHeader & pcl_header, std_msgs::msg::Header & header)
   {
     header.stamp = fromPCL(pcl_header.stamp);
     header.frame_id = pcl_header.frame_id;
   }
 
   inline
-  void toPCL(const std_msgs::msg::Header &header, pcl::PCLHeader &pcl_header)
+  void toPCL(const std_msgs::msg::Header & header, pcl::PCLHeader & pcl_header)
   {
     toPCL(header.stamp, pcl_header.stamp);
     // TODO(clalancette): Seq doesn't exist in the ROS2 header
@@ -130,7 +130,7 @@ namespace pcl_conversions {
   }
 
   inline
-  std_msgs::msg::Header fromPCL(const pcl::PCLHeader &pcl_header)
+  std_msgs::msg::Header fromPCL(const pcl::PCLHeader & pcl_header)
   {
     std_msgs::msg::Header header;
     fromPCL(pcl_header, header);
@@ -138,7 +138,7 @@ namespace pcl_conversions {
   }
 
   inline
-  pcl::PCLHeader toPCL(const std_msgs::msg::Header &header)
+  pcl::PCLHeader toPCL(const std_msgs::msg::Header & header)
   {
     pcl::PCLHeader pcl_header;
     toPCL(header, pcl_header);
@@ -148,7 +148,7 @@ namespace pcl_conversions {
   /** PCLImage <=> Image **/
 
   inline
-  void copyPCLImageMetaData(const pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
+  void copyPCLImageMetaData(const pcl::PCLImage & pcl_image, sensor_msgs::msg::Image & image)
   {
     fromPCL(pcl_image.header, image.header);
     image.height = pcl_image.height;
@@ -159,21 +159,21 @@ namespace pcl_conversions {
   }
 
   inline
-  void fromPCL(const pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
+  void fromPCL(const pcl::PCLImage & pcl_image, sensor_msgs::msg::Image & image)
   {
     copyPCLImageMetaData(pcl_image, image);
     image.data = pcl_image.data;
   }
 
   inline
-  void moveFromPCL(pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
+  void moveFromPCL(pcl::PCLImage & pcl_image, sensor_msgs::msg::Image & image)
   {
     copyPCLImageMetaData(pcl_image, image);
     image.data.swap(pcl_image.data);
   }
 
   inline
-  void copyImageMetaData(const sensor_msgs::msg::Image &image, pcl::PCLImage &pcl_image)
+  void copyImageMetaData(const sensor_msgs::msg::Image & image, pcl::PCLImage & pcl_image)
   {
     toPCL(image.header, pcl_image.header);
     pcl_image.height = image.height;
@@ -184,14 +184,14 @@ namespace pcl_conversions {
   }
 
   inline
-  void toPCL(const sensor_msgs::msg::Image &image, pcl::PCLImage &pcl_image)
+  void toPCL(const sensor_msgs::msg::Image & image, pcl::PCLImage & pcl_image)
   {
     copyImageMetaData(image, pcl_image);
     pcl_image.data = image.data;
   }
 
   inline
-  void moveToPCL(sensor_msgs::msg::Image &image, pcl::PCLImage &pcl_image)
+  void moveToPCL(sensor_msgs::msg::Image & image, pcl::PCLImage & pcl_image)
   {
     copyImageMetaData(image, pcl_image);
     pcl_image.data.swap(image.data);
@@ -200,7 +200,7 @@ namespace pcl_conversions {
   /** PCLPointField <=> PointField **/
 
   inline
-  void fromPCL(const pcl::PCLPointField &pcl_pf, sensor_msgs::msg::PointField &pf)
+  void fromPCL(const pcl::PCLPointField & pcl_pf, sensor_msgs::msg::PointField & pf)
   {
     pf.name = pcl_pf.name;
     pf.offset = pcl_pf.offset;
@@ -209,18 +209,24 @@ namespace pcl_conversions {
   }
 
   inline
-  void fromPCL(const std::vector<pcl::PCLPointField> &pcl_pfs, std::vector<sensor_msgs::msg::PointField> &pfs)
+  void fromPCL(
+    const std::vector < pcl::PCLPointField > &pcl_pfs,
+    std::vector < sensor_msgs::msg::PointField > &pfs)
   {
     pfs.resize(pcl_pfs.size());
-    std::vector<pcl::PCLPointField>::const_iterator it = pcl_pfs.begin();
+    std::vector < pcl::PCLPointField > ::const_iterator it = pcl_pfs.begin();
     size_t i = 0;
     for(; it != pcl_pfs.end(); ++it, ++i) {
       fromPCL(*(it), pfs[i]);
     }
+    std::sort(pfs.begin(), pfs.end(), [] (const auto & field_a, const auto & field_b)
+    {
+      return field_a.offset < field_b.offset;
+                                      });
   }
 
   inline
-  void toPCL(const sensor_msgs::msg::PointField &pf, pcl::PCLPointField &pcl_pf)
+  void toPCL(const sensor_msgs::msg::PointField & pf, pcl::PCLPointField & pcl_pf)
   {
     pcl_pf.name = pf.name;
     pcl_pf.offset = pf.offset;
@@ -229,10 +235,12 @@ namespace pcl_conversions {
   }
 
   inline
-  void toPCL(const std::vector<sensor_msgs::msg::PointField> &pfs, std::vector<pcl::PCLPointField> &pcl_pfs)
+  void toPCL(
+    const std::vector < sensor_msgs::msg::PointField > &pfs,
+    std::vector < pcl::PCLPointField > &pcl_pfs)
   {
     pcl_pfs.resize(pfs.size());
-    std::vector<sensor_msgs::msg::PointField>::const_iterator it = pfs.begin();
+    std::vector < sensor_msgs::msg::PointField > ::const_iterator it = pfs.begin();
     size_t i = 0;
     for(; it != pfs.end(); ++it, ++i) {
       toPCL(*(it), pcl_pfs[i]);
@@ -242,7 +250,9 @@ namespace pcl_conversions {
   /** PCLPointCloud2 <=> PointCloud2 **/
 
   inline
-  void copyPCLPointCloud2MetaData(const pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::msg::PointCloud2 &pc2)
+  void copyPCLPointCloud2MetaData(
+    const pcl::PCLPointCloud2 & pcl_pc2,
+    sensor_msgs::msg::PointCloud2 & pc2)
   {
     fromPCL(pcl_pc2.header, pc2.header);
     pc2.height = pcl_pc2.height;
@@ -255,21 +265,23 @@ namespace pcl_conversions {
   }
 
   inline
-  void fromPCL(const pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::msg::PointCloud2 &pc2)
+  void fromPCL(const pcl::PCLPointCloud2 & pcl_pc2, sensor_msgs::msg::PointCloud2 & pc2)
   {
     copyPCLPointCloud2MetaData(pcl_pc2, pc2);
     pc2.data = pcl_pc2.data;
   }
 
   inline
-  void moveFromPCL(pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::msg::PointCloud2 &pc2)
+  void moveFromPCL(pcl::PCLPointCloud2 & pcl_pc2, sensor_msgs::msg::PointCloud2 & pc2)
   {
     copyPCLPointCloud2MetaData(pcl_pc2, pc2);
     pc2.data.swap(pcl_pc2.data);
   }
 
   inline
-  void copyPointCloud2MetaData(const sensor_msgs::msg::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
+  void copyPointCloud2MetaData(
+    const sensor_msgs::msg::PointCloud2 & pc2,
+    pcl::PCLPointCloud2 & pcl_pc2)
   {
     toPCL(pc2.header, pcl_pc2.header);
     pcl_pc2.height = pc2.height;
@@ -282,14 +294,14 @@ namespace pcl_conversions {
   }
 
   inline
-  void toPCL(const sensor_msgs::msg::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
+  void toPCL(const sensor_msgs::msg::PointCloud2 & pc2, pcl::PCLPointCloud2 & pcl_pc2)
   {
     copyPointCloud2MetaData(pc2, pcl_pc2);
     pcl_pc2.data = pc2.data;
   }
 
   inline
-  void moveToPCL(sensor_msgs::msg::PointCloud2 &pc2, pcl::PCLPointCloud2 &pcl_pc2)
+  void moveToPCL(sensor_msgs::msg::PointCloud2 & pc2, pcl::PCLPointCloud2 & pcl_pc2)
   {
     copyPointCloud2MetaData(pc2, pcl_pc2);
     pcl_pc2.data.swap(pc2.data);
@@ -298,28 +310,28 @@ namespace pcl_conversions {
   /** pcl::PointIndices <=> pcl_msgs::PointIndices **/
 
   inline
-  void fromPCL(const pcl::PointIndices &pcl_pi, pcl_msgs::msg::PointIndices &pi)
+  void fromPCL(const pcl::PointIndices & pcl_pi, pcl_msgs::msg::PointIndices & pi)
   {
     fromPCL(pcl_pi.header, pi.header);
     pi.indices = pcl_pi.indices;
   }
 
   inline
-  void moveFromPCL(pcl::PointIndices &pcl_pi, pcl_msgs::msg::PointIndices &pi)
+  void moveFromPCL(pcl::PointIndices & pcl_pi, pcl_msgs::msg::PointIndices & pi)
   {
     fromPCL(pcl_pi.header, pi.header);
     pi.indices.swap(pcl_pi.indices);
   }
 
   inline
-  void toPCL(const pcl_msgs::msg::PointIndices &pi, pcl::PointIndices &pcl_pi)
+  void toPCL(const pcl_msgs::msg::PointIndices & pi, pcl::PointIndices & pcl_pi)
   {
     toPCL(pi.header, pcl_pi.header);
     pcl_pi.indices = pi.indices;
   }
 
   inline
-  void moveToPCL(pcl_msgs::msg::PointIndices &pi, pcl::PointIndices &pcl_pi)
+  void moveToPCL(pcl_msgs::msg::PointIndices & pi, pcl::PointIndices & pcl_pi)
   {
     toPCL(pi.header, pcl_pi.header);
     pcl_pi.indices.swap(pi.indices);
@@ -328,28 +340,28 @@ namespace pcl_conversions {
   /** pcl::ModelCoefficients <=> pcl_msgs::ModelCoefficients **/
 
   inline
-  void fromPCL(const pcl::ModelCoefficients &pcl_mc, pcl_msgs::msg::ModelCoefficients &mc)
+  void fromPCL(const pcl::ModelCoefficients & pcl_mc, pcl_msgs::msg::ModelCoefficients & mc)
   {
     fromPCL(pcl_mc.header, mc.header);
     mc.values = pcl_mc.values;
   }
 
   inline
-  void moveFromPCL(pcl::ModelCoefficients &pcl_mc, pcl_msgs::msg::ModelCoefficients &mc)
+  void moveFromPCL(pcl::ModelCoefficients & pcl_mc, pcl_msgs::msg::ModelCoefficients & mc)
   {
     fromPCL(pcl_mc.header, mc.header);
     mc.values.swap(pcl_mc.values);
   }
 
   inline
-  void toPCL(const pcl_msgs::msg::ModelCoefficients &mc, pcl::ModelCoefficients &pcl_mc)
+  void toPCL(const pcl_msgs::msg::ModelCoefficients & mc, pcl::ModelCoefficients & pcl_mc)
   {
     toPCL(mc.header, pcl_mc.header);
     pcl_mc.values = mc.values;
   }
 
   inline
-  void moveToPCL(pcl_msgs::msg::ModelCoefficients &mc, pcl::ModelCoefficients &pcl_mc)
+  void moveToPCL(pcl_msgs::msg::ModelCoefficients & mc, pcl::ModelCoefficients & pcl_mc)
   {
     toPCL(mc.header, pcl_mc.header);
     pcl_mc.values.swap(mc.values);
@@ -359,82 +371,90 @@ namespace pcl_conversions {
 
   namespace internal
   {
-    template <class T>
-    inline void move(std::vector<T> &a, std::vector<T> &b)
+    template < class T >
+    inline void move(std::vector < T > &a, std::vector < T > &b)
     {
       b.swap(a);
     }
 
-    template <class T1, class T2>
-    inline void move(std::vector<T1> &a, std::vector<T2> &b)
+    template < class T1, class T2 >
+    inline void move(std::vector < T1 > &a, std::vector < T2 > &b)
     {
       b.assign(a.cbegin(), a.cend());
     }
   }
 
   inline
-  void fromPCL(const pcl::Vertices &pcl_vert, pcl_msgs::msg::Vertices &vert)
+  void fromPCL(const pcl::Vertices & pcl_vert, pcl_msgs::msg::Vertices & vert)
   {
     vert.vertices.assign(pcl_vert.vertices.cbegin(), pcl_vert.vertices.cend());
   }
 
   inline
-  void fromPCL(const std::vector<pcl::Vertices> &pcl_verts, std::vector<pcl_msgs::msg::Vertices> &verts)
+  void fromPCL(
+    const std::vector < pcl::Vertices > &pcl_verts,
+    std::vector < pcl_msgs::msg::Vertices > &verts)
   {
     verts.resize(pcl_verts.size());
-    std::vector<pcl::Vertices>::const_iterator it = pcl_verts.begin();
-    std::vector<pcl_msgs::msg::Vertices>::iterator jt = verts.begin();
+    std::vector < pcl::Vertices > ::const_iterator it = pcl_verts.begin();
+    std::vector < pcl_msgs::msg::Vertices > ::iterator jt = verts.begin();
     for (; it != pcl_verts.end() && jt != verts.end(); ++it, ++jt) {
       fromPCL(*(it), *(jt));
     }
   }
 
   inline
-  void moveFromPCL(pcl::Vertices &pcl_vert, pcl_msgs::msg::Vertices &vert)
+  void moveFromPCL(pcl::Vertices & pcl_vert, pcl_msgs::msg::Vertices & vert)
   {
     internal::move(pcl_vert.vertices, vert.vertices);
   }
 
   inline
-  void fromPCL(std::vector<pcl::Vertices> &pcl_verts, std::vector<pcl_msgs::msg::Vertices> &verts)
+  void fromPCL(
+    std::vector < pcl::Vertices > &pcl_verts,
+    std::vector < pcl_msgs::msg::Vertices > &verts)
   {
     verts.resize(pcl_verts.size());
-    std::vector<pcl::Vertices>::iterator it = pcl_verts.begin();
-    std::vector<pcl_msgs::msg::Vertices>::iterator jt = verts.begin();
+    std::vector < pcl::Vertices > ::iterator it = pcl_verts.begin();
+    std::vector < pcl_msgs::msg::Vertices > ::iterator jt = verts.begin();
     for (; it != pcl_verts.end() && jt != verts.end(); ++it, ++jt) {
       moveFromPCL(*(it), *(jt));
     }
   }
 
   inline
-  void toPCL(const pcl_msgs::msg::Vertices &vert, pcl::Vertices &pcl_vert)
+  void toPCL(const pcl_msgs::msg::Vertices & vert, pcl::Vertices & pcl_vert)
   {
     pcl_vert.vertices.assign(vert.vertices.cbegin(), vert.vertices.cend());
   }
 
   inline
-  void toPCL(const std::vector<pcl_msgs::msg::Vertices> &verts, std::vector<pcl::Vertices> &pcl_verts)
+  void toPCL(
+    const std::vector < pcl_msgs::msg::Vertices > &verts,
+    std::vector < pcl::Vertices > &pcl_verts)
   {
     pcl_verts.resize(verts.size());
-    std::vector<pcl_msgs::msg::Vertices>::const_iterator it = verts.begin();
-    std::vector<pcl::Vertices>::iterator jt = pcl_verts.begin();
+    std::vector < pcl_msgs::msg::Vertices > ::const_iterator it = verts.begin();
+    std::vector < pcl::Vertices > ::iterator jt = pcl_verts.begin();
     for (; it != verts.end() && jt != pcl_verts.end(); ++it, ++jt) {
       toPCL(*(it), *(jt));
     }
   }
 
   inline
-  void moveToPCL(pcl_msgs::msg::Vertices &vert, pcl::Vertices &pcl_vert)
+  void moveToPCL(pcl_msgs::msg::Vertices & vert, pcl::Vertices & pcl_vert)
   {
     internal::move(vert.vertices, pcl_vert.vertices);
   }
 
   inline
-  void moveToPCL(std::vector<pcl_msgs::msg::Vertices> &verts, std::vector<pcl::Vertices> &pcl_verts)
+  void moveToPCL(
+    std::vector < pcl_msgs::msg::Vertices > &verts,
+    std::vector < pcl::Vertices > &pcl_verts)
   {
     pcl_verts.resize(verts.size());
-    std::vector<pcl_msgs::msg::Vertices>::iterator it = verts.begin();
-    std::vector<pcl::Vertices>::iterator jt = pcl_verts.begin();
+    std::vector < pcl_msgs::msg::Vertices > ::iterator it = verts.begin();
+    std::vector < pcl::Vertices > ::iterator jt = pcl_verts.begin();
     for (; it != verts.end() && jt != pcl_verts.end(); ++it, ++jt) {
       moveToPCL(*(it), *(jt));
     }
@@ -443,7 +463,7 @@ namespace pcl_conversions {
   /** pcl::PolygonMesh <=> pcl_msgs::PolygonMesh **/
 
   inline
-  void fromPCL(const pcl::PolygonMesh &pcl_mesh, pcl_msgs::msg::PolygonMesh &mesh)
+  void fromPCL(const pcl::PolygonMesh & pcl_mesh, pcl_msgs::msg::PolygonMesh & mesh)
   {
     fromPCL(pcl_mesh.header, mesh.header);
     fromPCL(pcl_mesh.cloud, mesh.cloud);
@@ -451,14 +471,14 @@ namespace pcl_conversions {
   }
 
   inline
-  void moveFromPCL(pcl::PolygonMesh &pcl_mesh, pcl_msgs::msg::PolygonMesh &mesh)
+  void moveFromPCL(pcl::PolygonMesh & pcl_mesh, pcl_msgs::msg::PolygonMesh & mesh)
   {
     fromPCL(pcl_mesh.header, mesh.header);
     moveFromPCL(pcl_mesh.cloud, mesh.cloud);
   }
 
   inline
-  void toPCL(const pcl_msgs::msg::PolygonMesh &mesh, pcl::PolygonMesh &pcl_mesh)
+  void toPCL(const pcl_msgs::msg::PolygonMesh & mesh, pcl::PolygonMesh & pcl_mesh)
   {
     toPCL(mesh.header, pcl_mesh.header);
     toPCL(mesh.cloud, pcl_mesh.cloud);
@@ -466,7 +486,7 @@ namespace pcl_conversions {
   }
 
   inline
-  void moveToPCL(pcl_msgs::msg::PolygonMesh &mesh, pcl::PolygonMesh &pcl_mesh)
+  void moveToPCL(pcl_msgs::msg::PolygonMesh & mesh, pcl::PolygonMesh & pcl_mesh)
   {
     toPCL(mesh.header, pcl_mesh.header);
     moveToPCL(mesh.cloud, pcl_mesh.cloud);
@@ -479,33 +499,35 @@ namespace pcl {
 
   /** Overload pcl::getFieldIndex **/
 
-  inline int getFieldIndex(const sensor_msgs::msg::PointCloud2 &cloud, const std::string &field_name)
+  inline int getFieldIndex(
+    const sensor_msgs::msg::PointCloud2 & cloud,
+    const std::string & field_name)
   {
     // Get the index we need
     for (size_t d = 0; d < cloud.fields.size(); ++d) {
       if (cloud.fields[d].name == field_name) {
-        return (static_cast<int>(d));
+        return  static_cast < int > (d);
       }
     }
-    return (-1);
+    return  -1;
   }
 
   /** Overload pcl::getFieldsList **/
 
-  inline std::string getFieldsList(const sensor_msgs::msg::PointCloud2 &cloud)
+  inline std::string getFieldsList(const sensor_msgs::msg::PointCloud2 & cloud)
   {
     std::string result;
     for (size_t i = 0; i < cloud.fields.size () - 1; ++i) {
       result += cloud.fields[i].name + " ";
     }
     result += cloud.fields[cloud.fields.size () - 1].name;
-    return (result);
+    return  result;
   }
 
   /** Provide pcl::toROSMsg **/
 
   inline
-  void toROSMsg(const sensor_msgs::msg::PointCloud2 &cloud, sensor_msgs::msg::Image &image)
+  void toROSMsg(const sensor_msgs::msg::PointCloud2 & cloud, sensor_msgs::msg::Image & image)
   {
     pcl::PCLPointCloud2 pcl_cloud;
     pcl_conversions::toPCL(cloud, pcl_cloud);
@@ -515,7 +537,7 @@ namespace pcl {
   }
 
   inline
-  void moveToROSMsg(sensor_msgs::msg::PointCloud2 &cloud, sensor_msgs::msg::Image &image)
+  void moveToROSMsg(sensor_msgs::msg::PointCloud2 & cloud, sensor_msgs::msg::Image & image)
   {
     pcl::PCLPointCloud2 pcl_cloud;
     pcl_conversions::moveToPCL(cloud, pcl_cloud);
@@ -524,30 +546,26 @@ namespace pcl {
     pcl_conversions::moveFromPCL(pcl_image, image);
   }
 
-  template<typename T> void
-  toROSMsg (const pcl::PointCloud<T> &cloud, sensor_msgs::msg::Image& msg)
+  template < typename T > void
+  toROSMsg(const pcl::PointCloud < T > &cloud, sensor_msgs::msg::Image & msg)
   {
     // Ease the user's burden on specifying width/height for unorganized datasets
-    if (cloud.width == 0 && cloud.height == 0)
-    {
+    if (cloud.width == 0 && cloud.height == 0) {
       throw std::runtime_error("Needs to be a dense like cloud!!");
-    }
-    else
-    {
-      if (cloud.points.size () != cloud.width * cloud.height)
+    } else {
+      if (cloud.points.size () != cloud.width * cloud.height) {
         throw std::runtime_error("The width and height do not match the cloud size!");
+      }
       msg.height = cloud.height;
       msg.width = cloud.width;
     }
 
     // sensor_msgs::image_encodings::BGR8;
     msg.encoding = "bgr8";
-    msg.step = msg.width * sizeof (std::uint8_t) * 3;
+    msg.step = msg.width * sizeof(std::uint8_t) * 3;
     msg.data.resize (msg.step * msg.height);
-    for (size_t y = 0; y < cloud.height; y++)
-    {
-      for (size_t x = 0; x < cloud.width; x++)
-      {
+    for (size_t y = 0; y < cloud.height; y++) {
+      for (size_t x = 0; x < cloud.width; x++) {
         std::uint8_t * pixel = &(msg.data[y * msg.step + x * 3]);
         memcpy (pixel, &cloud (x, y).rgb, 3 * sizeof(std::uint8_t));
       }
@@ -556,22 +574,27 @@ namespace pcl {
 
   /** Provide to/fromROSMsg for sensor_msgs::msg::PointCloud2 <=> pcl::PointCloud<T> **/
 
-  template<typename T>
-  void toROSMsg(const pcl::PointCloud<T> &pcl_cloud, sensor_msgs::msg::PointCloud2 &cloud)
+  template < typename T >
+  void toROSMsg(const pcl::PointCloud < T > &pcl_cloud, sensor_msgs::msg::PointCloud2 & cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
+#if PCL_VERSION_COMPARE(>=, 1, 14, 1)
+    // if PCL version is recent enough, request that all padding be removed to make the msg as small as possible
+    pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2, false);
+#else
     pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+#endif
     pcl_conversions::moveFromPCL(pcl_pc2, cloud);
   }
 
-  template<typename T>
-  void fromROSMsg(const sensor_msgs::msg::PointCloud2 &cloud, pcl::PointCloud<T> &pcl_cloud)
+  template < typename T >
+  void fromROSMsg(const sensor_msgs::msg::PointCloud2 & cloud, pcl::PointCloud < T > &pcl_cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
 #if PCL_VERSION_COMPARE(>=, 1, 13, 1)
     pcl_conversions::copyPointCloud2MetaData(cloud, pcl_pc2); // Like pcl_conversions::toPCL, but does not copy the binary data
     pcl::MsgFieldMap field_map;
-    pcl::createMapping<T> (pcl_pc2.fields, field_map);
+    pcl::createMapping < T > (pcl_pc2.fields, field_map);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_cloud, field_map, &cloud.data[0]);
 #else
     pcl_conversions::toPCL(cloud, pcl_pc2);
@@ -579,8 +602,8 @@ namespace pcl {
 #endif
   }
 
-  template<typename T>
-  void moveFromROSMsg(sensor_msgs::msg::PointCloud2 &cloud, pcl::PointCloud<T> &pcl_cloud)
+  template < typename T >
+  void moveFromROSMsg(sensor_msgs::msg::PointCloud2 & cloud, pcl::PointCloud < T > &pcl_cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::moveToPCL(cloud, pcl_pc2);
@@ -589,12 +612,14 @@ namespace pcl {
 
   /** Overload pcl::createMapping **/
 
-  template<typename PointT>
-  void createMapping(const std::vector<sensor_msgs::msg::PointField>& msg_fields, MsgFieldMap& field_map)
+  template < typename PointT >
+  void createMapping(
+    const std::vector < sensor_msgs::msg::PointField > &msg_fields,
+    MsgFieldMap & field_map)
   {
-    std::vector<pcl::PCLPointField> pcl_msg_fields;
+    std::vector < pcl::PCLPointField > pcl_msg_fields;
     pcl_conversions::toPCL(msg_fields, pcl_msg_fields);
-    return createMapping<PointT>(pcl_msg_fields, field_map);
+    return createMapping < PointT > (pcl_msg_fields, field_map);
   }
 
   namespace io {
@@ -602,10 +627,11 @@ namespace pcl {
     /** Overload pcl::io::savePCDFile **/
 
     inline int
-    savePCDFile(const std::string &file_name, const sensor_msgs::msg::PointCloud2 &cloud,
-                const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (),
-                const Eigen::Quaternionf &orientation = Eigen::Quaternionf::Identity (),
-                const bool binary_mode = false)
+    savePCDFile(
+      const std::string & file_name, const sensor_msgs::msg::PointCloud2 & cloud,
+      const Eigen::Vector4f & origin = Eigen::Vector4f::Zero (),
+      const Eigen::Quaternionf & orientation = Eigen::Quaternionf::Identity (),
+      const bool binary_mode = false)
     {
       pcl::PCLPointCloud2 pcl_cloud;
       pcl_conversions::toPCL(cloud, pcl_cloud);
@@ -613,10 +639,11 @@ namespace pcl {
     }
 
     inline int
-    destructiveSavePCDFile(const std::string &file_name, sensor_msgs::msg::PointCloud2 &cloud,
-                           const Eigen::Vector4f &origin = Eigen::Vector4f::Zero (),
-                           const Eigen::Quaternionf &orientation = Eigen::Quaternionf::Identity (),
-                           const bool binary_mode = false)
+    destructiveSavePCDFile(
+      const std::string & file_name, sensor_msgs::msg::PointCloud2 & cloud,
+      const Eigen::Vector4f & origin = Eigen::Vector4f::Zero (),
+      const Eigen::Quaternionf & orientation = Eigen::Quaternionf::Identity (),
+      const bool binary_mode = false)
     {
       pcl::PCLPointCloud2 pcl_cloud;
       pcl_conversions::moveToPCL(cloud, pcl_cloud);
@@ -625,7 +652,7 @@ namespace pcl {
 
     /** Overload pcl::io::loadPCDFile **/
 
-    inline int loadPCDFile(const std::string &file_name, sensor_msgs::msg::PointCloud2 &cloud)
+    inline int loadPCDFile(const std::string & file_name, sensor_msgs::msg::PointCloud2 & cloud)
     {
       pcl::PCLPointCloud2 pcl_cloud;
       int ret = pcl::io::loadPCDFile(file_name, pcl_cloud);
@@ -638,116 +665,119 @@ namespace pcl {
   /** Overload asdf **/
 
   inline
-  bool concatenatePointCloud (const sensor_msgs::msg::PointCloud2 &cloud1,
-                              const sensor_msgs::msg::PointCloud2 &cloud2,
-                              sensor_msgs::msg::PointCloud2 &cloud_out)
+  bool concatenatePointCloud(
+    const sensor_msgs::msg::PointCloud2 & cloud1,
+    const sensor_msgs::msg::PointCloud2 & cloud2,
+    sensor_msgs::msg::PointCloud2 & cloud_out)
   {
     //if one input cloud has no points, but the other input does, just return the cloud with points
-    if (cloud1.width * cloud1.height == 0 && cloud2.width * cloud2.height > 0)
-    {
+    if (cloud1.width * cloud1.height == 0 && cloud2.width * cloud2.height > 0) {
       cloud_out = cloud2;
-      return (true);
-    }
-    else if (cloud1.width*cloud1.height > 0 && cloud2.width*cloud2.height == 0)
-    {
+      return  true;
+    } else if (cloud1.width * cloud1.height > 0 && cloud2.width * cloud2.height == 0) {
       cloud_out = cloud1;
-      return (true);
+      return  true;
     }
 
     bool strip = false;
-    for (size_t i = 0; i < cloud1.fields.size (); ++i)
-      if (cloud1.fields[i].name == "_")
+    for (size_t i = 0; i < cloud1.fields.size (); ++i) {
+      if (cloud1.fields[i].name == "_") {
         strip = true;
+      }
+    }
 
-    for (size_t i = 0; i < cloud2.fields.size (); ++i)
-      if (cloud2.fields[i].name == "_")
+    for (size_t i = 0; i < cloud2.fields.size (); ++i) {
+      if (cloud2.fields[i].name == "_") {
         strip = true;
+      }
+    }
 
-    if (!strip && cloud1.fields.size () != cloud2.fields.size ())
-    {
-      PCL_ERROR ("[pcl::concatenatePointCloud] Number of fields in cloud1 (%u) != Number of fields in cloud2 (%u)\n", cloud1.fields.size (), cloud2.fields.size ());
-      return (false);
+    if (!strip && cloud1.fields.size () != cloud2.fields.size ()) {
+      PCL_ERROR (
+        "[pcl::concatenatePointCloud] Number of fields in cloud1 (%u) != Number of fields in cloud2 (%u)\n",
+        cloud1.fields.size (), cloud2.fields.size ());
+      return  false;
     }
 
     // Copy cloud1 into cloud_out
     cloud_out = cloud1;
     size_t nrpts = cloud_out.data.size ();
     // Height = 1 => no more organized
-    cloud_out.width    = cloud1.width * cloud1.height + cloud2.width * cloud2.height;
-    cloud_out.height   = 1;
-    if (!cloud1.is_dense || !cloud2.is_dense)
+    cloud_out.width = cloud1.width * cloud1.height + cloud2.width * cloud2.height;
+    cloud_out.height = 1;
+    cloud_out.row_step = cloud_out.width * cloud_out.point_step;
+    if (!cloud1.is_dense || !cloud2.is_dense) {
       cloud_out.is_dense = false;
-    else
+    } else {
       cloud_out.is_dense = true;
+    }
 
     // We need to strip the extra padding fields
-    if (strip)
-    {
+    if (strip) {
       // Get the field sizes for the second cloud
-      std::vector<sensor_msgs::msg::PointField> fields2;
-      std::vector<size_t> fields2_sizes;
-      for (size_t j = 0; j < cloud2.fields.size (); ++j)
-      {
-        if (cloud2.fields[j].name == "_")
+      std::vector < sensor_msgs::msg::PointField > fields2;
+      std::vector < size_t > fields2_sizes;
+      for (size_t j = 0; j < cloud2.fields.size (); ++j) {
+        if (cloud2.fields[j].name == "_") {
           continue;
+        }
 
         fields2_sizes.push_back(
           cloud2.fields[j].count *
-          static_cast<size_t>(pcl::getFieldSize(cloud2.fields[j].datatype)));
+          static_cast < size_t > (pcl::getFieldSize(cloud2.fields[j].datatype)));
         fields2.push_back(cloud2.fields[j]);
       }
 
       cloud_out.data.resize (nrpts + (cloud2.width * cloud2.height) * cloud_out.point_step);
 
       // Copy the second cloud
-      for (size_t cp = 0; cp < cloud2.width * cloud2.height; ++cp)
-      {
+      for (size_t cp = 0; cp < cloud2.width * cloud2.height; ++cp) {
         size_t i = 0;
-        for (size_t j = 0; j < fields2.size (); ++j)
-        {
-          if (cloud1.fields[i].name == "_")
-          {
+        for (size_t j = 0; j < fields2.size (); ++j) {
+          if (cloud1.fields[i].name == "_") {
             ++i;
             continue;
           }
 
           // We're fine with the special RGB vs RGBA use case
           if ((cloud1.fields[i].name == "rgb" && fields2[j].name == "rgba") ||
-              (cloud1.fields[i].name == "rgba" && fields2[j].name == "rgb") ||
-              (cloud1.fields[i].name == fields2[j].name))
+            (cloud1.fields[i].name == "rgba" && fields2[j].name == "rgb") ||
+            (cloud1.fields[i].name == fields2[j].name))
           {
-            memcpy (reinterpret_cast<char*> (&cloud_out.data[nrpts + cp * cloud1.point_step + cloud1.fields[i].offset]),
-                    reinterpret_cast<const char*> (&cloud2.data[cp * cloud2.point_step + cloud2.fields[j].offset]),
+            memcpy (reinterpret_cast < char * >
+              (&cloud_out.data[nrpts + cp * cloud1.point_step + cloud1.fields[i].offset]),
+                    reinterpret_cast < const char * >
+              (&cloud2.data[cp * cloud2.point_step + cloud2.fields[j].offset]),
                     fields2_sizes[j]);
             ++i;  // increment the field size i
           }
         }
       }
-    }
-    else
-    {
-      for (size_t i = 0; i < cloud1.fields.size (); ++i)
-      {
+    } else {
+      for (size_t i = 0; i < cloud1.fields.size (); ++i) {
         // We're fine with the special RGB vs RGBA use case
         if ((cloud1.fields[i].name == "rgb" && cloud2.fields[i].name == "rgba") ||
-            (cloud1.fields[i].name == "rgba" && cloud2.fields[i].name == "rgb"))
-          continue;
-        // Otherwise we need to make sure the names are the same
-        if (cloud1.fields[i].name != cloud2.fields[i].name)
+          (cloud1.fields[i].name == "rgba" && cloud2.fields[i].name == "rgb"))
         {
-          PCL_ERROR ("[pcl::concatenatePointCloud] Name of field %d in cloud1, %s, does not match name in cloud2, %s\n", i, cloud1.fields[i].name.c_str (), cloud2.fields[i].name.c_str ());
-          return (false);
+          continue;
+        }
+        // Otherwise we need to make sure the names are the same
+        if (cloud1.fields[i].name != cloud2.fields[i].name) {
+          PCL_ERROR (
+            "[pcl::concatenatePointCloud] Name of field %d in cloud1, %s, does not match name in cloud2, %s\n",
+            i, cloud1.fields[i].name.c_str (), cloud2.fields[i].name.c_str ());
+          return  false;
         }
       }
       cloud_out.data.resize (nrpts + cloud2.data.size ());
       memcpy (&cloud_out.data[nrpts], &cloud2.data[0], cloud2.data.size ());
     }
-    return (true);
+    return  true;
   }
 
 } // namespace pcl
 
-/* TODO when ROS2 type masquerading is implemented */ 
+/* TODO when ROS2 type masquerading is implemented */
 /**
 namespace ros
 {
@@ -760,7 +790,7 @@ namespace ros
       return msg;
     }
   };
-  
+
   namespace message_traits
   {
     template<>

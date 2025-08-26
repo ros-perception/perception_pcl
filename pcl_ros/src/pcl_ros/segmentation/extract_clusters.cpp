@@ -36,7 +36,7 @@
  */
 
 #include <pluginlib/class_list_macros.h>
-#include <pcl/io/io.h>
+#include <pcl/common/io.h>
 #include <pcl/PointIndices.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <vector>

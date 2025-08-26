@@ -37,10 +37,10 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <message_filters/subscriber.h>
-// #include <pcl_ros/subscriber.hpp>
 #include <nodelet_topic_tools/nodelet_mux.h>
 #include <nodelet_topic_tools/nodelet_demux.h>
+
+#include <message_filters/subscriber.hpp>
 
 typedef nodelet::NodeletMUX<sensor_msgs::PointCloud2,
     message_filters::Subscriber<sensor_msgs::PointCloud2>> NodeletMUX;

@@ -41,10 +41,9 @@
 
 // PCL includes
 #include <pcl/filters/crop_box.h>
+#include <vector>
+#include <visualization_msgs/msg/marker.hpp>
 #include "pcl_ros/filters/filter.hpp"
-
-// Dynamic reconfigure
-#include "pcl_ros/CropBoxConfig.hpp"
 
 namespace pcl_ros
 {
@@ -57,9 +56,6 @@ namespace pcl_ros
 class CropBox : public Filter
 {
 protected:
-  /** \brief Pointer to a dynamic reconfigure service. */
-  boost::shared_ptr<dynamic_reconfigure::Server<pcl_ros::CropBoxConfig>> srv_;  // TODO(xxx)
-
   /** \brief Call the actual filter.
     * \param input the input point cloud dataset
     * \param indices the input set of indices to use from \a input
@@ -67,32 +63,29 @@ protected:
     */
   inline void
   filter(
-    const PointCloud2::ConstPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-    pcl_conversions::toPCL(*(input), *(pcl_input));
-    impl_.setInputCloud(pcl_input);
-    impl_.setIndices(indices);
-    pcl::PCLPointCloud2 pcl_output;
-    impl_.filter(pcl_output);
-    pcl_conversions::moveFromPCL(pcl_output, output);
-  }
+    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
+    PointCloud2 & output) override;
 
-  /** \brief Child initialization routine.
-    * \param nh ROS node handle
-    * \param has_service set to true if the child has a Dynamic Reconfigure service
+  /** \brief Parameter callback
+    * \param params parameter values to set
     */
-  bool
-  child_init(ros::NodeHandle & nh, bool & has_service);
+  rcl_interfaces::msg::SetParametersResult
+  config_callback(const std::vector<rclcpp::Parameter> & params);
+  /** \brief Create publishers for output PointCloud2 data as well as the crop box marker. */
+  void createPublishers() override;
+  /** \brief Update the crop box marker msg. */
+  void update_marker_msg();
 
-  /** \brief Dynamic reconfigure service callback.
-    * \param config the dynamic reconfigure CropBoxConfig object
-    * \param level the dynamic reconfigure level
-    */
-  void
-  config_callback(pcl_ros::CropBoxConfig & config, uint32_t level);
+  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+  /** \brief The crop box marker msg publisher for visualization and debugging purposes. */
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr crop_box_marker_publisher_;
+  /**
+   * \brief The crop box marker message.
+   *
+   * The marker's cube gets updated whenever the min/max points are changed.
+   * The header is adjusted with every point cloud callback.
+   */
+  visualization_msgs::msg::Marker crop_box_marker_msg_;
 
 private:
   /** \brief The PCL filter implementation used. */
@@ -100,6 +93,8 @@ private:
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  explicit CropBox(const rclcpp::NodeOptions & options);
 };
 }  // namespace pcl_ros
 
