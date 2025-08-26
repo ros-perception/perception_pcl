@@ -73,11 +73,12 @@ public:
 
     if (bag_path_.empty() || topic_name_.empty() || output_directory_.empty()) {
       RCLCPP_ERROR(this->get_logger(), "Required parameter not set.");
-      RCLCPP_ERROR(this->get_logger(),
-                   "Example: ros2 run pcl_ros bag_to_pcd --ros-args "
-                   "-p bag_path:=rosbag2_2025_01_01/ "
-                   "-p topic_name:=/pointcloud "
-                   "-p output_directory:=pcds");
+      RCLCPP_ERROR(
+        this->get_logger(),
+        "Example: ros2 run pcl_ros bag_to_pcd --ros-args "
+        "-p bag_path:=rosbag2_2025_01_01/ "
+        "-p topic_name:=/pointcloud "
+        "-p output_directory:=pcds");
       throw std::runtime_error{"Required parameter not set."};
     }
 
@@ -106,7 +107,7 @@ private:
       pcl_conversions::moveToPCL(pointcloud_msg, cloud);
 
       std::stringstream ss;
-      ss << output_directory_ << "/" << msg->recv_timestamp << ".pcd";
+      ss << output_directory_ << "/" << msg->time_stamp << ".pcd";
       RCLCPP_INFO(this->get_logger(), "Writing to: %s", ss.str().c_str());
       pcl::io::savePCDFile(ss.str(), cloud);
       break;

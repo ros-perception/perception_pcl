@@ -4,11 +4,13 @@
 
 #include "pcl_conversions/pcl_conversions.h"
 
-namespace {
+namespace
+{
 
 class PCLConversionTests : public ::testing::Test {
 protected:
-  virtual void SetUp() {
+  virtual void SetUp()
+  {
     pcl_image.header.stamp = 3141592653;
     pcl_image.header.frame_id = "pcl";
     pcl_image.height = 1;
@@ -50,7 +52,8 @@ protected:
 };
 
 template<class T>
-void test_image(T &image) {
+void test_image(T & image)
+{
   EXPECT_EQ(std::string("pcl"), image.header.frame_id);
   EXPECT_EQ(1U, image.height);
   EXPECT_EQ(2U, image.width);
@@ -72,7 +75,8 @@ TEST_F(PCLConversionTests, imageConversion) {
 }
 
 template<class T>
-void test_pc(T &pc) {
+void test_pc(T & pc)
+{
   EXPECT_EQ(std::string("pcl"), pc.header.frame_id);
   EXPECT_EQ(1U, pc.height);
   EXPECT_EQ(2U, pc.width);
@@ -110,8 +114,8 @@ struct StampTestData
   const rclcpp::Time stamp_;
   rclcpp::Time stamp2_;
 
-  explicit StampTestData(const rclcpp::Time &stamp)
-    : stamp_(stamp)
+  explicit StampTestData(const rclcpp::Time & stamp)
+  : stamp_(stamp)
   {
     std::uint64_t pcl_stamp;
     pcl_conversions::toPCL(stamp_, pcl_stamp);
@@ -123,35 +127,36 @@ TEST(PCLConversionStamp, Stamps)
 {
   {
     const StampTestData d(rclcpp::Time(1, 1000));
-    EXPECT_TRUE(d.stamp_==d.stamp2_);
+    EXPECT_TRUE(d.stamp_ == d.stamp2_);
   }
 
   {
     const StampTestData d(rclcpp::Time(1, 999999000));
-    EXPECT_TRUE(d.stamp_==d.stamp2_);
+    EXPECT_TRUE(d.stamp_ == d.stamp2_);
   }
 
   {
     const StampTestData d(rclcpp::Time(1, 999000000));
-    EXPECT_TRUE(d.stamp_==d.stamp2_);
+    EXPECT_TRUE(d.stamp_ == d.stamp2_);
   }
 
   {
     const StampTestData d(rclcpp::Time(1423680574, 746000000));
-    EXPECT_TRUE(d.stamp_==d.stamp2_);
+    EXPECT_TRUE(d.stamp_ == d.stamp2_);
   }
 
   {
     const StampTestData d(rclcpp::Time(1423680629, 901000000));
-    EXPECT_TRUE(d.stamp_==d.stamp2_);
+    EXPECT_TRUE(d.stamp_ == d.stamp2_);
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   try {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-  } catch (std::exception &e) {
+  } catch (std::exception & e) {
     std::cerr << "Unhandled Exception: " << e.what() << std::endl;
   }
   return 1;

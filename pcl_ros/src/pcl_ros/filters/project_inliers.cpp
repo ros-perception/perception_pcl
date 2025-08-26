@@ -108,9 +108,9 @@ pcl_ros::ProjectInliers::subscribe()
   auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_default);
   auto sensor_qos_profile =
     rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_sensor_data);
-  sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-  sub_indices_filter_.subscribe(this, "indices", qos_profile);
-  sub_model_.subscribe(this, "model", qos_profile);
+  sub_input_filter_.subscribe(this, "input", sensor_qos_profile.get_rmw_qos_profile());
+  sub_indices_filter_.subscribe(this, "indices", qos_profile.get_rmw_qos_profile());
+  sub_model_.subscribe(this, "model", qos_profile.get_rmw_qos_profile());
 
   if (approximate_sync_) {
     sync_input_indices_model_a_ = std::make_shared<

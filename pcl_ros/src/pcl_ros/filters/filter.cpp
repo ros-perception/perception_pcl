@@ -124,8 +124,8 @@ pcl_ros::Filter::subscribe()
   if (use_indices_) {
     // Subscribe to the input using a filter
     auto sensor_qos_profile = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
-    sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
+    sub_input_filter_.subscribe(this, "input", sensor_qos_profile.get_rmw_qos_profile());
+    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile.get_rmw_qos_profile());
 
     if (approximate_sync_) {
       sync_input_indices_a_ =
@@ -182,23 +182,16 @@ pcl_ros::Filter::Filter(std::string node_name, const rclcpp::NodeOptions & optio
 void
 pcl_ros::Filter::createPublishers()
 {
-  auto pub_options = rclcpp::PublisherOptions();
-  pub_options.event_callbacks.matched_callback = [this](rclcpp::MatchedInfo & /*info*/) {
-      if (pub_output_->get_subscription_count() == 0) {
-        unsubscribe();
-      } else {
-        if (use_indices_) {
-          if (!sub_input_filter_.getSubscriber() || !sub_indices_filter_.getSubscriber()) {
-            subscribe();
-          }
-        } else {
-          if (!sub_input_) {
-            subscribe();
-          }
-        }
-      }
-    };
-  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_, pub_options);
+  if (use_indices_) {
+    if (!sub_input_filter_.getSubscriber() || !sub_indices_filter_.getSubscriber()) {
+      subscribe();
+    }
+  } else {
+    if (!sub_input_) {
+      subscribe();
+    }
+  }
+  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
