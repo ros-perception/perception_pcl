@@ -71,7 +71,7 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
   negative_desc.name = "negative";
   negative_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   negative_desc.description =
-    "Set whether the inliers should be returned (true) or the outliers (false).";
+    "Set whether the inliers should be returned (false) or the outliers (true).";
   declare_parameter(negative_desc.name, rclcpp::ParameterValue(false), negative_desc);
 
   const std::vector<std::string> param_names {
