@@ -72,8 +72,6 @@ protected:
   /** \brief The input PointCloud subscriber. */
   rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
 
-  message_filters::Subscriber<PointCloud2> sub_input_filter_;
-
   /** \brief The input TF frame the data should be transformed into,
     * if input.header.frame_id is different.
     */
