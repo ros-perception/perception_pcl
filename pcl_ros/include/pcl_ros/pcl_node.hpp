@@ -147,7 +147,8 @@ class PCLNode<Input<In...>, Output<Out...>>: public rclcpp::Node
 
 public:
   /** \brief Empty constructor. */
-  PCLNode(std::string node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
+  PCLNode(
+    std::string node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
     std::vector<std::string> input_topics = {},
     std::vector<std::string> output_topics = {})
   : rclcpp::Node(node_name, options),
@@ -184,9 +185,11 @@ public:
       desc.name = "input_frame";
       desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
       desc.description =
-      "The input TF frame the data should be transformed into before processing, "
-      "if input.header.frame_id is different.";
-      tf_input_frame_ = declare_parameter(desc.name, rclcpp::ParameterValue(""), desc).get<std::string>();
+        "The input TF frame the data should be transformed into before processing, "
+        "if input.header.frame_id is different.";
+      tf_input_frame_ = declare_parameter(
+        desc.name, rclcpp::ParameterValue(""),
+        desc).get<std::string>();
     }
 
     {
@@ -194,9 +197,11 @@ public:
       desc.name = "output_frame";
       desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
       desc.description =
-      "The output TF frame the data should be transformed into before processing, "
-      "if output.header.frame_id is different.";
-      tf_output_frame_ = declare_parameter(desc.name, rclcpp::ParameterValue(""), desc).get<std::string>();
+        "The output TF frame the data should be transformed into before processing, "
+        "if output.header.frame_id is different.";
+      tf_output_frame_ = declare_parameter(
+        desc.name, rclcpp::ParameterValue(""),
+        desc).get<std::string>();
     }
 
     // Register param callback handler
@@ -242,9 +247,7 @@ protected:
    */
   virtual void compute(const In &... inputs, Out &... output) = 0;
 
-
 private:
-
   /**
    * @brief Internal mutex.
    */
@@ -378,9 +381,13 @@ private:
     }
 
     // Check whether the user has given a different input TF frame
-    InputsTuple transformed{};
-    if (!transformInputs(std::make_index_sequence<NInputs>{}, transformed, inputs ...)) {
-      // transformInputs already logged the reason
+    auto in_ptr_tuple = std::forward_as_tuple(inputs ...);
+
+    InputsTuple transformed_inputs{};
+    if (!transformMessages(
+        std::make_index_sequence<NInputs>{}, transformed_inputs, in_ptr_tuple, tf_input_frame_))
+    {
+      // transformMessages already logged the reason
       return;
     }
 
@@ -396,10 +403,18 @@ private:
           },
           outputs);
       },
-      transformed);
+      transformed_inputs);
+
+    // Check whether the user has given a different input TF frame
+    OutputsTuple transformed_outputs{};
+    if (!transformMessages(std::make_index_sequence<NOutputs>{}, transformed_outputs, outputs, tf_output_frame_))
+    {
+      // transformMessages already logged the reason
+      return;
+    }
 
     // Publish all outputs
-    publishOutputs(outputs, std::make_index_sequence<NOutputs>{});
+    publishOutputs(transformed_outputs, std::make_index_sequence<NOutputs>{});
   }
 
   /**
@@ -506,51 +521,104 @@ private:
     ( ( std::get<I>(mf_subs_).unsubscribe() ), ... );
   }
 
-  template<std::size_t... I>
-  bool transformInputs(
-    std::index_sequence<I...>, InputsTuple & out,
-    const typename In::ConstSharedPtr &... inputs)
+  template<typename T>
+  struct is_const_shared_ptr : std::false_type {};
+
+  template<typename T>
+  struct is_const_shared_ptr<std::shared_ptr<const T>>: std::true_type {};
+
+  template<typename T>
+  static constexpr bool is_const_shared_ptr_v = is_const_shared_ptr<T>::value;
+
+  template<typename DestTuple, typename SourceTuple, std::size_t... Is>
+  bool transformMessages(
+    std::index_sequence<Is...>,
+    DestTuple & dest_tuple,
+    const SourceTuple & src_tuple,
+    const std::string & target_frame)
   {
     bool ok = true;
-    auto in_tuple = std::forward_as_tuple(inputs ...);
 
-    // If no target frame is set, just copy everything through.
-    if (tf_input_frame_.empty()) {
-      ( ( std::get<I>(out) = *std::get<I>(in_tuple) ), ... );
-      return true;
-    }
+    // No target frame specified
+    if (target_frame.empty()) {
+      (void)std::initializer_list<int>{
+        ( [&] {
+          // Get the source element (either a smart ptr or a value)
+          const auto & src_element = std::get<Is>(src_tuple);
+          using SrcElementT = std::remove_cv_t<std::remove_reference_t<decltype(src_element)>>;
 
-    (void)std::initializer_list<int>{
-      ( [&] {
-        using MsgT = std::tuple_element_t<I, InputsTuple>;
-        const auto & in = std::get<I>(in_tuple);
-        if (!in) {
-          ok = false;
-          RCLCPP_ERROR(get_logger(), "Null input at index %zu.", static_cast<size_t>(I));
-          return;
-        }
-
-        if constexpr (std::is_same<MsgT, PointCloud2>::value) {
-          // Only transform PointCloud2; others are pass-through.
-          if (in->header.frame_id != tf_input_frame_) {
-            if (!pcl_ros::transformPointCloud(tf_input_frame_, *in, std::get<I>(out), tf_buffer_)) {
+          if constexpr (is_const_shared_ptr_v<SrcElementT>) {
+            if (!src_element) {
               RCLCPP_ERROR(
-                get_logger(),
-                "TF transform failed for input %zu: '%s' -> '%s'.",
-                static_cast<size_t>(I), in->header.frame_id.c_str(), tf_input_frame_.c_str());
+                get_logger(), "Null at index %zu, skipping copy.",
+                static_cast<size_t>(Is));
               ok = false;
               return;
             }
-            // Preserve timestamp; ensure frame matches target.
-            std::get<I>(out).header.stamp = in->header.stamp;
-            std::get<I>(out).header.frame_id = tf_input_frame_;
+            std::get<Is>(dest_tuple) = *src_element;
           } else {
-            // Already in target frame
-            std::get<I>(out) = *in;
+            std::get<Is>(dest_tuple) = src_element;
+          }
+        }(),
+        0 )...
+      };
+      return ok;
+    }
+
+    // Transform to target frame
+    (void)std::initializer_list<int>{
+      ( [&] {
+        // Get the *destination* message type (e.g., PointCloud2)
+        using DestMsgT = std::tuple_element_t<Is, DestTuple>;
+        // Get the *source* element (smart ptr or value)
+        const auto & src_element = std::get<Is>(src_tuple);
+        using SrcElementT = std::remove_cv_t<std::remove_reference_t<decltype(src_element)>>;
+
+        auto get_msg_ptr = [&]() -> const DestMsgT * {
+          if constexpr (is_const_shared_ptr_v<SrcElementT>) {
+            if (!src_element) {
+              RCLCPP_ERROR(
+                get_logger(), "Null at index %zu.",
+                static_cast<size_t>(Is));
+              ok = false;
+              return nullptr;
+            }
+            return &(*src_element);
+          } else {
+            return &(static_cast<const DestMsgT &>(src_element));
+          }
+        };
+
+        const DestMsgT * msg_in_ptr = get_msg_ptr();
+        if (!msg_in_ptr) {
+          return;
+        }
+
+        const DestMsgT & msg_in = *msg_in_ptr;
+        auto & msg_out = std::get<Is>(dest_tuple);
+
+        if constexpr (std::is_same_v<DestMsgT, PointCloud2>) {
+          // This is a PointCloud2, transform it.
+          if (msg_in.header.frame_id != target_frame) {
+            if (!pcl_ros::transformPointCloud(target_frame, msg_in, msg_out, tf_buffer_)) {
+              RCLCPP_ERROR(
+                get_logger(),
+                "TF transform failed for %zu: '%s' -> '%s'.",
+                static_cast<size_t>(Is),
+                msg_in.header.frame_id.c_str(), target_frame.c_str());
+              ok = false;
+              return;
+            }
+            // Preserve stamp, set new frame
+            msg_out.header.stamp = msg_in.header.stamp;
+            msg_out.header.frame_id = target_frame;
+          } else {
+            // Already in target frame, just copy.
+            msg_out = msg_in;
           }
         } else {
-          // Non-cloud types (e.g., indices, model coeffs) just copy through
-          std::get<I>(out) = *in;
+          // Not a PointCloud2, just copy it through.
+          msg_out = msg_in;
         }
       }(),
       0 )...
