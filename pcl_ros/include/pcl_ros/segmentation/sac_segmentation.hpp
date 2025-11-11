@@ -46,105 +46,46 @@
 
 // PCL includes
 #include <pcl/segmentation/sac_segmentation.h>
+#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
-namespace sync_policies = message_filters::sync_policies;
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 /** \brief @b SACSegmentation represents a segmentation class for Sample Consensus
   * methods and models, in the sense that it just creates a wrapper for generic-purpose
   * SAC-based segmentation.
   * \author Radu Bogdan Rusu
+  * \author Antonio Brandi
   */
-class SACSegmentation : public PCLNode<pcl_msgs::msg::PointIndices>
+class SACSegmentation : public PCLNode<Input<PointCloud2>, Output<PointIndices, ModelCoefficients>>
 {
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  explicit SACSegmentation(const rclcpp::NodeOptions & options);
-
-protected:
-  /** \brief declare and subscribe to param callback for input_frame and output_frame params */
-  void
-  use_frame_params();
-
-  /** \brief The input PointCloud subscriber. */
-  rclcpp::Subscription<PointCloud2>::SharedPtr sub_input_;
-
-  /** \brief The input TF frame the data should be transformed into,
-    * if input.header.frame_id is different.
-    */
-  std::string tf_input_frame_;
-
-  /** \brief The original data input TF frame. */
-  std::string tf_input_orig_frame_;
-
-  /** \brief The output TF frame the data should be transformed into,
-    * if input.header.frame_id is different.
-    */
-  std::string tf_output_frame_;
-
-  /** \brief Internal mutex. */
-  std::mutex mutex_;
-
-  /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    * \param model the coefficients of the segmented model
-    */
-  inline void
-  segment(
-    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointIndices & output, ModelCoefficients & model);
-
-  /** \brief Lazy transport subscribe routine. */
-  virtual void
-  subscribe();
-
-  /** \brief Lazy transport unsubscribe routine. */
-  virtual void
-  unsubscribe();
-
-  /** \brief Create publishers for output PointCloud2 data. */
-  virtual void
-  createPublishers();
-
-  /** \brief Call the child filter () method, optionally transform the result, and publish it.
-    * \param input the input point cloud dataset.
-    * \param indices a pointer to the vector of point indices to use.
-    */
-  void
-  computePublish(const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices);
-
 private:
-  /** \brief Pointer to parameters callback handle. */
-  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-
-  /** \brief Synchronized input, and indices.*/
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
-    PointIndices>>> sync_input_indices_e_;
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
-    PointIndices>>> sync_input_indices_a_;
-
-  /** \brief The output ModelCoefficients publisher. */
-  rclcpp::Publisher<ModelCoefficients>::SharedPtr pub_model_;
-
-  /** \brief Parameter callback
-    * \param params parameter values to set
-    */
-  rcl_interfaces::msg::SetParametersResult
-  config_callback(const std::vector<rclcpp::Parameter> & params);
-
-  /** \brief PointCloud2 + Indices data callback. */
-  void
-  input_indices_callback(
-    const PointCloud2::ConstSharedPtr & cloud,
-    const PointIndices::ConstSharedPtr & indices);
+  /** \brief Tolerance for comparing floating point parameters */
+  static constexpr double PARAMETER_TOLERANCE = 1e-6;
 
   /** \brief The PCL implementation used. */
   pcl::SACSegmentation<pcl::PointXYZ> impl_;
+
+  /** \brief Parameter callback
+    * \param params parameter values to set.
+    */
+  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+    const std::vector<rclcpp::Parameter> & params) override;
+
+public:
+  /** \brief Constructor
+    * \param options A rclcpp::NodeOptions to be passed to the node.
+    */
+  explicit SACSegmentation(const rclcpp::NodeOptions & options);
+
+  /** \brief Call the actual filter.
+    * \param input the input point cloud dataset
+    * \param indices the output indices that contain the inliers found
+    * \param model the resultant model coefficients
+    */
+  virtual void compute(
+    const PointCloud2 & input, PointIndices & indices,
+    ModelCoefficients & model) override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////

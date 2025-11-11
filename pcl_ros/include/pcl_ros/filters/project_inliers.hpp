@@ -41,9 +41,7 @@
 // PCL includes
 #include <pcl/filters/project_inliers.h>
 #include <memory>
-#include "pcl_ros/filters/filter.hpp"
-#include <message_filters/subscriber.hpp>
-
+#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
@@ -53,50 +51,33 @@ namespace sync_policies = message_filters::sync_policies;
   * separate PointCloud.
   * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
   * \author Radu Bogdan Rusu
+  * \author Antonio Brandi
   */
-class ProjectInliers : public Filter
+class ProjectInliers : public PCLNode<Input<PointCloud2, PointIndices, ModelCoefficients>,
+    Output<PointCloud2>>
 {
-public:
-  explicit ProjectInliers(const rclcpp::NodeOptions & options);
-
-protected:
-  /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    */
-  inline void
-  filter(
-    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output) override;
-
 private:
-  /** \brief A pointer to the vector of model coefficients. */
-  ModelCoefficientsConstPtr model_;
-
-  /** \brief The message filter subscriber for model coefficients. */
-  message_filters::Subscriber<ModelCoefficients> sub_model_;
-
-  /** \brief Synchronized input, indices, and model coefficients.*/
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud2,
-    PointIndices, ModelCoefficients>>> sync_input_indices_model_e_;
-  std::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud2,
-    PointIndices, ModelCoefficients>>> sync_input_indices_model_a_;
   /** \brief The PCL filter implementation used. */
   pcl::ProjectInliers<pcl::PCLPointCloud2> impl_;
 
-  void subscribe() override;
-  void unsubscribe() override;
-
-  /** \brief PointCloud2 + Indices + Model data callback. */
-  void
-  input_indices_model_callback(
-    const PointCloud2::ConstSharedPtr & cloud,
-    const PointIndicesConstPtr & indices,
-    const ModelCoefficientsConstPtr & model);
+  /** \brief Parameter callback
+    * \param params parameter values to set.
+    */
+  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+    const std::vector<rclcpp::Parameter> & params) override;
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  explicit ProjectInliers(const rclcpp::NodeOptions & options);
+
+  /** \brief Calls the actual StatisticalOutlierRemoval PCL filter.
+    * \param input the input point cloud dataset.
+    * \param indices the input set of indices to use from the input dataset.
+    * \param model the model coefficients to use for filtering.
+    * \param output the resultant filtered dataset.
+    */
+  void compute(
+    const PointCloud2 & input, const PointIndices & indices,
+    const ModelCoefficients & model, PointCloud2 & output) override;
 };
 }  // namespace pcl_ros
 

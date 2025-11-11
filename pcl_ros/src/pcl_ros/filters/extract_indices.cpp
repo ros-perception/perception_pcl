@@ -37,50 +37,39 @@
 
 #include "pcl_ros/filters/extract_indices.hpp"
 
-pcl_ros::ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
-: Filter("ExtractIndicesNode", options)
+namespace pcl_ros
+{
+ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
+: PCLNode("ExtractIndicesNode", options, std::vector<std::string>{"input", "indices"},
+    std::vector<std::string>{"output"})
 {
   rcl_interfaces::msg::ParameterDescriptor neg_desc;
   neg_desc.name = "negative";
   neg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   neg_desc.description = "Extract indices or the negative (all-indices)";
   declare_parameter(neg_desc.name, rclcpp::ParameterValue(false), neg_desc);
-
-  // Validate initial values using same callback
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(&ExtractIndices::config_callback, this, std::placeholders::_1));
-
-  std::vector<std::string> param_names{neg_desc.name};
-  auto result = config_callback(get_parameters(param_names));
-  if (!result.successful) {
-    throw std::runtime_error(result.reason);
-  }
-
-  createPublishers();
 }
 
-void
-pcl_ros::ExtractIndices::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
+void ExtractIndices::compute(
+  const PointCloud2 & input, const PointIndices & indices,
   PointCloud2 & output)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
+
+  IndicesPtr pcl_indices (new pcl::PointIndices);
+  pcl_indices->indices = indices.indices;
+  impl_.setIndices(pcl_indices);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-rcl_interfaces::msg::SetParametersResult
-pcl_ros::ExtractIndices::config_callback(const std::vector<rclcpp::Parameter> & params)
+rcl_interfaces::msg::SetParametersResult ExtractIndices::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   for (const rclcpp::Parameter & param : params) {
     if (param.get_name() == "negative") {
       // Check the current value for the negative flag
@@ -97,6 +86,7 @@ pcl_ros::ExtractIndices::config_callback(const std::vector<rclcpp::Parameter> & 
   result.successful = true;
   return result;
 }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::ExtractIndices)

@@ -38,12 +38,12 @@
 
 #include "pcl_ros/filters/crop_box.hpp"
 
-pcl_ros::CropBox::CropBox(const rclcpp::NodeOptions & options)
-: Filter("CropBoxNode", options)
+namespace pcl_ros
 {
-  // This both declares and initializes the input and output frames
-  use_frame_params();
-
+CropBox::CropBox(const rclcpp::NodeOptions & options)
+: PCLNode("CropBoxNode", options, std::vector<std::string>{"input"},
+    std::vector<std::string>{"output", "~/crop_box_marker"})
+{
   rcl_interfaces::msg::ParameterDescriptor min_x_desc;
   min_x_desc.name = "min_x";
   min_x_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -136,58 +136,33 @@ pcl_ros::CropBox::CropBox(const rclcpp::NodeOptions & options)
   negative_desc.description =
     "Set whether the inliers should be returned (true) or the outliers (false).";
   declare_parameter(negative_desc.name, rclcpp::ParameterValue(false), negative_desc);
-
-  const std::vector<std::string> param_names {
-    min_x_desc.name,
-    max_x_desc.name,
-    min_y_desc.name,
-    max_y_desc.name,
-    min_z_desc.name,
-    max_z_desc.name,
-    keep_organized_desc.name,
-    negative_desc.name,
-  };
-
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &CropBox::config_callback, this,
-      std::placeholders::_1));
-
-  config_callback(get_parameters(param_names));
-
-  createPublishers();
 }
 
-void
-pcl_ros::CropBox::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointCloud2 & output)
+void CropBox::compute(
+  const PointCloud2 & input, PointCloud2 & output,
+  visualization_msgs::msg::Marker & marker)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
+  if(input.data.empty()) {
+    output = input;
+    return;
+  }
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
   // Publish the crop box as a cube marker for visualization purposes
-  if (crop_box_marker_publisher_->get_subscription_count() > 0) {
-    crop_box_marker_msg_.header.frame_id =
-      tf_input_frame_.empty() ? input->header.frame_id : tf_input_frame_;
-    crop_box_marker_msg_.header.stamp = input->header.stamp;
-    crop_box_marker_publisher_->publish(crop_box_marker_msg_);
-  }
+  crop_box_marker_msg_.header.frame_id = input.header.frame_id;
+  crop_box_marker_msg_.header.stamp = input.header.stamp;
+  marker = crop_box_marker_msg_;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-rcl_interfaces::msg::SetParametersResult
-pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
+rcl_interfaces::msg::SetParametersResult CropBox::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   Eigen::Vector4f min_point, max_point;
   min_point = impl_.getMin();
   max_point = impl_.getMax();
@@ -252,7 +227,7 @@ pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
     crop_box_marker_updated = true;
   }
   if (crop_box_marker_updated) {
-    update_marker_msg();
+    updateMarkerMsg();
   }
 
   // Range constraints are enforced by rclcpp::Parameter.
@@ -261,14 +236,7 @@ pcl_ros::CropBox::config_callback(const std::vector<rclcpp::Parameter> & params)
   return result;
 }
 
-void pcl_ros::CropBox::createPublishers()
-{
-  pcl_ros::Filter::createPublishers();
-  crop_box_marker_publisher_ = create_publisher<visualization_msgs::msg::Marker>(
-    "~/crop_box_marker", max_queue_size_);
-}
-
-void pcl_ros::CropBox::update_marker_msg()
+void CropBox::updateMarkerMsg()
 {
   auto min_point = impl_.getMin();
   auto max_point = impl_.getMax();
@@ -288,6 +256,7 @@ void pcl_ros::CropBox::update_marker_msg()
   crop_box_marker_msg_.scale.y = size.y();
   crop_box_marker_msg_.scale.z = size.z();
 }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::CropBox)

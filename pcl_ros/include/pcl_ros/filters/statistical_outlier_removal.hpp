@@ -41,7 +41,7 @@
 // PCL includes
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <vector>
-#include "pcl_ros/filters/filter.hpp"
+#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
@@ -55,36 +55,34 @@ namespace pcl_ros
   *
   * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
   * \author Radu Bogdan Rusu
+  * \author Antonio Brandi
   */
-class StatisticalOutlierRemoval : public Filter
+class StatisticalOutlierRemoval : public PCLNode<Input<PointCloud2>, Output<PointCloud2>>
 {
-protected:
-  /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    */
-  inline void
-  filter(
-    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output) override;
-
-  /** \brief Parameter callback
-    * \param params parameter values to set
-    */
-  rcl_interfaces::msg::SetParametersResult
-  config_callback(const std::vector<rclcpp::Parameter> & params);
-
-  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-
 private:
+  /** \brief Tolerance for comparing floating point parameters */
+  static constexpr double PARAMETER_TOLERANCE = 1e-6;
+
   /** \brief The PCL filter implementation used. */
   pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> impl_;
 
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  /** \brief Parameter callback
+    * \param params parameter values to set.
+    */
+  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+    const std::vector<rclcpp::Parameter> & params) override;
 
+public:
+  /** \brief Constructor
+    * \param options A rclcpp::NodeOptions to be passed to the node.
+    */
   explicit StatisticalOutlierRemoval(const rclcpp::NodeOptions & options);
+
+  /** \brief Calls the actual StatisticalOutlierRemoval PCL filter.
+    * \param input the input point cloud dataset.
+    * \param output the resultant filtered dataset.
+    */
+  void compute(const PointCloud2 & input, PointCloud2 & output) override;
 };
 }  // namespace pcl_ros
 

@@ -43,8 +43,11 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+namespace pcl_ros
+{
 pcl_ros::SACSegmentation::SACSegmentation(const rclcpp::NodeOptions & options)
-: PCLNode("SACSegmentationNode", options)
+: PCLNode("SACSegmentationNode", options, std::vector<std::string>{"input"},
+    std::vector<std::string>{"indices", "model"})
 {
   rcl_interfaces::msg::ParameterDescriptor model_type_desc;
   model_type_desc.name = "model_type";
@@ -161,236 +164,32 @@ pcl_ros::SACSegmentation::SACSegmentation(const rclcpp::NodeOptions & options)
   declare_parameter(
     radius_max_desc.name, rclcpp::ParameterValue(
       std::numeric_limits<double>::max()), radius_max_desc);
-
-  std::vector<std::string> param_names {
-    model_type_desc.name,
-    distance_threshold_desc.name,
-    eps_angle_desc.name,
-    method_type_desc.name,
-    axis_desc.name,
-    max_iterations_desc.name,
-    probability_desc.name,
-    optimize_coefficients_desc.name,
-    radius_min_desc.name,
-    radius_max_desc.name
-  };
-
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &SACSegmentation::config_callback, this,
-      std::placeholders::_1));
-
-  config_callback(get_parameters(param_names));
-
-  createPublishers();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::computePublish(
-  const PointCloud2::ConstSharedPtr & input,
-  const IndicesPtr & indices)
+void SACSegmentation::compute(
+  const PointCloud2 & input, PointIndices & indices, ModelCoefficients & model)
 {
-  PointCloud2::UniquePtr cloud_tf(new PointCloud2(*input));     // set the output by default
-  // Check whether the user has given a different output TF frame
-  if (!tf_output_frame_.empty() && input->header.frame_id != tf_output_frame_) {
-    RCLCPP_DEBUG(
-      this->get_logger(), "Transforming input dataset from %s to %s.",
-      input->header.frame_id.c_str(), tf_output_frame_.c_str());
-    // Convert the cloud into the different frame
-    PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud(tf_output_frame_, *input, cloud_transformed, tf_buffer_)) {
-      RCLCPP_ERROR(
-        this->get_logger(), "Error converting input dataset from %s to %s.",
-        input->header.frame_id.c_str(), tf_output_frame_.c_str());
-      return;
-    }
-    cloud_tf.reset(new PointCloud2(cloud_transformed));
-  }
-  if (tf_output_frame_.empty() && input->header.frame_id != tf_input_orig_frame_) {
-    // no tf_output_frame given, transform the dataset to its original frame
-    RCLCPP_DEBUG(
-      this->get_logger(), "Transforming input dataset from %s back to %s.",
-      input->header.frame_id.c_str(), tf_input_orig_frame_.c_str());
-    // Convert the cloud into the different frame
-    PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud(
-        tf_input_orig_frame_, *input, cloud_transformed,
-        tf_buffer_))
-    {
-      RCLCPP_ERROR(
-        this->get_logger(), "Error converting input dataset from %s back to %s.",
-        input->header.frame_id.c_str(), tf_input_orig_frame_.c_str());
-      return;
-    }
-    cloud_tf.reset(new PointCloud2(cloud_transformed));
+  if(input.data.empty()) {
+    indices.header = model.header = input.header;
+    return;
   }
 
-  PointIndices output;
-  ModelCoefficients model;
-  output.header = model.header = input->header;
-  // Call the virtual method in the child
-  if (!input->data.empty()) {
-    segment(input, indices, output, model);
-  } else {
-    RCLCPP_DEBUG(this->get_logger(), "Received empty input point cloud");
-  }
-
-  // Publish the unique ptr
-  pub_output_->publish(move(output));
-  pub_model_->publish(move(model));
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::subscribe()
-{
-  // If we're supposed to look for PointIndices (indices)
-  if (use_indices_) {
-    // Subscribe to the input using a filter
-    auto sensor_qos_profile = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
-    sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
-
-    if (approximate_sync_) {
-      sync_input_indices_a_ =
-        std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<PointCloud2,
-          pcl_msgs::msg::PointIndices>>>(max_queue_size_);
-      sync_input_indices_a_->connectInput(sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_a_->registerCallback(
-        std::bind(
-          &SACSegmentation::input_indices_callback, this,
-          std::placeholders::_1, std::placeholders::_2));
-    } else {
-      sync_input_indices_e_ =
-        std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ExactTime<PointCloud2,
-          pcl_msgs::msg::PointIndices>>>(max_queue_size_);
-      sync_input_indices_e_->connectInput(sub_input_filter_, sub_indices_filter_);
-      sync_input_indices_e_->registerCallback(
-        std::bind(
-          &SACSegmentation::input_indices_callback, this,
-          std::placeholders::_1, std::placeholders::_2));
-    }
-  } else {
-    // Workaround for a callback with custom arguments ros2/rclcpp#766
-    std::function<void(PointCloud2::ConstSharedPtr)> callback =
-      std::bind(&SACSegmentation::input_indices_callback, this, std::placeholders::_1, nullptr);
-
-    // Subscribe in an old fashion to input only (no filters)
-    sub_input_ =
-      this->create_subscription<PointCloud2>(
-      "input", rclcpp::SensorDataQoS().keep_last(max_queue_size_),
-      callback);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::unsubscribe()
-{
-  if (use_indices_) {
-    sub_input_filter_.unsubscribe();
-    sub_indices_filter_.unsubscribe();
-  } else {
-    sub_input_.reset();
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::createPublishers()
-{
-  if (use_indices_) {
-    if (!sub_input_filter_.getSubscriber() || !sub_indices_filter_.getSubscriber()) {
-      subscribe();
-    }
-  } else {
-    if (!sub_input_) {
-      subscribe();
-    }
-  }
-  pub_output_ = create_publisher<PointIndices>("output", max_queue_size_);
-  pub_model_ = create_publisher<ModelCoefficients>("model", max_queue_size_);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::use_frame_params()
-{
-  rcl_interfaces::msg::ParameterDescriptor input_frame_desc;
-  input_frame_desc.name = "input_frame";
-  input_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-  input_frame_desc.description =
-    "The input TF frame the data should be transformed into before processing, "
-    "if input.header.frame_id is different.";
-  declare_parameter(input_frame_desc.name, rclcpp::ParameterValue(""), input_frame_desc);
-
-  rcl_interfaces::msg::ParameterDescriptor output_frame_desc;
-  output_frame_desc.name = "output_frame";
-  output_frame_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-  output_frame_desc.description =
-    "The output TF frame the data should be transformed into after processing, "
-    "if input.header.frame_id is different.";
-  declare_parameter(output_frame_desc.name, rclcpp::ParameterValue(""), output_frame_desc);
-
-  // Validate initial values using same callback
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &SACSegmentation::config_callback, this,
-      std::placeholders::_1));
-
-  std::vector<std::string> param_names{input_frame_desc.name, output_frame_desc.name};
-  auto result = config_callback(get_parameters(param_names));
-  if (!result.successful) {
-    throw std::runtime_error(result.reason);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::segment(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointIndices & output, ModelCoefficients & model)
-{
-  std::lock_guard<std::mutex> lock(mutex_);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_input(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::fromROSMsg(*input, *pcl_input);
+  pcl::fromROSMsg(input, *pcl_input);
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
   pcl::PointIndices::Ptr pcl_inliers(new pcl::PointIndices());
   pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
   impl_.segment(*pcl_inliers, *pcl_model);
-  pcl_conversions::moveFromPCL(*pcl_inliers, output);
+  pcl_conversions::moveFromPCL(*pcl_inliers, indices);
   pcl_conversions::moveFromPCL(*pcl_model, model);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-rcl_interfaces::msg::SetParametersResult
-pcl_ros::SACSegmentation::config_callback(const std::vector<rclcpp::Parameter> & params)
+rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   for (const rclcpp::Parameter & param : params) {
-    if (param.get_name() == "input_frame") {
-      if (tf_input_frame_ != param.as_string()) {
-        tf_input_frame_ = param.as_string();
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Setting the input frame to: %s.",
-          tf_input_frame_.c_str());
-      }
-    }
-    if (param.get_name() == "output_frame") {
-      if (tf_output_frame_ != param.as_string()) {
-        tf_output_frame_ = param.as_string();
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Setting the output frame to: %s.",
-          tf_output_frame_.c_str());
-      }
-    }
     if (param.get_name() == "model_type") {
       int model_type = impl_.getModelType();
       if (model_type != param.as_int()) {
@@ -504,70 +303,6 @@ pcl_ros::SACSegmentation::config_callback(const std::vector<rclcpp::Parameter> &
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
   return result;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::SACSegmentation::input_indices_callback(
-  const PointCloud2::ConstSharedPtr & cloud,
-  const PointIndices::ConstSharedPtr & indices)
-{
-  // If cloud is given, check if it's valid
-  if (!isValid(cloud)) {
-    RCLCPP_ERROR(this->get_logger(), "Invalid input!");
-    return;
-  }
-  // If indices are given, check if they are valid
-  if (indices && !isValid(indices)) {
-    RCLCPP_ERROR(this->get_logger(), "Invalid indices!");
-    return;
-  }
-
-  /// DEBUG
-  if (indices) {
-    RCLCPP_DEBUG(
-      this->get_logger(), "[input_indices_callback]\n"
-      "  - PointCloud with %d data points (%s), stamp %d.%09d, and frame %s on topic %s received.\n"
-      "  - PointIndices with %zu values, stamp %d.%09d, and frame %s on topic %s received.",
-      cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
-      cloud->header.stamp.sec, cloud->header.stamp.nanosec, cloud->header.frame_id.c_str(), "input",
-      indices->indices.size(), indices->header.stamp.sec, indices->header.stamp.nanosec,
-      indices->header.frame_id.c_str(), "indices");
-  } else {
-    RCLCPP_DEBUG(
-      this->get_logger(), "PointCloud with %d data points and frame %s on topic %s received.",
-      cloud->width * cloud->height, cloud->header.frame_id.c_str(), "input");
-  }
-  ///
-
-  // Check whether the user has given a different input TF frame
-  tf_input_orig_frame_ = cloud->header.frame_id;
-  PointCloud2::ConstSharedPtr cloud_tf;
-  if (!tf_input_frame_.empty() && cloud->header.frame_id != tf_input_frame_) {
-    RCLCPP_DEBUG(
-      this->get_logger(), "Transforming input dataset from %s to %s.",
-      cloud->header.frame_id.c_str(), tf_input_frame_.c_str());
-    // Save the original frame ID
-    // Convert the cloud into the different frame
-    PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud(tf_input_frame_, *cloud, cloud_transformed, tf_buffer_)) {
-      RCLCPP_ERROR(
-        this->get_logger(), "Error converting input dataset from %s to %s.",
-        cloud->header.frame_id.c_str(), tf_input_frame_.c_str());
-      return;
-    }
-    cloud_tf = std::make_shared<PointCloud2>(cloud_transformed);
-  } else {
-    cloud_tf = cloud;
-  }
-
-  // Need setInputCloud () here because we have to extract x/y/z
-  IndicesPtr vindices;
-  if (indices) {
-    vindices.reset(new std::vector<int>(indices->indices));
-  }
-
-  computePublish(cloud_tf, vindices);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -958,6 +693,7 @@ pcl_ros::SACSegmentation::input_indices_callback(
 //     NODELET_WARN("[%s::input_indices_callback] No inliers found!", getName().c_str());
 //   }
 // }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::SACSegmentation)

@@ -38,11 +38,48 @@
 #include "pcl_ros/filters/voxel_grid.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-
-pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
-: Filter("VoxelGridNode", options)
+namespace pcl_ros
 {
-  std::vector<std::string> common_param_names = add_common_params();
+VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
+: PCLNode("VoxelGridNode", options, std::vector<std::string>{"input"},
+    std::vector<std::string>{"output"})
+{
+  rcl_interfaces::msg::ParameterDescriptor ffn_desc;
+  ffn_desc.name = "filter_field_name";
+  ffn_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+  ffn_desc.description = "The field name used for filtering";
+  declare_parameter(ffn_desc.name, rclcpp::ParameterValue("z"), ffn_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmin_desc;
+  flmin_desc.name = "filter_limit_min";
+  flmin_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmin_desc.description = "The minimum allowed field value a point will be considered from";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -100000.0;
+    float_range.to_value = 100000.0;
+    flmin_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(flmin_desc.name, rclcpp::ParameterValue(0.0), flmin_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flmax_desc;
+  flmax_desc.name = "filter_limit_max";
+  flmax_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+  flmax_desc.description = "The maximum allowed field value a point will be considered from";
+  {
+    rcl_interfaces::msg::FloatingPointRange float_range;
+    float_range.from_value = -100000.0;
+    float_range.to_value = 100000.0;
+    flmax_desc.floating_point_range.push_back(float_range);
+  }
+  declare_parameter(flmax_desc.name, rclcpp::ParameterValue(1.0), flmax_desc);
+
+  rcl_interfaces::msg::ParameterDescriptor flneg_desc;
+  flneg_desc.name = "filter_limit_negative";
+  flneg_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  flneg_desc.description =
+    "Set to true if we want to return the data outside [filter_limit_min; filter_limit_max].";
+  declare_parameter(flneg_desc.name, rclcpp::ParameterValue(false), flneg_desc);
 
   rcl_interfaces::msg::ParameterDescriptor leaf_size_desc;
   leaf_size_desc.name = "leaf_size";
@@ -70,34 +107,13 @@ pcl_ros::VoxelGrid::VoxelGrid(const rclcpp::NodeOptions & options)
   }
   declare_parameter(
     min_points_per_voxel_desc.name, rclcpp::ParameterValue(2), min_points_per_voxel_desc);
-
-  std::vector<std::string> param_names {
-    leaf_size_desc.name,
-    min_points_per_voxel_desc.name,
-  };
-  param_names.insert(param_names.end(), common_param_names.begin(), common_param_names.end());
-
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &VoxelGrid::config_callback, this,
-      std::placeholders::_1));
-
-  config_callback(get_parameters(param_names));
-
-  createPublishers();
 }
 
-void
-pcl_ros::VoxelGrid::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointCloud2 & output)
+void VoxelGrid::compute(const PointCloud2 & input, PointCloud2 & output)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
@@ -105,10 +121,8 @@ pcl_ros::VoxelGrid::filter(
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 rcl_interfaces::msg::SetParametersResult
-pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & params)
+VoxelGrid::onParamsChanged(const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   double filter_min, filter_max;
   impl_.getFilterLimits(filter_min, filter_max);
 
@@ -186,6 +200,7 @@ pcl_ros::VoxelGrid::config_callback(const std::vector<rclcpp::Parameter> & param
   result.successful = true;
   return result;
 }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::VoxelGrid)
