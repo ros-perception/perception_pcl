@@ -316,7 +316,6 @@ private:
       // Subscribe in an old fashion to input only (no filters)
       using First = typename std::tuple_element<0, InputsTuple>::type;
       auto qos = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
-      rmw_qos_profile_t rmw_qos = qos.get_rmw_qos_profile();
 
       sub_single_ = create_subscription<First>(
         input_topics_[0], qos,
@@ -327,10 +326,9 @@ private:
     } else {
       // If multiple inputs are given, we synchronize them with message filters
       auto sensor_qos = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
-      rmw_qos_profile_t rmw_qos = sensor_qos.get_rmw_qos_profile();
 
       // Initialize MF subscribers
-      initMFSubscribers(rmw_qos, std::make_index_sequence<NInputs>{});
+      initMFSubscribers(sensor_qos, std::make_index_sequence<NInputs>{});
 
       // Build synchronizer over all MF subscribers
       if (approximate_sync_) {
@@ -480,14 +478,14 @@ private:
 
   /**
    * @brief Initialize message_filters subscribers for each input type In[I].
-   * @param rmw_qos the RMW QoS profile to use for subscribing.
+   * @param qos the QoS profile to use for subscribing.
    * @param index_sequence a compile-time index sequence for the input types.
    */
   template<std::size_t... I>
-  void initMFSubscribers(const rmw_qos_profile_t & rmw_qos, std::index_sequence<I...>)
+  void initMFSubscribers(const rclcpp::QoS & qos, std::index_sequence<I...>)
   {
     // For each input type In[I], subscribe with message_filters
-    ( ( std::get<I>(mf_subs_).subscribe(this, input_topics_[I], rmw_qos) ), ... );
+    ( ( std::get<I>(mf_subs_).subscribe(this, input_topics_[I], qos) ), ... );
   }
 
   /**
