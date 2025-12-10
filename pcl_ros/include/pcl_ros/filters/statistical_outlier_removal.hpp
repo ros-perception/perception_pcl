@@ -69,7 +69,7 @@ private:
   /** \brief Parameter callback
     * \param params parameter values to set.
     */
-  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
     const std::vector<rclcpp::Parameter> & params) override;
 
 public:

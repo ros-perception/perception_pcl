@@ -41,6 +41,7 @@
 // PCL includes
 #include <pcl/filters/project_inliers.h>
 #include <memory>
+#include <vector>
 #include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
@@ -63,7 +64,7 @@ private:
   /** \brief Parameter callback
     * \param params parameter values to set.
     */
-  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
     const std::vector<rclcpp::Parameter> & params) override;
 
 public:

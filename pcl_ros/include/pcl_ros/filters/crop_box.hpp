@@ -54,7 +54,8 @@ namespace pcl_ros
   * \author Marti Morta Garriga
   * \author Antonio Brandi
   */
-class CropBox : public PCLNode<Input<PointCloud2>, Output<PointCloud2, visualization_msgs::msg::Marker>>
+class CropBox : public PCLNode<Input<PointCloud2>, Output<PointCloud2,
+    visualization_msgs::msg::Marker>>
 {
 private:
   /** \brief The PCL filter implementation used.
@@ -73,7 +74,7 @@ private:
   /** \brief Parameter callback
     * \param params parameter values to set.
     */
-  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
     const std::vector<rclcpp::Parameter> & params) override;
 
 public:
@@ -87,7 +88,7 @@ public:
     * \param output the resultant filtered dataset.
     * \param marker the crop box marker for visualization and debugging purposes.
     */
-  virtual void compute(
+  void compute(
     const PointCloud2 & input, PointCloud2 & output,
     visualization_msgs::msg::Marker & marker) override;
 };

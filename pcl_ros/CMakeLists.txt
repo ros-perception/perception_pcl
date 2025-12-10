@@ -130,10 +130,10 @@ rclcpp_components_register_node(pcl_ros_filters
 class_loader_hide_library_symbols(pcl_ros_filters)
 #
 ### Declare the pcl_ros_segmentation library
-add_library (pcl_ros_segmentation SHARED
+add_library(pcl_ros_segmentation SHARED
 #  src/pcl_ros/segmentation/extract_clusters.cpp
 #  src/pcl_ros/segmentation/extract_polygonal_prism_data.cpp
- src/pcl_ros/segmentation/sac_segmentation.cpp
+  src/pcl_ros/segmentation/sac_segmentation.cpp
 #  src/pcl_ros/segmentation/segment_differences.cpp
 #  src/pcl_ros/segmentation/segmentation.cpp
 )

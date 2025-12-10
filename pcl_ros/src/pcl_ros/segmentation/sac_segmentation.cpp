@@ -35,10 +35,10 @@
  *
  */
 
+ #include <pcl/common/io.h>
 #include <limits>
 
 #include "pcl_ros/segmentation/sac_segmentation.hpp"
-#include <pcl/common/io.h>
 #include "pcl_ros/transforms.hpp"
 
 
@@ -142,8 +142,8 @@ pcl_ros::SACSegmentation::SACSegmentation(const rclcpp::NodeOptions & options)
   rcl_interfaces::msg::ParameterDescriptor optimize_coefficients_desc;
   optimize_coefficients_desc.name = "optimize_coefficients";
   optimize_coefficients_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
-  optimize_coefficients_desc.description =
-    "Model coefficient refinement. true for enabling model coefficient refinement, false otherwise.";
+  optimize_coefficients_desc.description = "Model coefficient refinement."
+    "true for enabling model coefficient refinement, false otherwise.";
   declare_parameter(
     optimize_coefficients_desc.name, rclcpp::ParameterValue(true), optimize_coefficients_desc);
 
@@ -313,7 +313,8 @@ rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
 //   PCLNodelet::onInit();
 
 //   // Enable the dynamic reconfigure service
-//   srv_ = boost::make_shared<dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>>(*pnh_);
+//   srv_ = boost::make_shared<dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>>(
+//     *pnh_);
 //   dynamic_reconfigure::Server<SACSegmentationFromNormalsConfig>::CallbackType f = boost::bind(
 //     &SACSegmentationFromNormals::config_callback, this, _1, _2);
 //   srv_->setCallback(f);
@@ -351,8 +352,8 @@ rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
 //       {
 //         if (axis_param.size() != 3) {
 //           NODELET_ERROR(
-//             "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) than "
-//             "required (3)!",
+//             "[%s::onInit] Parameter 'axis' given but with a different number of values (%d) "
+//             "than required (3)!",
 //             getName().c_str(), axis_param.size());
 //           return;
 //         }
@@ -407,8 +408,8 @@ rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
 
 //   if (approximate_sync_) {
 //     sync_input_normals_indices_a_ =
-//       boost::make_shared<message_filters::Synchronizer<
-//           sync_policies::ApproximateTime<PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
+//       boost::make_shared<message_filters::Synchronizer<sync_policies::ApproximateTime<
+//         PointCloud, PointCloudN, PointIndices>>>(max_queue_size_);
 //   } else {
 //     sync_input_normals_indices_e_ =
 //       boost::make_shared<message_filters::Synchronizer<
@@ -431,7 +432,8 @@ rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
 //     }
 //   } else {
 //     // Create a different callback for copying over the timestamp to fake indices
-//     sub_input_filter_.registerCallback(bind(&SACSegmentationFromNormals::input_callback, this, _1));
+//     sub_input_filter_.registerCallback(
+//       bind(&SACSegmentationFromNormals::input_callback, this, _1));
 
 //     if (approximate_sync_) {
 //       sync_input_normals_indices_a_->connectInput(sub_input_filter_, sub_normals_filter_, nf_);
@@ -476,7 +478,8 @@ rcl_interfaces::msg::SetParametersResult SACSegmentation::onParamsChanged(
 
 //   if (model->values.size() < 3) {
 //     NODELET_ERROR(
-//       "[%s::axis_callback] Invalid axis direction / model coefficients with %zu values sent on %s!",
+//       "[%s::axis_callback] Invalid axis direction / model coefficients with "
+//       "%zu values sent on %s!",
 //       getName().c_str(), model->values.size(), pnh_->resolveName("axis").c_str());
 //     return;
 //   }

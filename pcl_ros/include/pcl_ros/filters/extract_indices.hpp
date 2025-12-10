@@ -73,10 +73,9 @@ public:
     * \param indices the input set of indices to use from input.
     * \param output the resultant filtered dataset.
     */
-  virtual void compute(
+  void compute(
     const PointCloud2 & input, const PointIndices & indices,
     PointCloud2 & output) override;
-
 };
 }  // namespace pcl_ros
 

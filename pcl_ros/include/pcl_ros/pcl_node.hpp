@@ -54,6 +54,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <tuple>
+#include <utility>
+#include <algorithm>
 
 #include <message_filters/subscriber.hpp>
 #include <message_filters/synchronizer.hpp>
@@ -407,7 +410,8 @@ private:
 
     // Check whether the user has given a different input TF frame
     OutputsTuple transformed_outputs{};
-    if (!transformMessages(std::make_index_sequence<NOutputs>{}, transformed_outputs, outputs, tf_output_frame_))
+    if (!transformMessages(std::make_index_sequence<NOutputs>{}, transformed_outputs, outputs,
+        tf_output_frame_))
     {
       // transformMessages already logged the reason
       return;

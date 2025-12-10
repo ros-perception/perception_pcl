@@ -38,15 +38,12 @@
 #ifndef PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
 #define PCL_ROS__SEGMENTATION__SAC_SEGMENTATION_HPP_
 
+#include <pcl/segmentation/sac_segmentation.h>
 #include <string>
 #include <vector>
 
 #include "pcl_ros/pcl_node.hpp"
 #include <pcl_msgs/msg/point_indices.hpp>
-
-// PCL includes
-#include <pcl/segmentation/sac_segmentation.h>
-#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
@@ -69,7 +66,7 @@ private:
   /** \brief Parameter callback
     * \param params parameter values to set.
     */
-  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
     const std::vector<rclcpp::Parameter> & params) override;
 
 public:
@@ -83,7 +80,7 @@ public:
     * \param indices the output indices that contain the inliers found
     * \param model the resultant model coefficients
     */
-  virtual void compute(
+  void compute(
     const PointCloud2 & input, PointIndices & indices,
     ModelCoefficients & model) override;
 };
@@ -105,11 +102,14 @@ public:
 // public:
 //   /** \brief Set the input TF frame the data should be transformed into before processing,
 //     * if input.header.frame_id is different.
-//     * \param tf_frame the TF frame the input PointCloud should be transformed into before processing
+//     * \param tf_frame the TF frame the input PointCloud should be transformed into
+//     * before processing
 //     */
 //   inline void setInputTFframe(std::string tf_frame) {tf_input_frame_ = tf_frame;}
 
-//   /** \brief Get the TF frame the input PointCloud should be transformed into before processing. */
+//   /** \brief Get the TF frame the input PointCloud should be transformed into
+//     * before processing.
+//     */
 //   inline std::string getInputTFframe() {return tf_input_frame_;}
 
 //   /** \brief Set the output TF frame the data should be transformed into after processing.
@@ -196,8 +196,8 @@ public:
 //   /** \brief Synchronized input, normals, and indices.*/
 //   boost::shared_ptr<message_filters::Synchronizer<sync_policies::ApproximateTime<PointCloud,
 //     PointCloudN, PointIndices>>> sync_input_normals_indices_a_;
-//   boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud, PointCloudN,
-//     PointIndices>>> sync_input_normals_indices_e_;
+//   boost::shared_ptr<message_filters::Synchronizer<sync_policies::ExactTime<PointCloud,
+//     PointCloudN, PointIndices>>> sync_input_normals_indices_e_;
 
 // public:
 //   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

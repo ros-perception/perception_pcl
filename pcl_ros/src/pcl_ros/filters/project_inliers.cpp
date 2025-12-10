@@ -60,7 +60,8 @@ ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   copy_all_data_desc.name = "copy_all_data";
   copy_all_data_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   copy_all_data_desc.description =
-    "Whether all data will be returned, or only the projected inliers. true if all data should be returned, false if only the projected inliers";
+    "Whether all data will be returned, or only the projected inliers."
+    "true if all data should be returned, false if only the projected inliers";
   // Optional Parameter - Default Value: false
   declare_parameter(
     copy_all_data_desc.name, rclcpp::ParameterValue(false), copy_all_data_desc);
@@ -70,7 +71,8 @@ ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   copy_all_fields_desc.name = "copy_all_fields";
   copy_all_fields_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
   copy_all_fields_desc.description =
-    "Whether all fields should be copied, or only the XYZ. true if all fields will be returned, false if only XYZ";
+    "Whether all fields should be copied, or only the XYZ."
+    "true if all fields will be returned, false if only XYZ";
   // Optional Parameter - Default Value: true
   declare_parameter(
     copy_all_fields_desc.name, rclcpp::ParameterValue(true), copy_all_fields_desc);

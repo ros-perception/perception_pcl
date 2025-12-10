@@ -63,7 +63,7 @@ private:
   /** \brief Parameter callback
     * \param params parameter values to set.
     */
-  virtual rcl_interfaces::msg::SetParametersResult onParamsChanged(
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
     const std::vector<rclcpp::Parameter> & params) override;
 
 public:
@@ -76,8 +76,7 @@ public:
     * \param input the input point cloud dataset.
     * \param output the resultant filtered dataset.
     */
-  virtual void compute(const PointCloud2 & input, PointCloud2 & output) override;
-
+  void compute(const PointCloud2 & input, PointCloud2 & output) override;
 };
 }  // namespace pcl_ros
 
