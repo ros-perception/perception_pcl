@@ -101,7 +101,7 @@ public:
     use_indices_(false), transient_local_indices_(false),
     max_queue_size_(3), approximate_sync_(false),
     tf_buffer_(this->get_clock()),
-    tf_listener_(tf_buffer_)
+    tf_listener_(tf_buffer_, this)
   {
     {
       rcl_interfaces::msg::ParameterDescriptor desc;
