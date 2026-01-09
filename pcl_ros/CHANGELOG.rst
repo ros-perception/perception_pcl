@@ -2,6 +2,13 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update PCLNode to use TransformListener Node constructor so that it does not create a new node under the hood
+* Correct Statistical Outlier Removal param description
+* Add support for Windows
+* Contributors: AntoBrandi, Silvio Traversaro, Xavier Ruiz
+
 2.7.3 (2025-06-05)
 ------------------
 * Fix ament_export_dependencies (`#500 <https://github.com/ros-perception/perception_pcl/issues/500>`_)
