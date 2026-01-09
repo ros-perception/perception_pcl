@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.4 (2026-01-09)
+------------------
 * Update PCLNode to use TransformListener Node constructor so that it does not create a new node under the hood
 * Correct Statistical Outlier Removal param description
 * Add support for Windows
