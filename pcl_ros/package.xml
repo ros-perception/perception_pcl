@@ -15,7 +15,7 @@
   <maintainer email="stevenmacenski@gmail.com">Steve Macenski</maintainer>
   <maintainer email="www.kentaro.wada@gmail.com">Kentaro Wada</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://ros.org/wiki/perception_pcl</url>
   <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
