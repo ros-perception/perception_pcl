@@ -46,12 +46,20 @@ pcl_ros::ExtractIndices::ExtractIndices(const rclcpp::NodeOptions & options)
   neg_desc.description = "Extract indices or the negative (all-indices)";
   declare_parameter(neg_desc.name, rclcpp::ParameterValue(false), neg_desc);
 
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
   // Validate initial values using same callback
   callback_handle_ =
     add_on_set_parameters_callback(
     std::bind(&ExtractIndices::config_callback, this, std::placeholders::_1));
 
-  std::vector<std::string> param_names{neg_desc.name};
+  std::vector<std::string> param_names{neg_desc.name, keep_organized_desc.name};
   auto result = config_callback(get_parameters(param_names));
   if (!result.successful) {
     throw std::runtime_error(result.reason);
@@ -90,6 +98,14 @@ pcl_ros::ExtractIndices::config_callback(const std::vector<rclcpp::Parameter> & 
           param.as_bool() ? "true" : "false");
         // Call the virtual method in the child
         impl_.setNegative(param.as_bool());
+      }
+    }
+    if (param.get_name() == "keep_organized") {
+      if (impl_.getKeepOrganized() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter keep_organized flag to: %s.",
+          param.as_bool() ? "true" : "false");
+        impl_.setKeepOrganized(param.as_bool());
       }
     }
   }
