@@ -66,9 +66,18 @@ pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & 
   }
   declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
 
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
   const std::vector<std::string> param_names {
     min_neighbors_desc.name,
     radius_search_desc.name,
+    keep_organized_desc.name
   };
 
   callback_handle_ =
@@ -118,6 +127,14 @@ pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Paramet
           get_logger(), "Setting the radius to search neighbors: %f.",
           param.as_double());
         impl_.setRadiusSearch(param.as_double());
+      }
+    }
+    if (param.get_name() == "keep_organized") {
+      if (impl_.getKeepOrganized() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter keep_organized flag to: %s.",
+          param.as_bool() ? "true" : "false");
+        impl_.setKeepOrganized(param.as_bool());
       }
     }
   }
