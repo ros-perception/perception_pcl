@@ -37,8 +37,11 @@
 
 #include "pcl_ros/filters/statistical_outlier_removal.hpp"
 
-pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::NodeOptions & options)
-: Filter("StatisticalOutlierRemovalNode", options)
+namespace pcl_ros
+{
+StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::NodeOptions & options)
+: PCLNode("StatisticalOutlierRemovalNode", options, std::vector<std::string>{"input"},
+    std::vector<std::string>{"output"})
 {
   rcl_interfaces::msg::ParameterDescriptor mean_k_desc;
   mean_k_desc.name = "mean_k";
@@ -73,45 +76,27 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
   negative_desc.description =
     "Set whether the inliers should be returned (false) or the outliers (true).";
   declare_parameter(negative_desc.name, rclcpp::ParameterValue(false), negative_desc);
-
-  const std::vector<std::string> param_names {
-    mean_k_desc.name,
-    stddev_desc.name,
-    negative_desc.name,
-  };
-
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &StatisticalOutlierRemoval::config_callback, this,
-      std::placeholders::_1));
-
-  config_callback(get_parameters(param_names));
-
-  createPublishers();
 }
 
-void
-pcl_ros::StatisticalOutlierRemoval::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointCloud2 & output)
+void StatisticalOutlierRemoval::compute(const PointCloud2 & input, PointCloud2 & output)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
+  if(input.data.empty()) {
+    output = input;
+    return;
+  }
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
+  output.header = input.header;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-rcl_interfaces::msg::SetParametersResult
-pcl_ros::StatisticalOutlierRemoval::config_callback(const std::vector<rclcpp::Parameter> & params)
+rcl_interfaces::msg::SetParametersResult StatisticalOutlierRemoval::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   for (const rclcpp::Parameter & param : params) {
     if (param.get_name() == "mean_k") {
       if (impl_.getMeanK() != param.as_int()) {
@@ -147,6 +132,7 @@ pcl_ros::StatisticalOutlierRemoval::config_callback(const std::vector<rclcpp::Pa
   result.successful = true;
   return result;
 }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::StatisticalOutlierRemoval)

@@ -37,8 +37,11 @@
 
 #include "pcl_ros/filters/radius_outlier_removal.hpp"
 
-pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & options)
-: Filter("RadiusOutlierRemovalNode", options)
+namespace pcl_ros
+{
+RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & options)
+: PCLNode("RadiusOutlierRemovalNode", options, std::vector<std::string>{"input"},
+    std::vector<std::string>{"output"})
 {
   rcl_interfaces::msg::ParameterDescriptor min_neighbors_desc;
   min_neighbors_desc.name = "min_neighbors";
@@ -65,44 +68,27 @@ pcl_ros::RadiusOutlierRemoval::RadiusOutlierRemoval(const rclcpp::NodeOptions & 
     radius_search_desc.floating_point_range.push_back(float_range);
   }
   declare_parameter(radius_search_desc.name, rclcpp::ParameterValue(0.1), radius_search_desc);
-
-  const std::vector<std::string> param_names {
-    min_neighbors_desc.name,
-    radius_search_desc.name,
-  };
-
-  callback_handle_ =
-    add_on_set_parameters_callback(
-    std::bind(
-      &RadiusOutlierRemoval::config_callback, this,
-      std::placeholders::_1));
-
-  config_callback(get_parameters(param_names));
-
-  createPublishers();
 }
 
-void
-pcl_ros::RadiusOutlierRemoval::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointCloud2 & output)
+void RadiusOutlierRemoval::compute(const PointCloud2 & input, PointCloud2 & output)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
+  if(input.data.empty()) {
+    output = input;
+    return;
+  }
+
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-rcl_interfaces::msg::SetParametersResult
-pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Parameter> & params)
+rcl_interfaces::msg::SetParametersResult RadiusOutlierRemoval::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
-
   for (const rclcpp::Parameter & param : params) {
     if (param.get_name() == "min_neighbors") {
       if (impl_.getMinNeighborsInRadius() != param.as_int()) {
@@ -127,6 +113,7 @@ pcl_ros::RadiusOutlierRemoval::config_callback(const std::vector<rclcpp::Paramet
   result.successful = true;
   return result;
 }
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::RadiusOutlierRemoval)

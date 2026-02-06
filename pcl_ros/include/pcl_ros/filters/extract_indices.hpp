@@ -41,43 +41,41 @@
 // PCL includes
 #include <pcl/filters/extract_indices.h>
 #include <vector>
-#include "pcl_ros/filters/filter.hpp"
+#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
 /** \brief @b ExtractIndices extracts a set of indices from a PointCloud as a separate PointCloud.
   * \note setFilterFieldName (), setFilterLimits (), and setFilterLimitNegative () are ignored.
   * \author Radu Bogdan Rusu
+  * \author Antonio Brandi
   */
-class ExtractIndices : public Filter
+class ExtractIndices : public PCLNode<Input<PointCloud2, PointIndices>, Output<PointCloud2>>
 {
-protected:
-  /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    */
-  inline void
-  filter(
-    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output) override;
+private:
+  /** \brief The PCL filter implementation used. */
+  pcl::ExtractIndices<pcl::PCLPointCloud2> impl_;
 
   /** \brief Parameter callback
     * \param params parameter values to set
     */
   rcl_interfaces::msg::SetParametersResult
-  config_callback(const std::vector<rclcpp::Parameter> & params);
-
-  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-
-private:
-  /** \brief The PCL filter implementation used. */
-  pcl::ExtractIndices<pcl::PCLPointCloud2> impl_;
+  onParamsChanged(const std::vector<rclcpp::Parameter> & params) override;
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+  /** \brief Constructor
+    * \param options A rclcpp::NodeOptions to be passed to the node.
+    */
   explicit ExtractIndices(const rclcpp::NodeOptions & options);
+
+  /** \brief Calls the actual RadiusOutlierRemoval PCL filter.
+    * \param input the input point cloud dataset.
+    * \param indices the input set of indices to use from input.
+    * \param output the resultant filtered dataset.
+    */
+  void compute(
+    const PointCloud2 & input, const PointIndices & indices,
+    PointCloud2 & output) override;
 };
 }  // namespace pcl_ros
 

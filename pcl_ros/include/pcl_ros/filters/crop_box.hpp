@@ -43,7 +43,7 @@
 #include <pcl/filters/crop_box.h>
 #include <vector>
 #include <visualization_msgs/msg/marker.hpp>
-#include "pcl_ros/filters/filter.hpp"
+#include "pcl_ros/pcl_node.hpp"
 
 namespace pcl_ros
 {
@@ -52,49 +52,45 @@ namespace pcl_ros
   * \author Radu Bogdan Rusu
   * \author Justin Rosen
   * \author Marti Morta Garriga
+  * \author Antonio Brandi
   */
-class CropBox : public Filter
+class CropBox : public PCLNode<Input<PointCloud2>, Output<PointCloud2,
+    visualization_msgs::msg::Marker>>
 {
-protected:
-  /** \brief Call the actual filter.
-    * \param input the input point cloud dataset
-    * \param indices the input set of indices to use from \a input
-    * \param output the resultant filtered dataset
-    */
-  inline void
-  filter(
-    const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-    PointCloud2 & output) override;
-
-  /** \brief Parameter callback
-    * \param params parameter values to set
-    */
-  rcl_interfaces::msg::SetParametersResult
-  config_callback(const std::vector<rclcpp::Parameter> & params);
-  /** \brief Create publishers for output PointCloud2 data as well as the crop box marker. */
-  void createPublishers() override;
-  /** \brief Update the crop box marker msg. */
-  void update_marker_msg();
-
-  OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-  /** \brief The crop box marker msg publisher for visualization and debugging purposes. */
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr crop_box_marker_publisher_;
-  /**
-   * \brief The crop box marker message.
-   *
-   * The marker's cube gets updated whenever the min/max points are changed.
-   * The header is adjusted with every point cloud callback.
-   */
-  visualization_msgs::msg::Marker crop_box_marker_msg_;
-
 private:
-  /** \brief The PCL filter implementation used. */
+  /** \brief The PCL filter implementation used.
+    */
   pcl::CropBox<pcl::PCLPointCloud2> impl_;
 
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  /** \brief The crop box marker message.
+    * The marker's cube gets updated whenever the min/max points are changed.
+    * The header is adjusted with every point cloud callback.
+    */
+  visualization_msgs::msg::Marker crop_box_marker_msg_;
 
+  /** \brief Update the crop box marker msg. */
+  void updateMarkerMsg();
+
+  /** \brief Parameter callback
+    * \param params parameter values to set.
+    */
+  rcl_interfaces::msg::SetParametersResult onParamsChanged(
+    const std::vector<rclcpp::Parameter> & params) override;
+
+public:
+  /** \brief Constructor.
+    * \param options A rclcpp::NodeOptions to be passed to the node.
+    */
   explicit CropBox(const rclcpp::NodeOptions & options);
+
+  /** \brief Calls the actual CropBox PCL filter.
+    * \param input the input point cloud dataset.
+    * \param output the resultant filtered dataset.
+    * \param marker the crop box marker for visualization and debugging purposes.
+    */
+  void compute(
+    const PointCloud2 & input, PointCloud2 & output,
+    visualization_msgs::msg::Marker & marker) override;
 };
 }  // namespace pcl_ros
 

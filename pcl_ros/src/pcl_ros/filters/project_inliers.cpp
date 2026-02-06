@@ -38,8 +38,11 @@
 #include "pcl_ros/filters/project_inliers.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
-: Filter("ProjectInliersNode", options), model_()
+namespace pcl_ros
+{
+ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
+: PCLNode("ProjectInliersNode", options, std::vector<std::string>{"input", "indices", "model"},
+    std::vector<std::string>{"output"})
 {
   // ---[ Mandatory parameters
   // The type of model to use (user given parameter).
@@ -53,140 +56,91 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   }
   // ---[ Optional parameters
   // True if all data will be returned, false if only the projected inliers. Default: false.
-  declare_parameter("copy_all_data", rclcpp::ParameterValue(false));
-  bool copy_all_data = get_parameter("copy_all_data").as_bool();
+  rcl_interfaces::msg::ParameterDescriptor copy_all_data_desc;
+  copy_all_data_desc.name = "copy_all_data";
+  copy_all_data_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  copy_all_data_desc.description =
+    "Whether all data will be returned, or only the projected inliers."
+    "true if all data should be returned, false if only the projected inliers";
+  // Optional Parameter - Default Value: false
+  declare_parameter(
+    copy_all_data_desc.name, rclcpp::ParameterValue(false), copy_all_data_desc);
 
   // True if all fields will be returned, false if only XYZ. Default: true.
-  declare_parameter("copy_all_fields", rclcpp::ParameterValue(true));
-  bool copy_all_fields = get_parameter("copy_all_fields").as_bool();
-
-  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
-
-  RCLCPP_DEBUG(
-    this->get_logger(),
-    "[onConstruct] Node successfully created with the following parameters:\n"
-    "  - model_type      : %d\n"
-    "  - copy_all_data   : %s\n"
-    "  - copy_all_fields : %s",
-    model_type, (copy_all_data) ? "true" : "false", (copy_all_fields) ? "true" : "false");
-
-  // Set given parameters here
-  impl_.setModelType(model_type);
-  impl_.setCopyAllFields(copy_all_fields);
-  impl_.setCopyAllData(copy_all_data);
-
-  createPublishers();
+  rcl_interfaces::msg::ParameterDescriptor copy_all_fields_desc;
+  copy_all_fields_desc.name = "copy_all_fields";
+  copy_all_fields_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  copy_all_fields_desc.description =
+    "Whether all fields should be copied, or only the XYZ."
+    "true if all fields will be returned, false if only XYZ";
+  // Optional Parameter - Default Value: true
+  declare_parameter(
+    copy_all_fields_desc.name, rclcpp::ParameterValue(true), copy_all_fields_desc);
 }
 
-void
-pcl_ros::ProjectInliers::filter(
-  const PointCloud2::ConstSharedPtr & input, const IndicesPtr & indices,
-  PointCloud2 & output)
+void ProjectInliers::compute(
+  const PointCloud2 & input, const PointIndices & indices,
+  const ModelCoefficients & model, PointCloud2 & output)
 {
+  if(input.data.empty()) {
+    output = input;
+    return;
+  }
+
   pcl::PCLPointCloud2::Ptr pcl_input(new pcl::PCLPointCloud2);
-  pcl_conversions::toPCL(*(input), *(pcl_input));
+  pcl_conversions::toPCL(input, *(pcl_input));
   impl_.setInputCloud(pcl_input);
-  impl_.setIndices(indices);
+
+  IndicesPtr pcl_indices(new pcl::PointIndices);
+  pcl_indices->indices = indices.indices;
+  impl_.setIndices(pcl_indices);
   pcl::ModelCoefficients::Ptr pcl_model(new pcl::ModelCoefficients);
-  pcl_conversions::toPCL(*(model_), *(pcl_model));
+  pcl_conversions::toPCL(model, *(pcl_model));
   impl_.setModelCoefficients(pcl_model);
   pcl::PCLPointCloud2 pcl_output;
   impl_.filter(pcl_output);
   pcl_conversions::moveFromPCL(pcl_output, output);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ProjectInliers::subscribe()
+rcl_interfaces::msg::SetParametersResult ProjectInliers::onParamsChanged(
+  const std::vector<rclcpp::Parameter> & params)
 {
-  RCLCPP_DEBUG(get_logger(), "subscribe");
-/*
-  TODO : implement use_indices_
-  if (use_indices_)
-  {*/
-
-  auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_default);
-  auto sensor_qos_profile =
-    rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_sensor_data);
-  sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-  sub_indices_filter_.subscribe(this, "indices", qos_profile);
-  sub_model_.subscribe(this, "model", qos_profile);
-
-  if (approximate_sync_) {
-    sync_input_indices_model_a_ = std::make_shared<
-      message_filters::Synchronizer<
-        message_filters::sync_policies::ApproximateTime<
-          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
-    sync_input_indices_model_a_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_a_->registerCallback(
-      std::bind(
-        &ProjectInliers::input_indices_model_callback, this,
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  } else {
-    sync_input_indices_model_e_ = std::make_shared<
-      message_filters::Synchronizer<
-        message_filters::sync_policies::ExactTime<
-          PointCloud2, PointIndices, ModelCoefficients>>>(max_queue_size_);
-    sync_input_indices_model_e_->connectInput(sub_input_filter_, sub_indices_filter_, sub_model_);
-    sync_input_indices_model_e_->registerCallback(
-      std::bind(
-        &ProjectInliers::input_indices_model_callback, this,
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  for (const rclcpp::Parameter & param : params) {
+    if (param.get_name() == "model_type") {
+      if (impl_.getModelType() != param.as_int()) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting the model type to: %ld.",
+          param.as_int());
+        impl_.setModelType(param.as_int());
+      }
+    }
+    if (param.get_name() == "copy_all_data") {
+      if (impl_.getCopyAllData() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting copy all data to: %s.",
+          (param.as_bool() ? "true" : "false"));
+        impl_.setCopyAllData(param.as_bool());
+      }
+    }
+    if (param.get_name() == "copy_all_fields") {
+      if (impl_.getCopyAllFields() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Setting copy all fields to: %s.",
+          (param.as_bool() ? "true" : "false"));
+        impl_.setCopyAllFields(param.as_bool());
+      }
+    }
   }
+
+  // Range constraints are enforced by rclcpp::Parameter.
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ProjectInliers::unsubscribe()
-{
-/*
-  TODO : implement use_indices_
-  if (use_indices_)
-  {*/
-  sub_input_filter_.unsubscribe();
-  sub_indices_filter_.unsubscribe();
-  sub_model_.unsubscribe();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-void
-pcl_ros::ProjectInliers::input_indices_model_callback(
-  const PointCloud2::ConstSharedPtr & cloud,
-  const PointIndicesConstPtr & indices,
-  const ModelCoefficientsConstPtr & model)
-{
-  if (pub_output_->get_subscription_count() == 0) {
-    return;
-  }
-
-  if (!isValid(model) || !isValid(indices) || !isValid(cloud)) {
-    RCLCPP_ERROR(
-      this->get_logger(), "[%s::input_indices_model_callback] Invalid input!", this->get_name());
-    return;
-  }
-
-  RCLCPP_DEBUG(
-    this->get_logger(),
-    "[%s::input_indices_model_callback]\n"
-    "  - PointCloud with %d data points (%s), stamp %d.%09d, and frame %s on topic %s received.\n"
-    "  - PointIndices with %zu values, stamp %d.%09d, and frame %s on topic %s received.\n"
-    "  - ModelCoefficients with %zu values, stamp %d.%09d, and frame %s on topic %s received.",
-    this->get_name(), cloud->width * cloud->height, pcl::getFieldsList(*cloud).c_str(),
-    cloud->header.stamp.sec, cloud->header.stamp.nanosec, cloud->header.frame_id.c_str(), "input",
-    indices->indices.size(), indices->header.stamp.sec, indices->header.stamp.nanosec,
-    indices->header.frame_id.c_str(), "inliers", model->values.size(),
-    model->header.stamp.sec, model->header.stamp.nanosec, model->header.frame_id.c_str(), "model");
-
-  tf_input_orig_frame_ = cloud->header.frame_id;
-
-  IndicesPtr vindices;
-  if (indices) {
-    vindices.reset(new std::vector<int>(indices->indices));
-  }
-
-  model_ = model;
-  computePublish(cloud, vindices);
-}
+}  // namespace pcl_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(pcl_ros::ProjectInliers)
