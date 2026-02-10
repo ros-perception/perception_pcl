@@ -74,10 +74,19 @@ pcl_ros::StatisticalOutlierRemoval::StatisticalOutlierRemoval(const rclcpp::Node
     "Set whether the inliers should be returned (false) or the outliers (true).";
   declare_parameter(negative_desc.name, rclcpp::ParameterValue(false), negative_desc);
 
+  rcl_interfaces::msg::ParameterDescriptor keep_organized_desc;
+  keep_organized_desc.name = "keep_organized";
+  keep_organized_desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+  keep_organized_desc.description =
+    "Set whether the filtered points should be kept and set to NaN, "
+    "or removed from the PointCloud, thus potentially breaking its organized structure.";
+  declare_parameter(keep_organized_desc.name, rclcpp::ParameterValue(false), keep_organized_desc);
+
   const std::vector<std::string> param_names {
     mean_k_desc.name,
     stddev_desc.name,
     negative_desc.name,
+    keep_organized_desc.name,
   };
 
   callback_handle_ =
@@ -138,6 +147,14 @@ pcl_ros::StatisticalOutlierRemoval::config_callback(const std::vector<rclcpp::Pa
           "Returning only inliers: %s.",
           (param.as_bool() ? "false" : "true"));
         impl_.setNegative(param.as_bool());
+      }
+    }
+    if (param.get_name() == "keep_organized") {
+      if (impl_.getKeepOrganized() != param.as_bool()) {
+        RCLCPP_DEBUG(
+          get_logger(), "Setting the filter keep_organized flag to: %s.",
+          param.as_bool() ? "true" : "false");
+        impl_.setKeepOrganized(param.as_bool());
       }
     }
   }
