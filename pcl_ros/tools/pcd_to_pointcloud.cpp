@@ -95,7 +95,16 @@ public:
     auto resolved_cloud_topic =
       this->get_node_topics_interface()->resolve_topic_name(cloud_topic_);
 
-    pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_topic_, 10);
+    // Enable QoS reconfigurability via parameters
+    auto pub_options = rclcpp::PublisherOptions();
+    pub_options.qos_overriding_options =
+      rclcpp::QosOverridingOptions {{
+      rclcpp::QosPolicyKind::History,
+      rclcpp::QosPolicyKind::Reliability,
+      rclcpp::QosPolicyKind::Durability,
+      rclcpp::QosPolicyKind::Depth
+    }};
+    pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_topic_, 10, pub_options);
     timer_ = this->create_wall_timer(
       std::chrono::milliseconds(period_ms_),
       [this]() {
