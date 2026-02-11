@@ -51,6 +51,7 @@ Cloud Data) file format.
 #include <tf2_ros/transform_listener.h>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/qos_overriding_options.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
@@ -189,10 +190,20 @@ public:
     this->get_parameter("compressed", compressed_);
     this->get_parameter("rgb", rgb_);
 
+    // Enable QoS reconfigurability via parameters
+    rclcpp::SubscriptionOptions sub_options;
+    sub_options.qos_overriding_options =
+      rclcpp::QosOverridingOptions {{
+      rclcpp::QosPolicyKind::History,
+      rclcpp::QosPolicyKind::Reliability,
+      rclcpp::QosPolicyKind::Durability,
+      rclcpp::QosPolicyKind::Depth
+    }};
+
     auto sensor_qos = rclcpp::SensorDataQoS();
     sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
       "input", sensor_qos,
-      std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1));
+      std::bind(&PointCloudToPCD::cloud_cb, this, std::placeholders::_1), sub_options);
   }
 };
 }  // namespace pcl_ros
