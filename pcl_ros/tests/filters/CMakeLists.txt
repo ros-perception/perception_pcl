@@ -1,7 +1,7 @@
 find_package(ament_cmake_pytest REQUIRED)
 
 # build dummy publisher node and component
-add_library(dummy_topics SHARED
+add_library(dummy_topics
   dummy_topics.cpp
 )
 target_link_libraries(dummy_topics
