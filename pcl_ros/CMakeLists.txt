@@ -15,6 +15,7 @@ find_package(PCL REQUIRED QUIET COMPONENTS common features filters io segmentati
 
 ## Find ROS package dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -91,7 +92,7 @@ add_library(pcl_ros_filter
 target_link_libraries(pcl_ros_filter pcl_ros_tf ${PCL_LIBRARIES})
 
 ### Declare the pcl_ros_filters library
-add_library(pcl_ros_filters SHARED
+add_library(pcl_ros_filters
   src/pcl_ros/filters/extract_indices.cpp
   src/pcl_ros/filters/passthrough.cpp
   src/pcl_ros/filters/project_inliers.cpp
@@ -157,7 +158,7 @@ class_loader_hide_library_symbols(pcl_ros_filters)
 #
 ### Tools
 #
-add_library(pcd_to_pointcloud_lib SHARED tools/pcd_to_pointcloud.cpp)
+add_library(pcd_to_pointcloud_lib tools/pcd_to_pointcloud.cpp)
 target_link_libraries(pcd_to_pointcloud_lib
   ${PCL_LIBRARIES})
 target_include_directories(pcd_to_pointcloud_lib PUBLIC
@@ -171,7 +172,7 @@ rclcpp_components_register_node(pcd_to_pointcloud_lib
   PLUGIN "pcl_ros::PCDPublisher"
   EXECUTABLE pcd_to_pointcloud)
 
-add_library(pointcloud_to_pcd_lib SHARED tools/pointcloud_to_pcd.cpp)
+add_library(pointcloud_to_pcd_lib tools/pointcloud_to_pcd.cpp)
 target_link_libraries(pointcloud_to_pcd_lib
   pcl_ros_tf
   ${PCL_LIBRARIES})
@@ -192,7 +193,7 @@ rclcpp_components_register_node(pointcloud_to_pcd_lib
 # =====================================================
 # CombinedPointCloudToPCD Component
 # =====================================================
-add_library(combined_pointcloud_to_pcd_lib SHARED
+add_library(combined_pointcloud_to_pcd_lib
   tools/combined_pointcloud_to_pcd.cpp
 )
 
