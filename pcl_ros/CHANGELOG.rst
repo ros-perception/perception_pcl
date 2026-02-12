@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.0 (2026-02-12)
+------------------
 * chore: tf2_ros to hpp headers (`#506 <https://github.com/ros-perception/perception_pcl/issues/506>`_)
 * Add ament_cmake_ros to build libraries by default as SHARED
   Previously there were some inconsistencies in the libraries, some where
