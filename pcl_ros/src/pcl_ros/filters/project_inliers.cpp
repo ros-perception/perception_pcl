@@ -60,7 +60,16 @@ pcl_ros::ProjectInliers::ProjectInliers(const rclcpp::NodeOptions & options)
   declare_parameter("copy_all_fields", rclcpp::ParameterValue(true));
   bool copy_all_fields = get_parameter("copy_all_fields").as_bool();
 
-  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_);
+  // Enable QoS reconfigurability via parameters
+  auto pub_options = rclcpp::PublisherOptions();
+  pub_options.qos_overriding_options =
+    rclcpp::QosOverridingOptions {{
+    rclcpp::QosPolicyKind::History,
+    rclcpp::QosPolicyKind::Reliability,
+    rclcpp::QosPolicyKind::Durability,
+    rclcpp::QosPolicyKind::Depth
+  }};
+  pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_, pub_options);
 
   RCLCPP_DEBUG(
     this->get_logger(),
@@ -105,12 +114,22 @@ pcl_ros::ProjectInliers::subscribe()
   if (use_indices_)
   {*/
 
+  // Enable QoS reconfigurability via parameters
+  rclcpp::SubscriptionOptions sub_options;
+  sub_options.qos_overriding_options =
+    rclcpp::QosOverridingOptions {{
+    rclcpp::QosPolicyKind::History,
+    rclcpp::QosPolicyKind::Reliability,
+    rclcpp::QosPolicyKind::Durability,
+    rclcpp::QosPolicyKind::Depth
+  }};
+
   auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_default);
   auto sensor_qos_profile =
     rclcpp::QoS(rclcpp::KeepLast(max_queue_size_), rmw_qos_profile_sensor_data);
-  sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-  sub_indices_filter_.subscribe(this, "indices", qos_profile);
-  sub_model_.subscribe(this, "model", qos_profile);
+  sub_input_filter_.subscribe(this, "input", sensor_qos_profile, sub_options);
+  sub_indices_filter_.subscribe(this, "indices", qos_profile, sub_options);
+  sub_model_.subscribe(this, "model", qos_profile, sub_options);
 
   if (approximate_sync_) {
     sync_input_indices_model_a_ = std::make_shared<

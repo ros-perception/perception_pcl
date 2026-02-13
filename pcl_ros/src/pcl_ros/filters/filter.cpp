@@ -120,12 +120,22 @@ pcl_ros::Filter::computePublish(
 void
 pcl_ros::Filter::subscribe()
 {
+  // Enable QoS reconfigurability via parameters
+  rclcpp::SubscriptionOptions sub_options;
+  sub_options.qos_overriding_options =
+    rclcpp::QosOverridingOptions {{
+    rclcpp::QosPolicyKind::History,
+    rclcpp::QosPolicyKind::Reliability,
+    rclcpp::QosPolicyKind::Durability,
+    rclcpp::QosPolicyKind::Depth
+  }};
+
   // If we're supposed to look for PointIndices (indices)
   if (use_indices_) {
     // Subscribe to the input using a filter
     auto sensor_qos_profile = rclcpp::SensorDataQoS().keep_last(max_queue_size_);
-    sub_input_filter_.subscribe(this, "input", sensor_qos_profile);
-    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile);
+    sub_input_filter_.subscribe(this, "input", sensor_qos_profile, sub_options);
+    sub_indices_filter_.subscribe(this, "indices", sensor_qos_profile, sub_options);
 
     if (approximate_sync_) {
       sync_input_indices_a_ =
@@ -155,7 +165,7 @@ pcl_ros::Filter::subscribe()
     sub_input_ =
       this->create_subscription<PointCloud2>(
       "input", rclcpp::SensorDataQoS().keep_last(max_queue_size_),
-      callback);
+      callback, sub_options);
   }
 }
 
@@ -198,6 +208,15 @@ pcl_ros::Filter::createPublishers()
         }
       }
     };
+
+  // Enable QoS reconfigurability via parameters
+  pub_options.qos_overriding_options =
+    rclcpp::QosOverridingOptions {{
+    rclcpp::QosPolicyKind::History,
+    rclcpp::QosPolicyKind::Reliability,
+    rclcpp::QosPolicyKind::Durability,
+    rclcpp::QosPolicyKind::Depth
+  }};
   pub_output_ = create_publisher<PointCloud2>("output", max_queue_size_, pub_options);
 }
 
