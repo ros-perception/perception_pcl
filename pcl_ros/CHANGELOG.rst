@@ -2,6 +2,40 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add ament_cmake_ros to build libraries by default as SHARED
+  Previously there were some inconsistencies in the libraries, some where
+  shared, others where static. By adding `ament_cmake_ros` everything is
+  shared by default.
+* Split off pcl_ros_filter into separate library (`#480 <https://github.com/ros-perception/perception_pcl/issues/480>`_)
+  Co-authored-by: Paul Bovbel <paul@bovbel.com>
+* Add keep organized parameter (`#518 <https://github.com/ros-perception/perception_pcl/issues/518>`_)
+* Fix BSD-3-Cause license name in package.xml files (`#516 <https://github.com/ros-perception/perception_pcl/issues/516>`_)
+* Correct Statistical Outlier Removal param description
+* Add support for Windows
+* Add CombinedPointCloudToPCD Node for Accumulating Multiple Point Clouds into a Single PCD (`#479 <https://github.com/ros-perception/perception_pcl/issues/479>`_)
+  - Introduces CombinedPointCloudToPCD, a ROS 2 component node that:
+  - Subscribes to sensor_msgs/PointCloud2 and accumulates multiple clouds.
+  - Optionally transforms each cloud to a fixed frame.
+  - Allows saving a combined PCD file in either binary, compressed, or ASCII format.
+  - Permits saving on node shutdown or at a configurable timer interval.
+  - Preserves the BSD License from Willow Garage and references original authors.
+  - Useful for aggregating data from multiple scans into one dataset.
+* fix deprecation of .h files in message_filters (`#493 <https://github.com/ros-perception/perception_pcl/issues/493>`_)
+* Improve pointcloud_to_pcd by keeping all field available in sensor_msgs (`#491 <https://github.com/ros-perception/perception_pcl/issues/491>`_)
+* Fix pcd timestamp format output in pointcloud_to_pcd (`#481 <https://github.com/ros-perception/perception_pcl/issues/481>`_)
+  * Fix pcd timestamp format output in pointcloud_to_pcd
+  Fix pcd timestamp indentation offset if nanosec value is less than 100000000 ns
+  * Fix coding style
+  Fixes uncrustify CI error
+* Add lazy feature (`#476 <https://github.com/ros-perception/perception_pcl/issues/476>`_)
+  * Add lazy feature
+  * Fix format
+  * Call createPublishers() from derived class
+  * Check subscriber
+* Contributors: Adraub, AntoBrandi, Błażej Sowa, Garrett Brown, Ramon Wijnands, Silvio Traversaro, Tatsuro Sakaguchi, Tim Clephas, Valerio Passamano
+
 2.6.2 (2024-11-07)
 ------------------
 * Fix handling of empty input point cloud in computePublish method (`#467 <https://github.com/ros-perception/perception_pcl/issues/467>`_)
