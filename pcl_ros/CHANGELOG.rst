@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.3 (2026-02-17)
+------------------
 * Add ament_cmake_ros to build libraries by default as SHARED
   Previously there were some inconsistencies in the libraries, some where
   shared, others where static. By adding `ament_cmake_ros` everything is

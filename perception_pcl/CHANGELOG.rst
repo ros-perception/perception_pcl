@@ -2,8 +2,8 @@
 Changelog for package perception_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.3 (2026-02-17)
+------------------
 * Fix BSD-3-Cause license name in package.xml files (`#516 <https://github.com/ros-perception/perception_pcl/issues/516>`_)
 * Contributors: Garrett Brown
 
