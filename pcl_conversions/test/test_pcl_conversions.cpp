@@ -147,6 +147,34 @@ TEST(PCLConversionStamp, Stamps)
   }
 }
 
+TEST(PCLConversionStamp, ToPclNanosecondStampsRounding)
+{
+  // <500ns rounding down is 0us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999499));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 1999999);
+  }
+
+  // =500ns rounding down is 1us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999500));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 2000000);
+
+  }
+
+  // >500ns rounding up is 1us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999999));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 2000000);
+  }
+}
+
 int main(int argc, char **argv) {
   try {
     ::testing::InitGoogleTest(&argc, argv);
