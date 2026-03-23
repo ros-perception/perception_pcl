@@ -20,6 +20,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
@@ -29,6 +30,7 @@ set(dependencies
   sensor_msgs
   geometry_msgs
   tf2
+  tf2_eigen
   tf2_geometry_msgs
   tf2_ros
   EIGEN3
@@ -133,8 +135,31 @@ rclcpp_components_register_node(pcd_to_pointcloud_lib
   PLUGIN "pcl_ros::PCDPublisher"
   EXECUTABLE pcd_to_pointcloud)
 #
-#add_executable(pointcloud_to_pcd tools/pointcloud_to_pcd.cpp)
-#target_link_libraries(pointcloud_to_pcd ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_library(pointcloud_to_pcd_lib SHARED tools/pointcloud_to_pcd.cpp)
+target_link_libraries(pointcloud_to_pcd_lib
+  pcl_ros_tf
+  ${PCL_LIBRARIES})
+target_include_directories(pointcloud_to_pcd_lib PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(pointcloud_to_pcd_lib
+  ${dependencies}
+  rclcpp_components)
+rclcpp_components_register_node(pointcloud_to_pcd_lib
+  PLUGIN "pcl_ros::PointCloudToPCD"
+  EXECUTABLE pointcloud_to_pcd)
+
+add_library(combined_pointcloud_to_pcd_lib SHARED tools/combined_pointcloud_to_pcd.cpp)
+target_link_libraries(combined_pointcloud_to_pcd_lib
+  pcl_ros_tf
+  ${PCL_LIBRARIES})
+target_include_directories(combined_pointcloud_to_pcd_lib PUBLIC
+  ${PCL_INCLUDE_DIRS})
+ament_target_dependencies(combined_pointcloud_to_pcd_lib
+  ${dependencies}
+  rclcpp_components)
+rclcpp_components_register_node(combined_pointcloud_to_pcd_lib
+  PLUGIN "pcl_ros::CombinedPointCloudToPCD"
+  EXECUTABLE combined_pointcloud_to_pcd)
 #
 #add_executable(bag_to_pcd tools/bag_to_pcd.cpp)
 #target_link_libraries(bag_to_pcd pcl_ros_tf ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -182,6 +207,8 @@ install(
   TARGETS
     pcl_ros_tf
     pcd_to_pointcloud_lib
+    pointcloud_to_pcd_lib
+    combined_pointcloud_to_pcd_lib
 #    pcl_ros_io
 #    pcl_ros_features
 #    pcl_ros_filters
