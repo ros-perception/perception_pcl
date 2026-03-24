@@ -212,10 +212,9 @@ target_link_libraries(combined_pointcloud_to_pcd_lib PUBLIC
   ${PCL_LIBRARIES}
   ${sensor_msgs_TARGETS}
   pcl_conversions::pcl_conversions
+  pcl_ros_tf
   rclcpp::rclcpp
   rclcpp_components::component
-  tf2_eigen::tf2_eigen
-  tf2_ros::tf2_ros
 )
 
 add_library(bag_to_pcd_lib tools/bag_to_pcd.cpp)
