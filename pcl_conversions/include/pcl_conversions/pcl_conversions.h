@@ -169,7 +169,7 @@ namespace pcl_conversions {
   void moveFromPCL(pcl::PCLImage &pcl_image, sensor_msgs::msg::Image &image)
   {
     copyPCLImageMetaData(pcl_image, image);
-    image.data.swap(pcl_image.data);
+    static_cast<std::vector<uint8_t>&>(image.data).swap(pcl_image.data);
   }
 
   inline
@@ -194,7 +194,7 @@ namespace pcl_conversions {
   void moveToPCL(sensor_msgs::msg::Image &image, pcl::PCLImage &pcl_image)
   {
     copyImageMetaData(image, pcl_image);
-    pcl_image.data.swap(image.data);
+    pcl_image.data.swap(static_cast<std::vector<uint8_t>&>(image.data));
   }
 
   /** PCLPointField <=> PointField **/
@@ -269,7 +269,7 @@ namespace pcl_conversions {
   void moveFromPCL(pcl::PCLPointCloud2 &pcl_pc2, sensor_msgs::msg::PointCloud2 &pc2)
   {
     copyPCLPointCloud2MetaData(pcl_pc2, pc2);
-    pc2.data.swap(pcl_pc2.data);
+    static_cast<std::vector<uint8_t>&>(pc2.data).swap(pcl_pc2.data);
   }
 
   inline
