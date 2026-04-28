@@ -11,7 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(PCL REQUIRED QUIET COMPONENTS common io)
