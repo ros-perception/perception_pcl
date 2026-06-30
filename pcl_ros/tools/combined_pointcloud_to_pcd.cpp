@@ -130,7 +130,7 @@ public:
     // Optionally save on node shutdown (do not call rclcpp::shutdown from destructor)
     if (!save_triggered_ && save_on_shutdown_) {
       RCLCPP_INFO(this->get_logger(), "Node is shutting down; saving accumulated cloud.");
-      saveAccumulatedCloud(false);
+      saveAccumulatedCloud();
     }
   }
 
@@ -202,15 +202,16 @@ private:
   void checkAndSave()
   {
     if (!save_triggered_) {
-      saveAccumulatedCloud(true);
+      saveAccumulatedCloud();
+      RCLCPP_INFO(this->get_logger(), "Shutting down the node.");
+      rclcpp::shutdown();
     }
   }
 
   /**
    * @brief Writes the accumulated point cloud to disk in a single PCD file.
-   * \param do_shutdown if true, calls rclcpp::shutdown() after saving.
    */
-  void saveAccumulatedCloud(bool do_shutdown = true)
+  void saveAccumulatedCloud()
   {
     if (save_triggered_) {
       return;
@@ -242,10 +243,6 @@ private:
         "Saved %u points to %s",
         accumulated_cloud_.width * accumulated_cloud_.height,
         filename.c_str());
-    }
-    if (do_shutdown) {
-      RCLCPP_INFO(this->get_logger(), "Shutting down the node.");
-      rclcpp::shutdown();
     }
   }
 };
