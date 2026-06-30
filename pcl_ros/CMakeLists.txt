@@ -203,6 +203,7 @@ target_include_directories(combined_pointcloud_to_pcd_lib PUBLIC
 )
 target_link_libraries(combined_pointcloud_to_pcd_lib
   ${PCL_LIBRARIES}
+  pcl_ros_tf
 )
 
 
@@ -211,8 +212,7 @@ ament_target_dependencies(combined_pointcloud_to_pcd_lib
   rclcpp_components
   sensor_msgs
   pcl_conversions
-  tf2_eigen
-  tf2_ros)
+)
 
 # Register the component
 rclcpp_components_register_node(combined_pointcloud_to_pcd_lib
