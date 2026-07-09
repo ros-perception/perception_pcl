@@ -2,6 +2,12 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix(pcl_ros): preserve all fields in combined_pointcloud_to_pcd
+* Replace exceptions with the base tf2::TransformException (`#532 <https://github.com/ros-perception/perception_pcl/issues/532>`_)
+* Contributors: Alireza Moayyedi, Jion Kubo
+
 2.8.0 (2026-02-12)
 ------------------
 * chore: tf2_ros to hpp headers (`#506 <https://github.com/ros-perception/perception_pcl/issues/506>`_)
