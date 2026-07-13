@@ -2,6 +2,16 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix(pcl_ros): preserve all fields in combined_pointcloud_to_pcd
+* Backport header deprecations to jazzy (`#536 <https://github.com/ros-perception/perception_pcl/issues/536>`_)
+  * Deprecating tf2 C Headers (`#469 <https://github.com/ros-perception/perception_pcl/issues/469>`_)
+  * Properly order the header includes for cpplint (`#490 <https://github.com/ros-perception/perception_pcl/issues/490>`_)
+  * chore: tf2_ros to hpp headers (`#506 <https://github.com/ros-perception/perception_pcl/issues/506>`_)
+* Replace exceptions with the base tf2::TransformException (`#532 <https://github.com/ros-perception/perception_pcl/issues/532>`_) (`#533 <https://github.com/ros-perception/perception_pcl/issues/533>`_)
+* Contributors: Alireza Moayyedi, Jion Kubo, Lucas Wendland, Ramon Wijnands, Tim Clephas
+
 2.6.4 (2026-02-17)
 ------------------
 * Add ament_cmake_ros to build libraries by default as SHARED
