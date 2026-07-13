@@ -2,8 +2,8 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.5 (2026-07-13)
+------------------
 * fix(pcl_ros): preserve all fields in combined_pointcloud_to_pcd
 * Backport header deprecations to jazzy (`#536 <https://github.com/ros-perception/perception_pcl/issues/536>`_)
   * Deprecating tf2 C Headers (`#469 <https://github.com/ros-perception/perception_pcl/issues/469>`_)
