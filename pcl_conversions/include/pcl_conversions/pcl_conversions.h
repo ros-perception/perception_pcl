@@ -89,7 +89,7 @@ namespace pcl_conversions {
   inline
   void toPCL(const rclcpp::Time &stamp, std::uint64_t &pcl_stamp)
   {
-    pcl_stamp = static_cast<std::uint64_t>(std::round(stamp.nanoseconds() / 1000.0));  // Convert from ns to us
+    pcl_stamp = (stamp.nanoseconds() + 500ull) / 1000;  // Round to nearest microsecond
   }
 
   inline
