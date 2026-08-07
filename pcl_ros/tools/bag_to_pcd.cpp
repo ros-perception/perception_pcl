@@ -49,8 +49,7 @@ Cloud Data) format.
 #include <rosbag/view.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "pcl_ros/transforms.h"
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
+#include <tf2_ros/buffer.h>
 
 typedef sensor_msgs::PointCloud2 PointCloud;
 typedef PointCloud::Ptr PointCloudPtr;
@@ -60,17 +59,13 @@ typedef PointCloud::ConstPtr PointCloudConstPtr;
 int
   main (int argc, char** argv)
 {
-  ros::init (argc, argv, "bag_to_pcd");
+  //ros::init (argc, argv, "bag_to_pcd");
   if (argc < 4)
   {
     std::cerr << "Syntax is: " << argv[0] << " <file_in.bag> <topic> <output_directory> [<target_frame>]" << std::endl;
     std::cerr << "Example: " << argv[0] << " data.bag /laser_tilt_cloud ./pointclouds /base_link" << std::endl;
     return (-1);
   }
-
-  // TF
-  tf::TransformListener tf_listener;
-  tf::TransformBroadcaster tf_broadcaster;
 
   rosbag::Bag bag;
   rosbag::View view;
@@ -85,6 +80,9 @@ int
     std::cerr << "Error opening file " << argv[1] << std::endl;
     return (-1);
   }
+
+  // TF
+  tf2_ros::Buffer tf_buffer;//{ros::DURATION_MAX * 0.5};
 
   // check that target topic exists in the bag file:
   rosbag::View topic_list_view(bag);
@@ -115,8 +113,12 @@ int
       return (-1);
   }
 
-  view.addQuery (bag, rosbag::TypeQuery ("tf/tfMessage"));
-  view.addQuery (bag, rosbag::TypeQuery ("tf2_msgs/TFMessage"));
+  // If target frame is specified, we need to read the transform tree
+  //if (argc > 4)
+  {
+    view.addQuery(bag, rosbag::TypeQuery("tf/tfMessage"));
+    view.addQuery(bag, rosbag::TypeQuery("tf2_msgs/TFMessage"));
+  }
   view_it = view.begin ();
 
   std::string output_dir = std::string (argv[3]);
@@ -135,17 +137,30 @@ int
   std::cerr << "Saving recorded sensor_msgs::PointCloud2 messages on topic " << target_topic << " to " << output_dir << std::endl;
 
   PointCloud cloud_t;
-  ros::Duration r (0.001);
   // Loop over the whole bag file
   while (view_it != view.end ())
   {
     // Handle TF messages first
-    tf::tfMessage::ConstPtr tf = view_it->instantiate<tf::tfMessage> ();
+    auto tf = view_it->instantiate<tf::tfMessage> ();
+    auto tf2 = view_it->instantiate<tf2_msgs::TFMessage> ();
+    const auto& topic = view_it->getTopic();
+    // For some reason, tf2_msgs/TFMessage sometimes gets interpreted as a TF1
+    // type, so we need to distinguish static TFs for this case, too.
     if (tf != NULL)
     {
-      tf_broadcaster.sendTransform (tf->transforms);
-      ros::spinOnce ();
-      r.sleep ();
+      const auto is_static = topic.rfind("_static") != std::string::npos;
+      for (const auto& transform : tf->transforms)
+      {
+        tf_buffer.setTransform(transform, "bag_to_pcd", is_static);
+      }
+    }
+    else if (tf2 != NULL)
+    {
+      const auto is_static = topic.rfind("_static") != std::string::npos;
+      for (const auto& transform : tf2->transforms)
+      {
+        tf_buffer.setTransform(transform, "bag_to_pcd", is_static);
+      }
     }
     else
     {
@@ -161,7 +176,7 @@ int
       if(argc > 4)
       {
         // Transform it
-        if (!pcl_ros::transformPointCloud (argv[4], *cloud, cloud_t, tf_listener))
+        if (!pcl_ros::transformPointCloud (argv[4], *cloud, cloud_t, tf_buffer))
         {
          ++view_it;
          continue;
