@@ -147,6 +147,65 @@ TEST(PCLConversionStamp, Stamps)
   }
 }
 
+<<<<<<< HEAD
+=======
+TEST(PCLConversionStamp, ToPclNanosecondStampsRounding)
+{
+  // <500ns rounding down is 0us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999499));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 1999999);
+  }
+
+  // =500ns rounding down is 1us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999500));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 2000000);
+
+  }
+
+  // >500ns rounding up is 1us
+  {
+    const rclcpp::Time d(rclcpp::Time(1, 999999999));
+    std::uint64_t pcl_stamp;
+    pcl_conversions::toPCL(d, pcl_stamp);
+    EXPECT_EQ(pcl_stamp, 2000000);
+  }
+}
+
+TEST(PCLConversionStamp, FromPCLPreservesClockType)
+{
+  {
+    rclcpp::Time d;
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_SYSTEM_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_ROS_TIME};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_ROS_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_STEADY_TIME};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_STEADY_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_CLOCK_UNINITIALIZED};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_CLOCK_UNINITIALIZED);
+  }
+}
+
+>>>>>>> 199768f (fix(pcl_conversions): preserve clock type when in fromPCL)
 int main(int argc, char **argv) {
   try {
     ::testing::InitGoogleTest(&argc, argv);
