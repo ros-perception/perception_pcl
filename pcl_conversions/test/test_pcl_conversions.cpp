@@ -175,6 +175,34 @@ TEST(PCLConversionStamp, ToPclNanosecondStampsRounding)
   }
 }
 
+TEST(PCLConversionStamp, FromPCLPreservesClockType)
+{
+  {
+    rclcpp::Time d;
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_SYSTEM_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_ROS_TIME};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_ROS_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_STEADY_TIME};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_STEADY_TIME);
+  }
+  {
+    rclcpp::Time d{0, 0, RCL_CLOCK_UNINITIALIZED};
+    std::uint64_t pcl_stamp = 3768435;
+    pcl_conversions::fromPCL(pcl_stamp, d);
+    EXPECT_TRUE(d.get_clock_type() == RCL_CLOCK_UNINITIALIZED);
+  }
+}
+
 int main(int argc, char **argv) {
   try {
     ::testing::InitGoogleTest(&argc, argv);
