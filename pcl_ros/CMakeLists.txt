@@ -39,7 +39,7 @@ target_include_directories(pcl_ros_tf SYSTEM PUBLIC
 )
 target_link_libraries(pcl_ros_tf PUBLIC
   ${geometry_msgs_TARGETS}
-  ${PCL_LIBRARIES}
+  pcl_common
   ${sensor_msgs_TARGETS}
   Eigen3::Eigen
   pcl_conversions::pcl_conversions
