@@ -83,13 +83,14 @@ namespace pcl_conversions {
   void fromPCL(const std::uint64_t &pcl_stamp, rclcpp::Time &stamp)
   {
     stamp = rclcpp::Time(
-      static_cast<rcl_time_point_value_t>(pcl_stamp * 1000ull));  // Convert from us to ns
+      static_cast<rcl_time_point_value_t>(pcl_stamp * 1000ull), // Convert from us to ns
+      stamp.get_clock_type());  // Preserve clock type
   }
 
   inline
   void toPCL(const rclcpp::Time &stamp, std::uint64_t &pcl_stamp)
   {
-    pcl_stamp = static_cast<std::uint64_t>(stamp.nanoseconds()) / 1000ull;  // Convert from ns to us
+    pcl_stamp = static_cast<std::uint64_t>(std::round(stamp.nanoseconds() / 1000.0));  // Convert from ns to us
   }
 
   inline
