@@ -65,6 +65,7 @@
 #if ROS_POINTER_COMPATIBILITY_IMPLEMENTED
 #include <type_traits>
 #include <memory>
+#include <boost/shared_ptr.hpp>
 #endif
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <boost/foreach.hpp>  // for BOOST_FOREACH
@@ -147,6 +148,7 @@ struct DefaultMessageCreator<pcl::PointCloud<T>>
 };
 #endif
 
+#if 0  // TODO(ros2): enable when ROS2 type masquerading is implemented
 namespace message_traits
 {
 template<typename T>
@@ -222,9 +224,13 @@ struct FrameId<pcl::PointCloud<T>>
 };
 
 }  // namespace message_traits
+#endif
 
 namespace serialization
 {
+template<typename Message, typename Enable = void>
+struct Serializer;
+
 template<typename T>
 struct Serializer<pcl::PointCloud<T>>
 {
@@ -278,16 +284,11 @@ struct Serializer<pcl::PointCloud<T>>
     std::vector<sensor_msgs::msg::PointField> fields;
     stream.next(fields);
 
-    // Construct field mapping if deserializing for the first time
-    boost::shared_ptr<pcl::MsgFieldMap> & mapping_ptr = pcl::detail::getMapping(m);
-    if (!mapping_ptr) {
-      // This normally should get allocated by DefaultMessageCreator, but just in case
-      mapping_ptr = boost::make_shared<pcl::MsgFieldMap>();
-    }
-    pcl::MsgFieldMap & mapping = *mapping_ptr;
-    if (mapping.empty()) {
-      pcl::createMapping<T>(fields, mapping);
-    }
+    // Construct field mapping
+    pcl::MsgFieldMap mapping;
+    std::vector<pcl::PCLPointField> pcl_fields;
+    pcl_conversions::toPCL(fields, pcl_fields);
+    pcl::createMapping<T>(pcl_fields, mapping);
 
     uint8_t is_bigendian;
     stream.next(is_bigendian);     // ignoring...
@@ -298,8 +299,28 @@ struct Serializer<pcl::PointCloud<T>>
     // Copy point data
     uint32_t data_size;
     stream.next(data_size);
-    assert(data_size == m.height * m.width * point_step);
-    m.points.resize(m.height * m.width);
+
+    const uint64_t expected_row_step =
+      static_cast<uint64_t>(m.width) * static_cast<uint64_t>(point_step);
+    if (static_cast<uint64_t>(row_step) < expected_row_step) {
+      throw std::runtime_error(
+              "PointCloud2 stream row_step is smaller than width * point_step");
+    }
+    const uint64_t expected_data_size =
+      static_cast<uint64_t>(row_step) * static_cast<uint64_t>(m.height);
+    if (static_cast<uint64_t>(data_size) != expected_data_size) {
+      throw std::runtime_error(
+              "PointCloud2 stream data_size mismatch or integer overflow");
+    }
+    const uint64_t total_points =
+      static_cast<uint64_t>(m.height) * static_cast<uint64_t>(m.width);
+    if (m.width > 0 && total_points / m.width != m.height) {
+      throw std::runtime_error("PointCloud2 point count integer overflow");
+    }
+    if (total_points > m.points.max_size()) {
+      throw std::runtime_error("PointCloud2 point count exceeds maximum capacity");
+    }
+    m.points.resize(total_points);
     uint8_t * m_data = reinterpret_cast<uint8_t *>(m.points.data());
     // If the data layouts match, can copy a whole row in one memcpy
     if (mapping.size() == 1 &&
