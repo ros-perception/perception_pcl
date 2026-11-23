@@ -31,7 +31,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/timer.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_msgs/msg/point_indices.hpp>
 #include <pcl_msgs/msg/model_coefficients.hpp>

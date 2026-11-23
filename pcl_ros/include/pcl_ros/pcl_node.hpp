@@ -57,7 +57,10 @@
 #include <message_filters/synchronizer.hpp>
 #include <pcl_msgs/msg/model_coefficients.hpp>
 #include <pcl_msgs/msg/point_indices.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/publisher.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>

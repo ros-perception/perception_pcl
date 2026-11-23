@@ -50,8 +50,12 @@ Cloud Data) format.
 
 #include <chrono>
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
 #include <rclcpp/serialization.hpp>
+#include <rclcpp/serialized_message.hpp>
+#include <rclcpp/timer.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <rosbag2_transport/reader_writer_factory.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>

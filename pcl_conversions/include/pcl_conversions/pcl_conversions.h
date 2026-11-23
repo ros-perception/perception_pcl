@@ -40,7 +40,7 @@
 #include <cstddef>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
 #include <message_filters/message_event.hpp>
 #include <message_filters/message_traits.hpp>
 
