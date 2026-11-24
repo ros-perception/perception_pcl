@@ -12,7 +12,6 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(message_filters REQUIRED)
 find_package(PCL REQUIRED QUIET COMPONENTS common io)
 find_package(pcl_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -20,7 +19,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 set(dependencies
-  message_filters
   pcl_msgs
   rclcpp
   sensor_msgs
@@ -39,7 +37,6 @@ target_include_directories(
 target_link_libraries(
   ${PROJECT_NAME} INTERFACE
   rclcpp::rclcpp
-  message_filters::message_filters
   pcl_common
   pcl_io
   ${std_msgs_TARGETS}
