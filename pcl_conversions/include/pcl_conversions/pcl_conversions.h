@@ -41,8 +41,6 @@
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
-#include <message_filters/message_event.hpp>
-#include <message_filters/message_traits.hpp>
 
 #include <pcl/conversions.h>
 
@@ -758,7 +756,12 @@ namespace pcl {
 
 } // namespace pcl
 
-/* TODO when ROS2 type masquerading is implemented */ 
+/*
+ * TODO when ROS2 type masquerading is implemented
+ * The following might require those includes:
+ * #include <message_filters/message_event.hpp>
+ * #include <message_filters/message_traits.hpp>
+ */
 /**
 namespace ros
 {
