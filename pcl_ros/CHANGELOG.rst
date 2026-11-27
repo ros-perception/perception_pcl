@@ -2,6 +2,13 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Migrate pcl_ros documentation from wiki.ros.org (`#556 <https://github.com/ros-perception/perception_pcl/issues/556>`_)
+* fix(pcl_ros): prevent integer overflow in PointCloud serializer (`#39 <https://github.com/ros-perception/perception_pcl/issues/39>`_)
+* `pcl_ros` - restrict PCL cmake targets used by `pcl_ros_tf` (`#548 <https://github.com/ros-perception/perception_pcl/issues/548>`_)
+* Contributors: Patrick Roncagliolo, Tully Foote, paneendrakumar0
+
 2.10.0 (2026-07-09)
 -------------------
 * fix(pcl_ros): preserve all fields in combined_pointcloud_to_pcd

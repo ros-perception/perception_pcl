@@ -2,6 +2,13 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use integer arithmetic time rounding
+* Make test fail with double precision time rounding
+* fix(pcl_conversions): preserve clock type when in fromPCL
+* Contributors: Mukunda Bharatheesha, Yannik Meinken
+
 2.10.0 (2026-07-09)
 -------------------
 
