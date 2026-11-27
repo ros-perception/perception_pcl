@@ -2,6 +2,14 @@
 Changelog for package pcl_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use integer arithmetic time rounding
+* Make test fail with double precision time rounding
+* fix(pcl_conversions): preserve clock type when in fromPCL
+* Fix rounding of nanoseconds to microseconds while converting to pcl format (`#526 <https://github.com/ros-perception/perception_pcl/issues/526>`_)
+* Contributors: Adraub, Mukunda Bharatheesha, Yannik Meinken
+
 2.6.5 (2026-07-13)
 ------------------
 

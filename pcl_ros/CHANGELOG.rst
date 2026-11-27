@@ -2,6 +2,9 @@
 Changelog for package pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.6.5 (2026-07-13)
 ------------------
 * fix(pcl_ros): preserve all fields in combined_pointcloud_to_pcd
